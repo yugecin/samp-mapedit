@@ -1,0 +1,7 @@
+/client-loader-cleo/CLEO_SDK/
+/**/vc2005/*
+!/**/vc2005/*.vcproj
+/*.suo
+/*.ncb
+/out-debug/
+/out-release/
