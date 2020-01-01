@@ -75,6 +75,7 @@ Called from the loader, do not call directly (use proc_unload)
 */
 void client_finalize()
 {
+	ui_deactivate();
 	undetour();
 }
 

@@ -56,10 +56,44 @@ void ui_do_cursor()
 		"+");
 }
 
-void ui_render()
+static
+void ui_activate()
 {
 	struct CCam *ccam;
 
+	if (!active) {
+		active = 1;
+		game_FreezePlayer(1);
+		ccam = &camera->cams[camera->activeCam];
+		camera->position = ccam->pos;
+		camera->rotation = ccam->lookVector;
+		camera->lookAt = camera->position;
+		camera->lookAt.x += camera->rotation.x;
+		camera->lookAt.y += camera->rotation.y;
+		camera->lookAt.z += camera->rotation.z;
+		game_CameraSetOnPoint(&camera->lookAt, CUT, 1);
+		*enableHudByOpcode = 0;
+		originalHudScaleX = *hudScaleX;
+		originalHudScaleY = *hudScaleY;
+		*hudScaleX = 0.0009f;
+		*hudScaleY = 0.0014f;
+	}
+}
+
+void ui_deactivate()
+{
+	if (active) {
+		active = 0;
+		game_FreezePlayer(0);
+		game_CameraRestore();
+		*enableHudByOpcode = 1;
+		*hudScaleX = originalHudScaleX;
+		*hudScaleY = originalHudScaleY;
+	}
+}
+
+void ui_render()
+{
 	fresx = (float) GAME_RESOLUTION_X;
 	fresy = (float) GAME_RESOLUTION_Y;
 	canvasx = fresx / 640.0f;
@@ -72,27 +106,10 @@ void ui_render()
 	if (currentKeyState->standards[0x52] &&
 		!prevKeyState->standards[0x52])
 	{
-		if (active ^= 1) {
-			game_FreezePlayer(1);
-			ccam = &camera->cams[camera->activeCam];
-			camera->position = ccam->pos;
-			camera->rotation = ccam->lookVector;
-			camera->lookAt = camera->position;
-			camera->lookAt.x += camera->rotation.x;
-			camera->lookAt.y += camera->rotation.y;
-			camera->lookAt.z += camera->rotation.z;
-			game_CameraSetOnPoint(&camera->lookAt, CUT, 1);
-			*enableHudByOpcode = 0;
-			originalHudScaleX = *hudScaleX;
-			originalHudScaleY = *hudScaleY;
-			*hudScaleX = 0.0009f;
-			*hudScaleY = 0.0014f;
+		if (active) {
+			ui_deactivate();
 		} else {
-			game_FreezePlayer(0);
-			game_CameraRestore();
-			*enableHudByOpcode = 1;
-			*hudScaleX = originalHudScaleX;
-			*hudScaleY = originalHudScaleY;
+			ui_activate();
 		}
 	}
 
