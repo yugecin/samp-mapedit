@@ -45,7 +45,7 @@ void ui_do_cursor()
 	game_TextSetMonospace(1);
 	game_TextSetColor(0xFFFFFFFF);
 	game_TextSetShadowColor(0xFF000000);
-	game_TextSetAlign(TEXT_ALIGN_CENTER);
+	game_TextSetAlign(CENTER);
 	game_TextSetOutline(1);
 	game_TextSetFont(2);
 	game_TextGetSizeXY(&textbounds, textsize, textsize, "+");

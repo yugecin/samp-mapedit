@@ -90,7 +90,7 @@ __declspec(naked) int game_TextPrintStringFromBottom(x, y, text)
 	_asm jmp eax
 }
 
-__declspec(naked) int game_TextSetAlign(char align)
+__declspec(naked) int game_TextSetAlign(enum eTextdrawAlignment align)
 {
 	_asm mov eax, 0x719610
 	_asm jmp eax

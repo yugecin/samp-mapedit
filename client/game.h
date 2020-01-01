@@ -12,9 +12,11 @@
 #define GAME_RESOLUTION_Y *(int*)(0xC17048)
 #define CPAD 0xB73458
 
-#define TEXT_ALIGN_CENTER 0
-#define TEXT_ALIGN_LEFT 1
-#define TEXT_ALIGN_RIGHT 2
+enum eTextdrawAlignment {
+	CENTER = 0,
+	LEFT = 1,
+	RIGHT = 2,
+};
 
 enum eCameraCutMode {
 	SMOOTH = 1,
@@ -202,7 +204,7 @@ idb CText__SetTextAlignment
 sdk CFont::SetOrientation
 scm ? 03E4: set_text_draw_align_right 0
 */
-int game_TextSetAlign(char align);
+int game_TextSetAlign(enum eTextdrawAlignment align);
 /**
 idb dummy_719500
 sdk CFont::SetAlphaFade
