@@ -37,6 +37,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;c:\Program Files (x86)\Windows Kits\8.0\Include\shared&quot;;&quot;c:\Program Files (x86)\Windows Kits\8.0\Include\um&quot;"
 				WarningLevel="3"
 				CompileAs="1"
 			/>
@@ -52,6 +53,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(SolutionDir)\out-$(ConfigurationName)\$(ProjectName).dll"
+				IgnoreDefaultLibraryNames="uuid.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -101,6 +103,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;c:\Program Files (x86)\Windows Kits\8.0\Include\shared&quot;;&quot;c:\Program Files (x86)\Windows Kits\8.0\Include\um&quot;"
 				WarningLevel="3"
 				CompileAs="1"
 			/>
