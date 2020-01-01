@@ -16,7 +16,63 @@
 #define TEXT_ALIGN_LEFT 1
 #define TEXT_ALIGN_RIGHT 2
 
+enum eCameraCutMode {
+	SMOOTH = 1,
+	CUT = 2,
+};
+
 #pragma pack(push,1)
+struct RwV3D {
+	float x;
+	float y;
+	float z;
+};
+EXPECT_SIZE(struct RwV3D, 0xC);
+
+struct CMatrix {
+	struct RwV3D one;
+	float pad0;
+	struct RwV3D two;
+	float pad1;
+	struct RwV3D three;
+	float pad2;
+	struct RwV3D four;
+	float pad3;
+	int matrixPtr;
+	int haveRwMatrix;
+};
+EXPECT_SIZE(struct CMatrix, 0x48);
+
+struct CCam {
+	char __pad0[0x190];
+	struct RwV3D lookVector; /*+190*/
+	struct RwV3D pos; /*+19C*/
+	char __pad1[0x90];
+};
+EXPECT_SIZE(struct CCam, 0x238);
+
+struct CCamera {
+	char __pad0[0x4E];
+	char field4E; /*+4E*/
+	char __pad4D[0x59 - 0x4F];
+	char activeCam; /*+59*/
+	char __pad5A[0x174 - 0x5A];
+	struct CCam cams[3]; /*+174*/
+	char __pad81C[0x860 - 0x81C];
+	struct RwV3D lookAt; /*+860*/
+	struct RwV3D position; /*+86C*/
+	struct RwV3D rotation; /*+878*/
+	char __pad884[0x958 - 0x884];
+	int *targetEntity; /*+958*/
+	char __pad95C[0xA04 - 0x95C];
+	struct CMatrix cameraViewMatrix; /*+A04*/
+	char __padA48[0xCEE - 0xA4C];
+	char positionLocked; /*+CEE*/
+	char directionLocked; /*+CEF*/
+	char __padA4C[0xD78 - 0xCF0];
+};
+EXPECT_SIZE(struct CCamera, 0xD78);
+
 struct Rect {
 	float left;
 	float bottom;
@@ -99,7 +155,13 @@ extern struct CMouseState *prevMouseState;
 extern struct CKeyState *activeKeyState;
 extern struct CKeyState *currentKeyState;
 extern struct CKeyState *prevKeyState;
+extern float *gamespeed;
+extern char *activecam;
+extern struct CCamera *camera;
 
+void game_CameraRestore();
+void __stdcall game_CameraSetOnPoint(
+	struct RwV3D *point, enum eCameraCutMode cutmode, int unk);
 void game_FreezePlayer(char flag);
 /**
 Seems to not work with standard keys, check enum RsKeyCode for supported ones.
@@ -108,6 +170,11 @@ idb CInputEvents__isKeyJustPressed
 sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 */
 int __stdcall game_InputWasKeyPressed(short keycode);
+/**
+idb CCamera__setPositionAndRotation
+sdk CCamera::SetCamPositionForFixedMode
+*/
+void game_SetCameraPosition(struct RwV3D *position, struct RwV3D *rotation);
 /**
 sdk CFont::GetStringWidth
 */

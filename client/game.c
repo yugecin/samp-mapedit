@@ -11,6 +11,28 @@ struct CMouseState *prevMouseState = (struct CMouseState*) 0xB7342C;
 struct CKeyState *activeKeyState = (struct CKeyState*) 0xB72CB0;
 struct CKeyState *currentKeyState = (struct CKeyState*) 0xB72F20;
 struct CKeyState *prevKeyState = (struct CKeyState*) 0xB73190;
+float *gamespeed = (float*) 0xB7CB64;
+struct CCamera *camera = (struct CCamera*) (0xB6F028);
+
+__declspec(naked) void game_CameraRestore()
+{
+	_asm mov ecx, camera
+	_asm mov eax, 0x50B930
+	_asm jmp eax
+}
+
+/**
+@param unk when 2, seems to restore the camera?
+*/
+__declspec(naked) void __stdcall game_CameraSetOnPoint(point, cutmode, unk)
+	struct RwV3D *point;
+	enum eCameraCutMode cutmode;
+	int unk;
+{
+	_asm mov ecx, camera
+	_asm mov eax, 0x50C8B0
+	_asm jmp eax
+}
 
 void game_FreezePlayer(char flag)
 {
