@@ -12,11 +12,17 @@ static float cursorx, cursory;
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
+static char key_w, key_a, key_s, key_d;
+static char need_camera_update;
 
 void ui_init()
 {
 	cursorx = (float) GAME_RESOLUTION_X / 2.0f;
 	cursory = (float) GAME_RESOLUTION_Y / 2.0f;
+	key_w = VK_Z;
+	key_a = VK_Q;
+	key_s = VK_S;
+	key_d = VK_D;
 }
 
 void ui_do_cursor()
@@ -111,11 +117,10 @@ void ui_deactivate()
 }
 
 static
-void ui_do_movement()
+void ui_do_mouse_movement()
 {
 	struct RwV3D rot;
 	float mx, my, xylen;
-	char buf[200];
 
 	mx = activeMouseState->x;
 	my = activeMouseState->y;
@@ -132,17 +137,48 @@ void ui_do_movement()
 		rot.x = cosf(horizLookAngle) * xylen;
 		rot.y = sinf(horizLookAngle) * xylen;
 		camera->rotation = rot;
-		ui_update_camera();
+		need_camera_update = 1;
 	}
-	sprintf(buf, "%f %f", horizLookAngle, vertLookAngle);
-	game_TextSetLetterSize(1.0f, 1.0f);
-	game_TextSetMonospace(1);
-	game_TextSetColor(0xFFFFFFFF);
-	game_TextSetShadowColor(0xFF000000);
-	game_TextSetAlign(CENTER);
-	game_TextSetOutline(1);
-	game_TextSetFont(2);
-	game_TextPrintString(320.0f * canvasx, 224.0f * canvasy, buf);
+}
+
+static
+void ui_do_key_movement()
+{
+	float speed = 1.0f, angle, xylen;
+
+	if (currentKeyState->standards[key_w]) {
+		xylen = sinf(vertLookAngle);
+		camera->position.x += cosf(horizLookAngle) * xylen * speed;
+		camera->position.y += sinf(horizLookAngle) * xylen * speed;
+		camera->position.z += cosf(vertLookAngle) * speed;
+		need_camera_update = 1;
+	} else if (currentKeyState->standards[key_s]) {
+		xylen = sinf(vertLookAngle);
+		camera->position.x -= cosf(horizLookAngle) * xylen * speed;
+		camera->position.y -= sinf(horizLookAngle) * xylen * speed;
+		camera->position.z -= cosf(vertLookAngle) * speed;
+		need_camera_update = 1;
+	}
+
+	if (currentKeyState->standards[key_a]) {
+		angle = horizLookAngle - M_PI2;
+		camera->position.x -= cosf(angle) * speed;
+		camera->position.y -= sinf(angle) * speed;
+		need_camera_update = 1;
+	} else if (currentKeyState->standards[key_d]) {
+		angle = horizLookAngle - M_PI2;
+		camera->position.x += cosf(angle) * speed;
+		camera->position.y += sinf(angle) * speed;
+		need_camera_update = 1;
+	}
+
+	if (currentKeyState->lshift) {
+		camera->position.z += speed / 2.5f;
+		need_camera_update = 1;
+	} else if (currentKeyState->lctrl) {
+		camera->position.z -= speed / 2.5f;
+		need_camera_update = 1;
+	}
 }
 
 void ui_render()
@@ -163,7 +199,12 @@ void ui_render()
 	}
 
 	if (active) {
-		ui_do_movement();
+		need_camera_update = 0;
+		ui_do_mouse_movement();
+		ui_do_key_movement();
 		ui_do_cursor();
+		if (need_camera_update) {
+			ui_update_camera();
+		}
 	}
 }
