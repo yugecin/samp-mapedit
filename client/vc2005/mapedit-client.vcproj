@@ -182,6 +182,10 @@
 				RelativePath="..\ui.h"
 				>
 			</File>
+			<File
+				RelativePath="..\vk.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

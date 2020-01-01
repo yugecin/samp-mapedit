@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "ui.h"
+#include "vk.h"
 #include <math.h>
 
 static float fresx, fresy;
@@ -151,12 +152,8 @@ void ui_render()
 	canvasx = fresx / 640.0f;
 	canvasy = fresy / 448.0f;
 
-	/*
-	if (game_InputWasKeyPressed(0x41)) {
-	*/
-	/*0x52 VK_R*/
-	if (currentKeyState->standards[0x52] &&
-		!prevKeyState->standards[0x52])
+	if (currentKeyState->standards[VK_R] &&
+		!prevKeyState->standards[VK_R])
 	{
 		if (active) {
 			ui_deactivate();
