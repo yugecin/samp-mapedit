@@ -80,12 +80,10 @@ static void detour()
 		*passthru_pa = detour_param;
 	} else if (detour_opcode == 0xE9) {
 		/*already a jump, perhaps plhud? :)*/
-		*passthru_pa =
-			(detour_param + 0x58FBC9) -
-			(unsigned int) passthru_pa + 4;
+		*passthru_pa = (detour_param + DETOUR_EIP) - DT(12);
 	}
 	*((unsigned char*) DT(12)) = 0xE9;
-	*((unsigned int*) DT(13)) = DETOUR_EIP - (int) &detour_detour - 17;
+	*((unsigned int*) DT(13)) = DETOUR_EIP - DT(17);
 	VirtualProtect(&detour_detour, 17, oldvp, &oldvp);
 
 	*((unsigned char*) DETOUR_OPCODE) = 0xE9;
