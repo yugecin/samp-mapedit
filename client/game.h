@@ -160,6 +160,7 @@ extern struct CKeyState *prevKeyState;
 extern float *gamespeed;
 extern char *activecam;
 extern struct CCamera *camera;
+extern float *hudScaleX, *hudScaleY;
 
 void game_CameraRestore();
 void __stdcall game_CameraSetOnPoint(

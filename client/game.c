@@ -13,6 +13,8 @@ struct CKeyState *currentKeyState = (struct CKeyState*) 0xB72F20;
 struct CKeyState *prevKeyState = (struct CKeyState*) 0xB73190;
 float *gamespeed = (float*) 0xB7CB64;
 struct CCamera *camera = (struct CCamera*) (0xB6F028);
+float *hudScaleX = (float*) 0x859520;
+float *hudScaleY = (float*) 0x859524;
 
 __declspec(naked) void game_CameraRestore()
 {

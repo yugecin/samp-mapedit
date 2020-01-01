@@ -8,6 +8,7 @@ static float fresx, fresy;
 static float canvasx, canvasy;
 static float cursorx, cursory;
 static char active = 0;
+static float originalHudScaleX, originalHudScaleY;
 
 void ui_init()
 {
@@ -81,9 +82,17 @@ void ui_render()
 			camera->lookAt.y += camera->rotation.y;
 			camera->lookAt.z += camera->rotation.z;
 			game_CameraSetOnPoint(&camera->lookAt, CUT, 1);
+			*enableHudByOpcode = 0;
+			originalHudScaleX = *hudScaleX;
+			originalHudScaleY = *hudScaleY;
+			*hudScaleX = 0.0009f;
+			*hudScaleY = 0.0014f;
 		} else {
 			game_FreezePlayer(0);
 			game_CameraRestore();
+			*enableHudByOpcode = 1;
+			*hudScaleX = originalHudScaleX;
+			*hudScaleY = originalHudScaleY;
 		}
 	}
 
