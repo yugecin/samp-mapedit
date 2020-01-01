@@ -1,40 +1,15 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "client.h"
+#include "ui.h"
 #include <windows.h>
 
 static unload_client_t proc_unload;
 
 void __cdecl renderloop()
 {
-	float xratio = (float)(*(int*)(0xC17044)) / 640.0f;
-	float yratio = (float)(*(int*)(0xC17048)) / 480.0f;
-
-	char *text = "hey text";
-	float x = 80.0f * xratio;
-	float y = 180.0f * yratio;
-	int font = 1;
-	char proportional = 1;
-	int align = 0;
-	int r = 255;
-	int g = 20;
-	int b = 20;
-	int a = 255;
-	float xsize = 1.0f * xratio;
-	float ysize = 1.0f * yratio;
-
-	/**((int*) 0xBAB230) = *((int*) (0xB73418 + 0xC));*/
-
-	((void (__cdecl *)(int,int))0x7195C0)(0, 0);
-	((void (__cdecl *)(int))0x7194F0)(0);
-	((void (__cdecl *)(char align))0x719610)(align);
-	((void (__cdecl *)(float xsize, float ysize))0x719380)(xsize, ysize);
-	((void (__cdecl *)(char proportional))0x7195B0)(proportional);
-	((void (__cdecl *)(char font))0x719490)(font);
-	((void (__cdecl *)(int outline))0x719590)(1);
-	((void (__cdecl *)(int abgr))0x719510)(0xFF000000);
-	((void (__cdecl *)(int abgr))0x719430)(0xFF0050CC);
-	((void (__cdecl *)(float, float, const char*))0x71A700)(x, y, text);
+	ui_init_frame();
+	ui_do_cursor();
 }
 
 __declspec(naked) void detour_detour()
@@ -109,5 +84,6 @@ client_finalize_t __cdecl MapEditMain(unload_client_t unloadfun)
 {
 	proc_unload = unloadfun;
 	detour();
+	ui_init();
 	return &client_finalize;
 }

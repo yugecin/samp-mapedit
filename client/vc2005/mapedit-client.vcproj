@@ -162,6 +162,26 @@
 				RelativePath="..\client.h"
 				>
 			</File>
+			<File
+				RelativePath="..\common.h"
+				>
+			</File>
+			<File
+				RelativePath="..\game.c"
+				>
+			</File>
+			<File
+				RelativePath="..\game.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ui.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
