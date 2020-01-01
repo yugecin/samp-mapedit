@@ -8,6 +8,9 @@ unsigned char *enableHudByOpcode = (unsigned char*) 0xA444A0;
 struct CMouseState *activeMouseState = (struct CMouseState*) 0xB73404;
 struct CMouseState *currentMouseState = (struct CMouseState*) 0xB73418;
 struct CMouseState *prevMouseState = (struct CMouseState*) 0xB7342C;
+struct CKeyState *activeKeyState = (struct CKeyState*) 0xB72CB0;
+struct CKeyState *currentKeyState = (struct CKeyState*) 0xB72F20;
+struct CKeyState *prevKeyState = (struct CKeyState*) 0xB73190;
 
 void game_FreezePlayer(char flag)
 {
@@ -19,6 +22,13 @@ void game_FreezePlayer(char flag)
 	} else {
 		*((unsigned char*) CPAD + 0x10E) &= 0xDF;
 	}
+}
+
+__declspec(naked) int __stdcall game_InputWasKeyPressed(short keycode)
+{
+	_asm mov ecx, 0xB70198 /*inputEvents*/
+	_asm mov eax, 0x52E450
+	_asm jmp eax
 }
 
 __declspec(naked) float game_TextGetSizeX(char *text, char unk1, char unk2)

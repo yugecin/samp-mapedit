@@ -39,6 +39,56 @@ struct CMouseState {
 	float y;
 };
 EXPECT_SIZE(struct CMouseState, 0x14);
+
+struct CKeyState {
+	short function[12];
+	short standards[256];
+	short esc;
+	short insert;
+	short del;
+	short home;
+	short end;
+	short pgup;
+	short pgdn;
+	short up;
+	short down;
+	short left;
+	short right;
+	short scroll;
+	short pause;
+	short numlock;
+	short div;
+	short mul;
+	short sub;
+	short add;
+	short enter;
+	short decimal;
+	short num1;
+	short num2;
+	short num3;
+	short num4;
+	short num5;
+	short num6;
+	short num7;
+	short num8;
+	short num9;
+	short num0;
+	short back;
+	short tab;
+	short capslock;
+	short extenter;
+	short lshift;
+	short rshift;
+	short shift;
+	short lctrl;
+	short rctrl;
+	short lmenu;
+	short rmenu;
+	short lwin;
+	short rwin;
+	short apps;
+};
+EXPECT_SIZE(struct CKeyState, 0x270);
 #pragma pack(pop)
 
 extern unsigned int *fontColorABGR;
@@ -46,8 +96,18 @@ extern unsigned char *enableHudByOpcode;
 extern struct CMouseState *activeMouseState;
 extern struct CMouseState *currentMouseState;
 extern struct CMouseState *prevMouseState;
+extern struct CKeyState *activeKeyState;
+extern struct CKeyState *currentKeyState;
+extern struct CKeyState *prevKeyState;
 
 void game_FreezePlayer(char flag);
+/**
+Seems to not work with standard keys, check enum RsKeyCode for supported ones.
+
+idb CInputEvents__isKeyJustPressed
+sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
+*/
+int __stdcall game_InputWasKeyPressed(short keycode);
 /**
 sdk CFont::GetStringWidth
 */

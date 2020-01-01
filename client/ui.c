@@ -7,19 +7,12 @@
 static float fresx, fresy;
 static float canvasx, canvasy;
 static float cursorx, cursory;
+static char active = 0;
 
 void ui_init()
 {
 	cursorx = (float) GAME_RESOLUTION_X / 2.0f;
 	cursory = (float) GAME_RESOLUTION_Y / 2.0f;
-}
-
-void ui_init_frame()
-{
-	fresx = (float) GAME_RESOLUTION_X;
-	fresy = (float) GAME_RESOLUTION_Y;
-	canvasx = fresx / 640.0f;
-	canvasy = fresy / 448.0f;
 }
 
 void ui_do_cursor()
@@ -60,4 +53,30 @@ void ui_do_cursor()
 		cursorx,
 		cursory - (textbounds.top - textbounds.bottom) / 2.0f,
 		"+");
+}
+
+void ui_render()
+{
+	fresx = (float) GAME_RESOLUTION_X;
+	fresy = (float) GAME_RESOLUTION_Y;
+	canvasx = fresx / 640.0f;
+	canvasy = fresy / 448.0f;
+
+	/*
+	if (game_InputWasKeyPressed(0x41)) {
+	*/
+	/*0x52 VK_R*/
+	if (currentKeyState->standards[0x52] &&
+		!prevKeyState->standards[0x52])
+	{
+		if (active ^= 1) {
+			game_FreezePlayer(1);
+		} else {
+			game_FreezePlayer(0);
+		}
+	}
+
+	if (active) {
+		ui_do_cursor();
+	}
 }

@@ -8,8 +8,7 @@ static unload_client_t proc_unload;
 
 void __cdecl renderloop()
 {
-	ui_init_frame();
-	ui_do_cursor();
+	ui_render();
 }
 
 __declspec(naked) void detour_detour()
