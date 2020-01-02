@@ -95,6 +95,18 @@ __declspec(naked) int game_RwIm2DRenderPrimitive(type, verts, numverts)
 	}
 }
 
+__declspec(naked) void game_RwMatrixInvert(out, in)
+	struct CMatrix *out;
+	struct CMatrix *in;
+{
+	_asm {
+		mov eax, 0x4C6E1D /*call    _RwMatrixInvert*/
+		mov eax, [eax]
+		add eax, 0x4C6E21
+		jmp eax
+	}
+}
+
 __declspec(naked) float game_TextGetSizeX(char *text, char unk1, char unk2)
 {
 	_asm mov eax, 0x71A0E0

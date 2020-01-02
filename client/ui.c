@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "vk.h"
 #include <math.h>
+#include <string.h>
 
 static float fresx, fresy;
 static float canvasx, canvasy;
@@ -202,8 +203,14 @@ void ui_do_key_movement()
 	}
 }
 
+struct RwV3D textloc;
+
 void ui_render()
 {
+	struct CMatrix minv;
+	struct RwV3D in;
+	struct RwV3D again;
+
 	fresx = (float) GAME_RESOLUTION_X;
 	fresy = (float) GAME_RESOLUTION_Y;
 	canvasx = fresx / 640.0f;
@@ -228,5 +235,24 @@ void ui_render()
 		if (need_camera_update) {
 			ui_update_camera();
 		}
+		in.z = 20.0f;
+		in.x = 0.5f * in.z;
+		in.y = 0.5f * in.z;
+		memset(&minv, 0, sizeof(struct CMatrix));
+		minv.pad3 = 1.0f;
+		game_RwMatrixInvert(&minv, &camera->cameraViewMatrix);
+		game_TransformPoint(&textloc, &minv, &in);
+	}
+
+	game_TransformPoint(&again, &camera->cameraViewMatrix, &textloc);
+	if (again.z > 0.0f) {
+		game_TextSetLetterSize(1.0f, 1.0f);
+		game_TextSetMonospace(1);
+		game_TextSetColor(0xFFFFFFFF);
+		game_TextSetShadowColor(0xFF000000);
+		game_TextSetAlign(CENTER);
+		game_TextSetOutline(1);
+		game_TextSetFont(2);
+		game_TextPrintString(again.x / again.z * fresx, again.y / again.z * fresy, "here");
 	}
 }

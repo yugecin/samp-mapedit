@@ -32,13 +32,13 @@ struct RwV3D {
 EXPECT_SIZE(struct RwV3D, 0xC);
 
 struct CMatrix {
-	struct RwV3D one;
+	struct RwV3D right;
 	float pad0;
-	struct RwV3D two;
+	struct RwV3D up;
 	float pad1;
-	struct RwV3D three;
+	struct RwV3D at;
 	float pad2;
-	struct RwV3D four;
+	struct RwV3D pos;
 	float pad3;
 	int matrixPtr;
 	int haveRwMatrix;
@@ -175,6 +175,7 @@ sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 int __stdcall game_InputWasKeyPressed(short keycode);
 int game_RwIm2DPrepareRender();
 int game_RwIm2DRenderPrimitive(int type, float *verts, int numverts);
+void game_RwMatrixInvert(struct CMatrix *out, struct CMatrix *in);
 /**
 sdk CFont::GetStringWidth
 */
