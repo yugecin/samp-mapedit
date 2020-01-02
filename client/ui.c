@@ -226,13 +226,13 @@ void ui_render()
 	}
 
 	if (active) {
-		need_camera_update = 0;
 		ui_do_mouse_movement();
 		ui_do_key_movement();
 		ui_draw_rect();
 		ui_do_cursor();
 		if (need_camera_update) {
 			ui_update_camera();
+			need_camera_update = 0;
 		}
 
 		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
