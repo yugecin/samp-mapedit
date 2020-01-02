@@ -7,9 +7,10 @@
 #include <math.h>
 #include <string.h>
 
-static float fresx, fresy;
-static float canvasx, canvasy;
-static float cursorx, cursory;
+float fresx, fresy;
+float canvasx, canvasy;
+float cursorx, cursory;
+
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
@@ -207,9 +208,7 @@ struct RwV3D textloc;
 
 void ui_render()
 {
-	struct CMatrix minv;
-	struct RwV3D in;
-	struct RwV3D again;
+	struct RwV3D v;
 
 	fresx = (float) GAME_RESOLUTION_X;
 	fresy = (float) GAME_RESOLUTION_Y;
@@ -235,17 +234,24 @@ void ui_render()
 		if (need_camera_update) {
 			ui_update_camera();
 		}
-		in.z = 20.0f;
-		in.x = 0.5f * in.z;
-		in.y = 0.5f * in.z;
-		memset(&minv, 0, sizeof(struct CMatrix));
-		minv.pad3 = 1.0f;
-		game_RwMatrixInvert(&minv, &camera->cameraViewMatrix);
-		game_TransformPoint(&textloc, &minv, &in);
+
+		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
+
+		if (activeMouseState->lmb && !prevMouseState->lmb) {
+			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
+			racecheckpoints[0].type = RACECP_TYPE_NORMAL;
+			racecheckpoints[0].free = 0;
+			racecheckpoints[0].used = 1;
+			racecheckpoints[0].colABGR = 0xFFFF0000;
+			racecheckpoints[0].fRadius = 5.0f;
+			racecheckpoints[0].pos.x = v.x;
+			racecheckpoints[0].pos.y = v.y;
+			racecheckpoints[0].pos.z = v.z;
+		}
 	}
 
-	game_TransformPoint(&again, &camera->cameraViewMatrix, &textloc);
-	if (again.z > 0.0f) {
+	game_WorldToScreen(&v, &textloc);
+	if (v.z > 0.0f) {
 		game_TextSetLetterSize(1.0f, 1.0f);
 		game_TextSetMonospace(1);
 		game_TextSetColor(0xFFFFFFFF);
@@ -253,6 +259,6 @@ void ui_render()
 		game_TextSetAlign(CENTER);
 		game_TextSetOutline(1);
 		game_TextSetFont(2);
-		game_TextPrintString(again.x / again.z * fresx, again.y / again.z * fresy, "here");
+		game_TextPrintString(v.x, v.y, "here");
 	}
 }

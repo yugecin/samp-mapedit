@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "ui.h"
 
 unsigned int *fontColorABGR = (unsigned int*) 0xC71A97;
 unsigned char *enableHudByOpcode = (unsigned char*) 0xA444A0;
@@ -15,6 +16,7 @@ float *gamespeed = (float*) 0xB7CB64;
 struct CCamera *camera = (struct CCamera*) (0xB6F028);
 float *hudScaleX = (float*) 0x859520;
 float *hudScaleY = (float*) 0x859524;
+struct CRaceCheckpoint *racecheckpoints = (struct CRaceCheckpoint*) 0xC7F158;
 
 __declspec(naked) void game_CameraRestore()
 {
@@ -105,6 +107,20 @@ __declspec(naked) void game_RwMatrixInvert(out, in)
 		add eax, 0x4C6E21
 		jmp eax
 	}
+}
+
+void game_ScreenToWorld(struct RwV3D *out, float x, float y, float dist)
+{
+	struct RwV3D in;
+	struct CMatrix invCVM;
+
+	in.x = x * dist / fresx;
+	in.y = y * dist / fresy;
+	in.z = dist;
+	memset(&invCVM, 0, sizeof(struct CMatrix));
+	invCVM.pad3 = 1.0f;
+	game_RwMatrixInvert(&invCVM, &camera->cameraViewMatrix);
+	game_TransformPoint(out, &invCVM, &in);
 }
 
 __declspec(naked) float game_TextGetSizeX(char *text, char unk1, char unk2)
@@ -244,4 +260,11 @@ __declspec(naked) int game_TransformPoint(out, mat, in)
 {
 	_asm mov eax, 0x59C890
 	_asm jmp eax
+}
+
+void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in)
+{
+	game_TransformPoint(out, &camera->cameraViewMatrix, in);
+	out->x *= fresx / out->z;
+	out->y *= fresy / out->z;
 }

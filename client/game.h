@@ -147,6 +147,33 @@ struct CKeyState {
 	short apps;
 };
 EXPECT_SIZE(struct CKeyState, 0x270);
+
+#define RACECP_TYPE_NORMAL 0
+#define RACECP_TYPE_FINISH 1
+#define RACECP_TYPE_NOTHING 2
+#define RACECP_TYPE_AIRNORM 3
+#define RACECP_TYPE_AIRFINISH 4
+#define RACECP_TYPE_AIRROT 5
+#define RACECP_TYPE_AIRUPDOWNNOTHING 6
+#define RACECP_TYPE_AIRUPDOWN1 7
+#define RACECP_TYPE_AIRUPDOWN2 8
+
+struct CRaceCheckpoint
+{
+	char type;
+	char free;
+	char used;
+	char __pad3[5];
+	int colABGR;
+	char __padC[4];
+	struct RwV3D pos;
+	struct RwV3D arrowDirection;
+	char __pad28[4];
+	float fRadius;
+	char __pad30[8];
+};
+EXPECT_SIZE(struct CRaceCheckpoint, 0x38);
+#define MAXRACECHECKPOINT 32
 #pragma pack(pop)
 
 extern unsigned int *fontColorABGR;
@@ -161,6 +188,7 @@ extern float *gamespeed;
 extern char *activecam;
 extern struct CCamera *camera;
 extern float *hudScaleX, *hudScaleY;
+extern struct CRaceCheckpoint *racecheckpoints;
 
 void game_CameraRestore();
 void __stdcall game_CameraSetOnPoint(
@@ -176,6 +204,7 @@ int __stdcall game_InputWasKeyPressed(short keycode);
 int game_RwIm2DPrepareRender();
 int game_RwIm2DRenderPrimitive(int type, float *verts, int numverts);
 void game_RwMatrixInvert(struct CMatrix *out, struct CMatrix *in);
+void game_ScreenToWorld(struct RwV3D *out, float x, float y, float dist);
 /**
 sdk CFont::GetStringWidth
 */
@@ -298,3 +327,4 @@ sdk CMatrix::operator*
 */
 int game_TransformPoint(
 	struct RwV3D *out, struct CMatrix *mat, struct RwV3D *in);
+void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in);
