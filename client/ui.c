@@ -147,7 +147,7 @@ void ui_do_mouse_movement()
 
 	mx = activeMouseState->x;
 	my = activeMouseState->y;
-	if (activeMouseState->rmb && (mx != 0.0f || my != 0.0f)) {
+	if (mx != 0.0f || my != 0.0f) {
 		horizLookAngle -= mx / 200.0f;
 		vertLookAngle -= my / 200.0f;
 		if (vertLookAngle < 0.001f) {
@@ -226,8 +226,10 @@ void ui_render()
 	}
 
 	if (active) {
-		ui_do_mouse_movement();
-		ui_do_key_movement();
+		if (activeMouseState->rmb) {
+			ui_do_mouse_movement();
+			ui_do_key_movement();
+		}
 		ui_draw_rect();
 		ui_do_cursor();
 		if (need_camera_update) {
