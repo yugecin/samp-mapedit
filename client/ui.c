@@ -25,6 +25,26 @@ void ui_init()
 	key_d = VK_D;
 }
 
+struct Vert {
+	float x, y;
+	int near;
+	int far;
+	int col;
+	float u;
+	float v;
+};
+void ui_draw_rect()
+{
+	struct Vert verts[] = {
+		{800.0f, 800.0f, 0, 0x40555556, 0xFFFFFFFF, 1.0f, 0.0f},
+		{1000.0f, 800.0f, 0, 0x40555556, 0xFFFFFFFF, 1.0f, 0.0f},
+		{800.0f, 400.0f, 0, 0x40555556, 0xFFFFFFFF, 1.0f, 0.0f},
+		{1000.0f, 400.0f, 0, 0x40555556, 0xFFFFFFFF, 1.0f, 0.0f},
+	};
+	game_RwIm2DPrepareRender();
+	game_RwIm2DRenderPrimitive(4, (float*) verts, 4);
+}
+
 void ui_do_cursor()
 {
 	float textsize;
@@ -202,6 +222,7 @@ void ui_render()
 		need_camera_update = 0;
 		ui_do_mouse_movement();
 		ui_do_key_movement();
+		ui_draw_rect();
 		ui_do_cursor();
 		if (need_camera_update) {
 			ui_update_camera();

@@ -173,11 +173,8 @@ idb CInputEvents__isKeyJustPressed
 sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 */
 int __stdcall game_InputWasKeyPressed(short keycode);
-/**
-idb CCamera__setPositionAndRotation
-sdk CCamera::SetCamPositionForFixedMode
-*/
-void game_SetCameraPosition(struct RwV3D *position, struct RwV3D *rotation);
+int game_RwIm2DPrepareRender();
+int game_RwIm2DRenderPrimitive(int type, float *verts, int numverts);
 /**
 sdk CFont::GetStringWidth
 */

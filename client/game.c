@@ -55,6 +55,46 @@ __declspec(naked) int __stdcall game_InputWasKeyPressed(short keycode)
 	_asm jmp eax
 }
 
+__declspec(naked) int game_RwIm2DPrepareRender()
+{
+	_asm {
+		//pushad
+		mov eax, 0xC97B24
+		mov eax, [eax] /*_RwEngineInstance*/
+		mov eax, [eax+0x10+0x10] /*.dOpenDevice.fpRenderStateSet*/
+		push eax
+		push 0x0
+		push 0x1
+		call eax
+		add esp, 0x8
+		mov eax, [esp]
+		push 0x1
+		push 0x7
+		call eax
+		add esp, 0x8
+		mov eax, [esp]
+		push 0x1
+		push 0xC
+		call eax
+		add esp, 0xC
+		//popad
+		ret
+	}
+}
+
+__declspec(naked) int game_RwIm2DRenderPrimitive(type, verts, numverts)
+	int type;
+	float *verts;
+	int numverts;
+{
+	_asm {
+		mov eax, 0xC97B24
+		mov eax, [eax] /*_RwEngineInstance*/
+		mov eax, [eax+0x10+0x20] /*.dOpenDevice.fpIm2DRenderPrimitive*/
+		jmp eax
+	}
+}
+
 __declspec(naked) float game_TextGetSizeX(char *text, char unk1, char unk2)
 {
 	_asm mov eax, 0x71A0E0
