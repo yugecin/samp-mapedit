@@ -291,3 +291,9 @@ int game_TextSetWrapX(float value);
 ?
 */
 int game_TextSetWrapY(float value);
+/**
+idb _transformPoint
+sdk CMatrix::operator*
+*/
+int game_TransformPoint(
+	struct RwV3D *out, struct CMatrix *mat, struct RwV3D *in);

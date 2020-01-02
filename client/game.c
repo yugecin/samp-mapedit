@@ -224,3 +224,12 @@ __declspec(naked) int game_TextSetWrapY(float value)
 	_asm mov eax, 0x7194E0
 	_asm jmp eax
 }
+
+__declspec(naked) int game_TransformPoint(out, mat, in)
+	struct RwV3D *out;
+	struct CMatrix *mat;
+	struct RwV3D *in;
+{
+	_asm mov eax, 0x59C890
+	_asm jmp eax
+}

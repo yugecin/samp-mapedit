@@ -111,16 +111,16 @@ void ui_activate()
 		ccam = &camera->cams[camera->activeCam];
 		camera->position = ccam->pos;
 		camera->rotation = ccam->lookVector;
-		ui_update_camera();
 		rot = camera->rotation;
+		need_camera_update = 1;
 		horizLookAngle = atan2f(rot.y, rot.x);
 		xylen = sqrtf(rot.x * rot.x + rot.y * rot.y);
 		vertLookAngle = atan2f(xylen, rot.z);
 		*enableHudByOpcode = 0;
 		originalHudScaleX = *hudScaleX;
 		originalHudScaleY = *hudScaleY;
-		*hudScaleX = 0.0009f;
-		*hudScaleY = 0.0014f;
+		//*hudScaleX = 0.0009f;
+		//*hudScaleY = 0.0014f;
 	}
 }
 
