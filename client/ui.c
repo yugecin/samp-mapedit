@@ -119,8 +119,9 @@ void ui_activate()
 		*enableHudByOpcode = 0;
 		originalHudScaleX = *hudScaleX;
 		originalHudScaleY = *hudScaleY;
-		//*hudScaleX = 0.0009f;
-		//*hudScaleY = 0.0014f;
+		/*note: scaling the hud might mess up projections*/
+		*hudScaleX = 0.0009f;
+		*hudScaleY = 0.0014f;
 	}
 }
 
