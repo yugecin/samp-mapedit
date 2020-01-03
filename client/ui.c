@@ -24,12 +24,22 @@ static unsigned char foliageCall[5] = { 0, 0, 0, 0, 0 };
 static
 void cb_btn_foliage()
 {
+	void* position;
+
 	if (*((unsigned char*) 0x53C159) == 0x90) {
 		memcpy((void*) 0x53C159, foliageCall, 5);
 		foliageCall[0] = 0;
 	} else {
 		memcpy(foliageCall, (void*) 0x53C159, 5);
 		memset((void*) 0x53C159, 0x90, 5);
+
+		/*remove existing foliage*/
+		position = (void*) 0xB6F03C; /*_camera.__parent.m_pCoords*/
+		if (position == NULL) {
+			/*_camera.__parent.placement*/
+			position = (void*) 0xB6F02C;
+		}
+		((void (__cdecl *)(void*,int)) 0x5DC510)(position, 0);
 	}
 }
 
