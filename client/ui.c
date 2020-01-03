@@ -58,8 +58,9 @@ void ui_draw_rect(float x, float y, float w, float h, int argb)
 
 void ui_do_cursor()
 {
-	float textsize;
-	struct Rect textbounds;
+	/* (inner|outer)(width|height)(radius|diam)*/
+	float iwr, iwd, ihr, ihd;
+	float owr, owd, ohr, ohd;
 
 	if (!activeMouseState->rmb) {
 		cursorx += activeMouseState->x;
@@ -80,19 +81,22 @@ void ui_do_cursor()
 		}
 	}
 
-	ui_default_font();
 	if (activeMouseState->lmb) {
-		textsize = 1.2f;
+		iwr = 2.0f; iwd = 4.0f;
+		owr = 4.0f, owd = 8.0f;
+		ihr = 8.0f, ihd = 16.0f;
+		ohr = 10.0f, ohd = 20.0f;
 	} else {
-		textsize = 1.0f;
+		iwr = 1.0f; iwd = 2.0f;
+		owr = 3.0f, owd = 6.0f;
+		ihr = 6.0f, ihd = 12.0f;
+		ohr = 8.0f, ohd = 16.0f;
 	}
-	game_TextSetLetterSize(textsize, textsize);
-	game_TextSetAlign(CENTER);
-	game_TextGetSizeXY(&textbounds, textsize, textsize, "+");
-	game_TextPrintString(
-		cursorx,
-		cursory - (textbounds.top - textbounds.bottom) / 2.0f,
-		"+");
+
+	ui_draw_rect(cursorx - owr, cursory - ohr, owd, ohd, 0xFF000000);
+	ui_draw_rect(cursorx - ohr, cursory - owr, ohd, owd, 0xFF000000);
+	ui_draw_rect(cursorx - iwr, cursory - ihr, iwd, ihd, 0xFFFFFFFF);
+	ui_draw_rect(cursorx - ihr, cursory - iwr, ihd, iwd, 0xFFFFFFFF);
 }
 
 static
