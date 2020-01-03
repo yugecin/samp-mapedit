@@ -56,30 +56,32 @@ void ui_draw_rect(float x, float y, float w, float h, int argb)
 	game_RwIm2DRenderPrimitive(4, (float*) verts, 4);
 }
 
-void ui_do_cursor()
+void ui_do_cursor_movement()
 {
+	cursorx += activeMouseState->x;
+	/*TODO: this is off*/
+	cursory -= activeMouseState->y * fresx / fresy;
+
+	if (cursorx < 0.0f) {
+		cursorx = 0.0f;
+	}
+	if (cursorx > fresx) {
+		cursorx = fresx;
+	}
+	if (cursory < 0.0f) {
+		cursory = 0.0f;
+	}
+	if (cursory > fresy) {
+		cursory = fresy;
+	}
+}
+
+void ui_draw_cursor()
+{
+	/*TODO because this is drawn with rects, it draws below textdraws...*/
 	/* (inner|outer)(width|height)(radius|diam)*/
 	float iwr, iwd, ihr, ihd;
 	float owr, owd, ohr, ohd;
-
-	if (!activeMouseState->rmb) {
-		cursorx += activeMouseState->x;
-		/*TODO: this is off*/
-		cursory -= activeMouseState->y * fresx / fresy;
-
-		if (cursorx < 0.0f) {
-			cursorx = 0.0f;
-		}
-		if (cursorx > fresx) {
-			cursorx = fresx;
-		}
-		if (cursory < 0.0f) {
-			cursory = 0.0f;
-		}
-		if (cursory > fresy) {
-			cursory = fresy;
-		}
-	}
 
 	if (activeMouseState->lmb) {
 		iwr = 2.0f; iwd = 4.0f;
@@ -257,11 +259,13 @@ void ui_render()
 		if (activeMouseState->rmb) {
 			ui_do_mouse_movement();
 			ui_do_key_movement();
+		} else {
+			ui_do_cursor_movement();
 		}
 
 		ui_btn_draw(btn_settings);
 
-		ui_do_cursor();
+		ui_draw_cursor();
 
 		if (need_camera_update) {
 			ui_update_camera();
