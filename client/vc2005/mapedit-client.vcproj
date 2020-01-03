@@ -183,6 +183,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ui_button.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_button.h"
+				>
+			</File>
+			<File
 				RelativePath="..\vk.h"
 				>
 			</File>
