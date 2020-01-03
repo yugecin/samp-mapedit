@@ -52,3 +52,12 @@ int ui_btn_is_hovered(struct UI_BUTTON *btn, float *btnw)
 	return btn->x <= cursorx && cursorx < btn->x + w &&
 		btn->y <= cursory && cursory < btn->y + buttonheight;
 }
+
+int ui_btn_handle_click(struct UI_BUTTON *btn)
+{
+	if (ui_btn_is_hovered(btn, NULL)) {
+		btn->cb();
+		return 1;
+	}
+	return 0;
+}

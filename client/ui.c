@@ -17,11 +17,20 @@ static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
 static char key_w, key_a, key_s, key_d;
 static char need_camera_update;
-static struct UI_BUTTON *btn_settings;
+static struct UI_BUTTON *btn_foliage;
+
+static unsigned char foliageCall[5] = { 0, 0, 0, 0, 0 };
 
 static
-void cb_btn_settings()
+void cb_btn_foliage()
 {
+	if (*((unsigned char*) 0x53C159) == 0x90) {
+		memcpy((void*) 0x53C159, foliageCall, 5);
+		foliageCall[0] = 0;
+	} else {
+		memcpy(foliageCall, (void*) 0x53C159, 5);
+		memset((void*) 0x53C159, 0x90, 5);
+	}
 }
 
 void ui_init()
@@ -32,7 +41,7 @@ void ui_init()
 	key_a = VK_Q;
 	key_s = VK_S;
 	key_d = VK_D;
-	btn_settings = ui_btn_make(10.0f, 500.0f, "Settings", cb_btn_settings);
+	btn_foliage = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
 }
 
 struct Vert {
@@ -263,7 +272,7 @@ void ui_render()
 			ui_do_cursor_movement();
 		}
 
-		ui_btn_draw(btn_settings);
+		ui_btn_draw(btn_foliage);
 
 		ui_draw_cursor();
 
@@ -273,6 +282,10 @@ void ui_render()
 		}
 
 		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
+
+		if (activeMouseState->lmb && !prevMouseState->lmb) {
+			ui_btn_handle_click(btn_foliage);
+		}
 
 		if (activeMouseState->lmb) {
 			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
@@ -302,6 +315,9 @@ void ui_render()
 
 void ui_dispose()
 {
+	if (foliageCall[0]) {
+		cb_btn_foliage();
+	}
 	ui_deactivate();
-	ui_btn_dispose(btn_settings);
+	ui_btn_dispose(btn_foliage);
 }
