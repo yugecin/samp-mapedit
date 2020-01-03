@@ -157,7 +157,7 @@ void ui_default_font()
 	game_TextSetShadowColor(0xFF000000);
 	game_TextSetAlign(LEFT);
 	game_TextSetOutline(1);
-	game_TextSetFont(2);
+	game_TextSetFont(1);
 }
 
 static
