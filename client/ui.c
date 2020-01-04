@@ -75,6 +75,7 @@ void ui_draw_rect(float x, float y, float w, float h, int argb)
 	game_RwIm2DRenderPrimitive(4, (float*) verts, 4);
 }
 
+static
 void ui_do_cursor_movement()
 {
 	cursorx += activeMouseState->x;
@@ -95,6 +96,7 @@ void ui_do_cursor_movement()
 	}
 }
 
+static
 void ui_draw_cursor()
 {
 	/*TODO because this is drawn with rects, it draws below textdraws...*/
