@@ -248,6 +248,52 @@ void ui_do_key_movement()
 	}
 }
 
+static
+float hue(float t)
+{
+	if(t < 0.0f) t += 1.0f;
+	if(t > 1.0f) t -= 1.0f;
+	if(t < 1.0f / 6.0f) return 255.0f * 6.0f * t;
+	if(t < 1.0f / 2.0f) return 255.0f;
+	if(t < 2.0f / 3.0f) return 255.0f * (4.0f - 6.0f * t);
+	return 0.0f;
+};
+
+static
+void colorwheel()
+{
+	const int amount = 50;
+	int i, col;
+	float angle, size = 100.0f;
+	struct Vert verts[50 + 1];
+
+	verts[0].x = 500.0f;
+	verts[0].y = 500.0f;
+	verts[0].near = 0;
+	verts[0].far = 0x40555556;
+	verts[0].col = 0xFFFFFFFF;
+	verts[0].u = 1.0f;
+	verts[0].v = 0.0f;
+	for (i = 0; i < amount;) {
+		angle = 1.0f / (float) (amount - 2) * (float) i;
+		col = 0xFF000000;
+		col |= ((unsigned char) hue(angle + 1.0f / 3.0f)) << 16;
+		col |= ((unsigned char) hue(angle)) << 8;
+		col |= ((unsigned char) hue(angle - 1.0f / 3.0f));
+		angle *= 2.0f * M_PI;
+		i++;
+		verts[i].x = 500.0f + cosf(angle) * size;
+		verts[i].y = 500.0f + sinf(angle) * size;
+		verts[i].near = 0;
+		verts[i].far = 0x40555556;
+		verts[i].col = col;
+		verts[i].u = 1.0f;
+		verts[i].v = 0.0f;
+	}
+	game_RwIm2DPrepareRender();
+	game_RwIm2DRenderPrimitive(5, (float*) verts, amount);
+}
+
 struct RwV3D textloc;
 
 void ui_render()
@@ -283,6 +329,8 @@ void ui_render()
 		} else {
 			ui_do_cursor_movement();
 		}
+
+		colorwheel();
 
 		ui_btn_draw(btn_foliage);
 
