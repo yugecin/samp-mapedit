@@ -19,6 +19,8 @@ static char key_w, key_a, key_s, key_d;
 static char need_camera_update;
 static struct UI_BUTTON *btn_foliage;
 
+static int activeRCP = 0;
+
 static unsigned char foliageCall[5] = { 0, 0, 0, 0, 0 };
 
 static
@@ -52,6 +54,9 @@ void ui_init()
 	key_s = VK_S;
 	key_d = VK_D;
 	btn_foliage = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
+	racecheckpoints[activeRCP].colABGR = 0xFFFF0000;
+	racecheckpoints[activeRCP].free = 0;
+	racecheckpoints[activeRCP].used = 1;
 }
 
 struct Vert {
@@ -259,12 +264,16 @@ float hue(float t)
 	return 0.0f;
 };
 
+int drawnodraw = 0;
+int lastcol;
+float a;
+
 static
 void colorwheel()
 {
 	const int amount = 50;
 	int i, col;
-	float angle, size = 100.0f;
+	float angle, size = 100.0f, dx, dy, dist;
 	struct Vert verts[50 + 1];
 
 	verts[0].x = 500.0f;
@@ -292,6 +301,51 @@ void colorwheel()
 	}
 	game_RwIm2DPrepareRender();
 	game_RwIm2DRenderPrimitive(5, (float*) verts, amount);
+
+	if (activeMouseState->lmb) {
+		dx = cursorx - 500.0f;
+		dy = cursory - 500.0f;
+		dist = dx * dx + dy * dy;
+		if (dist < size * size) {
+			angle = (float) atan2(-dy, -dx) / M_PI / 2.0f;
+			angle += 0.5f;
+			a = angle;
+			dist = (float) sqrt(dist) / size;
+			col = 0xFF000000;
+			col |= ((unsigned char) hue(angle + 1.0f / 3.0f));
+			col |= ((unsigned char) hue(angle)) << 8;
+			col |= ((unsigned char) hue(angle - 1.0f / 3.0f)) << 16;
+			if (lastcol == col) {
+				goto end;
+			}
+			lastcol = col;
+			racecheckpoints[activeRCP].colABGR = col;
+
+			/*i = activeRCP;
+			activeRCP++;
+			if (activeRCP >= 0x20) {
+				activeRCP = 0;
+			}
+			racecheckpoints[i].used = 0;
+			racecheckpoints[i].free = 1;
+			memcpy(racecheckpoints + activeRCP, racecheckpoints + i,
+				sizeof(struct CRaceCheckpoint));
+			memset(racecheckpoints[activeRCP].__pad3, 0, 5);
+			memset(racecheckpoints[activeRCP].__padC, 0, 4);
+			memset(racecheckpoints[activeRCP].__pad28, 0, 4);
+			memset(racecheckpoints[activeRCP].__pad30, 0, 8);
+			//racecheckpoints[activeRCP].free = 0;*/
+
+			racecheckpoints[activeRCP].used = 1;
+			racecheckpoints[activeRCP].free = 2;
+			return;
+		}
+	}
+end:
+	if (racecheckpoints[activeRCP].free == 2) {
+		racecheckpoints[activeRCP].free = 0;
+		racecheckpoints[activeRCP].used = 1;
+	}
 }
 
 struct RwV3D textloc;
@@ -300,11 +354,13 @@ void ui_render()
 {
 	struct Rect textbounds;
 	struct RwV3D v;
+	char b[100];
 
 	fresx = (float) GAME_RESOLUTION_X;
 	fresy = (float) GAME_RESOLUTION_Y;
 	canvasx = fresx / 640.0f;
 	canvasy = fresy / 448.0f;
+
 
 	ui_default_font();
 	game_TextGetSizeXY(&textbounds, 1.0f, 1.0f, "JQqd");
@@ -349,14 +405,14 @@ void ui_render()
 
 		if (activeMouseState->lmb) {
 			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
-			racecheckpoints[0].type = RACECP_TYPE_NORMAL;
-			racecheckpoints[0].free = 0;
-			racecheckpoints[0].used = 1;
-			racecheckpoints[0].colABGR = 0xFFFF0000;
-			racecheckpoints[0].fRadius = 5.0f;
-			racecheckpoints[0].pos.x = v.x;
-			racecheckpoints[0].pos.y = v.y;
-			racecheckpoints[0].pos.z = v.z;
+			racecheckpoints[activeRCP].type = RACECP_TYPE_NORMAL;
+			/*racecheckpoints[activeRCP].free = 0;*/
+			/*racecheckpoints[activeRCP].used = 1;*/
+			/*racecheckpoints[activeRCP].colABGR = 0xFFFF0000;*/
+			racecheckpoints[activeRCP].fRadius = 5.0f;
+			racecheckpoints[activeRCP].pos.x = v.x;
+			racecheckpoints[activeRCP].pos.y = v.y;
+			racecheckpoints[activeRCP].pos.z = v.z;
 		}
 	}
 
@@ -371,6 +427,8 @@ void ui_render()
 		game_TextSetFont(2);
 		game_TextPrintString(v.x, v.y, "here");
 	}
+	sprintf(b, "%f", a);
+		game_TextPrintString(700.0f, 700.0f, b);
 }
 
 void ui_dispose()
