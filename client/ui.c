@@ -266,7 +266,6 @@ float hue(float t)
 
 int drawnodraw = 0;
 int lastcol;
-float a;
 
 static
 void colorwheel()
@@ -309,7 +308,6 @@ void colorwheel()
 		if (dist < size * size) {
 			angle = (float) atan2(-dy, -dx) / M_PI / 2.0f;
 			angle += 0.5f;
-			a = angle;
 			dist = (float) sqrt(dist) / size;
 			col = 0xFF000000;
 			col |= ((unsigned char) hue(angle + 1.0f / 3.0f));
@@ -354,7 +352,6 @@ void ui_render()
 {
 	struct Rect textbounds;
 	struct RwV3D v;
-	char b[100];
 
 	fresx = (float) GAME_RESOLUTION_X;
 	fresy = (float) GAME_RESOLUTION_Y;
@@ -427,8 +424,6 @@ void ui_render()
 		game_TextSetFont(2);
 		game_TextPrintString(v.x, v.y, "here");
 	}
-	sprintf(b, "%f", a);
-		game_TextPrintString(700.0f, 700.0f, b);
 }
 
 void ui_dispose()
