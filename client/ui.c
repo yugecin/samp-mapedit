@@ -18,6 +18,7 @@ static float horizLookAngle, vertLookAngle;
 static char key_w, key_a, key_s, key_d;
 static char need_camera_update;
 static struct UI_BUTTON *btn_foliage;
+static struct UI_BUTTON *btn_reload;
 
 static int activeRCP = 0;
 
@@ -45,6 +46,12 @@ void cb_btn_foliage()
 	}
 }
 
+static
+void cb_btn_reload()
+{
+	reload_requested = 1;
+}
+
 void ui_init()
 {
 	cursorx = (float) GAME_RESOLUTION_X / 2.0f;
@@ -54,6 +61,7 @@ void ui_init()
 	key_s = VK_S;
 	key_d = VK_D;
 	btn_foliage = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
+	btn_reload = ui_btn_make(10.0f, 600.0f, "Reload_client", cb_btn_reload);
 	racecheckpoints[activeRCP].colABGR = 0xFFFF0000;
 	racecheckpoints[activeRCP].free = 0;
 	racecheckpoints[activeRCP].used = 1;
@@ -386,6 +394,7 @@ void ui_render()
 		colorwheel();
 
 		ui_btn_draw(btn_foliage);
+		ui_btn_draw(btn_reload);
 
 		ui_draw_cursor();
 
@@ -398,6 +407,7 @@ void ui_render()
 
 		if (activeMouseState->lmb && !prevMouseState->lmb) {
 			ui_btn_handle_click(btn_foliage);
+			ui_btn_handle_click(btn_reload);
 		}
 
 		if (activeMouseState->lmb) {

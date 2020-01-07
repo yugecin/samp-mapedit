@@ -4,37 +4,47 @@
 #include "ui.h"
 #include <windows.h>
 
-static struct CLIENTLINK *linkdata;
+struct CLIENTLINK *linkdata;
+int reload_requested = 0;
 
 static
-void __cdecl renderloop()
+__declspec(naked) void clientloop()
 {
 	ui_render();
+	_asm {
+		pop eax
+		push reload_requested
+		jmp eax
+	}
 }
 
+static
 __declspec(naked) void detour_detour()
 {
 	_asm {
 		pushad
-		call renderloop
+		call clientloop
+		pop eax
+		test eax, eax
 		popad
-		nop
-		nop
-		nop
-		nop
-		nop
-		nop
-		nop
-		nop
-		nop
-		nop
+		mov eax, 0x99887766 /*dummy 5 bytes, to be original code*/
+		jz noreload
+		/*disguise next jmp to linkdata->proc_loader_reload_client
+		as a call with as return address the address were this was
+		hooked from*/
+		push 0x99887766
+		mov eax, 0x99887766 /*dummy 5 bytes, to be jmp to reload*/
+noreload:
+		mov eax, 0x99887766 /*dummy 5 bytes, to be return jmp*/
 	}
 }
 
 #define DETOUR_OPCODE 0x58FBC4
 #define DETOUR_PARAM 0x58FBC5
 #define DETOUR_EIP 0x58FBC9
-#define DT(X) ((int) &detour_detour + X)
+#define DETOUR_SIZE 0x20
+#define DETOUR &detour_detour
+#define DT(X) ((int) DETOUR + X)
 
 static unsigned char detour_opcode;
 static unsigned int detour_param;
@@ -43,27 +53,38 @@ static
 void detour()
 {
 	DWORD oldvp;
-	unsigned char *passthru_op = (unsigned char*) DT(7);
-	unsigned int *passthru_pa = (unsigned int*) DT(8);
+	unsigned char *passthru_op = (unsigned char*) DT(0xA);
+	unsigned int *passthru_pa = (unsigned int*) DT(0xB);
+	int reload_addr = (int) linkdata->proc_loader_reload_client;
 
+	/*fetch the original code*/
 	detour_opcode = *((unsigned char*) DETOUR_OPCODE);
 	detour_param = *((unsigned int*) DETOUR_PARAM);
+	/*install the detour*/
+	*((unsigned char*) DETOUR_OPCODE) = 0xE9;
+	*((unsigned int*) DETOUR_PARAM) = (int) DETOUR - DETOUR_EIP;
 
-	VirtualProtect(&detour_detour, 17, PAGE_EXECUTE_READWRITE, &oldvp);
+	VirtualProtect(DETOUR, DETOUR_SIZE, PAGE_EXECUTE_READWRITE, &oldvp);
+	/*write the thing that was overwritten to the detour jmp*/
 	*passthru_op = detour_opcode;
 	if (detour_opcode == 0xA0 && detour_param == 0xBA6769) {
 		/*original code*/
 		*passthru_pa = detour_param;
 	} else if (detour_opcode == 0xE9) {
 		/*already a jump, perhaps plhud? :)*/
-		*passthru_pa = (detour_param + DETOUR_EIP) - DT(12);
+		*passthru_pa = (detour_param + DETOUR_EIP) - DT(0xF);
+		/*reloading won't work in this case,
+		but production use should be ok*/
 	}
-	*((unsigned char*) DT(12)) = 0xE9;
-	*((unsigned int*) DT(13)) = DETOUR_EIP - DT(17);
-	VirtualProtect(&detour_detour, 17, oldvp, &oldvp);
-
-	*((unsigned char*) DETOUR_OPCODE) = 0xE9;
-	*((unsigned int*) DETOUR_PARAM) = (int) &detour_detour - DETOUR_EIP;
+	/*return address for fake call to reload_client*/
+	*((unsigned int*) DT(0x12)) = DETOUR_EIP;
+	/*call to reload_client (actually a jmp)*/
+	*((unsigned char*) DT(0x16)) = 0xE9;
+	*((unsigned int*) DT(0x17)) = reload_addr - DT(0x1B);
+	/*jmp back to where the detour was set*/
+	*((unsigned char*) DT(0x1B)) = 0xE9;
+	*((unsigned int*) DT(0x1C)) = DETOUR_EIP - DT(DETOUR_SIZE);
+	VirtualProtect(DETOUR, DETOUR_SIZE, oldvp, &oldvp);
 }
 
 static

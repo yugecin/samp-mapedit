@@ -35,7 +35,7 @@ void copy_client()
 }
 
 static
-void reload_client()
+void __cdecl reload_client()
 {
 	unload_client();
 	copy_client();
