@@ -4,12 +4,12 @@
 #include "../client/client.h"
 
 static HMODULE client = NULL;
-static client_finalize_t proc_finalize;
+static struct CLIENTLINK data;
 
 void unload_client()
 {
 	if (client != NULL) {
-		proc_finalize();
+		data.proc_client_finalize();
 		FreeLibrary(client);
 		client = NULL;
 	}
@@ -24,8 +24,6 @@ Example:
 */
 OpcodeResult WINAPI opcode_0C62(CScriptThread *thread)
 {
-	MapEditMain_t clientmain;
-
 	if (client != NULL) {
 		unload_client();
 		/*when reloading MPACK, this sleep allows the copy script
@@ -33,8 +31,8 @@ OpcodeResult WINAPI opcode_0C62(CScriptThread *thread)
 		Sleep(2750);
 	}
 	client = LoadLibrary("CLEO\\mapedit-client.dll");
-	clientmain = (MapEditMain_t) GetProcAddress(client, "MapEditMain");
-	proc_finalize = clientmain(&unload_client);
+	((MapEditMain_t*) GetProcAddress(client, "MapEditMain"))(&data);
+	data.proc_client_clientmain(data);
 	return OR_CONTINUE;
 }
 

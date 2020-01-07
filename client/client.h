@@ -7,6 +7,13 @@ EXPECT_SIZE(char, 1);
 EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 
-typedef void (*unload_client_t)();
-typedef void (*client_finalize_t)();
-typedef client_finalize_t (*MapEditMain_t)(unload_client_t);
+typedef void (cb)();
+
+struct CLIENTLINK {
+	cb *proc_loader_reload_client;
+	cb *proc_loader_unload_client;
+	cb *proc_client_clientmain;
+	cb *proc_client_finalize;
+};
+
+typedef void (MapEditMain_t)(struct CLIENTLINK *data);

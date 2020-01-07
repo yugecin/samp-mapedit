@@ -4,8 +4,9 @@
 #include "ui.h"
 #include <windows.h>
 
-static unload_client_t proc_unload;
+static struct CLIENTLINK *linkdata;
 
+static
 void __cdecl renderloop()
 {
 	ui_render();
@@ -38,7 +39,8 @@ __declspec(naked) void detour_detour()
 static unsigned char detour_opcode;
 static unsigned int detour_param;
 
-static void detour()
+static
+void detour()
 {
 	DWORD oldvp;
 	unsigned char *passthru_op = (unsigned char*) DT(7);
@@ -64,7 +66,8 @@ static void detour()
 	*((unsigned int*) DETOUR_PARAM) = (int) &detour_detour - DETOUR_EIP;
 }
 
-static void undetour()
+static
+void undetour()
 {
 	*((unsigned char*) DETOUR_OPCODE) = detour_opcode;
 	*((unsigned int*) DETOUR_PARAM) = detour_param;
@@ -73,17 +76,28 @@ static void undetour()
 /**
 Called from the loader, do not call directly (use proc_unload)
 */
+static
 void client_finalize()
 {
 	ui_dispose();
 	undetour();
 }
 
-__declspec(dllexport)
-client_finalize_t __cdecl MapEditMain(unload_client_t unloadfun)
+/**
+Separate init function, because you shouldn't do too much in the dll's entrypt.
+
+See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain
+*/
+static
+void client_init()
 {
-	proc_unload = unloadfun;
 	detour();
 	ui_init();
-	return &client_finalize;
+}
+
+__declspec(dllexport) void __cdecl MapEditMain(struct CLIENTLINK *data)
+{
+	linkdata = data;
+	data->proc_client_finalize = client_finalize;
+	data->proc_client_clientmain = client_init;
 }
