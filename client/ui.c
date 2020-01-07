@@ -20,7 +20,6 @@ static char need_camera_update;
 static struct UI_BUTTON *btn_foliage;
 static struct UI_BUTTON *btn_reload;
 
-static int click_was_consumed;
 void* ui_element_being_clicked;
 int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
@@ -174,7 +173,6 @@ void ui_activate()
 		/*note: scaling the hud might mess up projections*/
 		*hudScaleX = 0.0009f;
 		*hudScaleY = 0.0014f;
-		click_was_consumed = 0;
 		ui_element_being_clicked = NULL;
 	}
 }
@@ -316,7 +314,7 @@ void colorwheel()
 	game_RwIm2DPrepareRender();
 	game_RwIm2DRenderPrimitive(5, (float*) verts, amount);
 
-	if ((!click_was_consumed ||
+	if ((!ui_element_being_clicked ||
 		ui_element_being_clicked == UI_ELEM_COLORWHEEL) &&
 		activeMouseState->lmb)
 	{
@@ -324,7 +322,6 @@ void colorwheel()
 		dy = cursory - 500.0f;
 		dist = dx * dx + dy * dy;
 		if (dist < size * size) {
-			click_was_consumed = 1;
 			ui_element_being_clicked = UI_ELEM_COLORWHEEL;
 			angle = (float) atan2(-dy, -dx) / M_PI / 2.0f;
 			angle += 0.5f;
@@ -396,15 +393,16 @@ void ui_render()
 	}
 
 	if (active) {
-		if (click_was_consumed && !activeMouseState->lmb) {
-			click_was_consumed = 0;
-			ui_element_being_clicked = NULL;
-		}
-
 		ui_mouse_is_just_down =
 			activeMouseState->lmb && !prevMouseState->lmb;
 		ui_mouse_is_just_up =
 			prevMouseState->lmb && !activeMouseState->lmb;
+
+		if (ui_element_being_clicked && ui_mouse_is_just_up) {
+			if (ui_btn_handle_mouseup(btn_foliage) ||
+				ui_btn_handle_mouseup(btn_reload)) ;
+			ui_element_being_clicked = NULL;
+		}
 
 		if (activeMouseState->rmb) {
 			ui_do_mouse_movement();
@@ -427,22 +425,15 @@ void ui_render()
 
 		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
 
-		if (!click_was_consumed && ui_mouse_is_just_down) {
-			if (ui_btn_handle_click(btn_foliage)) {
-				ui_element_being_clicked = btn_foliage;
-				click_was_consumed = 1;
-			}
-			if (ui_btn_handle_click(btn_reload)) {
-				ui_element_being_clicked = btn_reload;
-				click_was_consumed = 1;
-			}
+		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
+			if (ui_btn_handle_mousedown(btn_foliage) ||
+				ui_btn_handle_mousedown(btn_reload));
 		}
 
 		if (activeMouseState->lmb &&
-			(!click_was_consumed ||
+			(!ui_element_being_clicked ||
 			ui_element_being_clicked == UI_ELEM_WORLDSPACE))
 		{
-			click_was_consumed = 1;
 			ui_element_being_clicked = UI_ELEM_WORLDSPACE;
 			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
 			racecheckpoints[activeRCP].type = RACECP_TYPE_NORMAL;
