@@ -2,6 +2,9 @@
 
 #include "ui_button.h"
 
+#define UI_ELEM_COLORWHEEL ((void*) 1)
+#define UI_ELEM_WORLDSPACE ((void*) 2)
+
 extern float fresx, fresy;
 extern float canvasx, canvasy;
 /**
@@ -9,6 +12,9 @@ Screen-space coordinates of the cursor.
 */
 extern float cursorx, cursory;
 extern float fontheight, buttonheight, fontpad;
+extern void* ui_element_being_clicked;
+extern int ui_mouse_is_just_down;
+extern int ui_mouse_is_just_up;
 
 void ui_default_font();
 void ui_dispose();

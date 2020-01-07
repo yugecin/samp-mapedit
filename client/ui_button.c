@@ -33,7 +33,11 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 
 	btnw = game_TextGetSizeX(btn->text, 0, 0) + fontpad * 2.0f;
 	if (ui_btn_is_hovered(btn, &btnw)) {
-		col = 0xEEFF0000;
+		if (ui_element_being_clicked == btn) {
+			col = 0xEE0000FF;
+		} else {
+			col = 0xEEFF0000;
+		}
 	} else {
 		col = 0xAAFF0000;
 	}
