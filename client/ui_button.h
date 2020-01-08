@@ -15,17 +15,5 @@ Recalculates the width and height of the button.
 The correct font properties must be active for this to work!
 */
 void ui_btn_recalc_size(struct UI_BUTTON *btn);
-/**
-Does not check if an other element is focused.
-
-@returns non-zero when the event was handled
-*/
-int ui_btn_handle_mousedown(struct UI_BUTTON *btn);
-/**
-@returns non-zero when the event was handled
-*/
-int ui_btn_handle_mouseup(struct UI_BUTTON *btn);
-/**
-@param btnw width of the button or NULL if not calculated
-*/
-int ui_btn_is_hovered(struct UI_BUTTON *btn, float *btnw);
+int ui_btn_mousedown(struct UI_BUTTON *btn);
+int ui_btn_mouseup(struct UI_BUTTON *btn);

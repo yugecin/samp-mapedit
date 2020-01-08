@@ -4,7 +4,6 @@
 #include "game.h"
 #include "ui.h"
 #include <math.h>
-#include <string.h>
 
 #define COLORWHEEL_SEGMENTS 50
 #define VERTCOUNT (COLORWHEEL_SEGMENTS + 1)
@@ -62,6 +61,10 @@ struct UI_COLORPICKER *ui_colpick_make(float x, float y, float size, cb *cb)
 	colpick->_parent.y = y;
 	colpick->_parent.width = size;
 	colpick->_parent.height = size;
+	colpick->_parent.proc_draw = (ui_method*) ui_colpick_draw;
+	colpick->_parent.proc_dispose = (ui_method*) ui_colpick_dispose;
+	colpick->_parent.proc_mousedown = (ui_method*) ui_colpick_mousedown;
+	colpick->_parent.proc_mouseup = (ui_method*) ui_colpick_mouseup;
 	colpick->size = size;
 	colpick->cb = cb;
 	return colpick;
@@ -116,7 +119,7 @@ void ui_colpick_draw(struct UI_COLORPICKER *colpick)
 	game_RwIm2DRenderPrimitive(5, verts, VERTCOUNT);
 }
 
-int ui_colpick_handle_mousedown(struct UI_COLORPICKER *colpick)
+int ui_colpick_mousedown(struct UI_COLORPICKER *colpick)
 {
 	float dx, dy, size;
 
@@ -129,7 +132,7 @@ int ui_colpick_handle_mousedown(struct UI_COLORPICKER *colpick)
 	return 0;
 }
 
-int ui_colpick_handle_mouseup(struct UI_COLORPICKER *colpick)
+int ui_colpick_mouseup(struct UI_COLORPICKER *colpick)
 {
 	return ui_element_being_clicked == colpick;
 }

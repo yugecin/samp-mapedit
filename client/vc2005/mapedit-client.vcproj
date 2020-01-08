@@ -200,6 +200,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ui_element.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_element.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_window.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_window.h"
+				>
+			</File>
+			<File
 				RelativePath="..\vk.h"
 				>
 			</File>

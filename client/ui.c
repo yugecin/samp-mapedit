@@ -329,9 +329,9 @@ void ui_render()
 			prevMouseState->lmb && !activeMouseState->lmb;
 
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
-			if (ui_btn_handle_mouseup(btn_foliage) ||
-				ui_btn_handle_mouseup(btn_reload) ||
-				ui_colpick_handle_mouseup(colpick));
+			if (ui_btn_mouseup(btn_foliage) ||
+				ui_btn_mouseup(btn_reload) ||
+				ui_colpick_mouseup(colpick));
 			ui_element_being_clicked = NULL;
 		}
 
@@ -350,9 +350,9 @@ void ui_render()
 		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
-			if (!ui_btn_handle_mousedown(btn_foliage) &&
-				!ui_btn_handle_mousedown(btn_reload) &&
-				!ui_colpick_handle_mousedown(colpick))
+			if (!ui_btn_mousedown(btn_foliage) &&
+				!ui_btn_mousedown(btn_reload) &&
+				!ui_colpick_mousedown(colpick))
 			{
 				ui_element_being_clicked = background_element;
 			}
