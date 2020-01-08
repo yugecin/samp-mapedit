@@ -31,5 +31,6 @@ extern int ui_mouse_is_just_up;
 void ui_default_font();
 void ui_dispose();
 void ui_draw_rect(float x, float y, float w, float h, int argb);
+void ui_draw_element_rect(struct UI_ELEMENT *element, int argb);
 void ui_init();
 void ui_render();

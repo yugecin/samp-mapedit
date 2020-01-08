@@ -66,14 +66,31 @@ void cb_colpick()
 	racecheckpoints[activeRCP].free = 3;
 }
 
+static
+void ui_recalculate_sizes()
+{
+	struct Rect textbounds;
+
+	fresx = (float) GAME_RESOLUTION_X;
+	fresy = (float) GAME_RESOLUTION_Y;
+
+	canvasx = fresx / 640.0f;
+	canvasy = fresy / 448.0f;
+
+	game_TextGetSizeXY(&textbounds, 1.0f, 1.0f, "JQqd");
+	fontheight = textbounds.top - textbounds.bottom;
+	buttonheight = fontheight * 1.25f;
+	fontpad = (buttonheight - fontheight) / 2;
+}
+
 void ui_init()
 {
-	cursorx = (float) GAME_RESOLUTION_X / 2.0f;
-	cursory = (float) GAME_RESOLUTION_Y / 2.0f;
 	key_w = VK_Z;
 	key_a = VK_Q;
 	key_s = VK_S;
 	key_d = VK_D;
+	ui_default_font();
+	ui_recalculate_sizes(); /*needed for ui element text measurements*/
 	ui_colpick_init();
 	btn_foliage = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
 	btn_reload = ui_btn_make(10.0f, 600.0f, "Reload_client", cb_btn_reload);
@@ -81,6 +98,8 @@ void ui_init()
 	racecheckpoints[activeRCP].colABGR = 0xFFFF0000;
 	racecheckpoints[activeRCP].free = 0;
 	racecheckpoints[activeRCP].used = 1;
+	cursorx = fresx / 2.0f;
+	cursory = fresy / 2.0f;
 }
 
 void ui_draw_rect(float x, float y, float w, float h, int argb)
@@ -93,6 +112,12 @@ void ui_draw_rect(float x, float y, float w, float h, int argb)
 	};
 	game_RwIm2DPrepareRender();
 	game_RwIm2DRenderPrimitive(4, verts, 4);
+}
+
+void ui_draw_element_rect(struct UI_ELEMENT *element, int argb)
+{
+	ui_draw_rect(
+		element->x, element->y, element->width, element->height, argb);
 }
 
 static
@@ -273,20 +298,15 @@ struct RwV3D textloc;
 
 void ui_render()
 {
-	struct Rect textbounds;
 	struct RwV3D v;
 
-	fresx = (float) GAME_RESOLUTION_X;
-	fresy = (float) GAME_RESOLUTION_Y;
-	canvasx = fresx / 640.0f;
-	canvasy = fresy / 448.0f;
-
-
 	ui_default_font();
-	game_TextGetSizeXY(&textbounds, 1.0f, 1.0f, "JQqd");
-	fontheight = textbounds.top - textbounds.bottom;
-	buttonheight = fontheight * 1.25f;
-	fontpad = (buttonheight - fontheight) / 2;
+
+	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
+		ui_recalculate_sizes();
+		/*TODO: recalculate element sizes*/
+	}
+
 
 	if (currentKeyState->standards[VK_R] &&
 		!prevKeyState->standards[VK_R])

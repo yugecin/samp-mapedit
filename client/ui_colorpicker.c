@@ -60,6 +60,8 @@ struct UI_COLORPICKER *ui_colpick_make(float x, float y, float size, cb *cb)
 	colpick->_parent.type = COLORPICKER;
 	colpick->_parent.x = x;
 	colpick->_parent.y = y;
+	colpick->_parent.width = size;
+	colpick->_parent.height = size;
 	colpick->size = size;
 	colpick->cb = cb;
 	return colpick;

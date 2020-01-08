@@ -18,6 +18,7 @@ struct UI_BUTTON *ui_btn_make(float x, float y, char *text, cb *cb)
 	btn->text = malloc(sizeof(char) * textlen);
 	btn->cb = cb;
 	memcpy(btn->text, text, textlen + 1);
+	ui_btn_recalc_size(btn);
 	return btn;
 }
 
@@ -47,25 +48,30 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 	} else {
 		col = 0xAAFF0000;
 	}
-	ui_draw_rect(btn->_parent.x, btn->_parent.y, btnw, buttonheight, col);
+	ui_draw_element_rect(&btn->_parent, col);
 	game_TextPrintString(
 		btn->_parent.x + fontpad,
 		btn->_parent.y + fontpad,
 		btn->text);
 }
 
+void ui_btn_recalc_size(struct UI_BUTTON *btn)
+{
+	float textw;
+
+	/*width calculations stop at whitespace, should whitespace be replaced
+	with underscores for this size calculations?*/
+	textw = game_TextGetSizeX(btn->text, 0, 0);
+	btn->_parent.width = textw + fontpad * 2.0f;
+	btn->_parent.height = buttonheight;
+}
+
 int ui_btn_is_hovered(struct UI_BUTTON *btn, float *btnw)
 {
-	float w;
-	if (btnw != NULL) {
-		w = *btnw;
-	} else {
-		w = game_TextGetSizeX(btn->text, 0, 0);
-	}
 	return btn->_parent.x <= cursorx &&
 		btn->_parent.y <= cursory &&
-		cursorx < btn->_parent.x + w &&
-		cursory < btn->_parent.y + buttonheight;
+		cursorx < btn->_parent.x + btn->_parent.width &&
+		cursory < btn->_parent.y + btn->_parent.height;
 }
 
 int ui_btn_handle_mousedown(struct UI_BUTTON *btn)
