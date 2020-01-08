@@ -129,5 +129,5 @@ int ui_colpick_handle_mousedown(struct UI_COLORPICKER *colpick)
 
 int ui_colpick_handle_mouseup(struct UI_COLORPICKER *colpick)
 {
-	return 1;
+	return ui_element_being_clicked == colpick;
 }

@@ -78,8 +78,11 @@ int ui_btn_handle_mousedown(struct UI_BUTTON *btn)
 
 int ui_btn_handle_mouseup(struct UI_BUTTON *btn)
 {
-	if (ui_element_being_clicked == btn && ui_btn_is_hovered(btn, NULL)) {
-		btn->cb();
+	if (ui_element_being_clicked == btn) {
+		if (ui_btn_is_hovered(btn, NULL)) {
+			btn->cb();
+		}
+		return 1;
 	}
-	return 1;
+	return 0;
 }
