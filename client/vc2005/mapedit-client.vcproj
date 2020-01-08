@@ -54,6 +54,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(SolutionDir)\out-$(ConfigurationName)\$(ProjectName).dll"
 				IgnoreDefaultLibraryNames="uuid.lib"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"

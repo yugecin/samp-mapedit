@@ -33,7 +33,7 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 	int col;
 
 	btnw = game_TextGetSizeX(btn->text, 0, 0) + fontpad * 2.0f;
-	if ((btn->ishovered = ui_btn_is_hovered(btn, &btnw))) {
+	if (ui_btn_is_hovered(btn, &btnw)) {
 		if (ui_element_being_clicked == NULL) {
 			col = 0xEEFF0000;
 		} else if (ui_element_being_clicked == btn) {
@@ -70,7 +70,7 @@ int ui_btn_is_hovered(struct UI_BUTTON *btn, float *btnw)
 
 int ui_btn_handle_mousedown(struct UI_BUTTON *btn)
 {
-	if (btn->ishovered) {
+	if (ui_btn_is_hovered(btn, NULL)) {
 		return (int) (ui_element_being_clicked = btn);
 	}
 	return 0;

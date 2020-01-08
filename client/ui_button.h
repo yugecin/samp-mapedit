@@ -4,11 +4,6 @@ struct UI_BUTTON {
 	struct UI_ELEMENT _parent;
 	char *text;
 	cb *cb;
-	/**
-	Flag denoting if the button is being hovered, set every frame when
-	the button is being drawn.
-	*/
-	char ishovered;
 };
 
 struct UI_BUTTON *ui_btn_make(float x, float y, char *text, cb *cb);
