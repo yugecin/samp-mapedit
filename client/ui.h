@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 enum eUIElementType {
+	BACKGROUND,
 	BUTTON,
 	COLORPICKER,
 };
@@ -13,9 +14,7 @@ struct UI_ELEMENT {
 
 #include "ui_button.h"
 #include "ui_colorpicker.h"
-
-#define UI_ELEM_COLORWHEEL ((void*) 1)
-#define UI_ELEM_WORLDSPACE ((void*) 2)
+#include "ui_window.h"
 
 extern float fresx, fresy;
 extern float canvasx, canvasy;
@@ -27,6 +26,7 @@ extern float fontheight, buttonheight, fontpad;
 extern void* ui_element_being_clicked;
 extern int ui_mouse_is_just_down;
 extern int ui_mouse_is_just_up;
+extern struct UI_ELEMENT *background_element;
 
 void ui_default_font();
 void ui_dispose();

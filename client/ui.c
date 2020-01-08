@@ -21,6 +21,9 @@ static char need_camera_update;
 static struct UI_BUTTON *btn_foliage;
 static struct UI_BUTTON *btn_reload;
 static struct UI_COLORPICKER *colpick;
+static struct UI_ELEMENT _background_element;
+
+struct UI_ELEMENT *background_element = &_background_element;
 
 void* ui_element_being_clicked;
 int ui_mouse_is_just_down;
@@ -85,6 +88,7 @@ void ui_recalculate_sizes()
 
 void ui_init()
 {
+	_background_element.type = BACKGROUND;
 	key_w = VK_Z;
 	key_a = VK_Q;
 	key_s = VK_S;
@@ -327,7 +331,7 @@ void ui_render()
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if (ui_btn_handle_mouseup(btn_foliage) ||
 				ui_btn_handle_mouseup(btn_reload) ||
-				ui_colpick_handle_mouseup(colpick)) ;
+				ui_colpick_handle_mouseup(colpick));
 			ui_element_being_clicked = NULL;
 		}
 
@@ -346,9 +350,12 @@ void ui_render()
 		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
-			if (ui_btn_handle_mousedown(btn_foliage) ||
-				ui_btn_handle_mousedown(btn_reload) ||
-				ui_colpick_handle_mousedown(colpick));
+			if (!ui_btn_handle_mousedown(btn_foliage) &&
+				!ui_btn_handle_mousedown(btn_reload) &&
+				!ui_colpick_handle_mousedown(colpick))
+			{
+				ui_element_being_clicked = background_element;
+			}
 		}
 
 		ui_colpick_update(colpick);
@@ -366,11 +373,7 @@ void ui_render()
 
 		ui_draw_cursor();
 
-		if (activeMouseState->lmb &&
-			(!ui_element_being_clicked ||
-			ui_element_being_clicked == UI_ELEM_WORLDSPACE))
-		{
-			ui_element_being_clicked = UI_ELEM_WORLDSPACE;
+		if (ui_element_being_clicked == background_element) {
 			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
 			racecheckpoints[activeRCP].type = RACECP_TYPE_NORMAL;
 			/*racecheckpoints[activeRCP].free = 0;*/
