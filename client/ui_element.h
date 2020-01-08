@@ -27,4 +27,5 @@ struct UI_ELEMENT {
 	ui_method *proc_mouseup;
 };
 
+void ui_element_draw_background(struct UI_ELEMENT *elem, int argb);
 int ui_element_is_hovered(struct UI_ELEMENT *element);

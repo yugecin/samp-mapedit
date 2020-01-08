@@ -50,7 +50,7 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 	} else {
 		col = 0xAAFF0000;
 	}
-	ui_draw_element_rect(&btn->_parent, col);
+	ui_element_draw_background(&btn->_parent, col);
 	game_TextPrintString(
 		btn->_parent.x + fontpad,
 		btn->_parent.y + fontpad,

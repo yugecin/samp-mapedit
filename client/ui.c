@@ -106,24 +106,6 @@ void ui_init()
 	cursory = fresy / 2.0f;
 }
 
-void ui_draw_rect(float x, float y, float w, float h, int argb)
-{
-	struct IM2DVERTEX verts[] = {
-		{x, y + h, 0, 0x40555556, argb, 1.0f, 0.0f},
-		{x + w, y + h, 0, 0x40555556, argb, 1.0f, 0.0f},
-		{x, y, 0, 0x40555556, argb, 1.0f, 0.0f},
-		{x + w, y, 0, 0x40555556, argb, 1.0f, 0.0f},
-	};
-	game_RwIm2DPrepareRender();
-	game_RwIm2DRenderPrimitive(4, verts, 4);
-}
-
-void ui_draw_element_rect(struct UI_ELEMENT *element, int argb)
-{
-	ui_draw_rect(
-		element->x, element->y, element->width, element->height, argb);
-}
-
 static
 void ui_do_cursor_movement()
 {
@@ -165,10 +147,10 @@ void ui_draw_cursor()
 		ohr = 8.0f, ohd = 16.0f;
 	}
 
-	ui_draw_rect(cursorx - owr, cursory - ohr, owd, ohd, 0xFF000000);
-	ui_draw_rect(cursorx - ohr, cursory - owr, ohd, owd, 0xFF000000);
-	ui_draw_rect(cursorx - iwr, cursory - ihr, iwd, ihd, 0xFFFFFFFF);
-	ui_draw_rect(cursorx - ihr, cursory - iwr, ihd, iwd, 0xFFFFFFFF);
+	game_DrawRect(cursorx - owr, cursory - ohr, owd, ohd, 0xFF000000);
+	game_DrawRect(cursorx - ohr, cursory - owr, ohd, owd, 0xFF000000);
+	game_DrawRect(cursorx - iwr, cursory - ihr, iwd, ihd, 0xFFFFFFFF);
+	game_DrawRect(cursorx - ihr, cursory - iwr, ihd, iwd, 0xFFFFFFFF);
 }
 
 static

@@ -38,6 +38,18 @@ __declspec(naked) void __stdcall game_CameraSetOnPoint(point, cutmode, unk)
 	_asm jmp eax
 }
 
+void game_DrawRect(float x, float y, float w, float h, int argb)
+{
+	struct IM2DVERTEX verts[] = {
+		{x, y + h, 0, 0x40555556, argb, 1.0f, 0.0f},
+		{x + w, y + h, 0, 0x40555556, argb, 1.0f, 0.0f},
+		{x, y, 0, 0x40555556, argb, 1.0f, 0.0f},
+		{x + w, y, 0, 0x40555556, argb, 1.0f, 0.0f},
+	};
+	game_RwIm2DPrepareRender();
+	game_RwIm2DRenderPrimitive(4, verts, 4);
+}
+
 void game_FreezePlayer(char flag)
 {
 	/*see CPlayer__makePlayerSafe 0x56E870
