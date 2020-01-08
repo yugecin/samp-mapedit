@@ -1,12 +1,9 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-typedef void (callback)();
-
 struct UI_BUTTON {
-	float x;
-	float y;
+	struct UI_ELEMENT _parent;
 	char *text;
-	callback *cb;
+	cb *cb;
 	/**
 	Flag denoting if the button is being hovered, set every frame when
 	the button is being drawn.
@@ -14,7 +11,7 @@ struct UI_BUTTON {
 	char ishovered;
 };
 
-struct UI_BUTTON *ui_btn_make(float x, float y, char *text, callback *cb);
+struct UI_BUTTON *ui_btn_make(float x, float y, char *text, cb *cb);
 void ui_btn_dispose(struct UI_BUTTON *btn);
 void ui_btn_draw(struct UI_BUTTON *btn);
 /**

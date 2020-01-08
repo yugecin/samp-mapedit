@@ -1,6 +1,18 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+enum eUIElementType {
+	BUTTON,
+	COLORPICKER,
+};
+
+struct UI_ELEMENT {
+	enum eUIElementType type;
+	float x, y;
+	float width, height;
+};
+
 #include "ui_button.h"
+#include "ui_colorpicker.h"
 
 #define UI_ELEM_COLORWHEEL ((void*) 1)
 #define UI_ELEM_WORLDSPACE ((void*) 2)

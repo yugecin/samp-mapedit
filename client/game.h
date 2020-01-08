@@ -24,6 +24,16 @@ enum eCameraCutMode {
 };
 
 #pragma pack(push,1)
+struct IM2DVERTEX {
+	float x, y;
+	int near;
+	int far;
+	int col;
+	float u;
+	float v;
+};
+EXPECT_SIZE(struct IM2DVERTEX, 0x1C);
+
 struct RwV3D {
 	float x;
 	float y;
@@ -202,7 +212,7 @@ sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 */
 int __stdcall game_InputWasKeyPressed(short keycode);
 int game_RwIm2DPrepareRender();
-int game_RwIm2DRenderPrimitive(int type, float *verts, int numverts);
+int game_RwIm2DRenderPrimitive(int type, void *verts, int numverts);
 void game_RwMatrixInvert(struct CMatrix *out, struct CMatrix *in);
 void game_ScreenToWorld(struct RwV3D *out, float x, float y, float dist);
 /**

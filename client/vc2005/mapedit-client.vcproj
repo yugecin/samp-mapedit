@@ -191,6 +191,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ui_colorpicker.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_colorpicker.h"
+				>
+			</File>
+			<File
 				RelativePath="..\vk.h"
 				>
 			</File>

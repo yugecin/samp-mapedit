@@ -5,15 +5,16 @@
 #include "ui.h"
 #include <string.h>
 
-struct UI_BUTTON *ui_btn_make(float x, float y, char *text, callback *cb)
+struct UI_BUTTON *ui_btn_make(float x, float y, char *text, cb *cb)
 {
 	struct UI_BUTTON *btn;
 	int textlen;
 
 	textlen = strlen(text);
 	btn = malloc(sizeof(struct UI_BUTTON));
-	btn->x = x;
-	btn->y = y;
+	btn->_parent.type = BUTTON;
+	btn->_parent.x = x;
+	btn->_parent.y = y;
 	btn->text = malloc(sizeof(char) * textlen);
 	btn->cb = cb;
 	memcpy(btn->text, text, textlen + 1);
@@ -46,8 +47,11 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 	} else {
 		col = 0xAAFF0000;
 	}
-	ui_draw_rect(btn->x, btn->y, btnw, buttonheight, col);
-	game_TextPrintString(btn->x + fontpad, btn->y + fontpad, btn->text);
+	ui_draw_rect(btn->_parent.x, btn->_parent.y, btnw, buttonheight, col);
+	game_TextPrintString(
+		btn->_parent.x + fontpad,
+		btn->_parent.y + fontpad,
+		btn->text);
 }
 
 int ui_btn_is_hovered(struct UI_BUTTON *btn, float *btnw)
@@ -58,8 +62,10 @@ int ui_btn_is_hovered(struct UI_BUTTON *btn, float *btnw)
 	} else {
 		w = game_TextGetSizeX(btn->text, 0, 0);
 	}
-	return btn->x <= cursorx && cursorx < btn->x + w &&
-		btn->y <= cursory && cursory < btn->y + buttonheight;
+	return btn->_parent.x <= cursorx &&
+		btn->_parent.y <= cursory &&
+		cursorx < btn->_parent.x + w &&
+		cursory < btn->_parent.y + buttonheight;
 }
 
 int ui_btn_handle_mousedown(struct UI_BUTTON *btn)
@@ -74,7 +80,6 @@ int ui_btn_handle_mouseup(struct UI_BUTTON *btn)
 {
 	if (ui_element_being_clicked == btn && ui_btn_is_hovered(btn, NULL)) {
 		btn->cb();
-		return 1;
 	}
-	return 0;
+	return 1;
 }

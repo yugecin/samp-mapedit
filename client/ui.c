@@ -17,8 +17,10 @@ static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
 static char key_w, key_a, key_s, key_d;
 static char need_camera_update;
+
 static struct UI_BUTTON *btn_foliage;
 static struct UI_BUTTON *btn_reload;
+static struct UI_COLORPICKER *colpick;
 
 void* ui_element_being_clicked;
 int ui_mouse_is_just_down;
@@ -56,6 +58,14 @@ void cb_btn_reload()
 	reload_requested = 1;
 }
 
+static
+void cb_colpick()
+{
+	racecheckpoints[activeRCP].colABGR = colpick->last_selected_colorABGR;
+	racecheckpoints[activeRCP].used = 1;
+	racecheckpoints[activeRCP].free = 3;
+}
+
 void ui_init()
 {
 	cursorx = (float) GAME_RESOLUTION_X / 2.0f;
@@ -64,32 +74,25 @@ void ui_init()
 	key_a = VK_Q;
 	key_s = VK_S;
 	key_d = VK_D;
+	ui_colpick_init();
 	btn_foliage = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
 	btn_reload = ui_btn_make(10.0f, 600.0f, "Reload_client", cb_btn_reload);
+	colpick = ui_colpick_make(500.0f, 500.0f, 100.0f, cb_colpick);
 	racecheckpoints[activeRCP].colABGR = 0xFFFF0000;
 	racecheckpoints[activeRCP].free = 0;
 	racecheckpoints[activeRCP].used = 1;
 }
 
-struct Vert {
-	float x, y;
-	int near;
-	int far;
-	int col;
-	float u;
-	float v;
-};
-
 void ui_draw_rect(float x, float y, float w, float h, int argb)
 {
-	struct Vert verts[] = {
+	struct IM2DVERTEX verts[] = {
 		{x, y + h, 0, 0x40555556, argb, 1.0f, 0.0f},
 		{x + w, y + h, 0, 0x40555556, argb, 1.0f, 0.0f},
 		{x, y, 0, 0x40555556, argb, 1.0f, 0.0f},
 		{x + w, y, 0, 0x40555556, argb, 1.0f, 0.0f},
 	};
 	game_RwIm2DPrepareRender();
-	game_RwIm2DRenderPrimitive(4, (float*) verts, 4);
+	game_RwIm2DRenderPrimitive(4, verts, 4);
 }
 
 static
@@ -266,103 +269,6 @@ void ui_do_key_movement()
 	}
 }
 
-static
-float hue(float t)
-{
-	if(t < 0.0f) t += 1.0f;
-	if(t > 1.0f) t -= 1.0f;
-	if(t < 1.0f / 6.0f) return 255.0f * 6.0f * t;
-	if(t < 1.0f / 2.0f) return 255.0f;
-	if(t < 2.0f / 3.0f) return 255.0f * (4.0f - 6.0f * t);
-	return 0.0f;
-};
-
-int drawnodraw = 0;
-int lastcol;
-
-static
-void colorwheel()
-{
-	const int amount = 50;
-	int i, col;
-	float angle, size = 100.0f, dx, dy, dist;
-	struct Vert verts[50 + 1];
-
-	verts[0].x = 500.0f;
-	verts[0].y = 500.0f;
-	verts[0].near = 0;
-	verts[0].far = 0x40555556;
-	verts[0].col = 0xFFFFFFFF;
-	verts[0].u = 1.0f;
-	verts[0].v = 0.0f;
-	for (i = 0; i < amount;) {
-		angle = 1.0f / (float) (amount - 2) * (float) i;
-		col = 0xFF000000;
-		col |= ((unsigned char) hue(angle + 1.0f / 3.0f)) << 16;
-		col |= ((unsigned char) hue(angle)) << 8;
-		col |= ((unsigned char) hue(angle - 1.0f / 3.0f));
-		angle *= 2.0f * M_PI;
-		i++;
-		verts[i].x = 500.0f + cosf(angle) * size;
-		verts[i].y = 500.0f + sinf(angle) * size;
-		verts[i].near = 0;
-		verts[i].far = 0x40555556;
-		verts[i].col = col;
-		verts[i].u = 1.0f;
-		verts[i].v = 0.0f;
-	}
-	game_RwIm2DPrepareRender();
-	game_RwIm2DRenderPrimitive(5, (float*) verts, amount);
-
-	if ((!ui_element_being_clicked ||
-		ui_element_being_clicked == UI_ELEM_COLORWHEEL) &&
-		activeMouseState->lmb)
-	{
-		dx = cursorx - 500.0f;
-		dy = cursory - 500.0f;
-		dist = dx * dx + dy * dy;
-		if (dist < size * size) {
-			ui_element_being_clicked = UI_ELEM_COLORWHEEL;
-			angle = (float) atan2(-dy, -dx) / M_PI / 2.0f;
-			angle += 0.5f;
-			dist = (float) sqrt(dist) / size;
-			col = 0xFF000000;
-			col |= ((unsigned char) hue(angle + 1.0f / 3.0f));
-			col |= ((unsigned char) hue(angle)) << 8;
-			col |= ((unsigned char) hue(angle - 1.0f / 3.0f)) << 16;
-			if (lastcol == col) {
-				goto end;
-			}
-			lastcol = col;
-			racecheckpoints[activeRCP].colABGR = col;
-
-			/*i = activeRCP;
-			activeRCP++;
-			if (activeRCP >= 0x20) {
-				activeRCP = 0;
-			}
-			racecheckpoints[i].used = 0;
-			racecheckpoints[i].free = 1;
-			memcpy(racecheckpoints + activeRCP, racecheckpoints + i,
-				sizeof(struct CRaceCheckpoint));
-			memset(racecheckpoints[activeRCP].__pad3, 0, 5);
-			memset(racecheckpoints[activeRCP].__padC, 0, 4);
-			memset(racecheckpoints[activeRCP].__pad28, 0, 4);
-			memset(racecheckpoints[activeRCP].__pad30, 0, 8);
-			//racecheckpoints[activeRCP].free = 0;*/
-
-			racecheckpoints[activeRCP].used = 1;
-			racecheckpoints[activeRCP].free = 2;
-			return;
-		}
-	}
-end:
-	if (racecheckpoints[activeRCP].free == 2) {
-		racecheckpoints[activeRCP].free = 0;
-		racecheckpoints[activeRCP].used = 1;
-	}
-}
-
 struct RwV3D textloc;
 
 void ui_render()
@@ -400,7 +306,8 @@ void ui_render()
 
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if (ui_btn_handle_mouseup(btn_foliage) ||
-				ui_btn_handle_mouseup(btn_reload)) ;
+				ui_btn_handle_mouseup(btn_reload) ||
+				ui_colpick_handle_mouseup(colpick)) ;
 			ui_element_being_clicked = NULL;
 		}
 
@@ -411,13 +318,6 @@ void ui_render()
 			ui_do_cursor_movement();
 		}
 
-		colorwheel();
-
-		ui_btn_draw(btn_foliage);
-		ui_btn_draw(btn_reload);
-
-		ui_draw_cursor();
-
 		if (need_camera_update) {
 			ui_update_camera();
 			need_camera_update = 0;
@@ -427,8 +327,24 @@ void ui_render()
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
 			if (ui_btn_handle_mousedown(btn_foliage) ||
-				ui_btn_handle_mousedown(btn_reload));
+				ui_btn_handle_mousedown(btn_reload) ||
+				ui_colpick_handle_mousedown(colpick));
 		}
+
+		ui_colpick_update(colpick);
+
+		if (racecheckpoints[activeRCP].free > 2) {
+			racecheckpoints[activeRCP].free--;
+		} else if (racecheckpoints[activeRCP].free == 2) {
+			racecheckpoints[activeRCP].free = 0;
+			racecheckpoints[activeRCP].used = 1;
+		}
+
+		ui_colpick_draw(colpick);
+		ui_btn_draw(btn_foliage);
+		ui_btn_draw(btn_reload);
+
+		ui_draw_cursor();
 
 		if (activeMouseState->lmb &&
 			(!ui_element_being_clicked ||
@@ -467,4 +383,6 @@ void ui_dispose()
 	}
 	ui_deactivate();
 	ui_btn_dispose(btn_foliage);
+	ui_btn_dispose(btn_reload);
+	ui_colpick_dispose(colpick);
 }
