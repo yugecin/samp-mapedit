@@ -4,6 +4,8 @@ struct UI_COLORPICKER {
 	struct UI_ELEMENT _parent;
 	float size;
 	int last_selected_colorABGR;
+	float last_angle;
+	float last_dist;
 	cb *cb;
 };
 

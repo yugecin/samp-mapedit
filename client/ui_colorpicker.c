@@ -87,7 +87,10 @@ void ui_colpick_update(struct UI_COLORPICKER *colpick)
 		if (dist > 1.0f) {
 			dist = 1.0f;
 		}
-		angle = (float) atan2(-dy, -dx) / M_PI / 2.0f + 0.5f;
+		colpick->last_dist = dist;
+		angle = (float) atan2(dy, dx);
+		colpick->last_angle = angle;
+		angle = angle / M_PI / 2.0f;
 		col = 0xFF000000;
 		col |= ((unsigned char) hue(angle + 1.0f / 3.0f));
 		col |= ((unsigned char) hue(angle)) << 8;
@@ -117,6 +120,13 @@ void ui_colpick_draw(struct UI_COLORPICKER *colpick)
 	}
 	game_RwIm2DPrepareRender();
 	game_RwIm2DRenderPrimitive(5, verts, VERTCOUNT);
+	size = colpick->last_dist * colpick->size;
+	game_DrawRect(
+		x + cosf(colpick->last_angle) * size - 3.0f,
+		y + sinf(colpick->last_angle) * size - 3.0f,
+		7.0f,
+		7.0f,
+		0xFF000000);
 }
 
 int ui_colpick_mousedown(struct UI_COLORPICKER *colpick)
