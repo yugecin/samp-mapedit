@@ -200,6 +200,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ui_container.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_container.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ui_element.c"
 				>
 			</File>

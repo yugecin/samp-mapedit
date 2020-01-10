@@ -51,18 +51,19 @@ void ui_colpick_init()
 	}
 }
 
-struct UI_COLORPICKER *ui_colpick_make(float x, float y, float size, cb *cb)
+struct UI_COLORPICKER *ui_colpick_make(
+	float x, float y, float size, colpickcb *cb)
 {
 	struct UI_COLORPICKER *colpick;
 
 	colpick = malloc(sizeof(struct UI_COLORPICKER));
+	ui_elem_init(colpick, COLORPICKER, x, y);
 	colpick->_parent.type = COLORPICKER;
-	colpick->_parent.x = x;
-	colpick->_parent.y = y;
 	colpick->_parent.width = size;
 	colpick->_parent.height = size;
-	colpick->_parent.proc_draw = (ui_method*) ui_colpick_draw;
 	colpick->_parent.proc_dispose = (ui_method*) ui_colpick_dispose;
+	colpick->_parent.proc_update = (ui_method*) ui_colpick_update;
+	colpick->_parent.proc_draw = (ui_method*) ui_colpick_draw;
 	colpick->_parent.proc_mousedown = (ui_method*) ui_colpick_mousedown;
 	colpick->_parent.proc_mouseup = (ui_method*) ui_colpick_mouseup;
 	colpick->size = size;
@@ -97,7 +98,7 @@ void ui_colpick_update(struct UI_COLORPICKER *colpick)
 		col |= ((unsigned char) hue(angle - 1.0f / 3.0f)) << 16;
 		if (colpick->last_selected_colorABGR != col) {
 			colpick->last_selected_colorABGR = col;
-			colpick->cb();
+			colpick->cb(colpick);
 		}
 	}
 }

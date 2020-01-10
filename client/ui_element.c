@@ -4,6 +4,26 @@
 #include "game.h"
 #include "ui.h"
 
+static
+void ui_elem_dummy(struct UI_ELEMENT *elem)
+{
+}
+
+void ui_elem_init(void *elem, enum eUIElementType type, float x, float y)
+{
+	struct UI_ELEMENT *e = (struct UI_ELEMENT*) elem;
+
+	e->type = type;
+	e->x = x;
+	e->y = y;
+	e->proc_update = (ui_method*) ui_elem_dummy;
+	e->proc_draw = (ui_method*) ui_elem_dummy;
+	e->proc_mousedown = (ui_method*) ui_elem_dummy;
+	e->proc_mouseup = (ui_method*) ui_elem_dummy;
+	e->alignment = 0;
+	e->span = 0;
+}
+
 void ui_element_draw_background(struct UI_ELEMENT *elem, int argb)
 {
 	game_DrawRect(elem->x, elem->y, elem->width, elem->height, argb);

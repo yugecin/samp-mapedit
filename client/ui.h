@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "ui_element.h"
+#include "ui_container.h"
 
 #include "ui_button.h"
 #include "ui_colorpicker.h"
@@ -16,7 +17,7 @@ extern float fontheight, buttonheight, fontpad;
 extern void* ui_element_being_clicked;
 extern int ui_mouse_is_just_down;
 extern int ui_mouse_is_just_up;
-extern struct UI_ELEMENT *background_element;
+extern struct UI_CONTAINER *background_element;
 
 void ui_default_font();
 void ui_dispose();

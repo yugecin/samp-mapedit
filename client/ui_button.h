@@ -1,13 +1,16 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+typedef void (btncb)(struct UI_BUTTON *btn);
+
 struct UI_BUTTON {
 	struct UI_ELEMENT _parent;
 	char *text;
-	cb *cb;
+	btncb *cb;
 };
 
-struct UI_BUTTON *ui_btn_make(float x, float y, char *text, cb *cb);
+struct UI_BUTTON *ui_btn_make(float x, float y, char *text, btncb *cb);
 void ui_btn_dispose(struct UI_BUTTON *btn);
+void ui_btn_update(struct UI_BUTTON *btn);
 void ui_btn_draw(struct UI_BUTTON *btn);
 /**
 Recalculates the width and height of the button.

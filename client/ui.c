@@ -18,12 +18,8 @@ static float horizLookAngle, vertLookAngle;
 static char key_w, key_a, key_s, key_d;
 static char need_camera_update;
 
-static struct UI_BUTTON *btn_foliage;
-static struct UI_BUTTON *btn_reload;
-static struct UI_COLORPICKER *colpick;
-static struct UI_ELEMENT _background_element;
-
-struct UI_ELEMENT *background_element = &_background_element;
+struct UI_CONTAINER *background_element = NULL;
+struct UI_WINDOW *active_window = NULL;
 
 void* ui_element_being_clicked;
 int ui_mouse_is_just_down;
@@ -34,7 +30,7 @@ static int activeRCP = 0;
 static unsigned char foliageCall[5] = { 0, 0, 0, 0, 0 };
 
 static
-void cb_btn_foliage()
+void cb_btn_foliage(struct UI_BUTTON *btn)
 {
 	void* position;
 
@@ -56,13 +52,13 @@ void cb_btn_foliage()
 }
 
 static
-void cb_btn_reload()
+void cb_btn_reload(struct UI_BUTTON *btn)
 {
 	reload_requested = 1;
 }
 
 static
-void cb_colpick()
+void cb_colpick(struct UI_COLORPICKER *colpick)
 {
 	racecheckpoints[activeRCP].colABGR = colpick->last_selected_colorABGR;
 	racecheckpoints[activeRCP].used = 1;
@@ -88,7 +84,9 @@ void ui_recalculate_sizes()
 
 void ui_init()
 {
-	_background_element.type = BACKGROUND;
+	struct UI_BUTTON *btn;
+	struct UI_COLORPICKER *colpick;
+
 	key_w = VK_Z;
 	key_a = VK_Q;
 	key_s = VK_S;
@@ -96,9 +94,13 @@ void ui_init()
 	ui_default_font();
 	ui_recalculate_sizes(); /*needed for ui element text measurements*/
 	ui_colpick_init();
-	btn_foliage = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
-	btn_reload = ui_btn_make(10.0f, 600.0f, "Reload_client", cb_btn_reload);
+	background_element = ui_cnt_make();
+	btn = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
+	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
+	btn = ui_btn_make(10.0f, 600.0f, "Reload_client", cb_btn_reload);
+	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
 	colpick = ui_colpick_make(500.0f, 500.0f, 100.0f, cb_colpick);
+	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) colpick);
 	racecheckpoints[activeRCP].colABGR = 0xFFFF0000;
 	racecheckpoints[activeRCP].free = 0;
 	racecheckpoints[activeRCP].used = 1;
@@ -286,9 +288,8 @@ void ui_render()
 {
 	struct RwV3D v;
 
-	ui_default_font();
-
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
+		ui_default_font();
 		ui_recalculate_sizes();
 		/*TODO: recalculate element sizes*/
 	}
@@ -305,15 +306,17 @@ void ui_render()
 	}
 
 	if (active) {
+		ui_default_font();
+
 		ui_mouse_is_just_down =
 			activeMouseState->lmb && !prevMouseState->lmb;
 		ui_mouse_is_just_up =
 			prevMouseState->lmb && !activeMouseState->lmb;
 
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
-			if (ui_btn_mouseup(btn_foliage) ||
-				ui_btn_mouseup(btn_reload) ||
-				ui_colpick_mouseup(colpick));
+			if ((active_window != NULL &&
+				ui_wnd_mouseup(active_window)) ||
+				ui_cnt_mouseup(background_element));
 			ui_element_being_clicked = NULL;
 		}
 
@@ -332,15 +335,15 @@ void ui_render()
 		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
-			if (!ui_btn_mousedown(btn_foliage) &&
-				!ui_btn_mousedown(btn_reload) &&
-				!ui_colpick_mousedown(colpick))
-			{
-				ui_element_being_clicked = background_element;
-			}
+			if ((active_window != NULL &&
+				ui_wnd_mousedown(active_window)) ||
+				ui_cnt_mousedown(background_element));
 		}
 
-		ui_colpick_update(colpick);
+		if (active_window != NULL) {
+			ui_wnd_update(active_window);
+		}
+		ui_cnt_update(background_element);
 
 		if (racecheckpoints[activeRCP].free > 2) {
 			racecheckpoints[activeRCP].free--;
@@ -349,9 +352,10 @@ void ui_render()
 			racecheckpoints[activeRCP].used = 1;
 		}
 
-		ui_colpick_draw(colpick);
-		ui_btn_draw(btn_foliage);
-		ui_btn_draw(btn_reload);
+		ui_cnt_draw(background_element);
+		if (active_window != NULL) {
+			ui_wnd_draw(active_window);
+		}
 
 		ui_draw_cursor();
 
@@ -384,10 +388,11 @@ void ui_render()
 void ui_dispose()
 {
 	if (foliageCall[0]) {
-		cb_btn_foliage();
+		cb_btn_foliage(NULL /*TODO*/);
 	}
 	ui_deactivate();
-	ui_btn_dispose(btn_foliage);
-	ui_btn_dispose(btn_reload);
-	ui_colpick_dispose(colpick);
+	ui_cnt_dispose(background_element);
+	if (active_window != NULL) {
+		ui_wnd_dispose(active_window);
+	}
 }

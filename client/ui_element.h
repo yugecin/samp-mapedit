@@ -12,9 +12,16 @@ enum eUIElementType {
 struct UI_ELEMENT {
 	enum eUIElementType type;
 	float x, y;
+	float pref_width, pref_height;
 	float width, height;
-	ui_method *proc_draw;
+	short alignment, span;
+	struct UI_CONTAINER *parent;
 	ui_method *proc_dispose;
+	/**
+	Update proc, called before parent container performed layout.
+	*/
+	ui_method *proc_update;
+	ui_method *proc_draw;
 	/**
 	Does not check if an other element is focused.
 
@@ -27,5 +34,6 @@ struct UI_ELEMENT {
 	ui_method *proc_mouseup;
 };
 
+void ui_elem_init(void *elem, enum eUIElementType type, float x, float y);
 void ui_element_draw_background(struct UI_ELEMENT *elem, int argb);
 int ui_element_is_hovered(struct UI_ELEMENT *element);

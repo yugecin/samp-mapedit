@@ -11,82 +11,56 @@ struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 	int textlenandzero;
 
 	textlenandzero = strlen(title) + 1;
-	wnd = malloc(sizeof(struct UI_BUTTON));
-	wnd->_parent.type = WINDOW;
-	wnd->childcount = 0;
+	wnd = malloc(sizeof(struct UI_WINDOW));
+	wnd->_parent._parent.type = WINDOW;
+	wnd->_parent._parent.proc_dispose = (ui_method*) ui_wnd_dispose;
+	wnd->_parent._parent.proc_update = (ui_method*) ui_wnd_update;
+	wnd->_parent._parent.proc_draw = (ui_method*) ui_wnd_draw;
+	wnd->_parent._parent.proc_mousedown = (ui_method*) ui_wnd_mousedown;
+	wnd->_parent._parent.proc_mouseup = (ui_method*) ui_wnd_mouseup;
+	wnd->_parent.childcount = 0;
+	wnd->_parent.need_layout = 1;
 	wnd->title = malloc(sizeof(char) * textlenandzero);
-	wnd->_parent.proc_draw = (ui_method*) ui_wnd_draw;
-	wnd->_parent.proc_dispose = (ui_method*) ui_wnd_dispose;
-	wnd->_parent.proc_mousedown = (ui_method*) ui_wnd_mousedown;
-	wnd->_parent.proc_mouseup = (ui_method*) ui_wnd_mouseup;
 	memcpy(wnd->title, title, textlenandzero);
-	ui_wnd_recalc_size(wnd);
 	return wnd;
 }
 
 void ui_wnd_dispose(struct UI_WINDOW *wnd)
 {
+	free(wnd->title);
+	ui_cnt_dispose((struct UI_CONTAINER*) wnd);
+}
+
+void ui_wnd_update(struct UI_WINDOW *wnd)
+{
 	struct UI_ELEMENT *child;
 	int i;
 
-	for (i = 0; i < wnd->childcount; i++) {
-		child = wnd->children[i];
-		child->proc_dispose(child);
+	for (i = 0; i < wnd->_parent.childcount; i++) {
+		child = wnd->_parent.children[i];
+		child->proc_update(child);
 	}
-
-	free(wnd->title);
-	free(wnd);
+	if (wnd->_parent.need_layout) {
+		wnd->_parent.need_layout = 0;
+	}
 }
 
 void ui_wnd_draw(struct UI_WINDOW *wnd)
 {
-	struct UI_ELEMENT *child;
-	int i;
-
-	for (i = 0; i < wnd->childcount; i++) {
-		child = wnd->children[i];
-		child->proc_draw(child);
-	}
-}
-
-void ui_wnd_recalc_size(struct UI_WINDOW *wnd)
-{
+	ui_cnt_draw((struct UI_CONTAINER*) wnd);
 }
 
 int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 {
-	struct UI_ELEMENT *child;
-	int i, ret;
-
-	if (ui_element_is_hovered(&wnd->_parent)) {
-		for (i = 0; i < wnd->childcount; i++) {
-			child = wnd->children[i];
-			if ((ret = child->proc_mousedown(child))) {
-				return ret;
-			}
-		}
-		return 1;
-	}
-	return 0;
+	return ui_cnt_mousedown((struct UI_CONTAINER*) wnd);
 }
 
 int ui_wnd_mouseup(struct UI_WINDOW *wnd)
 {
-	struct UI_ELEMENT *child;
-	int i, ret;
-
-	for (i = 0; i < wnd->childcount; i++) {
-		child = wnd->children[i];
-		if ((ret = child->proc_mouseup(child))) {
-			return ret;
-		}
-	}
-	return 0;
+	return ui_cnt_mouseup((struct UI_CONTAINER*) wnd);
 }
 
 void ui_wnd_add_child(struct UI_WINDOW *wnd, struct UI_ELEMENT *child)
 {
-	if (wnd->childcount < WINDOW_MAX_CHILD_COUNT) {
-		wnd->children[wnd->childcount++] = child;
-	}
+	ui_cnt_add_child((struct UI_CONTAINER*) wnd, child);
 }
