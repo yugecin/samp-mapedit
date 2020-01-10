@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define COLORWHEEL_SEGMENTS 50
-#define VERTCOUNT (COLORWHEEL_SEGMENTS + 1)
+#define VERTCOUNT (COLORWHEEL_SEGMENTS + 2)
 
 static struct IM2DVERTEX normverts[VERTCOUNT];
 
@@ -35,6 +35,7 @@ void ui_colpick_init()
 	normverts[0].v = 0.0f;
 	for (i = 0; i < VERTCOUNT;) {
 		angle = 1.0f / (float) (VERTCOUNT - 2) * (float) i;
+		angle -= 1.0f / (float) COLORWHEEL_SEGMENTS / 2.0f;
 		col = 0xFF000000;
 		col |= ((unsigned char) hue(angle + 1.0f / 3.0f)) << 16;
 		col |= ((unsigned char) hue(angle)) << 8;
@@ -92,9 +93,14 @@ void ui_colpick_update(struct UI_COLORPICKER *colpick)
 			dist = 1.0f;
 		}
 		colpick->last_dist = dist;
-		angle = (float) atan2(dy, dx);
-		colpick->last_angle = angle;
-		angle = angle / M_PI / 2.0f;
+		angle = (float) atan2(dy, dx) / M_PI / 2.0f;
+		angle += 1.0f / (float) COLORWHEEL_SEGMENTS / 2.0f;
+		if (angle < 0.0f) {
+			angle = 1.0f + angle;
+		}
+		angle = ((int) (angle * (float) COLORWHEEL_SEGMENTS))
+			/ (float) COLORWHEEL_SEGMENTS;
+		colpick->last_angle = angle * M_PI * 2.0f;
 		col = 0xFF000000;
 		col |= ((unsigned char) hue(angle + 1.0f / 3.0f));
 		col |= ((unsigned char) hue(angle)) << 8;
