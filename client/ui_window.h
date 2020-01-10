@@ -2,6 +2,7 @@
 
 struct UI_WINDOW {
 	struct UI_CONTAINER _parent;
+	short columns;
 	char *title;
 };
 

@@ -4,6 +4,7 @@
 #include "game.h"
 #include "ui.h"
 #include "vk.h"
+#include "windows.h"
 #include <math.h>
 #include <string.h>
 
@@ -27,28 +28,10 @@ int ui_mouse_is_just_up;
 
 static int activeRCP = 0;
 
-static unsigned char foliageCall[5] = { 0, 0, 0, 0, 0 };
-
 static
-void cb_btn_foliage(struct UI_BUTTON *btn)
+void cb_btn_settings(struct UI_BUTTON *btn)
 {
-	void* position;
-
-	if (*((unsigned char*) 0x53C159) == 0x90) {
-		memcpy((void*) 0x53C159, foliageCall, 5);
-		foliageCall[0] = 0;
-	} else {
-		memcpy(foliageCall, (void*) 0x53C159, 5);
-		memset((void*) 0x53C159, 0x90, 5);
-
-		/*remove existing foliage*/
-		position = (void*) 0xB6F03C; /*_camera.__parent.m_pCoords*/
-		if (position == NULL) {
-			/*_camera.__parent.placement*/
-			position = (void*) 0xB6F02C;
-		}
-		((void (__cdecl *)(void*,int)) 0x5DC510)(position, 0);
-	}
+	ui_show_window(window_settings);
 }
 
 static
@@ -93,19 +76,33 @@ void ui_init()
 	key_d = VK_D;
 	ui_default_font();
 	ui_recalculate_sizes(); /*needed for ui element text measurements*/
+	cursorx = fresx / 2.0f;
+	cursory = fresy / 2.0f;
 	ui_colpick_init();
 	background_element = ui_cnt_make();
-	btn = ui_btn_make(10.0f, 500.0f, "Foliage", cb_btn_foliage);
+	btn = ui_btn_make(10.0f, 550.0f, "Settings", cb_btn_settings);
 	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
 	btn = ui_btn_make(10.0f, 600.0f, "Reload_client", cb_btn_reload);
 	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
 	colpick = ui_colpick_make(500.0f, 500.0f, 100.0f, cb_colpick);
 	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) colpick);
+	wnd_init();
 	racecheckpoints[activeRCP].colABGR = 0xFFFF0000;
 	racecheckpoints[activeRCP].free = 0;
 	racecheckpoints[activeRCP].used = 1;
-	cursorx = fresx / 2.0f;
-	cursory = fresy / 2.0f;
+}
+
+void ui_show_window(struct UI_WINDOW *wnd)
+{
+	if (active_window == NULL) {
+		active_window = wnd;
+		wnd->_parent.need_layout = 1;
+	}
+}
+
+void ui_hide_window(struct UI_WINDOW *wnd)
+{
+	active_window = NULL;
 }
 
 static
@@ -387,12 +384,7 @@ void ui_render()
 
 void ui_dispose()
 {
-	if (foliageCall[0]) {
-		cb_btn_foliage(NULL /*TODO*/);
-	}
 	ui_deactivate();
 	ui_cnt_dispose(background_element);
-	if (active_window != NULL) {
-		ui_wnd_dispose(active_window);
-	}
+	wnd_dispose();
 }

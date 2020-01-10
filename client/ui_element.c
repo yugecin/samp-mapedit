@@ -21,7 +21,7 @@ void ui_elem_init(void *elem, enum eUIElementType type, float x, float y)
 	e->proc_mousedown = (ui_method*) ui_elem_dummy;
 	e->proc_mouseup = (ui_method*) ui_elem_dummy;
 	e->alignment = 0;
-	e->span = 0;
+	e->span = 1;
 }
 
 void ui_element_draw_background(struct UI_ELEMENT *elem, int argb)
