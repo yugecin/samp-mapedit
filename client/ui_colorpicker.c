@@ -68,6 +68,9 @@ struct UI_COLORPICKER *ui_colpick_make(
 	colpick->_parent.proc_mouseup = (ui_method*) ui_colpick_mouseup;
 	colpick->size = size;
 	colpick->cb = cb;
+	colpick->last_selected_colorABGR = 0xFFFFFFFF;
+	colpick->last_angle = 0.0f;
+	colpick->last_dist = 0.0f;
 	return colpick;
 }
 
