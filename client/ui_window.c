@@ -136,7 +136,7 @@ void update_layout(struct UI_WINDOW *wnd)
 void ui_wnd_update(struct UI_WINDOW *wnd)
 {
 	struct UI_ELEMENT *child;
-	float x, y;
+	float x, y, dx, dy;
 	int i;
 
 	for (i = 0; i < wnd->_parent.childcount; i++) {
@@ -149,17 +149,24 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 		if (x < 0.0f) {
 			x = 0.0f;
 		} else if (x + wnd->_parent._parent.width > fresx) {
-			x = fresx - wnd->_parent._parent.width - 1.0f;
+			x = fresx - wnd->_parent._parent.width;
 		}
 		if (y < buttonheight) {
 			y = buttonheight;
 		} else if (y + wnd->_parent._parent.height > fresy) {
-			y = fresy - wnd->_parent._parent.height - 1.0f;
+			y = fresy - wnd->_parent._parent.height;
 		}
+		dx = x - wnd->_parent._parent.x;
+		dy = y - wnd->_parent._parent.y;
 		wnd->_parent._parent.x = x;
 		wnd->_parent._parent.y = y;
-		wnd->_parent.need_layout = 1;
-		/*should just update the positions though...*/
+		if (!wnd->_parent.need_layout) {
+			for (i = 0; i < wnd->_parent.childcount; i++) {
+				child = wnd->_parent.children[i];
+				child->x += dx;
+				child->y += dy;
+			}
+		}
 	}
 	if (wnd->_parent.need_layout) {
 		update_layout(wnd);
