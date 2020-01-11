@@ -61,6 +61,7 @@ void ui_recalculate_sizes()
 
 	game_TextGetSizeXY(&textbounds, 1.0f, 1.0f, "JQqd");
 	fontheight = textbounds.top - textbounds.bottom;
+	fontheight *= 0.85f; /*some ratio...*/
 	buttonheight = fontheight * 1.25f;
 	fontpad = (buttonheight - fontheight) / 2;
 }

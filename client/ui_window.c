@@ -142,6 +142,12 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 		child = wnd->_parent.children[i];
 		child->proc_update(child);
 	}
+	if (ui_element_being_clicked == wnd) {
+		wnd->_parent._parent.x = cursorx - wnd->grabx;
+		wnd->_parent._parent.y = cursory - wnd->graby;
+		wnd->_parent.need_layout = 1;
+		/*should just update the positions though...*/
+	}
 	if (wnd->_parent.need_layout) {
 		update_layout(wnd);
 		wnd->_parent.need_layout = 0;
@@ -150,13 +156,33 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 
 void ui_wnd_draw(struct UI_WINDOW *wnd)
 {
-	ui_element_draw_background((struct UI_ELEMENT*) wnd, 0x55000000);
+	struct UI_ELEMENT *elem = (struct UI_ELEMENT*) wnd;
+
+	ui_element_draw_background(elem, 0x88000000);
+	game_DrawRect(elem->x, elem->y, elem->width, -buttonheight, 0xcc000000);
+	game_TextPrintString(elem->x + fontpad,
+		elem->y - buttonheight + fontpad,
+		wnd->title);
 	ui_cnt_draw((struct UI_CONTAINER*) wnd);
 }
 
 int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 {
-	return ui_cnt_mousedown((struct UI_CONTAINER*) wnd);
+	int res;
+
+	if ((res = ui_cnt_mousedown((struct UI_CONTAINER*) wnd))) {
+		return res;
+	}
+	if (wnd->_parent._parent.x <= cursorx &&
+		cursorx < wnd->_parent._parent.x + wnd->_parent._parent.width &&
+		wnd->_parent._parent.y - buttonheight <= cursory &&
+		cursory < wnd->_parent._parent.y)
+	{
+		wnd->grabx = cursorx - wnd->_parent._parent.x;
+		wnd->graby = cursory - wnd->_parent._parent.y;
+		return (int) (ui_element_being_clicked = wnd);
+	}
+	return 0;
 }
 
 int ui_wnd_mouseup(struct UI_WINDOW *wnd)

@@ -4,6 +4,7 @@ struct UI_WINDOW {
 	struct UI_CONTAINER _parent;
 	short columns;
 	char *title;
+	float grabx, graby;
 };
 
 struct UI_WINDOW *ui_wnd_make(float x, float y, char *title);
