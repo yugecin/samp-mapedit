@@ -216,6 +216,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ui_label.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_label.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ui_window.c"
 				>
 			</File>

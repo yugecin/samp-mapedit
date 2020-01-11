@@ -3,6 +3,7 @@
 #include "ui_element.h"
 #include "ui_container.h"
 
+#include "ui_label.h"
 #include "ui_button.h"
 #include "ui_colorpicker.h"
 #include "ui_window.h"

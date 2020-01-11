@@ -190,7 +190,7 @@ int ui_wnd_mouseup(struct UI_WINDOW *wnd)
 	return ui_cnt_mouseup((struct UI_CONTAINER*) wnd);
 }
 
-void ui_wnd_add_child(struct UI_WINDOW *wnd, struct UI_ELEMENT *child)
+void ui_wnd_add_child(struct UI_WINDOW *wnd, void *child)
 {
 	ui_cnt_add_child((struct UI_CONTAINER*) wnd, child);
 }

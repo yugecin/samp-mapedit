@@ -5,8 +5,9 @@
 #include "ui.h"
 
 static
-void ui_elem_dummy(struct UI_ELEMENT *elem)
+int ui_elem_dummy(struct UI_ELEMENT *elem)
 {
+	return 0;
 }
 
 void ui_elem_init(void *elem, enum eUIElementType type, float x, float y)

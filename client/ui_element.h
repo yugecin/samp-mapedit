@@ -7,6 +7,7 @@ enum eUIElementType {
 	BUTTON,
 	COLORPICKER,
 	WINDOW,
+	LABEL,
 };
 
 struct UI_ELEMENT {

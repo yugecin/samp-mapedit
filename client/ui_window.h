@@ -16,4 +16,4 @@ void ui_wnd_update(struct UI_WINDOW *wnd);
 void ui_wnd_draw(struct UI_WINDOW *wnd);
 int ui_wnd_mousedown(struct UI_WINDOW *wnd);
 int ui_wnd_mouseup(struct UI_WINDOW *wnd);
-void ui_wnd_add_child(struct UI_WINDOW *wnd, struct UI_ELEMENT *child);
+void ui_wnd_add_child(struct UI_WINDOW *wnd, void *child);

@@ -39,19 +39,17 @@ void cb_btn_foliage(struct UI_BUTTON *btn)
 
 void wnd_init()
 {
+	struct UI_LABEL *lbl;
 	struct UI_BUTTON *btn;
 
 	window_settings = ui_wnd_make(500.0f, 500.0f, "Settings");
-	window_settings->columns = 2;
-	btn = ui_btn_make(0.0f, 0.0f, "Foliage", cb_btn_foliage);
-	ui_wnd_add_child(window_settings, (struct UI_ELEMENT*) btn);
-	btn = ui_btn_make(0.0f, 0.0f, "Foliage2", cb_btn_foliage);
-	ui_wnd_add_child(window_settings, (struct UI_ELEMENT*) btn);
-	btn = ui_btn_make(0.0f, 0.0f, "Foliage3", cb_btn_foliage);
-	btn->_parent.span = 2;
-	ui_wnd_add_child(window_settings, (struct UI_ELEMENT*) btn);
-	btn = ui_btn_make(0.0f, 0.0f, "Foliage4", cb_btn_foliage);
-	ui_wnd_add_child(window_settings, (struct UI_ELEMENT*) btn);
+	window_settings->columns = 3;
+	lbl = ui_lbl_make(0.0f, 0.0f, "Foliage");
+	ui_wnd_add_child(window_settings, lbl);
+	btn = ui_btn_make(0.0f, 0.0f, "On", cb_btn_foliage);
+	ui_wnd_add_child(window_settings, btn);
+	btn = ui_btn_make(0.0f, 0.0f, "Off", cb_btn_foliage);
+	ui_wnd_add_child(window_settings, btn);
 }
 
 void wnd_dispose()
