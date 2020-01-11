@@ -83,7 +83,7 @@ void ui_init()
 	key_a = VK_Q;
 	key_s = VK_S;
 	key_d = VK_D;
-	ui_set_fontsize(0, 0);
+	ui_set_fontsize(-2, -4);
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
 	ui_elem_init(&dummy_element, DUMMY, 0.0f, 0.0f);
