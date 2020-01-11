@@ -136,6 +136,7 @@ void update_layout(struct UI_WINDOW *wnd)
 void ui_wnd_update(struct UI_WINDOW *wnd)
 {
 	struct UI_ELEMENT *child;
+	float x, y;
 	int i;
 
 	for (i = 0; i < wnd->_parent.childcount; i++) {
@@ -143,8 +144,20 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 		child->proc_update(child);
 	}
 	if (ui_element_being_clicked == wnd) {
-		wnd->_parent._parent.x = cursorx - wnd->grabx;
-		wnd->_parent._parent.y = cursory - wnd->graby;
+		x = cursorx - wnd->grabx;
+		y = cursory - wnd->graby;
+		if (x < 0.0f) {
+			x = 0.0f;
+		} else if (x + wnd->_parent._parent.width > fresx) {
+			x = fresx - wnd->_parent._parent.width - 1.0f;
+		}
+		if (y < buttonheight) {
+			y = buttonheight;
+		} else if (y + wnd->_parent._parent.height > fresy) {
+			y = fresy - wnd->_parent._parent.height - 1.0f;
+		}
+		wnd->_parent._parent.x = x;
+		wnd->_parent._parent.y = y;
 		wnd->_parent.need_layout = 1;
 		/*should just update the positions though...*/
 	}
