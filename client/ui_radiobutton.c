@@ -86,7 +86,7 @@ struct UI_RADIOBUTTON *ui_rdb_make(
 	struct UI_RADIOBUTTON *rdb;
 	int textlenandzero;
 
-	textlenandzero = 4 + strlen(text) + 1;
+	textlenandzero = 3 + strlen(text) + 1;
 	rdb = malloc(sizeof(struct UI_RADIOBUTTON));
 	ui_elem_init(rdb, RADIOBUTTON, x, y);
 	rdb->_parent._parent.proc_dispose = (ui_method*) ui_rdb_dispose;
@@ -100,8 +100,7 @@ struct UI_RADIOBUTTON *ui_rdb_make(
 	rdb->_parent.text[0] = '[';
 	/*1 is set below with the ui_rdbgroup_add call*/
 	rdb->_parent.text[2] = ']';
-	rdb->_parent.text[3] = '_';
-	memcpy(rdb->_parent.text + 4, text, textlenandzero - 4);
+	memcpy(rdb->_parent.text + 3, text, textlenandzero - 3);
 	rdb->data = NULL;
 	ui_rdbgroup_add(group, rdb, check);
 	ui_btn_recalc_size((struct UI_BUTTON*) rdb);
