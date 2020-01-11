@@ -47,9 +47,9 @@ void ui_rdbgroup_add(
 			for (i = 0; i < group->buttoncount; i++) {
 				ui_rdb_set_checked(group->buttons[i], 0);
 			}
-			ui_rdb_set_checked(rdb, 1);
 			group->activebutton = rdb;
 		}
+		ui_rdb_set_checked(rdb, check);
 		group->buttoncount++;
 	}
 }
