@@ -101,7 +101,8 @@ void ui_colpick_update(struct UI_COLORPICKER *colpick)
 		angle = ((int) (angle * (float) COLORWHEEL_SEGMENTS))
 			/ (float) COLORWHEEL_SEGMENTS;
 		colpick->last_angle = angle * M_PI * 2.0f;
-		col = 0xFF000000;
+		/*TODO: alpha editor*/
+		col = 0x66000000;
 		col |= ((unsigned char) hue(angle + 1.0f / 3.0f));
 		col |= ((unsigned char) hue(angle)) << 8;
 		col |= ((unsigned char) hue(angle - 1.0f / 3.0f)) << 16;

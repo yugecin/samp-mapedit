@@ -39,6 +39,7 @@ struct UI_ELEMENT {
 	Called when ui font or screen resolution changes.
 	*/
 	ui_method *proc_recalc_size;
+	void *userdata;
 };
 
 extern struct UI_ELEMENT dummy_element;

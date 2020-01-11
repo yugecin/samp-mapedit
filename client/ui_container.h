@@ -1,6 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define CONTAINER_MAX_CHILD_COUNT 20
+#define CONTAINER_MAX_CHILD_COUNT 100
 
 struct UI_CONTAINER {
 	struct UI_ELEMENT _parent;

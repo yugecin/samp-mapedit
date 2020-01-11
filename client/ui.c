@@ -28,8 +28,6 @@ void* ui_element_being_clicked;
 int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
 
-static int activeRCP = 0;
-
 static
 void cb_btn_settings(struct UI_BUTTON *btn)
 {
@@ -37,17 +35,15 @@ void cb_btn_settings(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_reload(struct UI_BUTTON *btn)
+void cb_btn_cpsettings(struct UI_BUTTON *btn)
 {
-	reload_requested = 1;
+	ui_show_window(window_cpsettings);
 }
 
 static
-void cb_colpick(struct UI_COLORPICKER *colpick)
+void cb_btn_reload(struct UI_BUTTON *btn)
 {
-	racecheckpoints[activeRCP].colABGR = colpick->last_selected_colorABGR;
-	racecheckpoints[activeRCP].used = 1;
-	racecheckpoints[activeRCP].free = 3;
+	reload_requested = 1;
 }
 
 static
@@ -77,7 +73,6 @@ void ui_recalculate_sizes()
 void ui_init()
 {
 	struct UI_BUTTON *btn;
-	struct UI_COLORPICKER *colpick;
 
 	key_w = VK_Z;
 	key_a = VK_Q;
@@ -92,14 +87,14 @@ void ui_init()
 	background_element = ui_cnt_make();
 	btn = ui_btn_make(10.0f, 550.0f, "Settings", cb_btn_settings);
 	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
+	btn = ui_btn_make(300.0f, 550.0f, "Edit_checkpoint", cb_btn_cpsettings);
+	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
 	btn = ui_btn_make(10.0f, 600.0f, "Reload_client", cb_btn_reload);
 	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
-	colpick = ui_colpick_make(500.0f, 500.0f, 100.0f, cb_colpick);
-	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) colpick);
 	wnd_init();
-	racecheckpoints[activeRCP].colABGR = 0xFFFF0000;
-	racecheckpoints[activeRCP].free = 0;
-	racecheckpoints[activeRCP].used = 1;
+	racecheckpoints[0].colABGR = 0xFFFF0000;
+	racecheckpoints[0].free = 0;
+	racecheckpoints[0].used = 1;
 }
 
 void ui_show_window(struct UI_WINDOW *wnd)
@@ -370,11 +365,11 @@ void ui_render()
 		}
 		ui_cnt_update(background_element);
 
-		if (racecheckpoints[activeRCP].free > 2) {
-			racecheckpoints[activeRCP].free--;
-		} else if (racecheckpoints[activeRCP].free == 2) {
-			racecheckpoints[activeRCP].free = 0;
-			racecheckpoints[activeRCP].used = 1;
+		if (racecheckpoints[0].free > 2) {
+			racecheckpoints[0].free--;
+		} else if (racecheckpoints[0].free == 2) {
+			racecheckpoints[0].free = 0;
+			racecheckpoints[0].used = 1;
 		}
 
 		ui_cnt_draw(background_element);
@@ -386,14 +381,14 @@ void ui_render()
 
 		if (ui_element_being_clicked == background_element) {
 			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
-			racecheckpoints[activeRCP].type = RACECP_TYPE_NORMAL;
+			racecheckpoints[0].type = RACECP_TYPE_NORMAL;
 			/*racecheckpoints[activeRCP].free = 0;*/
 			/*racecheckpoints[activeRCP].used = 1;*/
 			/*racecheckpoints[activeRCP].colABGR = 0xFFFF0000;*/
-			racecheckpoints[activeRCP].fRadius = 5.0f;
-			racecheckpoints[activeRCP].pos.x = v.x;
-			racecheckpoints[activeRCP].pos.y = v.y;
-			racecheckpoints[activeRCP].pos.z = v.z;
+			racecheckpoints[0].fRadius = 5.0f;
+			racecheckpoints[0].pos.x = v.x;
+			racecheckpoints[0].pos.y = v.y;
+			racecheckpoints[0].pos.z = v.z;
 		}
 	}
 
