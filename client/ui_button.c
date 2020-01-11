@@ -58,7 +58,7 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 	game_TextSetAlign(CENTER);
 	game_TextPrintString(
 		btn->_parent.x + btn->_parent.width / 2.0f,
-		btn->_parent.y + fontpad,
+		btn->_parent.y + fontpady,
 		btn->text);
 	game_TextSetAlign(LEFT);
 }
@@ -70,7 +70,7 @@ void ui_btn_recalc_size(struct UI_BUTTON *btn)
 	/*width calculations stop at whitespace, should whitespace be replaced
 	with underscores for this size calculations?*/
 	textw = game_TextGetSizeX(btn->text, 0, 0);
-	btn->_parent.pref_width = textw + fontpad * 2.0f;
+	btn->_parent.pref_width = textw + fontpadx * 2.0f;
 	btn->_parent.pref_height = buttonheight;
 	/*tell container it needs to redo its layout*/
 	if (btn->_parent.parent != NULL) {

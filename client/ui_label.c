@@ -36,8 +36,8 @@ void ui_lbl_update(struct UI_LABEL *lbl)
 void ui_lbl_draw(struct UI_LABEL *lbl)
 {
 	game_TextPrintString(
-		lbl->_parent.x + fontpad,
-		lbl->_parent.y + fontpad,
+		lbl->_parent.x + fontpadx,
+		lbl->_parent.y + fontpady,
 		lbl->text);
 }
 
@@ -48,6 +48,6 @@ void ui_lbl_recalc_size(struct UI_LABEL *lbl)
 	/*width calculations stop at whitespace, should whitespace be replaced
 	with underscores for this size calculations?*/
 	textw = game_TextGetSizeX(lbl->text, 0, 0);
-	lbl->_parent.pref_width = textw + fontpad * 2.0f;
+	lbl->_parent.pref_width = textw + fontpadx * 2.0f;
 	lbl->_parent.pref_height = buttonheight;
 }

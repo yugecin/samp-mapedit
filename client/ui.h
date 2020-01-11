@@ -17,7 +17,7 @@ Screen-space coordinates of the cursor.
 extern float cursorx, cursory;
 extern float font_size_x, font_size_y;
 extern int fontsize, fontratio;
-extern float fontheight, buttonheight, fontpad;
+extern float fontheight, buttonheight, fontpadx, fontpady;
 extern void* ui_element_being_clicked;
 extern int ui_mouse_is_just_down;
 extern int ui_mouse_is_just_up;

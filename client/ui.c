@@ -13,7 +13,7 @@ float canvasx, canvasy;
 float cursorx, cursory;
 float font_size_x, font_size_y;
 int fontsize, fontratio;
-float fontheight, buttonheight, fontpad;
+float fontheight, buttonheight, fontpadx, fontpady;
 
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
@@ -64,8 +64,14 @@ void ui_recalculate_sizes()
 	game_TextGetSizeXY(&textbounds, font_size_x, font_size_y, "JQqd");
 	fontheight = textbounds.top - textbounds.bottom;
 	fontheight *= 0.85f; /*some ratio...*/
-	buttonheight = fontheight * 1.25f;
-	fontpad = (buttonheight - fontheight) / 2;
+	if (fontsize < 0) {
+		fontheight *= 1.0f + 0.05f * fontsize;
+	}
+	fontpadx = fontpady = fontheight * 0.1f;
+	if (fontpadx < 4.0f) {
+		fontpadx = 4.0f;
+	}
+	buttonheight = fontheight + 2.0f * fontpady;
 }
 
 void ui_init()
