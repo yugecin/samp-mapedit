@@ -53,7 +53,10 @@ void update_layout(struct UI_WINDOW *wnd)
 	for (e = 0; e < wnd->_parent.childcount; e++) {
 		child = wnd->_parent.children[e];
 		if (child->span == 1) {
-			colwidths[col] = fontpad * 2.0f + child->pref_width;
+			tmp = fontpad * 2.0f + child->pref_width;
+			if (tmp > colwidths[col]) {
+				colwidths[col] = tmp;
+			}
 			col++;
 		} else {
 			cw = (fontpad * 2.0f + child->pref_width) / child->span;
