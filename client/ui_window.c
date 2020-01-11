@@ -126,9 +126,9 @@ void update_layout(struct UI_WINDOW *wnd)
 
 		if (col >= colcount) {
 			col = 0;
-			row++;
 			colx = wnd->_parent._parent.x;
 			rowy += rowheights[row];
+			row++;
 		}
 	}
 }
