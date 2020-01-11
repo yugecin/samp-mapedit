@@ -104,8 +104,8 @@ struct UI_RADIOBUTTON *ui_rdb_make(
 	rdb->_parent.text[2] = ']';
 	memcpy(rdb->_parent.text + 3, text, textlenandzero - 3);
 	rdb->data = NULL;
+	/*following call will also recalc sizes*/
 	ui_rdbgroup_add(group, rdb, check);
-	ui_btn_recalc_size((struct UI_BUTTON*) rdb);
 	return rdb;
 }
 
