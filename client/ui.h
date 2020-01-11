@@ -5,6 +5,7 @@
 
 #include "ui_label.h"
 #include "ui_button.h"
+#include "ui_radiobutton.h"
 #include "ui_colorpicker.h"
 #include "ui_window.h"
 

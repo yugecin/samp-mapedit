@@ -224,6 +224,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ui_radiobutton.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_radiobutton.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ui_window.c"
 				>
 			</File>

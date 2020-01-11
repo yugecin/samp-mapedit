@@ -6,8 +6,7 @@
 
 struct UI_ELEMENT dummy_element;
 
-static
-int ui_elem_dummy(struct UI_ELEMENT *elem)
+int ui_elem_dummy_proc(struct UI_ELEMENT *elem)
 {
 	return 0;
 }
@@ -19,13 +18,14 @@ void ui_elem_init(void *elem, enum eUIElementType type, float x, float y)
 	e->type = type;
 	e->x = x;
 	e->y = y;
-	e->proc_dispose = (ui_method*) ui_elem_dummy;
-	e->proc_update = (ui_method*) ui_elem_dummy;
-	e->proc_draw = (ui_method*) ui_elem_dummy;
-	e->proc_mousedown = (ui_method*) ui_elem_dummy;
-	e->proc_mouseup = (ui_method*) ui_elem_dummy;
+	e->proc_dispose = (ui_method*) ui_elem_dummy_proc;
+	e->proc_update = (ui_method*) ui_elem_dummy_proc;
+	e->proc_draw = (ui_method*) ui_elem_dummy_proc;
+	e->proc_mousedown = (ui_method*) ui_elem_dummy_proc;
+	e->proc_mouseup = (ui_method*) ui_elem_dummy_proc;
 	e->alignment = 0;
 	e->span = 1;
+	e->parent = NULL;
 }
 
 void ui_element_draw_background(struct UI_ELEMENT *elem, int argb)

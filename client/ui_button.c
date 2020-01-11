@@ -69,6 +69,10 @@ void ui_btn_recalc_size(struct UI_BUTTON *btn)
 	textw = game_TextGetSizeX(btn->text, 0, 0);
 	btn->_parent.pref_width = textw + fontpad * 2.0f;
 	btn->_parent.pref_height = buttonheight;
+	/*tell container it needs to redo its layout*/
+	if (btn->_parent.parent != NULL) {
+		btn->_parent.parent->need_layout = 1;
+	}
 }
 
 int ui_btn_mousedown(struct UI_BUTTON *btn)
