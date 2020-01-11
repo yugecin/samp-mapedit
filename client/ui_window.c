@@ -53,19 +53,38 @@ void update_layout(struct UI_WINDOW *wnd)
 	for (e = 0; e < wnd->_parent.childcount; e++) {
 		child = wnd->_parent.children[e];
 		if (child->span == 1) {
-			tmp = fontpadx * 2.0f + child->pref_width;
+			tmp = child->pref_width;
+			/*add fontpadx for first and last cols, half otherwise*/
+			if (col == 0) {
+				tmp += fontpadx;
+			} else {
+				tmp += fontpadx / 2.0f;
+			}
+			if (col == colcount - 1) {
+				tmp += fontpadx;
+			} else {
+				tmp += fontpadx / 2.0f;
+			}
 			if (tmp > colwidths[col]) {
 				colwidths[col] = tmp;
 			}
 			col++;
 		} else {
-			cw = (fontpadx * 2.0f + child->pref_width);
-			cw /= child->span;
 			span = child->span;
+			cw = (fontpadx * 2.0f + child->pref_width);
+			if (col == 0) {
+				cw += fontpadx / 2.0f;
+			}
+			if (col + span == colcount) {
+				cw += fontpadx / 2.0f;
+			}
+			cw /= span;
 			while (span-- > 0) {
 				tmp = cw;
-				if (span == child->span - 1 || span == 0) {
-					tmp += fontpadx;
+				if ((span == child->span - 1 && col == 0) ||
+					(span == 0 && col == colcount - 1))
+				{
+					tmp += fontpadx / 2.0f;
 				}
 				if (tmp > colwidths[col]) {
 					colwidths[col] = tmp;
@@ -118,13 +137,21 @@ void update_layout(struct UI_WINDOW *wnd)
 	rowy = wnd->_parent._parent.y;
 	for (e = 0; e < wnd->_parent.childcount; e++) {
 		child = wnd->_parent.children[e];
-		child->x = colx + fontpadx;
+		tmp = -fontpadx;
+		if (col == 0) {
+			child->x = colx + fontpadx;
+			tmp -= fontpadx / 2.0f;
+		} else {
+			child->x = colx + fontpadx / 2.0f;
+		}
 		child->y = rowy + fontpady;
-		tmp = fontpadx * -2.0f;
 		span = child->span;
 		while (span-- > 0) {
 			tmp += colwidths[col];
 			colx += colwidths[col];
+			if (col == colcount - 1) {
+				tmp -= fontpadx / 2.0f;
+			}
 			col++;
 		}
 		child->width = tmp;

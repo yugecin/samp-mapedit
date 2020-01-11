@@ -63,7 +63,7 @@ void ui_recalculate_sizes()
 
 	game_TextGetSizeXY(&textbounds, font_size_x, font_size_y, "JQqd");
 	fontheight = textbounds.top - textbounds.bottom;
-	fontheight *= 0.85f; /*some ratio...*/
+	fontheight *= 0.8f; /*some ratio...*/
 	if (fontsize < 0) {
 		fontheight *= 1.0f + 0.05f * fontsize;
 	}
