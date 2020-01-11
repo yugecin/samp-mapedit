@@ -4,6 +4,8 @@
 #include "game.h"
 #include "ui.h"
 
+struct UI_ELEMENT dummy_element;
+
 static
 int ui_elem_dummy(struct UI_ELEMENT *elem)
 {
@@ -17,6 +19,7 @@ void ui_elem_init(void *elem, enum eUIElementType type, float x, float y)
 	e->type = type;
 	e->x = x;
 	e->y = y;
+	e->proc_dispose = (ui_method*) ui_elem_dummy;
 	e->proc_update = (ui_method*) ui_elem_dummy;
 	e->proc_draw = (ui_method*) ui_elem_dummy;
 	e->proc_mousedown = (ui_method*) ui_elem_dummy;

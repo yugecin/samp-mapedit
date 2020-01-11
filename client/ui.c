@@ -79,6 +79,8 @@ void ui_init()
 	ui_recalculate_sizes(); /*needed for ui element text measurements*/
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
+	ui_elem_init(&dummy_element, DUMMY, 0.0f, 0.0f);
+	dummy_element.pref_height = dummy_element.pref_width = 0.0f;
 	ui_colpick_init();
 	background_element = ui_cnt_make();
 	btn = ui_btn_make(10.0f, 550.0f, "Settings", cb_btn_settings);

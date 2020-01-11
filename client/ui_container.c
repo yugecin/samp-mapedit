@@ -100,6 +100,9 @@ int ui_cnt_mouseup(struct UI_CONTAINER *cnt)
 void ui_cnt_add_child(struct UI_CONTAINER *cnt, struct UI_ELEMENT *child)
 {
 	if (cnt->childcount < CONTAINER_MAX_CHILD_COUNT) {
+		if (child == NULL) {
+			child = &dummy_element;
+		}
 		cnt->children[cnt->childcount++] = child;
 		child->parent = cnt;
 		cnt->need_layout = 1;

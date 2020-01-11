@@ -3,6 +3,7 @@
 typedef (ui_method)(void*);
 
 enum eUIElementType {
+	DUMMY,
 	BACKGROUND,
 	BUTTON,
 	COLORPICKER,
@@ -34,6 +35,8 @@ struct UI_ELEMENT {
 	*/
 	ui_method *proc_mouseup;
 };
+
+extern struct UI_ELEMENT dummy_element;
 
 void ui_elem_init(void *elem, enum eUIElementType type, float x, float y);
 void ui_element_draw_background(struct UI_ELEMENT *elem, int argb);
