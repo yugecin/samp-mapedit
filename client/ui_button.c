@@ -55,10 +55,12 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 		col = 0xAAFF0000;
 	}
 	ui_element_draw_background(&btn->_parent, col);
+	game_TextSetAlign(CENTER);
 	game_TextPrintString(
-		btn->_parent.x + fontpad,
+		btn->_parent.x + btn->_parent.width / 2.0f,
 		btn->_parent.y + fontpad,
 		btn->text);
+	game_TextSetAlign(LEFT);
 }
 
 void ui_btn_recalc_size(struct UI_BUTTON *btn)
