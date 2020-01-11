@@ -60,12 +60,14 @@ void ui_rdbgroup_clicked(
 {
 	int i;
 
-	for (i = 0; i < group->buttoncount; i++) {
-		ui_rdb_set_checked(group->buttons[i], 0);
+	if (group->activebutton != rdb) {
+		for (i = 0; i < group->buttoncount; i++) {
+			ui_rdb_set_checked(group->buttons[i], 0);
+		}
+		ui_rdb_set_checked(rdb, 1);
+		group->activebutton = rdb;
+		group->proc_change(group, rdb->data);
 	}
-	ui_rdb_set_checked(rdb, 1);
-	group->activebutton = rdb;
-	group->proc_change(group, rdb->data);
 }
 
 struct RADIOBUTTONGROUP *ui_rdbgroup_make(rdbcb *proc_change)
