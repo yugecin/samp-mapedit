@@ -18,6 +18,7 @@ struct UI_BUTTON *ui_btn_make(float x, float y, char *text, btncb *cb)
 	btn->_parent.proc_draw = (ui_method*) ui_btn_draw;
 	btn->_parent.proc_mousedown = (ui_method*) ui_btn_mousedown;
 	btn->_parent.proc_mouseup = (ui_method*) ui_btn_mouseup;
+	btn->_parent.proc_recalc_size = (ui_method*) ui_btn_recalc_size;
 	btn->text = malloc(sizeof(char) * textlenandzero);
 	btn->cb = cb;
 	memcpy(btn->text, text, textlenandzero);

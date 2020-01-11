@@ -18,6 +18,8 @@ struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 	wnd->_parent._parent.proc_draw = (ui_method*) ui_wnd_draw;
 	wnd->_parent._parent.proc_mousedown = (ui_method*) ui_wnd_mousedown;
 	wnd->_parent._parent.proc_mouseup = (ui_method*) ui_wnd_mouseup;
+	/*recalcsize proc can be container proc*/
+	wnd->_parent._parent.proc_recalc_size = (ui_method*) ui_cnt_recalc_size;
 	wnd->_parent.childcount = 0;
 	wnd->_parent.need_layout = 1;
 	wnd->columns = 1;

@@ -35,6 +35,10 @@ struct UI_ELEMENT {
 	@returns non-zero when the event was handled
 	*/
 	ui_method *proc_mouseup;
+	/**
+	Called when ui font or screen resolution changes.
+	*/
+	ui_method *proc_recalc_size;
 };
 
 extern struct UI_ELEMENT dummy_element;

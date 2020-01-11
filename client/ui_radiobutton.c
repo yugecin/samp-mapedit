@@ -98,6 +98,8 @@ struct UI_RADIOBUTTON *ui_rdb_make(
 	/*mousedown for radiobutton can be the button proc*/
 	rdb->_parent._parent.proc_mousedown = (ui_method*) ui_btn_mousedown;
 	rdb->_parent._parent.proc_mouseup = (ui_method*) ui_rdb_mouseup;
+	/*recalcsize for radiobutton can be the button proc*/
+	rdb->_parent._parent.proc_recalc_size = (ui_method*) ui_btn_recalc_size;
 	rdb->_parent.text = malloc(sizeof(char) * textlenandzero);
 	rdb->_parent.text[0] = '[';
 	/*1 is set below with the ui_rdbgroup_add call*/

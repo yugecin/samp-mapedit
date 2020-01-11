@@ -11,6 +11,8 @@
 float fresx, fresy;
 float canvasx, canvasy;
 float cursorx, cursory;
+float font_size_x, font_size_y;
+int fontsize, fontratio;
 float fontheight, buttonheight, fontpad;
 
 static char active = 0;
@@ -59,7 +61,7 @@ void ui_recalculate_sizes()
 	canvasx = fresx / 640.0f;
 	canvasy = fresy / 448.0f;
 
-	game_TextGetSizeXY(&textbounds, 1.0f, 1.0f, "JQqd");
+	game_TextGetSizeXY(&textbounds, font_size_x, font_size_y, "JQqd");
 	fontheight = textbounds.top - textbounds.bottom;
 	fontheight *= 0.85f; /*some ratio...*/
 	buttonheight = fontheight * 1.25f;
@@ -75,8 +77,7 @@ void ui_init()
 	key_a = VK_Q;
 	key_s = VK_S;
 	key_d = VK_D;
-	ui_default_font();
-	ui_recalculate_sizes(); /*needed for ui element text measurements*/
+	ui_set_fontsize(0, 0);
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
 	ui_elem_init(&dummy_element, DUMMY, 0.0f, 0.0f);
@@ -206,9 +207,27 @@ void ui_deactivate()
 	}
 }
 
+void ui_set_fontsize(int fs, int fr)
+{
+	fontsize = fs;
+	fontratio = fr;
+	font_size_x = 0.9f + 0.025f * fr + fs * 0.1f;
+	font_size_y = 1.0f - 0.025f * fr + fs * 0.1f;
+	ui_default_font();
+	ui_recalculate_sizes();
+	if (background_element != NULL) {
+		background_element->_parent.proc_recalc_size(
+			background_element);
+		if (active_window != NULL) {
+			active_window->_parent._parent.proc_recalc_size(
+				active_window);
+		}
+	}
+}
+
 void ui_default_font()
 {
-	game_TextSetLetterSize(1.0f, 1.0f);
+	game_TextSetLetterSize(font_size_x, font_size_y);
 	game_TextSetMonospace(0);
 	game_TextSetColor(0xFFFFFFFF);
 	game_TextSetShadowColor(0xFF000000);

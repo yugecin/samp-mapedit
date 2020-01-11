@@ -15,6 +15,8 @@ extern float canvasx, canvasy;
 Screen-space coordinates of the cursor.
 */
 extern float cursorx, cursory;
+extern float font_size_x, font_size_y;
+extern int fontsize, fontratio;
 extern float fontheight, buttonheight, fontpad;
 extern void* ui_element_being_clicked;
 extern int ui_mouse_is_just_down;
@@ -27,3 +29,4 @@ void ui_init();
 void ui_render();
 void ui_show_window(struct UI_WINDOW *wnd);
 void ui_hide_window(struct UI_WINDOW *wnd);
+void ui_set_fontsize(int fontsize, int fontratio);

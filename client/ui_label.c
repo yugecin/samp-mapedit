@@ -16,6 +16,7 @@ struct UI_LABEL *ui_lbl_make(float x, float y, char *text)
 	lbl->_parent.proc_dispose = (ui_method*) ui_lbl_dispose;
 	lbl->_parent.proc_update = (ui_method*) ui_lbl_update;
 	lbl->_parent.proc_draw = (ui_method*) ui_lbl_draw;
+	lbl->_parent.proc_recalc_size = (ui_method*) ui_lbl_recalc_size;
 	lbl->text = malloc(sizeof(char) * textlenandzero);
 	memcpy(lbl->text, text, textlenandzero);
 	ui_lbl_recalc_size(lbl);

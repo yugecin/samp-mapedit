@@ -17,6 +17,7 @@ struct UI_CONTAINER *ui_cnt_make()
 	cnt->_parent.proc_draw = (ui_method*) ui_cnt_draw;
 	cnt->_parent.proc_mousedown = (ui_method*) ui_cnt_mousedown;
 	cnt->_parent.proc_mouseup = (ui_method*) ui_cnt_mouseup;
+	cnt->_parent.proc_recalc_size = (ui_method*) ui_cnt_recalc_size;
 	cnt->childcount = 0;
 	cnt->need_layout = 1;
 	return cnt;
@@ -107,4 +108,16 @@ void ui_cnt_add_child(struct UI_CONTAINER *cnt, struct UI_ELEMENT *child)
 		child->parent = cnt;
 		cnt->need_layout = 1;
 	}
+}
+
+void ui_cnt_recalc_size(struct UI_CONTAINER *cnt)
+{
+	struct UI_ELEMENT *child;
+	int i;
+
+	for (i = 0; i < cnt->childcount; i++) {
+		child = cnt->children[i];
+		child->proc_recalc_size(child);
+	}
+	cnt->need_layout = 1;
 }

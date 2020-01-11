@@ -39,6 +39,42 @@ void cb_rdb_foliage(struct RADIOBUTTONGROUP *grp, void *data)
 	toggle_foliage((int) data);
 }
 
+static
+void cb_btn_uifontsup(struct UI_BUTTON *btn)
+{
+	if (fontsize < 25) {
+		fontsize++;
+		ui_set_fontsize(fontsize, fontratio);
+	}
+}
+
+static
+void cb_btn_uifontsdown(struct UI_BUTTON *btn)
+{
+	if (fontsize > -25) {
+		fontsize--;
+		ui_set_fontsize(fontsize, fontratio);
+	}
+}
+
+static
+void cb_btn_uifontrup(struct UI_BUTTON *btn)
+{
+	if (fontratio < 25) {
+		fontratio++;
+		ui_set_fontsize(fontsize, fontratio);
+	}
+}
+
+static
+void cb_btn_uifontrdown(struct UI_BUTTON *btn)
+{
+	if (fontratio > -25) {
+		fontratio--;
+		ui_set_fontsize(fontsize, fontratio);
+	}
+}
+
 void wnd_init()
 {
 	struct RADIOBUTTONGROUP *rdbgroup;
@@ -58,6 +94,21 @@ void wnd_init()
 	rdb = ui_rdb_make(0.0f, 0.0f, "off", rdbgroup, 0);
 	rdb->data = 0;
 	ui_wnd_add_child(window_settings, rdb);
+
+	lbl = ui_lbl_make(0.0f, 0.0f, "UI_font_size:");
+	ui_wnd_add_child(window_settings, lbl);
+	btn = ui_btn_make(0.0f, 0.0f, "-", cb_btn_uifontsdown);
+	ui_wnd_add_child(window_settings, btn);
+	btn = ui_btn_make(0.0f, 0.0f, "+", cb_btn_uifontsup);
+	ui_wnd_add_child(window_settings, btn);
+
+	lbl = ui_lbl_make(0.0f, 0.0f, "UI_font_ratio:");
+	ui_wnd_add_child(window_settings, lbl);
+	btn = ui_btn_make(0.0f, 0.0f, "-", cb_btn_uifontrdown);
+	ui_wnd_add_child(window_settings, btn);
+	btn = ui_btn_make(0.0f, 0.0f, "+", cb_btn_uifontrup);
+	ui_wnd_add_child(window_settings, btn);
+
 	btn = ui_btn_make(0.0f, 0.0f, "Hey", (btncb*) ui_elem_dummy_proc);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(window_settings, btn);
