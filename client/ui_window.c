@@ -171,6 +171,10 @@ int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 	int res;
 
 	if ((res = ui_cnt_mousedown((struct UI_CONTAINER*) wnd))) {
+		/*container can be clicked, but window should not be*/
+		if (ui_element_being_clicked == wnd) {
+			ui_element_being_clicked = NULL;
+		}
 		return res;
 	}
 	if (wnd->_parent._parent.x <= cursorx &&
