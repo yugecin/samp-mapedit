@@ -202,10 +202,20 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 				child->y += dy;
 			}
 		}
+		if (!wnd->_parent.need_layout) {
+			for (i = 0; i < wnd->_parent.childcount; i++) {
+				child = wnd->_parent.children[i];
+				child->proc_post_layout(child);
+			}
+		}
 	}
 	if (wnd->_parent.need_layout) {
 		update_layout(wnd);
 		wnd->_parent.need_layout = 0;
+		for (i = 0; i < wnd->_parent.childcount; i++) {
+			child = wnd->_parent.children[i];
+			child->proc_post_layout(child);
+		}
 	}
 }
 

@@ -39,6 +39,12 @@ struct UI_ELEMENT {
 	Called when ui font or screen resolution changes.
 	*/
 	ui_method *proc_recalc_size;
+	/**
+	Called after container layout happenend.
+
+	Also called when the container's position changed.
+	*/
+	ui_method *proc_post_layout;
 	void *userdata;
 };
 

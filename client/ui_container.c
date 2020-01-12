@@ -54,6 +54,10 @@ void ui_cnt_update(struct UI_CONTAINER *cnt)
 			child->height = child->pref_height;
 		}
 		cnt->need_layout = 0;
+		for (i = 0; i < cnt->childcount; i++) {
+			child = cnt->children[i];
+			child->proc_post_layout(child);
+		}
 	}
 }
 
