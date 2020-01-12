@@ -263,3 +263,8 @@ void ui_wnd_add_child(struct UI_WINDOW *wnd, void *child)
 {
 	ui_cnt_add_child((struct UI_CONTAINER*) wnd, child);
 }
+
+void ui_wnd_remove_child(struct UI_WINDOW *wnd, void *child)
+{
+	ui_cnt_remove_child((struct UI_CONTAINER*) wnd, child);
+}

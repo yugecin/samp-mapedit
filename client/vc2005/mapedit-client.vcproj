@@ -164,6 +164,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common.c"
+				>
+			</File>
+			<File
 				RelativePath="..\common.h"
 				>
 			</File>
@@ -173,6 +177,14 @@
 			</File>
 			<File
 				RelativePath="..\game.h"
+				>
+			</File>
+			<File
+				RelativePath="..\settings.c"
+				>
+			</File>
+			<File
+				RelativePath="..\settings.h"
 				>
 			</File>
 			<File

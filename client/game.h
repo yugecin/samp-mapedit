@@ -199,6 +199,10 @@ extern char *activecam;
 extern struct CCamera *camera;
 extern float *hudScaleX, *hudScaleY;
 extern struct CRaceCheckpoint *racecheckpoints;
+/**
+Resets when player starts a new game.
+*/
+extern int *timeInGame;
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();

@@ -11,7 +11,6 @@
 #define UI_DEFAULT_FONT_SIZE -2
 #define UI_DEFAULT_FONT_RATIO -4
 
-
 extern float fresx, fresy;
 extern float canvasx, canvasy;
 /**

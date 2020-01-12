@@ -6,6 +6,8 @@ struct UI_BUTTON {
 	struct UI_ELEMENT _parent;
 	char *text;
 	btncb *cb;
+	int bufferoverflow;
+	int foregroundABGR;
 };
 
 struct UI_BUTTON *ui_btn_make(char *text, btncb *cb);

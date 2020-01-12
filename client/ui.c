@@ -30,12 +30,6 @@ int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
 
 static
-void cb_btn_settings(struct UI_BUTTON *btn)
-{
-	ui_show_window(window_settings);
-}
-
-static
 void cb_btn_cpsettings(struct UI_BUTTON *btn)
 {
 	ui_show_window(window_cpsettings);
@@ -88,18 +82,14 @@ void ui_init()
 	dummy_element.pref_height = dummy_element.pref_width = 0.0f;
 	ui_colpick_init();
 	background_element = ui_cnt_make();
-	btn = ui_btn_make("Settings", cb_btn_settings);
-	btn->_parent.x = 10.0f;
-	btn->_parent.y = 550.0f;
-	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
 	btn = ui_btn_make("Edit_checkpoint", cb_btn_cpsettings);
 	btn->_parent.x = 300.0f;
 	btn->_parent.y = 550.0f;
-	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
+	ui_cnt_add_child(background_element, btn);
 	btn = ui_btn_make("Reload_client", cb_btn_reload);
 	btn->_parent.x = 10.0f;
 	btn->_parent.y = 600.0f;
-	ui_cnt_add_child(background_element, (struct UI_ELEMENT*) btn);
+	ui_cnt_add_child(background_element, btn);
 	wnd_init();
 	racecheckpoints[0].colABGR = 0xFFFF0000;
 	racecheckpoints[0].free = 0;

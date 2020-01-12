@@ -21,6 +21,7 @@ struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 	btn->_parent.proc_recalc_size = (ui_method*) ui_btn_recalc_size;
 	btn->text = malloc(sizeof(char) * textlenandzero);
 	btn->cb = cb;
+	btn->foregroundABGR = -1;
 	memcpy(btn->text, text, textlenandzero);
 	ui_btn_recalc_size(btn);
 	return btn;
@@ -56,10 +57,16 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 	}
 	ui_element_draw_background(&btn->_parent, col);
 	game_TextSetAlign(CENTER);
+	if (btn->foregroundABGR != -1) {
+		game_TextSetColor(btn->foregroundABGR);
+	}
 	game_TextPrintString(
 		btn->_parent.x + btn->_parent.width / 2.0f,
 		btn->_parent.y + fontpady,
 		btn->text);
+	if (btn->foregroundABGR != -1) {
+		game_TextSetColor(-1);
+	}
 	game_TextSetAlign(LEFT);
 }
 

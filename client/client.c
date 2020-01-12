@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "client.h"
+#include "settings.h"
 #include "ui.h"
 #include <windows.h>
 
@@ -100,6 +101,7 @@ Called from the loader, do not call directly (use proc_unload)
 static
 void client_finalize()
 {
+	settings_dispose();
 	ui_dispose();
 	undetour();
 }
@@ -114,6 +116,7 @@ void client_init()
 {
 	detour();
 	ui_init();
+	settings_init();
 }
 
 __declspec(dllexport) void __cdecl MapEditMain(struct CLIENTLINK *data)

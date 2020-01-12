@@ -104,6 +104,7 @@ struct UI_RADIOBUTTON *ui_rdb_make(
 	/*1 is set below with the ui_rdbgroup_add call*/
 	rdb->_parent.text[2] = ']';
 	memcpy(rdb->_parent.text + 3, text, textlenandzero - 3);
+	rdb->_parent.foregroundABGR = -1;
 	/*following call will also recalc sizes*/
 	ui_rdbgroup_add(group, rdb, check);
 	return rdb;

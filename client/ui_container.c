@@ -104,15 +104,34 @@ int ui_cnt_mouseup(struct UI_CONTAINER *cnt)
 	return 0;
 }
 
-void ui_cnt_add_child(struct UI_CONTAINER *cnt, struct UI_ELEMENT *child)
+void ui_cnt_add_child(struct UI_CONTAINER *cnt, void *child)
 {
 	if (cnt->childcount < CONTAINER_MAX_CHILD_COUNT) {
 		if (child == NULL) {
 			child = &dummy_element;
 		}
 		cnt->children[cnt->childcount++] = child;
-		child->parent = cnt;
+		((struct UI_ELEMENT*) child)->parent = cnt;
 		cnt->need_layout = 1;
+	}
+}
+
+void ui_cnt_remove_child(struct UI_CONTAINER *cnt, void *child)
+{
+	struct UI_ELEMENT *c;
+	int i;
+
+	for (i = 0; i < cnt->childcount; i++) {
+		c = cnt->children[i];
+		if (c == child) {
+			c->parent = NULL;
+			for (i++; i < cnt->childcount; i++) {
+				cnt->children[i - 1] = cnt->children[i];
+			}
+			cnt->childcount--;
+			cnt->need_layout = 1;
+			return;
+		}
 	}
 }
 

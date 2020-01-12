@@ -13,17 +13,6 @@
 static struct IM2DVERTEX normverts[COLORWHEEL_VERTS];
 static struct IM2DVERTEX barverts[ALPHABAR_VERTS];
 
-static
-float hue(float t)
-{
-	if (t < 0.0f) t += 1.0f;
-	if (t > 1.0f) t -= 1.0f;
-	if (t < 1.0f / 6.0f) return 255.0f * 6.0f * t;
-	if (t < 1.0f / 2.0f) return 255.0f;
-	if( t < 2.0f / 3.0f) return 255.0f * (4.0f - 6.0f * t);
-	return 0.0f;
-};
-
 void ui_colpick_init()
 {
 	float angle;
@@ -40,9 +29,9 @@ void ui_colpick_init()
 		angle = 1.0f / (float) (COLORWHEEL_VERTS - 2) * (float) i;
 		angle -= 1.0f / (float) COLORWHEEL_SEGMENTS / 2.0f;
 		col = 0xFF000000;
-		col |= ((unsigned char) hue(angle + 1.0f / 3.0f)) << 16;
-		col |= ((unsigned char) hue(angle)) << 8;
-		col |= ((unsigned char) hue(angle - 1.0f / 3.0f));
+		col |= hue(angle, HUE_COMP_R) << 16;
+		col |= hue(angle, HUE_COMP_G) << 8;
+		col |= hue(angle, HUE_COMP_B);
 		angle *= 2.0f * M_PI;
 		i++;
 		normverts[i].x = cosf(angle);
@@ -139,9 +128,9 @@ void ui_colpick_update(struct UI_COLORPICKER *colpick)
 			tmp = ((int) (tmp * (float) COLORWHEEL_SEGMENTS))
 				/ (float) COLORWHEEL_SEGMENTS;
 			colpick->last_angle = tmp * M_PI * 2.0f;
-			col = ((unsigned char) hue(tmp + 1.0f / 3.0f));
-			col |= ((unsigned char) hue(tmp)) << 8;
-			col |= ((unsigned char) hue(tmp - 1.0f / 3.0f)) << 16;
+			col = hue(tmp, HUE_COMP_R);
+			col |= hue(tmp, HUE_COMP_G) << 8;
+			col |= hue(tmp, HUE_COMP_B) << 16;
 		} else if (colpick->clickmode == CLICKMODE_ALPHA) {
 			col = colpick->last_selected_colorABGR & 0xFFFFFF;
 			tmp = cursory - colpick->_parent.y;

@@ -17,6 +17,7 @@ struct CCamera *camera = (struct CCamera*) (0xB6F028);
 float *hudScaleX = (float*) 0x859520;
 float *hudScaleY = (float*) 0x859524;
 struct CRaceCheckpoint *racecheckpoints = (struct CRaceCheckpoint*) 0xC7F158;
+int *timeInGame = (int*) 0xB7CB84;
 
 __declspec(naked) void game_CameraRestore()
 {

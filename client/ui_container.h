@@ -15,5 +15,6 @@ void ui_cnt_update(struct UI_CONTAINER *cnt);
 void ui_cnt_draw(struct UI_CONTAINER *cnt);
 int ui_cnt_mousedown(struct UI_CONTAINER *cnt);
 int ui_cnt_mouseup(struct UI_CONTAINER *cnt);
-void ui_cnt_add_child(struct UI_CONTAINER *cnt, struct UI_ELEMENT *child);
+void ui_cnt_add_child(struct UI_CONTAINER *cnt, void *child);
+void ui_cnt_remove_child(struct UI_CONTAINER *cnt, void *child);
 void ui_cnt_recalc_size(struct UI_CONTAINER *cnt);
