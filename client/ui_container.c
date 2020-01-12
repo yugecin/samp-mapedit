@@ -8,7 +8,9 @@ struct UI_CONTAINER *ui_cnt_make()
 	struct UI_CONTAINER *cnt;
 
 	cnt = malloc(sizeof(struct UI_CONTAINER));
-	ui_elem_init(cnt, BACKGROUND, 0.0f, 0.0f);
+	ui_elem_init(cnt, BACKGROUND);
+	cnt->_parent.x = 0.0f;
+	cnt->_parent.y = 0.0f;
 	cnt->_parent.type = BACKGROUND;
 	cnt->_parent.width = fresx;
 	cnt->_parent.height = fresy;

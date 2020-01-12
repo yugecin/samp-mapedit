@@ -5,14 +5,14 @@
 #include "ui.h"
 #include <string.h>
 
-struct UI_LABEL *ui_lbl_make(float x, float y, char *text)
+struct UI_LABEL *ui_lbl_make(char *text)
 {
 	struct UI_LABEL *lbl;
 	int textlenandzero;
 
 	textlenandzero = strlen(text) + 1;
 	lbl = malloc(sizeof(struct UI_LABEL));
-	ui_elem_init(lbl, LABEL, x, y);
+	ui_elem_init(lbl, LABEL);
 	lbl->_parent.proc_dispose = (ui_method*) ui_lbl_dispose;
 	lbl->_parent.proc_update = (ui_method*) ui_lbl_update;
 	lbl->_parent.proc_draw = (ui_method*) ui_lbl_draw;

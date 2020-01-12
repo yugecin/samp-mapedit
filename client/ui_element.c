@@ -11,13 +11,11 @@ int ui_elem_dummy_proc(struct UI_ELEMENT *elem)
 	return 0;
 }
 
-void ui_elem_init(void *elem, enum eUIElementType type, float x, float y)
+void ui_elem_init(void *elem, enum eUIElementType type)
 {
 	struct UI_ELEMENT *e = (struct UI_ELEMENT*) elem;
 
 	e->type = type;
-	e->x = x;
-	e->y = y;
 	e->proc_dispose = (ui_method*) ui_elem_dummy_proc;
 	e->proc_update = (ui_method*) ui_elem_dummy_proc;
 	e->proc_draw = (ui_method*) ui_elem_dummy_proc;

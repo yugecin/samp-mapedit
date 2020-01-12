@@ -5,14 +5,14 @@
 #include "ui.h"
 #include <string.h>
 
-struct UI_BUTTON *ui_btn_make(float x, float y, char *text, btncb *cb)
+struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 {
 	struct UI_BUTTON *btn;
 	int textlenandzero;
 
 	textlenandzero = strlen(text) + 1;
 	btn = malloc(sizeof(struct UI_BUTTON));
-	ui_elem_init(btn, BUTTON, x, y);
+	ui_elem_init(btn, BUTTON);
 	btn->_parent.proc_dispose = (ui_method*) ui_btn_dispose;
 	btn->_parent.proc_update = (ui_method*) ui_btn_update;
 	btn->_parent.proc_draw = (ui_method*) ui_btn_draw;

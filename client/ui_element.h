@@ -45,6 +45,6 @@ struct UI_ELEMENT {
 extern struct UI_ELEMENT dummy_element;
 
 int ui_elem_dummy_proc(struct UI_ELEMENT *elem);
-void ui_elem_init(void *elem, enum eUIElementType type, float x, float y);
+void ui_elem_init(void *elem, enum eUIElementType type);
 void ui_element_draw_background(struct UI_ELEMENT *elem, int argb);
 int ui_element_is_hovered(struct UI_ELEMENT *element);

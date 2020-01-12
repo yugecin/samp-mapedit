@@ -128,28 +128,28 @@ void wnd_init()
 	window_settings = ui_wnd_make(500.0f, 500.0f, "Settings");
 	window_settings->columns = 3;
 
-	lbl = ui_lbl_make(0.0f, 0.0f, "Foliage:");
+	lbl = ui_lbl_make("Foliage:");
 	ui_wnd_add_child(window_settings, lbl);
 	rdbgroup = ui_rdbgroup_make(cb_rdb_foliage);
-	rdb = ui_rdb_make(0.0f, 0.0f, "on", rdbgroup, 1);
+	rdb = ui_rdb_make("on", rdbgroup, 1);
 	rdb->_parent._parent.userdata = (void*) 1;
 	ui_wnd_add_child(window_settings, rdb);
-	rdb = ui_rdb_make(0.0f, 0.0f, "off", rdbgroup, 0);
+	rdb = ui_rdb_make("off", rdbgroup, 0);
 	rdb->_parent._parent.userdata = 0;
 	ui_wnd_add_child(window_settings, rdb);
 
-	lbl = ui_lbl_make(0.0f, 0.0f, "UI_font_size:");
+	lbl = ui_lbl_make("UI_font_size:");
 	ui_wnd_add_child(window_settings, lbl);
-	btn = ui_btn_make(0.0f, 0.0f, "-", cb_btn_uifontsdown);
+	btn = ui_btn_make("-", cb_btn_uifontsdown);
 	ui_wnd_add_child(window_settings, btn);
-	btn = ui_btn_make(0.0f, 0.0f, "+", cb_btn_uifontsup);
+	btn = ui_btn_make("+", cb_btn_uifontsup);
 	ui_wnd_add_child(window_settings, btn);
 
-	lbl = ui_lbl_make(0.0f, 0.0f, "UI_font_ratio:");
+	lbl = ui_lbl_make("UI_font_ratio:");
 	ui_wnd_add_child(window_settings, lbl);
-	btn = ui_btn_make(0.0f, 0.0f, "-", cb_btn_uifontrdown);
+	btn = ui_btn_make("-", cb_btn_uifontrdown);
 	ui_wnd_add_child(window_settings, btn);
-	btn = ui_btn_make(0.0f, 0.0f, "+", cb_btn_uifontrup);
+	btn = ui_btn_make("+", cb_btn_uifontrup);
 	ui_wnd_add_child(window_settings, btn);
 
 	/*            checkpoint settings*/
@@ -157,60 +157,60 @@ void wnd_init()
 	window_cpsettings = ui_wnd_make(500.0f, 500.0f, "Checkpoint");
 	window_cpsettings->columns = 4;
 
-	lbl = ui_lbl_make(0.0f, 0.0f, "Type:");
+	lbl = ui_lbl_make("Type:");
 	ui_wnd_add_child(window_cpsettings, lbl);
-	btn = ui_btn_make(0.0f, 0.0f, "0_Arrow", cb_btn_cptype);
+	btn = ui_btn_make("0_Arrow", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = 0;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "1_Finish", cb_btn_cptype);
+	btn = ui_btn_make("1_Finish", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 1;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "2_Normal", cb_btn_cptype);
+	btn = ui_btn_make("2_Normal", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 2;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "3_Air_normal", cb_btn_cptype);
+	btn = ui_btn_make("3_Air_normal", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 3;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "4_Air_finish", cb_btn_cptype);
+	btn = ui_btn_make("4_Air_finish", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 4;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "5_Air_rotate", cb_btn_cptype);
+	btn = ui_btn_make("5_Air_rotate", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 5;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "6_Air_up_down_nothing", cb_btn_cptype);
+	btn = ui_btn_make("6_Air_up_down_nothing", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 6;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "7_Air_up_down_1", cb_btn_cptype);
+	btn = ui_btn_make("7_Air_up_down_1", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 7;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make(0.0f, 0.0f, "8_Air_up_down_2", cb_btn_cptype);
+	btn = ui_btn_make("8_Air_up_down_2", cb_btn_cptype);
 	btn->_parent.span = 3;
 	btn->_parent.userdata = (void*) 8;
 	ui_wnd_add_child(window_cpsettings, btn);
 
-	lbl = ui_lbl_make(0.0f, 0.0f, "Color:");
+	lbl = ui_lbl_make("Color:");
 	ui_wnd_add_child(window_cpsettings, lbl);
-	colpick = ui_colpick_make(0.0f, 0.0f, 100.0f, cb_cp_cpcol);
+	colpick = ui_colpick_make(100.0f, cb_cp_cpcol);
 	colpick->_parent.span = 3;
 	ui_wnd_add_child(window_cpsettings, colpick);
 
-	btn = ui_btn_make(0.0f, 0.0f, "Reset", cb_btn_cpreset);
+	btn = ui_btn_make("Reset", cb_btn_cpreset);
 	btn->_parent.span = 4;
 	ui_wnd_add_child(window_cpsettings, btn);
 }

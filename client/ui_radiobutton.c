@@ -82,15 +82,14 @@ struct RADIOBUTTONGROUP *ui_rdbgroup_make(rdbcb *proc_change)
 }
 
 struct UI_RADIOBUTTON *ui_rdb_make(
-	float x, float y, char *text,
-	struct RADIOBUTTONGROUP *group, int check)
+	char *text, struct RADIOBUTTONGROUP *group, int check)
 {
 	struct UI_RADIOBUTTON *rdb;
 	int textlenandzero;
 
 	textlenandzero = 3 + strlen(text) + 1;
 	rdb = malloc(sizeof(struct UI_RADIOBUTTON));
-	ui_elem_init(rdb, RADIOBUTTON, x, y);
+	ui_elem_init(rdb, RADIOBUTTON);
 	rdb->_parent._parent.proc_dispose = (ui_method*) ui_rdb_dispose;
 	rdb->_parent._parent.proc_update = (ui_method*) ui_rdb_update;
 	/*draw for radiobutton can be the button proc*/

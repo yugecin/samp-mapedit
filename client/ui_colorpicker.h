@@ -12,8 +12,7 @@ struct UI_COLORPICKER {
 };
 
 void ui_colpick_init();
-struct UI_COLORPICKER *ui_colpick_make(
-	float x, float y, float size, colpickcb *cb);
+struct UI_COLORPICKER *ui_colpick_make(float size, colpickcb *cb);
 void ui_colpick_dispose(struct UI_COLORPICKER *colpick);
 void ui_colpick_update(struct UI_COLORPICKER *colpick);
 void ui_colpick_draw(struct UI_COLORPICKER *colpick);

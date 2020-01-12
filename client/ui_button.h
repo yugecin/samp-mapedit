@@ -8,7 +8,7 @@ struct UI_BUTTON {
 	btncb *cb;
 };
 
-struct UI_BUTTON *ui_btn_make(float x, float y, char *text, btncb *cb);
+struct UI_BUTTON *ui_btn_make(char *text, btncb *cb);
 void ui_btn_dispose(struct UI_BUTTON *btn);
 void ui_btn_update(struct UI_BUTTON *btn);
 void ui_btn_draw(struct UI_BUTTON *btn);

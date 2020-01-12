@@ -23,8 +23,7 @@ It will be disposed when all its containing children are disposed.
 */
 struct RADIOBUTTONGROUP *ui_rdbgroup_make(rdbcb *proc_change);
 struct UI_RADIOBUTTON *ui_rdb_make(
-	float x, float y, char *text,
-struct RADIOBUTTONGROUP *group, int check);
+	char *text, struct RADIOBUTTONGROUP *group, int check);
 void ui_rdb_dispose(struct UI_RADIOBUTTON *rdb);
 void ui_rdb_update(struct UI_RADIOBUTTON *rdb);
 int ui_rdb_mouseup(struct UI_RADIOBUTTON *rdb);
