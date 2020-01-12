@@ -2,7 +2,7 @@
 
 #define RADIOGROUP_MAX_CHILDREN 30
 
-typedef void (rdbcb)(struct RADIOBUTTONGROUP *btn);
+typedef void (rdbcb)(struct UI_RADIOBUTTON *rdb);
 
 struct UI_RADIOBUTTON {
 	struct UI_BUTTON _parent;

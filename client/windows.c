@@ -36,9 +36,9 @@ void toggle_foliage(int should_be_enabled)
 }
 
 static
-void cb_rdb_foliage(struct RADIOBUTTONGROUP *grp)
+void cb_rdb_foliage(struct UI_RADIOBUTTON *rdb)
 {
-	toggle_foliage((int) grp->activebutton->_parent._parent.userdata);
+	toggle_foliage((int) rdb->_parent._parent.userdata);
 }
 
 static
@@ -78,9 +78,9 @@ void cb_btn_uifontrdown(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_cptype(struct UI_BUTTON *btn)
+void cb_rdbgroup_cptype(struct UI_RADIOBUTTON *rdb)
 {
-	racecheckpoints[0].type = (char) btn->_parent.userdata;
+	racecheckpoints[0].type = (char) rdb->_parent._parent.userdata;
 }
 
 static
@@ -159,50 +159,51 @@ void wnd_init()
 
 	lbl = ui_lbl_make("Type:");
 	ui_wnd_add_child(window_cpsettings, lbl);
-	btn = ui_btn_make("0_Arrow", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = 0;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdbgroup = ui_rdbgroup_make(cb_rdbgroup_cptype);
+	rdb = ui_rdb_make("0._Arrow", rdbgroup, 1);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = 0;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("1_Finish", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 1;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("1._Finish", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 1;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("2_Normal", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 2;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("2._Normal", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 2;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("3_Air_normal", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 3;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("3._Air_normal", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 3;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("4_Air_finish", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 4;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("4._Air_finish", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 4;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("5_Air_rotate", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 5;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("5._Air_rotate", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 5;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("6_Air_up_down_nothing", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 6;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("6._Air_up_down_nothing", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 6;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("7_Air_up_down_1", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 7;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("7._Air_up_down_1", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 7;
+	ui_wnd_add_child(window_cpsettings, rdb);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("8_Air_up_down_2", cb_btn_cptype);
-	btn->_parent.span = 3;
-	btn->_parent.userdata = (void*) 8;
-	ui_wnd_add_child(window_cpsettings, btn);
+	rdb = ui_rdb_make("8._Air_up_down_2", rdbgroup, 0);
+	rdb->_parent._parent.span = 3;
+	rdb->_parent._parent.userdata = (void*) 8;
+	ui_wnd_add_child(window_cpsettings, rdb);
 
 	lbl = ui_lbl_make("Color:");
 	ui_wnd_add_child(window_cpsettings, lbl);

@@ -66,7 +66,7 @@ void ui_rdbgroup_clicked(
 		}
 		ui_rdb_set_checked(rdb, 1);
 		group->activebutton = rdb;
-		group->proc_change(group);
+		group->proc_change(rdb);
 	}
 }
 
