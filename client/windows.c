@@ -45,13 +45,19 @@ void cb_rdb_foliage(struct UI_RADIOBUTTON *rdb)
 static
 void cb_rdb_keys(struct UI_RADIOBUTTON *rdb)
 {
-	if((int) rdb->_parent._parent.userdata) {
+	if ((int) rdb->_parent._parent.userdata) {
 		key_w = VK_Z;
 		key_a = VK_Q;
 	} else {
 		key_w = VK_W;
 		key_a = VK_A;
 	}
+}
+
+static
+void cb_rdb_movement(struct UI_RADIOBUTTON *rdb)
+{
+	directional_movement = (int) rdb->_parent._parent.userdata;
 }
 
 static
@@ -137,7 +143,7 @@ void wnd_init()
 
 	/*            settings*/
 
-	/*TODO: movements stuff (keys & mode)*/
+	/*TODO: movements stuff*/
 	window_settings = ui_wnd_make(500.0f, 500.0f, "Settings");
 	window_settings->columns = 3;
 
@@ -158,6 +164,16 @@ void wnd_init()
 	rdb->_parent._parent.userdata = (void*) 1;
 	ui_wnd_add_child(window_settings, rdb);
 	rdb = ui_rdb_make("wasd", rdbgroup, 0);
+	rdb->_parent._parent.userdata = 0;
+	ui_wnd_add_child(window_settings, rdb);
+
+	lbl = ui_lbl_make("Movement:");
+	ui_wnd_add_child(window_settings, lbl);
+	rdbgroup = ui_rdbgroup_make(cb_rdb_movement);
+	rdb = ui_rdb_make("directional", rdbgroup, 1);
+	rdb->_parent._parent.userdata = (void*) 1;
+	ui_wnd_add_child(window_settings, rdb);
+	rdb = ui_rdb_make("flat", rdbgroup, 0);
 	rdb->_parent._parent.userdata = 0;
 	ui_wnd_add_child(window_settings, rdb);
 

@@ -15,6 +15,7 @@ float font_size_x, font_size_y;
 int fontsize, fontratio;
 float fontheight, buttonheight, fontpadx, fontpady;
 char key_w, key_a, key_s, key_d;
+char directional_movement;
 
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
@@ -78,6 +79,7 @@ void ui_init()
 	key_a = VK_Q;
 	key_s = VK_S;
 	key_d = VK_D;
+	directional_movement = 1;
 	ui_set_fontsize(-2, -4);
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
@@ -274,16 +276,20 @@ void ui_do_key_movement()
 	float speed = 1.0f, angle, xylen;
 
 	if (currentKeyState->standards[key_w]) {
-		xylen = sinf(vertLookAngle);
+		xylen = directional_movement ? sinf(vertLookAngle) : 1.0f;
 		camera->position.x += cosf(horizLookAngle) * xylen * speed;
 		camera->position.y += sinf(horizLookAngle) * xylen * speed;
-		camera->position.z += cosf(vertLookAngle) * speed;
+		if (directional_movement) {
+			camera->position.z += cosf(vertLookAngle) * speed;
+		}
 		need_camera_update = 1;
 	} else if (currentKeyState->standards[key_s]) {
-		xylen = sinf(vertLookAngle);
+		xylen = directional_movement ? sinf(vertLookAngle) : 1.0f;
 		camera->position.x -= cosf(horizLookAngle) * xylen * speed;
 		camera->position.y -= sinf(horizLookAngle) * xylen * speed;
-		camera->position.z -= cosf(vertLookAngle) * speed;
+		if (directional_movement) {
+			camera->position.z -= cosf(vertLookAngle) * speed;
+		}
 		need_camera_update = 1;
 	}
 
