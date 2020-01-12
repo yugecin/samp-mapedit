@@ -17,6 +17,10 @@ struct RADIOBUTTONGROUP {
 };
 
 /**
+Gets userdata from the selected radiobutton in the given radiobuttongroup
+*/
+void *ui_rdbgroup_selected_data(struct RADIOBUTTONGROUP *group);
+/**
 Returned group does not need to be disposed (only if it has children)!
 
 It will be disposed when all its containing children are disposed.

@@ -5,6 +5,11 @@
 #include "ui.h"
 #include <string.h>
 
+void *ui_rdbgroup_selected_data(struct RADIOBUTTONGROUP *group)
+{
+	return group->activebutton->_parent._parent.userdata;
+}
+
 static
 void ui_rdb_set_checked(struct UI_RADIOBUTTON *rdb, int state)
 {
