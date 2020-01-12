@@ -314,11 +314,9 @@ void ui_do_key_movement()
 	}
 }
 
-struct RwV3D textloc;
-
 void ui_render()
 {
-	struct RwV3D v;
+	struct RwV3D v, click;
 
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
 		ui_default_font();
@@ -364,7 +362,7 @@ void ui_render()
 			need_camera_update = 0;
 		}
 
-		game_ScreenToWorld(&textloc, fresx / 2.0f, fresy / 2.0f, 20.0f);
+		game_ScreenToWorld(&click, fresx / 2.0f, fresy / 2.0f, 20.0f);
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
 			if ((active_window != NULL &&
@@ -402,18 +400,6 @@ void ui_render()
 			racecheckpoints[0].pos.y = v.y;
 			racecheckpoints[0].pos.z = v.z;
 		}
-	}
-
-	game_WorldToScreen(&v, &textloc);
-	if (v.z > 0.0f) {
-		game_TextSetLetterSize(1.0f, 1.0f);
-		game_TextSetMonospace(1);
-		game_TextSetColor(0xFFFFFFFF);
-		game_TextSetShadowColor(0xFF000000);
-		game_TextSetAlign(CENTER);
-		game_TextSetOutline(1);
-		game_TextSetFont(2);
-		game_TextPrintString(v.x, v.y, "here");
 	}
 }
 
