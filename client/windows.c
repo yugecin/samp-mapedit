@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "ui.h"
+#include "vk.h"
 #include "windows.h"
 #include <string.h>
 
@@ -39,6 +40,18 @@ static
 void cb_rdb_foliage(struct UI_RADIOBUTTON *rdb)
 {
 	toggle_foliage((int) rdb->_parent._parent.userdata);
+}
+
+static
+void cb_rdb_keys(struct UI_RADIOBUTTON *rdb)
+{
+	if((int) rdb->_parent._parent.userdata) {
+		key_w = VK_Z;
+		key_a = VK_Q;
+	} else {
+		key_w = VK_W;
+		key_a = VK_A;
+	}
 }
 
 static
@@ -135,6 +148,16 @@ void wnd_init()
 	rdb->_parent._parent.userdata = (void*) 1;
 	ui_wnd_add_child(window_settings, rdb);
 	rdb = ui_rdb_make("off", rdbgroup, 0);
+	rdb->_parent._parent.userdata = 0;
+	ui_wnd_add_child(window_settings, rdb);
+
+	lbl = ui_lbl_make("Keys:");
+	ui_wnd_add_child(window_settings, lbl);
+	rdbgroup = ui_rdbgroup_make(cb_rdb_keys);
+	rdb = ui_rdb_make("zqsd", rdbgroup, 1);
+	rdb->_parent._parent.userdata = (void*) 1;
+	ui_wnd_add_child(window_settings, rdb);
+	rdb = ui_rdb_make("wasd", rdbgroup, 0);
 	rdb->_parent._parent.userdata = 0;
 	ui_wnd_add_child(window_settings, rdb);
 

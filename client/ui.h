@@ -15,6 +15,7 @@ extern float canvasx, canvasy;
 Screen-space coordinates of the cursor.
 */
 extern float cursorx, cursory;
+extern char key_w, key_a, key_s, key_d;
 extern float font_size_x, font_size_y;
 extern int fontsize, fontratio;
 extern float fontheight, buttonheight, fontpadx, fontpady;

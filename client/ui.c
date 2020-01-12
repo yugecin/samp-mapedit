@@ -14,11 +14,11 @@ float cursorx, cursory;
 float font_size_x, font_size_y;
 int fontsize, fontratio;
 float fontheight, buttonheight, fontpadx, fontpady;
+char key_w, key_a, key_s, key_d;
 
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
-static char key_w, key_a, key_s, key_d;
 static char need_camera_update;
 
 struct UI_CONTAINER *background_element = NULL;
