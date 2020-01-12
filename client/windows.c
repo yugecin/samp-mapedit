@@ -36,9 +36,9 @@ void toggle_foliage(int should_be_enabled)
 }
 
 static
-void cb_rdb_foliage(struct RADIOBUTTONGROUP *grp, void *data)
+void cb_rdb_foliage(struct RADIOBUTTONGROUP *grp)
 {
-	toggle_foliage((int) data);
+	toggle_foliage((int) grp->activebutton->_parent._parent.userdata);
 }
 
 static
@@ -132,10 +132,10 @@ void wnd_init()
 	ui_wnd_add_child(window_settings, lbl);
 	rdbgroup = ui_rdbgroup_make(cb_rdb_foliage);
 	rdb = ui_rdb_make(0.0f, 0.0f, "on", rdbgroup, 1);
-	rdb->data = (void*) 1;
+	rdb->_parent._parent.userdata = (void*) 1;
 	ui_wnd_add_child(window_settings, rdb);
 	rdb = ui_rdb_make(0.0f, 0.0f, "off", rdbgroup, 0);
-	rdb->data = 0;
+	rdb->_parent._parent.userdata = 0;
 	ui_wnd_add_child(window_settings, rdb);
 
 	lbl = ui_lbl_make(0.0f, 0.0f, "UI_font_size:");

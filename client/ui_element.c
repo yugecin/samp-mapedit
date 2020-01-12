@@ -27,6 +27,7 @@ void ui_elem_init(void *elem, enum eUIElementType type, float x, float y)
 	e->alignment = 0;
 	e->span = 1;
 	e->parent = NULL;
+	e->userdata = NULL;
 }
 
 void ui_element_draw_background(struct UI_ELEMENT *elem, int argb)
