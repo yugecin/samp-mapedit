@@ -81,7 +81,7 @@ void ui_init()
 	ui_set_fontsize(-2, -4);
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
-	ui_elem_init(&dummy_element, DUMMY, 0.0f, 0.0f);
+	ui_elem_init(&dummy_element, DUMMY);
 	dummy_element.pref_height = dummy_element.pref_width = 0.0f;
 	ui_colpick_init();
 	background_element = ui_cnt_make();
