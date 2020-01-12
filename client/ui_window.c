@@ -200,17 +200,34 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 				child = wnd->_parent.children[i];
 				child->x += dx;
 				child->y += dy;
-			}
-		}
-		if (!wnd->_parent.need_layout) {
-			for (i = 0; i < wnd->_parent.childcount; i++) {
-				child = wnd->_parent.children[i];
 				child->proc_post_layout(child);
 			}
 		}
 	}
 	if (wnd->_parent.need_layout) {
 		update_layout(wnd);
+		child = (struct UI_ELEMENT*) wnd;
+		x = child->x;
+		y = child->y;
+		dx = 0;
+		dy = 0;
+		if (child->x + child->width > fresx) {
+			x = fresx - child->width;
+			dx = x - child->x;
+		}
+		if (child->y + child->height > fresy) {
+			y = fresy - child->height;
+			dy = y - child->y;
+		}
+		if (dx != 0 || dy != 0) {
+			child->x = x;
+			child->y = y;
+			for (i = 0; i < wnd->_parent.childcount; i++) {
+				child = wnd->_parent.children[i];
+				child->x += dx;
+				child->y += dy;
+			}
+		}
 		wnd->_parent.need_layout = 0;
 		for (i = 0; i < wnd->_parent.childcount; i++) {
 			child = wnd->_parent.children[i];
