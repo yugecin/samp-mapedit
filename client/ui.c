@@ -176,23 +176,29 @@ void ui_update_camera()
 }
 
 static
-void ui_activate()
+void ui_store_camera()
 {
 	struct CCam *ccam;
 	struct RwV3D rot;
 	float xylen;
 
+	ccam = &camera->cams[camera->activeCam];
+	camera->position = ccam->pos;
+	camera->rotation = ccam->lookVector;
+	rot = camera->rotation;
+	horizLookAngle = atan2f(rot.y, rot.x);
+	xylen = sqrtf(rot.x * rot.x + rot.y * rot.y);
+	vertLookAngle = atan2f(xylen, rot.z);
+}
+
+static
+void ui_activate()
+{
 	if (!active) {
 		active = 1;
 		game_FreezePlayer(1);
-		ccam = &camera->cams[camera->activeCam];
-		camera->position = ccam->pos;
-		camera->rotation = ccam->lookVector;
-		rot = camera->rotation;
+		ui_store_camera();
 		need_camera_update = 1;
-		horizLookAngle = atan2f(rot.y, rot.x);
-		xylen = sqrtf(rot.x * rot.x + rot.y * rot.y);
-		vertLookAngle = atan2f(xylen, rot.z);
 		*enableHudByOpcode = 0;
 		originalHudScaleX = *hudScaleX;
 		originalHudScaleY = *hudScaleY;
@@ -318,8 +324,8 @@ void ui_render()
 {
 	struct RwV3D v, click;
 
+	ui_default_font();
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
-		ui_default_font();
 		ui_recalculate_sizes();
 		/*TODO: recalculate element sizes*/
 	}
@@ -336,8 +342,6 @@ void ui_render()
 	}
 
 	if (active) {
-		ui_default_font();
-
 		ui_mouse_is_just_down =
 			activeMouseState->lmb && !prevMouseState->lmb;
 		ui_mouse_is_just_up =
@@ -355,6 +359,20 @@ void ui_render()
 			ui_do_key_movement();
 		} else {
 			ui_do_cursor_movement();
+		}
+
+		if (activeKeyState->standards[VK_T] &&
+			!currentKeyState->standards[VK_T])
+		{
+			game_CameraRestoreWithJumpCut();
+			/*need to store camera but camera is only applied
+			on the next frame(?), so make sure camera doesn't update
+			now and check for T key release*/
+			need_camera_update = 0;
+		} else  if (currentKeyState->standards[VK_T] &&
+			!activeKeyState->standards[VK_T])
+		{
+			ui_store_camera();
 		}
 
 		if (need_camera_update) {
@@ -400,6 +418,20 @@ void ui_render()
 			racecheckpoints[0].pos.y = v.y;
 			racecheckpoints[0].pos.z = v.z;
 		}
+
+		game_TextSetAlign(CENTER);
+		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
+			"~w~press ~r~T ~w~to reset camera");
+	} else {
+		originalHudScaleX = *hudScaleX;
+		originalHudScaleY = *hudScaleY;
+		*hudScaleX = 0.0009f;
+		*hudScaleY = 0.0014f;
+		game_TextSetAlign(CENTER);
+		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
+			"~w~press ~r~R ~w~to activate UI");
+		*hudScaleX = originalHudScaleX;
+		*hudScaleY = originalHudScaleY;
 	}
 }
 

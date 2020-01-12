@@ -25,6 +25,13 @@ __declspec(naked) void game_CameraRestore()
 	_asm jmp eax
 }
 
+__declspec(naked) void game_CameraRestoreWithJumpCut()
+{
+	_asm mov ecx, camera
+	_asm mov eax, 0x50BAB0
+	_asm jmp eax
+}
+
 /**
 @param unk when 2, seems to restore the camera?
 */
