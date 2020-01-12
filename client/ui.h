@@ -8,6 +8,9 @@
 #include "ui_radiobutton.h"
 #include "ui_colorpicker.h"
 #include "ui_window.h"
+#define UI_DEFAULT_FONT_SIZE -2
+#define UI_DEFAULT_FONT_RATIO -4
+
 
 extern float fresx, fresy;
 extern float canvasx, canvasy;

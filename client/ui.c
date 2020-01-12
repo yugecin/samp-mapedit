@@ -81,7 +81,7 @@ void ui_init()
 	key_d = VK_D;
 	directional_movement = 1;
 	has_set_camera_once = 0;
-	ui_set_fontsize(-2, -4);
+	ui_set_fontsize(UI_DEFAULT_FONT_SIZE, UI_DEFAULT_FONT_RATIO);
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
 	ui_elem_init(&dummy_element, DUMMY);

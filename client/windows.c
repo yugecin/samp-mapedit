@@ -61,38 +61,36 @@ void cb_rdb_movement(struct UI_RADIOBUTTON *rdb)
 }
 
 static
-void cb_btn_uifontsup(struct UI_BUTTON *btn)
+void cb_btn_uifontsize(struct UI_BUTTON *btn)
 {
-	if (fontsize < 25) {
-		fontsize++;
-		ui_set_fontsize(fontsize, fontratio);
-	}
-}
+	int data;
 
-static
-void cb_btn_uifontsdown(struct UI_BUTTON *btn)
-{
-	if (fontsize > -25) {
+	data = (int) btn->_parent.userdata;
+	if (data < 0 && fontsize > -25) {
 		fontsize--;
 		ui_set_fontsize(fontsize, fontratio);
-	}
-}
-
-static
-void cb_btn_uifontrup(struct UI_BUTTON *btn)
-{
-	if (fontratio < 25) {
-		fontratio++;
+	} else if (data > 0 && fontsize < 25) {
+		fontsize++;
 		ui_set_fontsize(fontsize, fontratio);
+	} else if (data == 0) {
+		ui_set_fontsize(UI_DEFAULT_FONT_SIZE, fontratio);
 	}
 }
 
 static
-void cb_btn_uifontrdown(struct UI_BUTTON *btn)
+void cb_btn_uifontratio(struct UI_BUTTON *btn)
 {
-	if (fontratio > -25) {
+	int data;
+
+	data = (int) btn->_parent.userdata;
+	if (data < 0 && fontratio > -25) {
 		fontratio--;
 		ui_set_fontsize(fontsize, fontratio);
+	} else if (data > 0 && fontratio < 25) {
+		fontratio++;
+		ui_set_fontsize(fontsize, fontratio);
+	} else if (data == 0) {
+		ui_set_fontsize(fontsize, UI_DEFAULT_FONT_RATIO);
 	}
 }
 
@@ -145,13 +143,14 @@ void wnd_init()
 
 	/*TODO: movements stuff*/
 	window_settings = ui_wnd_make(500.0f, 500.0f, "Settings");
-	window_settings->columns = 3;
+	window_settings->columns = 4;
 
 	lbl = ui_lbl_make("Foliage:");
 	ui_wnd_add_child(window_settings, lbl);
 	rdbgroup = ui_rdbgroup_make(cb_rdb_foliage);
 	rdb = ui_rdb_make("on", rdbgroup, 1);
 	rdb->_parent._parent.userdata = (void*) 1;
+	rdb->_parent._parent.span = 2;
 	ui_wnd_add_child(window_settings, rdb);
 	rdb = ui_rdb_make("off", rdbgroup, 0);
 	rdb->_parent._parent.userdata = 0;
@@ -162,6 +161,7 @@ void wnd_init()
 	rdbgroup = ui_rdbgroup_make(cb_rdb_keys);
 	rdb = ui_rdb_make("zqsd", rdbgroup, 1);
 	rdb->_parent._parent.userdata = (void*) 1;
+	rdb->_parent._parent.span = 2;
 	ui_wnd_add_child(window_settings, rdb);
 	rdb = ui_rdb_make("wasd", rdbgroup, 0);
 	rdb->_parent._parent.userdata = 0;
@@ -172,6 +172,7 @@ void wnd_init()
 	rdbgroup = ui_rdbgroup_make(cb_rdb_movement);
 	rdb = ui_rdb_make("directional", rdbgroup, 1);
 	rdb->_parent._parent.userdata = (void*) 1;
+	rdb->_parent._parent.span = 2;
 	ui_wnd_add_child(window_settings, rdb);
 	rdb = ui_rdb_make("flat", rdbgroup, 0);
 	rdb->_parent._parent.userdata = 0;
@@ -179,16 +180,26 @@ void wnd_init()
 
 	lbl = ui_lbl_make("UI_font_size:");
 	ui_wnd_add_child(window_settings, lbl);
-	btn = ui_btn_make("-", cb_btn_uifontsdown);
+	btn = ui_btn_make("-", cb_btn_uifontsize);
+	btn->_parent.userdata = (void*) -1;
 	ui_wnd_add_child(window_settings, btn);
-	btn = ui_btn_make("+", cb_btn_uifontsup);
+	btn = ui_btn_make("+", cb_btn_uifontsize);
+	btn->_parent.userdata = (void*) 1;
+	ui_wnd_add_child(window_settings, btn);
+	btn = ui_btn_make("reset", cb_btn_uifontsize);
+	btn->_parent.userdata = (void*) 0;
 	ui_wnd_add_child(window_settings, btn);
 
 	lbl = ui_lbl_make("UI_font_ratio:");
 	ui_wnd_add_child(window_settings, lbl);
-	btn = ui_btn_make("-", cb_btn_uifontrdown);
+	btn = ui_btn_make("-", cb_btn_uifontratio);
+	btn->_parent.userdata = (void*) -1;
 	ui_wnd_add_child(window_settings, btn);
-	btn = ui_btn_make("+", cb_btn_uifontrup);
+	btn = ui_btn_make("+", cb_btn_uifontratio);
+	btn->_parent.userdata = (void*) 1;
+	ui_wnd_add_child(window_settings, btn);
+	btn = ui_btn_make("reset", cb_btn_uifontratio);
+	btn->_parent.userdata = (void*) 0;
 	ui_wnd_add_child(window_settings, btn);
 
 	/*            checkpoint settings*/
