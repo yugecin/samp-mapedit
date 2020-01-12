@@ -86,7 +86,8 @@ void ui_colpick_update(struct UI_COLORPICKER *colpick)
 	int col;
 
 	if (ui_element_being_clicked == colpick) {
-		dx = cursorx - colpick->_parent.x - colpick->size / 2.0f;
+		dx = cursorx - colpick->_parent.x;
+		dx -= colpick->_parent.width / 2.0f;
 		dy = cursory - colpick->_parent.y - colpick->size / 2.0f;
 		dist = (float) sqrt(dx * dx + dy * dy) / colpick->size * 2.0f;
 		if (dist > 1.0f) {
@@ -120,7 +121,7 @@ void ui_colpick_draw(struct UI_COLORPICKER *colpick)
 	int i;
 
 	size = colpick->size / 2.0f;
-	x = colpick->_parent.x + size;
+	x = colpick->_parent.x + colpick->_parent.width / 2.0f;
 	y = colpick->_parent.y + size;
 	memcpy(verts, normverts, sizeof(normverts));
 	verts[0].x = x;
@@ -144,7 +145,7 @@ int ui_colpick_mousedown(struct UI_COLORPICKER *colpick)
 {
 	float dx, dy, size;
 
-	dx = cursorx - colpick->_parent.x - colpick->size / 2.0f;
+	dx = cursorx - colpick->_parent.x - colpick->_parent.width / 2.0f;
 	dy = cursory - colpick->_parent.y - colpick->size / 2.0f;
 	size = colpick->size;
 	if (dx * dx + dy * dy < size * size / 4.0f) {
