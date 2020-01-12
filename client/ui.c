@@ -20,7 +20,7 @@ char directional_movement;
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
-static char need_camera_update;
+static char need_camera_update, has_set_camera_once;
 
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
@@ -80,6 +80,7 @@ void ui_init()
 	key_s = VK_S;
 	key_d = VK_D;
 	directional_movement = 1;
+	has_set_camera_once = 0;
 	ui_set_fontsize(-2, -4);
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
@@ -197,7 +198,10 @@ void ui_activate()
 	if (!active) {
 		active = 1;
 		game_FreezePlayer(1);
-		ui_store_camera();
+		if (!has_set_camera_once) {
+			ui_store_camera();
+			has_set_camera_once = 1;
+		}
 		need_camera_update = 1;
 		*enableHudByOpcode = 0;
 		originalHudScaleX = *hudScaleX;
