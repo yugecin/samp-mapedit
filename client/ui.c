@@ -108,10 +108,8 @@ void ui_init()
 
 void ui_show_window(struct UI_WINDOW *wnd)
 {
-	if (active_window == NULL) {
-		active_window = wnd;
-		wnd->_parent.need_layout = 1;
-	}
+	active_window = wnd;
+	wnd->_parent.need_layout = 1;
 }
 
 void ui_hide_window(struct UI_WINDOW *wnd)
