@@ -4,7 +4,9 @@
 #include "game.h"
 #include "ui.h"
 #include "vk.h"
+#include <stdio.h>
 #include <string.h>
+#include <windows.h>
 
 #define KEYS_ZQSD ((void*) 1)
 #define KEYS_WASD ((void*) 0)
@@ -169,12 +171,48 @@ void cb_btn_settings(struct UI_BUTTON *btn)
 static
 void cb_btn_reload(struct UI_BUTTON *btn)
 {
-	/*TODO*/
+	FILE *ini;
+	int pos, i;
+	char buf[80];
+
 	saved_fontsize = UI_DEFAULT_FONT_SIZE;
 	saved_fontratio = UI_DEFAULT_FONT_RATIO;
-	saved_foliage = (int )FOLIAGE_ON;
+	saved_foliage = (int) FOLIAGE_ON;
 	saved_directional_movement = (int) MOVEMENT_DIR;
 	saved_zqsd = (int) KEYS_ZQSD;
+
+	ini = fopen("samp-mapedit\\settings.txt", "r");
+	if (ini != NULL) {
+		pos = 0;
+nextline:
+		memset(buf, 0, sizeof(buf));
+		fseek(ini, pos, SEEK_SET);
+		if (fread(buf, 1, sizeof(buf) - 1, ini) == 0) {
+			goto done;
+		}
+		if (strncmp("fontsize ", buf, 9) == 0) {
+			saved_fontsize = atoi(buf + (i = 9));
+		} else if (strncmp("fontratio ", buf, 10) == 0) {
+			saved_fontratio = atoi(buf + (i = 10));
+		} else if (strncmp("foliage ", buf, 8) == 0) {
+			saved_foliage = atoi(buf + (i = 8));
+		} else if (strncmp("directional_movement ", buf, 21) == 0) {
+			saved_directional_movement = atoi(buf + (i = 21));
+		} else if (strncmp("zqsd ", buf, 5) == 0) {
+			saved_zqsd = atoi(buf + (i = 5));
+		} else {
+			i = 0;
+		}
+		while (buf[i] != 0 && buf[i] != '\n') {
+			i++;
+		}
+		i++;
+		pos += i;
+		goto nextline;
+done:
+		fclose(ini);
+	}
+
 	ui_rdb_click_match_userdata(rdbgroup_foliage, (void*) saved_foliage);
 	ui_rdb_click_match_userdata(rdbgroup_keys, (void*) saved_zqsd);
 	ui_rdb_click_match_userdata(rdbgroup_movement,
@@ -258,6 +296,8 @@ void settings_init()
 	btn = ui_btn_make("reload_saved_settings", cb_btn_reload);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(window_settings, btn);
+
+	CreateDirectoryA("samp-mapedit", NULL);
 
 	btn_save_null_when_unchanged = NULL;
 	cb_btn_reload(NULL); /*loads saved settings*/
