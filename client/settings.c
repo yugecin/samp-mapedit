@@ -206,8 +206,7 @@ nextline:
 		while (buf[i] != 0 && buf[i] != '\n') {
 			i++;
 		}
-		i++;
-		pos += i;
+		pos += i + 2;
 		goto nextline;
 done:
 		fclose(ini);
