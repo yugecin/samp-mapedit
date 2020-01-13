@@ -27,21 +27,6 @@ static int saved_foliage, saved_directional_movement, saved_zqsd;
 static unsigned char foliageCall[5] = { 0, 0, 0, 0, 0 };
 
 static
-void btn_save_update(struct UI_BUTTON *btn)
-{
-	float angle;
-	int col;
-
-	angle = (*timeInGame % 2500) / 2500.0f;
-	col = 0xFF000000;
-	col |= hue(angle, HUE_COMP_R);
-	col |= hue(angle, HUE_COMP_G) << 8;
-	col |= hue(angle, HUE_COMP_B) << 16;
-	btn->foregroundABGR = col;
-	((ui_method*) btn->_parent.userdata)(btn);
-}
-
-static
 void settings_remove_save_button()
 {
 	ui_wnd_remove_child(window_settings, btn_save_null_when_unchanged);
@@ -77,10 +62,8 @@ void settings_changed()
 	if (settings_are_changed()) {
 		if (btn_save_null_when_unchanged == NULL) {
 			btn = ui_btn_make("save_settings", cb_btn_save);
-			btn->foregroundABGR = 0xFFFF0000;
 			btn->_parent.span = window_settings->columns;
 			btn->_parent.userdata = btn->_parent.proc_update;
-			btn->_parent.proc_update = (ui_method*) btn_save_update;
 			ui_wnd_add_child(window_settings, btn);
 			btn_save_null_when_unchanged = btn;
 		}
