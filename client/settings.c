@@ -63,6 +63,9 @@ void cb_btn_save(struct UI_BUTTON *btn)
 		len = sprintf(buf, "dirmov %d\n", saved_dirmov);
 		fwrite(buf, sizeof(char), len, ini);
 		fclose(ini);
+	} else {
+		sprintf(debugstring, "~r~failed to write settings");
+		ui_push_debug_string();
 	}
 }
 
@@ -233,6 +236,9 @@ nextline:
 		goto nextline;
 done:
 		fclose(ini);
+	} else {
+		sprintf(debugstring, "~r~failed to read settings");
+		ui_push_debug_string();
 	}
 
 	ui_rdb_click_match_userdata(rdbgroup_foliage, (void*) saved_foliage);
