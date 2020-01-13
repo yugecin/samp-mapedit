@@ -24,7 +24,7 @@ static struct RADIOBUTTONGROUP *rdbgroup_foliage;
 static struct RADIOBUTTONGROUP *rdbgroup_keys;
 
 static int saved_fontsize, saved_fontratio;
-static int saved_foliage, saved_directional_movement, saved_zqsd;
+static int saved_foliage, saved_dirmov, saved_zqsd;
 
 static unsigned char foliageCall[5] = { 0, 0, 0, 0, 0 };
 
@@ -39,7 +39,31 @@ void settings_remove_save_button()
 static
 void cb_btn_save(struct UI_BUTTON *btn)
 {
+	FILE *ini;
+	int len;
+	char buf[80];
+
 	settings_remove_save_button();
+	saved_foliage = (int) ui_rdbgroup_selected_data(rdbgroup_foliage);
+	saved_zqsd = (int) ui_rdbgroup_selected_data(rdbgroup_keys);
+	saved_dirmov = (int) ui_rdbgroup_selected_data(rdbgroup_movement);
+	saved_fontsize = fontsize;
+	saved_fontratio = fontratio;
+
+	ini = fopen("samp-mapedit\\settings.txt", "w");
+	if (ini != NULL) {
+		len = sprintf(buf, "fontsize %d\n", fontsize);
+		fwrite(buf, sizeof(char), len, ini);
+		len = sprintf(buf, "fontratio %d\n", fontratio);
+		fwrite(buf, sizeof(char), len, ini);
+		len = sprintf(buf, "foliage %d\n", saved_foliage);
+		fwrite(buf, sizeof(char), len, ini);
+		len = sprintf(buf, "zqsd %d\n", saved_zqsd);
+		fwrite(buf, sizeof(char), len, ini);
+		len = sprintf(buf, "dirmov %d\n", saved_dirmov);
+		fwrite(buf, sizeof(char), len, ini);
+		fclose(ini);
+	}
 }
 
 static
@@ -50,7 +74,7 @@ int settings_are_changed()
 			(int) ui_rdbgroup_selected_data(rdbgroup_foliage)) ||
 		(saved_zqsd ^
 			(int) ui_rdbgroup_selected_data(rdbgroup_keys)) ||
-		(saved_directional_movement ^
+		(saved_dirmov ^
 			(int) ui_rdbgroup_selected_data(rdbgroup_movement)) ||
 		fontsize != UI_DEFAULT_FONT_SIZE ||
 		fontratio != UI_DEFAULT_FONT_RATIO;
@@ -77,7 +101,6 @@ void settings_changed()
 static
 void toggle_foliage(int should_be_enabled)
 {
-
 	void* position;
 
 	if (*((unsigned char*) 0x53C159) == 0x90) {
@@ -178,7 +201,7 @@ void cb_btn_reload(struct UI_BUTTON *btn)
 	saved_fontsize = UI_DEFAULT_FONT_SIZE;
 	saved_fontratio = UI_DEFAULT_FONT_RATIO;
 	saved_foliage = (int) FOLIAGE_ON;
-	saved_directional_movement = (int) MOVEMENT_DIR;
+	saved_dirmov = (int) MOVEMENT_DIR;
 	saved_zqsd = (int) KEYS_ZQSD;
 
 	ini = fopen("samp-mapedit\\settings.txt", "r");
@@ -196,8 +219,8 @@ nextline:
 			saved_fontratio = atoi(buf + (i = 10));
 		} else if (strncmp("foliage ", buf, 8) == 0) {
 			saved_foliage = atoi(buf + (i = 8));
-		} else if (strncmp("directional_movement ", buf, 21) == 0) {
-			saved_directional_movement = atoi(buf + (i = 21));
+		} else if (strncmp("dirmov ", buf, 7) == 0) {
+			saved_dirmov = atoi(buf + (i = 7));
 		} else if (strncmp("zqsd ", buf, 5) == 0) {
 			saved_zqsd = atoi(buf + (i = 5));
 		} else {
@@ -214,8 +237,7 @@ done:
 
 	ui_rdb_click_match_userdata(rdbgroup_foliage, (void*) saved_foliage);
 	ui_rdb_click_match_userdata(rdbgroup_keys, (void*) saved_zqsd);
-	ui_rdb_click_match_userdata(rdbgroup_movement,
-		(void*) saved_directional_movement);
+	ui_rdb_click_match_userdata(rdbgroup_movement, (void*) saved_dirmov);
 	ui_set_fontsize(saved_fontsize, saved_fontratio);
 	settings_changed();
 }
