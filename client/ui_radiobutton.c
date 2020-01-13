@@ -75,6 +75,18 @@ void ui_rdbgroup_clicked(
 	}
 }
 
+void ui_rdb_click_match_userdata(struct RADIOBUTTONGROUP *group, void *data)
+{
+	int i;
+
+	for (i = 0; i < group->buttoncount; i++) {
+		if (group->buttons[i]->_parent._parent.userdata == data) {
+			ui_rdbgroup_clicked(group, group->buttons[i]);
+			return;
+		}
+	}
+}
+
 struct RADIOBUTTONGROUP *ui_rdbgroup_make(rdbcb *proc_change)
 {
 	struct RADIOBUTTONGROUP *grp;

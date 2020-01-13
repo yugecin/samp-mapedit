@@ -166,18 +166,28 @@ void cb_btn_settings(struct UI_BUTTON *btn)
 	ui_show_window(window_settings);
 }
 
-void settings_init()
+static
+void cb_btn_reload(struct UI_BUTTON *btn)
 {
-	struct UI_BUTTON *btn;
-	struct UI_RADIOBUTTON *rdb;
-	struct UI_LABEL *lbl;
-
+	/*TODO*/
 	saved_fontsize = UI_DEFAULT_FONT_SIZE;
 	saved_fontratio = UI_DEFAULT_FONT_RATIO;
 	saved_foliage = (int )FOLIAGE_ON;
 	saved_directional_movement = (int) MOVEMENT_DIR;
 	saved_zqsd = (int) KEYS_ZQSD;
-	btn_save_null_when_unchanged = NULL;
+	ui_rdb_click_match_userdata(rdbgroup_foliage, (void*) saved_foliage);
+	ui_rdb_click_match_userdata(rdbgroup_keys, (void*) saved_zqsd);
+	ui_rdb_click_match_userdata(rdbgroup_movement,
+		(void*) saved_directional_movement);
+	ui_set_fontsize(saved_fontsize, saved_fontratio);
+	settings_changed();
+}
+
+void settings_init()
+{
+	struct UI_BUTTON *btn;
+	struct UI_RADIOBUTTON *rdb;
+	struct UI_LABEL *lbl;
 
 	btn = ui_btn_make("Settings", cb_btn_settings);
 	btn->_parent.x = 10.0f;
@@ -243,6 +253,14 @@ void settings_init()
 	btn = ui_btn_make("reset", cb_btn_uifontratio);
 	btn->_parent.userdata = (void*) 0;
 	ui_wnd_add_child(window_settings, btn);
+
+	ui_wnd_add_child(window_settings, NULL);
+	btn = ui_btn_make("reload_saved_settings", cb_btn_reload);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(window_settings, btn);
+
+	btn_save_null_when_unchanged = NULL;
+	cb_btn_reload(NULL); /*loads saved settings*/
 }
 
 void settings_dispose()

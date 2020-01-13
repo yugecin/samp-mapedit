@@ -17,6 +17,10 @@ struct RADIOBUTTONGROUP {
 };
 
 /**
+Perform a click on the button in the radiobutton group that has given userdata.
+*/
+void ui_rdb_click_match_userdata(struct RADIOBUTTONGROUP *group, void *data);
+/**
 Gets userdata from the selected radiobutton in the given radiobuttongroup
 */
 void *ui_rdbgroup_selected_data(struct RADIOBUTTONGROUP *group);
