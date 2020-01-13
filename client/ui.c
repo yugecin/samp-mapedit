@@ -25,6 +25,13 @@ static char need_camera_update, has_set_camera_once;
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
 
+#define DEBUG_STRING_POOL 10
+#define DEBUG_STRING_LEN 256
+
+char debugstr[DEBUG_STRING_POOL * DEBUG_STRING_LEN];
+char *debugstring = debugstr;
+char debugstringidx = 0;
+
 void* ui_element_being_clicked;
 int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
@@ -63,6 +70,15 @@ void ui_recalculate_sizes()
 		fontpadx = 4.0f;
 	}
 	buttonheight = fontheight + 2.0f * fontpady;
+}
+
+void ui_push_debug_string()
+{
+	debugstringidx++;
+	if (debugstringidx >= DEBUG_STRING_POOL) {
+		debugstringidx = 0;
+	}
+	debugstring = debugstr + DEBUG_STRING_LEN * debugstringidx;
 }
 
 void ui_init()
@@ -313,6 +329,23 @@ void ui_do_key_movement()
 	}
 }
 
+void ui_draw_debug_strings()
+{
+	int i, j;
+
+	i = debugstringidx;
+	j = 0;
+	do {
+		game_TextPrintString(5.0f, 100.0f + j * fontheight,
+			debugstr + DEBUG_STRING_LEN * i);
+		j++;
+		i++;
+		if (i >= DEBUG_STRING_POOL) {
+			i = 0;
+		}
+	} while (i != debugstringidx);
+}
+
 void ui_render()
 {
 	struct RwV3D v, click;
@@ -398,6 +431,8 @@ void ui_render()
 			ui_wnd_draw(active_window);
 		}
 
+		ui_draw_debug_strings();
+
 		ui_draw_cursor();
 
 		if (ui_element_being_clicked == background_element) {
@@ -420,6 +455,7 @@ void ui_render()
 		originalHudScaleY = *hudScaleY;
 		*hudScaleX = 0.0009f;
 		*hudScaleY = 0.0014f;
+		ui_draw_debug_strings();
 		game_TextSetAlign(CENTER);
 		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
 			"~w~press ~r~R ~w~to activate UI");

@@ -27,7 +27,12 @@ extern void* ui_element_being_clicked;
 extern int ui_mouse_is_just_down;
 extern int ui_mouse_is_just_up;
 extern struct UI_CONTAINER *background_element;
+extern char *debugstring;
 
+/**
+To be called after writing to debugstring
+*/
+void ui_push_debug_string();
 void ui_default_font();
 void ui_dispose();
 void ui_init();
