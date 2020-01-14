@@ -20,10 +20,64 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
 }
 
+static
+void gen_gamemode_script()
+{
+	FILE *f;
+	int size;
+	int passthrufuncs, natives;
+	union {
+		char i1;
+		short i2;
+		int i4;
+		char buf[1000];
+	} data;
+	char nametable[10000];
+
+	passthrufuncs = 0; /*TODO test this later...*/
+	natives = 0;
+
+	/*error handling is.. missing*/
+	f = fopen("mapedit.amx", "wb");
+	/*prefix*/
+	fwrite(data.buf, 4, 1, f); /*size, to be set when done*/
+	data.i2 = 0xF1E0;
+	fwrite(data.buf, 2, 1, f); /*magic*/
+	data.i1 = 0x8;
+	fwrite(data.buf, 1, 1, f); /*file version*/
+	data.i1 = 0x8;
+	fwrite(data.buf, 1, 1, f); /*amx version*/
+	data.i2 = 0x14;
+	fwrite(data.buf, 2, 1, f); /*flags*/
+	data.i2 = 0x8;
+	fwrite(data.buf, 2, 1, f); /*defsize*/
+	data.i4 = 0; // TODO
+	fwrite(data.buf, 4, 1, f); /*cod*/
+	data.i4 = 0; // TODO
+	fwrite(data.buf, 4, 1, f); /*dat*/
+	data.i4 = 0; // TODO
+	fwrite(data.buf, 4, 1, f); /*hea*/
+	data.i4 = 0; // TODO
+	fwrite(data.buf, 4, 1, f); /*stp*/
+	data.i4 = 0; // TODO
+	fwrite(data.buf, 4, 1, f); /*cip*/
+	data.i4 = 0x38;
+	fwrite(data.buf, 4, 1, f); /*publics*/
+	data.i4 += passthrufuncs * 0x8;
+	fwrite(data.buf, 4, 1, f); /*natives*/
+	data.i4 += natives * 0x8;
+	fwrite(data.buf, 4, 1, f); /*libraries*/
+	fwrite(data.buf, 4, 1, f); /*pubvars*/
+	fwrite(data.buf, 4, 1, f); /*tags*/
+	fwrite(data.buf, 4, 1, f); /*nametable*/
+	size = 0x38;
+}
+
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
+	gen_gamemode_script();
 	return 1;
 }
 
