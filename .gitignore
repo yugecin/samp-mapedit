@@ -5,3 +5,5 @@
 /*.ncb
 /out-debug/
 /out-release/
+/server/**
+!/server/server.cfg
