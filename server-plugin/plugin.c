@@ -23,23 +23,28 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 static
 void gen_gamemode_script()
 {
+#define PUBLICS 2
+#define NATIVES 2
+
 	FILE *f;
-	int size;
-	int passthrufuncs, natives;
+	int tmp, size;
+	char pubtbl[PUBLICS * 8], nattbl[NATIVES * 8];
+	int pubidx, natidx;
+	int cod;
 	union {
 		char i1;
 		short i2;
 		int i4;
 		char buf[1000];
 	} data;
-	char nametable[10000];
-
-	passthrufuncs = 0; /*TODO test this later...*/
-	natives = 0;
+	struct {
+		int addr, sym;
+	} *table_entry;
 
 	/*error handling is.. missing*/
 	f = fopen("mapedit.amx", "wb");
-	/*prefix*/
+
+	/*header*/
 	fwrite(data.buf, 4, 1, f); /*size, to be set when done*/
 	data.i2 = 0xF1E0;
 	fwrite(data.buf, 2, 1, f); /*magic*/
@@ -51,26 +56,100 @@ void gen_gamemode_script()
 	fwrite(data.buf, 2, 1, f); /*flags*/
 	data.i2 = 0x8;
 	fwrite(data.buf, 2, 1, f); /*defsize*/
-	data.i4 = 0; // TODO
+	data.i4 = 0; /*done later*/
 	fwrite(data.buf, 4, 1, f); /*cod*/
-	data.i4 = 0; // TODO
+	data.i4 = 0; /*done later*/
 	fwrite(data.buf, 4, 1, f); /*dat*/
-	data.i4 = 0; // TODO
+	data.i4 = 0; /*done later*/
 	fwrite(data.buf, 4, 1, f); /*hea*/
-	data.i4 = 0; // TODO
+	data.i4 = 0; /*done later*/
 	fwrite(data.buf, 4, 1, f); /*stp*/
-	data.i4 = 0; // TODO
+	data.i4 = 0;
 	fwrite(data.buf, 4, 1, f); /*cip*/
 	data.i4 = 0x38;
-	fwrite(data.buf, 4, 1, f); /*publics*/
-	data.i4 += passthrufuncs * 0x8;
-	fwrite(data.buf, 4, 1, f); /*natives*/
-	data.i4 += natives * 0x8;
+	fwrite(data.buf, 4, 1, f); /*publictable*/
+	data.i4 += sizeof(pubtbl);
+	fwrite(data.buf, 4, 1, f); /*nativetable*/
+	data.i4 += sizeof(nattbl);
 	fwrite(data.buf, 4, 1, f); /*libraries*/
 	fwrite(data.buf, 4, 1, f); /*pubvars*/
 	fwrite(data.buf, 4, 1, f); /*tags*/
 	fwrite(data.buf, 4, 1, f); /*nametable*/
-	size = 0x38;
+	size = 0x38; /*header*/
+
+	/*pubtbl, dummy for now*/
+	fwrite(pubtbl, sizeof(pubtbl), 1, f);
+	size += sizeof(pubtbl);
+
+	/*nattbl, dummy for now*/
+	fwrite(nattbl, sizeof(nattbl), 1, f);
+	size += sizeof(nattbl);
+
+	/*namtbl*/
+	data.i2 = 31;
+	fwrite(data.buf, 2, 1, f); /*max name len (I suppose?)*/
+	size += 2;
+	pubidx = 0;
+	natidx = 0;
+	/*first [PUBLICS] amount of natives should be the names of the
+	native plugin functions to passthrough callbacks to*/
+#define NATIVE(NAME) \
+	tmp=strlen(NAME)+1;\
+	fwrite(NAME,tmp,1,f);\
+	table_entry->addr=0;\
+	table_entry->sym=size;\
+	table_entry++;\
+	size+=tmp;
+	table_entry = (void*) nattbl;
+	NATIVE("CreateObject");
+	NATIVE("DestroyObject");
+#define PUBLIC(NAME) \
+	tmp=strlen(NAME)+1;\
+	fwrite(NAME,tmp,1,f);\
+	table_entry->addr=(2+pubidx*4)*4;\
+	table_entry->sym=size;\
+	table_entry++;\
+	size+=tmp;
+	table_entry = (void*) pubtbl;
+	PUBLIC("public1");
+	PUBLIC("public2");
+
+	cod = size;
+
+	/*code segment*/
+	/*entrypoint*/
+	data.i1 = 46; /*OP_PROC*/
+	fwrite(data.buf, 1, 1, f);
+	data.i1 = 48; /*OP_RETN*/
+	fwrite(data.buf, 1, 1, f);
+	size += 2;
+	/*publics*/
+	for (tmp = 0; tmp < PUBLICS; tmp++) {
+		data.buf[0] = 46; /*OP_PROC*/
+		data.buf[1] = 123; /*OP_SYSREC_C*/
+		data.buf[2] = tmp; /*name table entry*/
+		data.buf[3] = 48; /*OP_RETN*/
+		fwrite(data.buf, 4, 1, f);
+	}
+	size += 4 * PUBLICS;
+
+	fseek(f, 0, SEEK_SET);
+	data.i4 = size;
+	fwrite(data.buf, 4, 1, f); /*size*/
+	fseek(f, 0xC, SEEK_SET);
+	data.i4 = cod;
+	fwrite(data.buf, 4, 1, f); /*cod*/
+	data.i4 += 0x1100; /*TODO what decides this amount*/
+	fwrite(data.buf, 4, 1, f); /*dat*/
+	fwrite(data.buf, 4, 1, f); /*hea*/
+	data.i4 += STACK_HEAP_SIZE * 4;
+	fwrite(data.buf, 4, 1, f); /*stp*/
+
+	fseek(f, 0x38, SEEK_SET);
+	fwrite(pubtbl, sizeof(pubtbl), 1, f); /*pubtbl*/
+	fwrite(nattbl, sizeof(nattbl), 1, f); /*nattbl*/
+
+	fclose(f);
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
