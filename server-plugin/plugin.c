@@ -29,7 +29,7 @@ void gen_gamemode_script()
 	FILE *f;
 	int tmp, size;
 	char pubtbl[PUBLICS * 8], nattbl[NATIVES * 8];
-	int pubidx, natidx;
+	int pubidx;
 	int cod;
 	union {
 		char i1;
@@ -64,7 +64,7 @@ void gen_gamemode_script()
 	fwrite(data.buf, 4, 1, f); /*hea*/
 	data.i4 = 0; /*done later*/
 	fwrite(data.buf, 4, 1, f); /*stp*/
-	data.i4 = 0;
+	data.i4 = 4 * PUBLICS * 4;
 	fwrite(data.buf, 4, 1, f); /*cip*/
 	data.i4 = 0x38;
 	fwrite(data.buf, 4, 1, f); /*publictable*/
@@ -90,7 +90,6 @@ void gen_gamemode_script()
 	fwrite(data.buf, 2, 1, f); /*max name len (I suppose?)*/
 	size += 2;
 	pubidx = 0;
-	natidx = 0;
 	/*first [PUBLICS] amount of natives should be the names of the
 	native plugin functions to passthrough callbacks to*/
 #define NATIVE(NAME) \
@@ -109,6 +108,7 @@ void gen_gamemode_script()
 	table_entry->addr=(2+pubidx*4)*4;\
 	table_entry->sym=size;\
 	table_entry++;\
+	pubidx++;\
 	size+=tmp;
 	table_entry = (void*) pubtbl;
 	PUBLIC("public1");
