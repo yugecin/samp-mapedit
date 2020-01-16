@@ -23,14 +23,15 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 static
 void gen_gamemode_script()
 {
+#define cellsize 4
 #define PUBLICS 2
-#define NATIVES 2
+#define NATIVES 1
 
 	FILE *f;
 	int tmp, size;
 	char pubtbl[PUBLICS * 8], nattbl[NATIVES * 8];
 	int pubidx;
-	int cod;
+	int cod, cip, dat;
 	union {
 		char i1;
 		short i2;
@@ -64,7 +65,7 @@ void gen_gamemode_script()
 	fwrite(data.buf, 4, 1, f); /*hea*/
 	data.i4 = 0; /*done later*/
 	fwrite(data.buf, 4, 1, f); /*stp*/
-	data.i4 = 4 * PUBLICS * 4;
+	data.i4 = 0; /*done later*/
 	fwrite(data.buf, 4, 1, f); /*cip*/
 	data.i4 = 0x38;
 	fwrite(data.buf, 4, 1, f); /*publictable*/
@@ -90,8 +91,6 @@ void gen_gamemode_script()
 	fwrite(data.buf, 2, 1, f); /*max name len (I suppose?)*/
 	size += 2;
 	pubidx = 0;
-	/*first [PUBLICS] amount of natives should be the names of the
-	native plugin functions to passthrough callbacks to*/
 #define NATIVE(NAME) \
 	tmp=strlen(NAME)+1;\
 	fwrite(NAME,tmp,1,f);\
@@ -99,28 +98,29 @@ void gen_gamemode_script()
 	table_entry->sym=size;\
 	table_entry++;\
 	size+=tmp;
-	table_entry = (void*) nattbl;
-	NATIVE("CreateObject");
-	NATIVE("DestroyObject");
 #define PUBLIC(NAME) \
 	tmp=strlen(NAME)+1;\
 	fwrite(NAME,tmp,1,f);\
-	table_entry->addr=(2+pubidx*4)*4;\
+	table_entry->addr=(2+pubidx*4)*cellsize;\
 	table_entry->sym=size;\
 	table_entry++;\
 	pubidx++;\
 	size+=tmp;
+	/*first [PUBLICS] amount of natives should be the names of the
+	native plugin functions to passthrough callbacks to*/
 	table_entry = (void*) pubtbl;
-	PUBLIC("public1");
-	PUBLIC("public2");
+	PUBLIC("MM");
+	PUBLIC("dummies");
+	table_entry = (void*) nattbl;
+	NATIVE("AddPlayerClass");
 
 	cod = size;
 
 	/*code segment*/
-	/*entrypoint*/
-	data.i1 = 46; /*OP_PROC*/
+	cip = 0;
+	data.i1 = 0x78;
 	fwrite(data.buf, 1, 1, f);
-	data.i1 = 48; /*OP_RETN*/
+	data.i1 = 0x00;
 	fwrite(data.buf, 1, 1, f);
 	size += 2;
 	/*publics*/
@@ -132,6 +132,14 @@ void gen_gamemode_script()
 		fwrite(data.buf, 4, 1, f);
 	}
 	size += 4 * PUBLICS;
+	/*entrypoint*/
+	cip = (size - cod) * cellsize;
+	data.i1 = 46; /*OP_PROC*/
+	fwrite(data.buf, 1, 1, f);
+	data.i1 = 48; /*OP_RETN*/
+	fwrite(data.buf, 1, 1, f);
+	size += 2;
+	dat = cod + (size - cod) * cellsize;
 
 	fseek(f, 0, SEEK_SET);
 	data.i4 = size;
@@ -139,11 +147,13 @@ void gen_gamemode_script()
 	fseek(f, 0xC, SEEK_SET);
 	data.i4 = cod;
 	fwrite(data.buf, 4, 1, f); /*cod*/
-	data.i4 += 0x1100; /*TODO what decides this amount*/
+	data.i4 = dat;
 	fwrite(data.buf, 4, 1, f); /*dat*/
 	fwrite(data.buf, 4, 1, f); /*hea*/
-	data.i4 += STACK_HEAP_SIZE * 4;
+	data.i4 += STACK_HEAP_SIZE * cellsize;
 	fwrite(data.buf, 4, 1, f); /*stp*/
+	data.i4 = cip;
+	fwrite(data.buf, 4, 1, f); /*cip*/
 
 	fseek(f, 0x38, SEEK_SET);
 	fwrite(pubtbl, sizeof(pubtbl), 1, f); /*pubtbl*/
