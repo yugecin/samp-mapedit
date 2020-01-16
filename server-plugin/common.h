@@ -37,3 +37,16 @@ struct FAKEAMX_DATA {
 
 extern AMX *amx;
 extern struct FAKEAMX_DATA fakeamx_data;
+
+extern AMX_NATIVE n_CreateObject;
+extern AMX_NATIVE n_DestroyObject;
+extern AMX_NATIVE n_SetObjectMaterial;
+extern AMX_NATIVE n_SetObjectMaterialText;
+extern AMX_NATIVE n_SetObjectPos;
+extern AMX_NATIVE n_SetObjectRot;
+
+union NCDATA {
+	cell asint[20];
+	float asflt[20];
+};
+extern union NCDATA nc_params;

@@ -15,6 +15,14 @@ EXPECT_SIZE(float, 4);
 AMX *amx;
 struct FAKEAMX_DATA fakeamx_data;
 
+AMX_NATIVE n_CreateObject;
+AMX_NATIVE n_DestroyObject;
+AMX_NATIVE n_SetObjectMaterial;
+AMX_NATIVE n_SetObjectMaterialText;
+AMX_NATIVE n_SetObjectPos;
+AMX_NATIVE n_SetObjectRot;
+union NCDATA nc_params;
+
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
@@ -184,6 +192,44 @@ AMX_NATIVE_INFO PluginNatives[] =
 	{0, 0}
 };
 
+static
+int findnatives()
+{
+#define N(X) {#X,(int*)&n_##X}
+	struct NATIVE {
+		char *name;
+		int *var;
+	};
+	struct NATIVE natives[] = {
+		N(CreateObject),
+		N(DestroyObject),
+		N(SetObjectMaterial),
+		N(SetObjectMaterialText),
+		N(SetObjectPos),
+		N(SetObjectRot),
+	};
+	struct NATIVE *n = natives + sizeof(natives)/sizeof(struct NATIVE);
+	AMX_HEADER *header;
+	AMX_FUNCSTUB *func;
+	unsigned char *nativetable;
+	int nativesize;
+	int idx;
+
+	header = (AMX_HEADER*) amx->base;
+	nativetable = (unsigned char*) header + header->natives;
+	nativesize = (int) header->defsize;
+
+	while (n-- != natives) {
+		if (amx_FindNative(amx, n->name, &idx) == AMX_ERR_NOTFOUND) {
+			logprintf("ERR: no %s native", n->name);
+			return 0;
+		}
+		func = (AMX_FUNCSTUB*) (nativetable + idx * nativesize);
+		*n->var = func->address;
+	}
+	return 1;
+}
+
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 {
 	AMX_HEADER *hdr;
@@ -226,9 +272,9 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 	/*this won't work on linux because linux builds have assertions
 	enabled, but this is only targeted for windows anyways*/
 
-	/*if (!natives_find()) {
+	if (!findnatives()) {
 		return 0;
-	}*/
+	}
 
 	return amx_Register(a, PluginNatives, -1);
 }
