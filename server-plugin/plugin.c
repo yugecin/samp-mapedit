@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include <string.h>
 
 logprintf_t logprintf;
 extern void *pAMXFunctions;
@@ -32,12 +33,15 @@ static
 void gen_gamemode_script()
 {
 #define cellsize 4
-#define PUBLICS 2
-#define NATIVES 1
+#define PUBLICS 0
+#define NATIVES 3
 
 	FILE *f;
 	int tmp, size;
-	char pubtbl[PUBLICS * 8], nattbl[NATIVES * 8];
+#if PUBLICS > 0
+	char pubtbl[PUBLICS * 8];
+#endif
+	char nattbl[NATIVES * 8];
 	int pubidx;
 	int cod, cip, dat;
 	union {
@@ -77,7 +81,9 @@ void gen_gamemode_script()
 	fwrite(data.buf, 4, 1, f); /*cip*/
 	data.i4 = 0x38;
 	fwrite(data.buf, 4, 1, f); /*publictable*/
+#if PUBLICS > 0
 	data.i4 += sizeof(pubtbl);
+#endif
 	fwrite(data.buf, 4, 1, f); /*nativetable*/
 	data.i4 += sizeof(nattbl);
 	fwrite(data.buf, 4, 1, f); /*libraries*/
@@ -86,11 +92,13 @@ void gen_gamemode_script()
 	fwrite(data.buf, 4, 1, f); /*nametable*/
 	size = 0x38; /*header*/
 
-	/*pubtbl, dummy for now*/
+	/*pubtbl, dummy at this point*/
+#if PUBLICS > 0
 	fwrite(pubtbl, sizeof(pubtbl), 1, f);
 	size += sizeof(pubtbl);
+#endif
 
-	/*nattbl, dummy for now*/
+	/*nattbl, dummy at this point*/
 	fwrite(nattbl, sizeof(nattbl), 1, f);
 	size += sizeof(nattbl);
 
@@ -116,30 +124,42 @@ void gen_gamemode_script()
 	size+=tmp;
 	/*first [PUBLICS] amount of natives should be the names of the
 	native plugin functions to passthrough callbacks to*/
+#if PUBLICS > 0
 	table_entry = (void*) pubtbl;
 	PUBLIC("MM");
 	PUBLIC("dummies");
+#endif
 	table_entry = (void*) nattbl;
+	NATIVE("CreateObject");
+	NATIVE("DestroyObject");
 	NATIVE("AddPlayerClass");
 
 	cod = size;
 
 	/*code segment*/
 	cip = 0;
-	data.i1 = 0x78;
+	dat = 0;
+	data.i1 = 0x80; /*???*/
 	fwrite(data.buf, 1, 1, f);
-	data.i1 = 0x00;
+	data.i1 = 0x78; /*OP_HALT*/
 	fwrite(data.buf, 1, 1, f);
-	size += 2;
+	data.i1 = 0x00; /*param*/
+	fwrite(data.buf, 1, 1, f);
+	size += 3;
+	dat += 2;
 	/*publics*/
+#if PUBLICS > 0
+	/*TODO: something makes the amx not accept this...*/
 	for (tmp = 0; tmp < PUBLICS; tmp++) {
 		data.buf[0] = 46; /*OP_PROC*/
 		data.buf[1] = 123; /*OP_SYSREC_C*/
 		data.buf[2] = tmp; /*name table entry*/
 		data.buf[3] = 48; /*OP_RETN*/
 		fwrite(data.buf, 4, 1, f);
+		size += 4;
+		dat += 4;
 	}
-	size += 4 * PUBLICS;
+#endif
 	/*entrypoint*/
 	cip = (size - cod) * cellsize;
 	data.i1 = 46; /*OP_PROC*/
@@ -147,7 +167,8 @@ void gen_gamemode_script()
 	data.i1 = 48; /*OP_RETN*/
 	fwrite(data.buf, 1, 1, f);
 	size += 2;
-	dat = cod + (size - cod) * cellsize;
+	dat += 2;
+	dat = cod + dat * cellsize;
 
 	fseek(f, 0, SEEK_SET);
 	data.i4 = size;
@@ -164,7 +185,9 @@ void gen_gamemode_script()
 	fwrite(data.buf, 4, 1, f); /*cip*/
 
 	fseek(f, 0x38, SEEK_SET);
+#if PUBLICS > 0
 	fwrite(pubtbl, sizeof(pubtbl), 1, f); /*pubtbl*/
+#endif
 	fwrite(nattbl, sizeof(nattbl), 1, f); /*nattbl*/
 
 	fclose(f);
