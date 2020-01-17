@@ -322,6 +322,15 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 	amx = a;
 	collect_natives();
 
+	nc_params.asint[1] = 0;
+	nc_params.asflt[2] = 0.0f;
+	nc_params.asflt[3] = 0.0f;
+	nc_params.asflt[4] = 4.5f;
+	nc_params.asflt[5] = 0.0f;
+	nc_params.asint[6] = nc_params.asint[8] = nc_params.asint[10] = 0;
+	nc_params.asint[7] = nc_params.asint[9] = nc_params.asint[11] = 0;
+	natives[NC_AddPlayerClass].fp(amx, nc_params.asint);
+
 	/*relocate the data segment*/
 	hdr = (AMX_HEADER*) amx->base;
 	tmp = hdr->hea - hdr->dat;
