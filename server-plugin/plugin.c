@@ -24,6 +24,21 @@ AMX_NATIVE n_SetObjectPos;
 AMX_NATIVE n_SetObjectRot;
 union NCDATA nc_params;
 
+#define N(X) {#X,(int*)&n_##X}
+struct NATIVE {
+	char *name;
+	int *var;
+};
+struct NATIVE natives[] = {
+	N(CreateObject),
+	N(DestroyObject),
+	N(SetObjectMaterial),
+	N(SetObjectMaterialText),
+	N(SetObjectPos),
+	N(SetObjectRot),
+};
+#define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
+
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
@@ -34,15 +49,14 @@ void gen_gamemode_script()
 {
 #define cellsize 4
 #define PUBLICS 0
-#define NATIVES 3
 
 	FILE *f;
 	int tmp, size;
 #if PUBLICS > 0
 	char pubtbl[PUBLICS * 8];
 #endif
-	char nattbl[NATIVES * 8];
-	int pubidx;
+	char nattbl[NUMNATIVES * 8];
+	int pubidx, i;
 	int cod, cip, dat;
 	union {
 		char i1;
@@ -130,9 +144,11 @@ void gen_gamemode_script()
 	PUBLIC("dummies");
 #endif
 	table_entry = (void*) nattbl;
-	NATIVE("CreateObject");
-	NATIVE("DestroyObject");
-	NATIVE("AddPlayerClass");
+	for (i = 0; i < NUMNATIVES; i++) {
+		NATIVE(natives[i].name);
+	}
+#undef PUBLIC
+#undef NATIVE
 
 	cod = size;
 
@@ -216,22 +232,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 };
 
 static
-int findnatives()
+void collect_natives()
 {
-#define N(X) {#X,(int*)&n_##X}
-	struct NATIVE {
-		char *name;
-		int *var;
-	};
-	struct NATIVE natives[] = {
-		N(CreateObject),
-		N(DestroyObject),
-		N(SetObjectMaterial),
-		N(SetObjectMaterialText),
-		N(SetObjectPos),
-		N(SetObjectRot),
-	};
-	struct NATIVE *n = natives + sizeof(natives)/sizeof(struct NATIVE);
+	struct NATIVE *n = natives + NUMNATIVES;
 	AMX_HEADER *header;
 	AMX_FUNCSTUB *func;
 	unsigned char *nativetable;
@@ -243,14 +246,10 @@ int findnatives()
 	nativesize = (int) header->defsize;
 
 	while (n-- != natives) {
-		if (amx_FindNative(amx, n->name, &idx) == AMX_ERR_NOTFOUND) {
-			logprintf("ERR: no %s native", n->name);
-			return 0;
-		}
+		amx_FindNative(amx, n->name, &idx);
 		func = (AMX_FUNCSTUB*) (nativetable + idx * nativesize);
 		*n->var = func->address;
 	}
-	return 1;
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
@@ -259,6 +258,7 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 	int tmp;
 
 	amx = a;
+	collect_natives();
 
 	/*relocate the data segment*/
 	hdr = (AMX_HEADER*) amx->base;
@@ -294,10 +294,6 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 	hdr->dat = (int) &fakeamx_data - (int) hdr;
 	/*this won't work on linux because linux builds have assertions
 	enabled, but this is only targeted for windows anyways*/
-
-	if (!findnatives()) {
-		return 0;
-	}
 
 	return amx_Register(a, PluginNatives, -1);
 }
