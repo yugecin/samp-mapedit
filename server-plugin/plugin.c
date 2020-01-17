@@ -2,6 +2,9 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "windows.h"
+#include "io.h"
+#include "../shared/shared.h"
 #include <string.h>
 
 logprintf_t logprintf;
@@ -38,6 +41,8 @@ struct NATIVE natives[] = {
 	N(SetObjectRot),
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
+
+static int socketsend, socketrecv;
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
@@ -211,18 +216,59 @@ void gen_gamemode_script()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
+	struct sockaddr_in addr;
+	int flags;
+
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 	gen_gamemode_script();
+
+	socketrecv = socket(AF_INET, SOCK_DGRAM, 0);
+	if (socketrecv == -1) {
+		printf("failed to create recv socket\n");
+		return 0;
+	}
+	socketsend = socket(AF_INET, SOCK_DGRAM, 0);
+	if (socketsend == -1) {
+		closesocket(socketrecv);
+		printf("failed to create send socket\n");
+		return 0;
+	}
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(SOCKET_PORT_SERVER);
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	if (bind(socketsend, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+		closesocket(socketrecv);
+		closesocket(socketsend);
+		logprintf("socket cannot listen (port %d)", SOCKET_PORT_SERVER);
+		return 0;
+	}
+	/*set socket as non-blocking*/
+	flags = 1;
+	ioctlsocket(socketsend, FIONBIO, (DWORD*) &flags);
+
 	return 1;
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
+	closesocket(socketrecv);
+	closesocket(socketsend);
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
+	static struct sockaddr_in remote_client;
+	static int client_len = sizeof(remote_client);
+	static struct sockaddr* rc = (struct sockaddr*) &remote_client;
+	static char buf[8096];
+	int recvsize;
+
+	recvsize = recvfrom(socketrecv, buf, 2048, 0, rc, &client_len);
+	if (recvsize > 0) {
+		printf("received %d bytes\n", recvsize);
+	}
 }
 
 #define REGISTERNATIVE(X) {#X, X}
@@ -301,4 +347,9 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *a)
 {
 	return AMX_ERR_NONE;
+}
+
+void socket_send(char *data, int len)
+{
+	send(socketsend, data, len, 0);
 }

@@ -13,6 +13,7 @@ client: the client
 client-loader-cleo: the cleo plugin and script that loads the client
 client-mpack: the missionpack to load the editor without the backing server
 server-plugin: the plugin for the backing SA:MP server
+shared: code shared between client and server
 
 Note
 ----

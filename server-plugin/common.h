@@ -50,3 +50,5 @@ union NCDATA {
 	float asflt[20];
 };
 extern union NCDATA nc_params;
+
+void socket_send(char *data, int len);
