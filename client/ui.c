@@ -387,16 +387,16 @@ void ui_render()
 			ui_do_cursor_movement();
 		}
 
-		if (activeKeyState->standards[VK_T] &&
-			!currentKeyState->standards[VK_T])
+		if (activeKeyState->standards[VK_Y] &&
+			!currentKeyState->standards[VK_Y])
 		{
 			game_CameraRestoreWithJumpCut();
 			/*need to store camera but camera is only applied
 			on the next frame(?), so make sure camera doesn't update
-			now and check for T key release*/
+			now and check for Y key release*/
 			need_camera_update = 0;
-		} else  if (currentKeyState->standards[VK_T] &&
-			!activeKeyState->standards[VK_T])
+		} else  if (currentKeyState->standards[VK_Y] &&
+			!activeKeyState->standards[VK_Y])
 		{
 			ui_store_camera();
 		}
@@ -449,7 +449,7 @@ void ui_render()
 
 		game_TextSetAlign(CENTER);
 		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
-			"~w~press ~r~T ~w~to reset camera");
+			"~w~press ~r~Y ~w~to reset camera");
 	} else {
 		originalHudScaleX = *hudScaleX;
 		originalHudScaleY = *hudScaleY;
