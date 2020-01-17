@@ -1,3 +1,4 @@
 * eol=lf
 **.vcproj eol=crlf
 **.sln eol=crlf
+server-plugin/vendor/** linguist-vendored
