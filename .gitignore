@@ -7,3 +7,4 @@
 /out-release/
 /server/**
 !/server/server.cfg
+/client-loader-cleo/*.cs

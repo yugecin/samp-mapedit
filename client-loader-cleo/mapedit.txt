@@ -1,0 +1,18 @@
+{$CLEO}
+{$NOSOURCE}
+
+03A4: name_thread 'MAPEDIT'
+
+:NOTPRESSED
+0006: 32@ = 0 // l=i (int)
+:WAITFORIT
+0001: wait 250
+0AB0:   key_pressed 0x78 /*F9*/
+004D: jump_if_false @NOTPRESSED
+0019:   32@ > 5000 // l>i (int)
+004D: jump_if_false @WAITFORIT
+
+{$O 0C62=0,amazingshit}
+0C62:
+
+0A93: end_custom_thread
