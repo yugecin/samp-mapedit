@@ -19,26 +19,21 @@ EXPECT_SIZE(float, 4);
 AMX *amx;
 struct FAKEAMX_DATA fakeamx_data;
 
-AMX_NATIVE n_CreateObject;
-AMX_NATIVE n_DestroyObject;
-AMX_NATIVE n_SetObjectMaterial;
-AMX_NATIVE n_SetObjectMaterialText;
-AMX_NATIVE n_SetObjectPos;
-AMX_NATIVE n_SetObjectRot;
 union NCDATA nc_params;
 
-#define N(X) {#X,(int*)&n_##X}
 struct NATIVE {
 	char *name;
-	int *var;
+	AMX_NATIVE fp;
 };
 struct NATIVE natives[] = {
-	N(CreateObject),
-	N(DestroyObject),
-	N(SetObjectMaterial),
-	N(SetObjectMaterialText),
-	N(SetObjectPos),
-	N(SetObjectRot),
+	/*this needs to be synced with NC_ definitions*/
+	{ "CreateObject", 0 },
+	{ "DestroyObject", 0 },
+	{ "SetObjectMaterial", 0 },
+	{ "SetObjectMaterialText", 0 },
+	{ "SetObjectPos", 0 },
+	{ "SetObjectRot", 0 },
+	{ "AddPlayerClass", 0 },
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
 
@@ -257,17 +252,42 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 	closesocket(socketsend);
 }
 
+static
+void rpc_nativecall(struct RPC_NC *rpc)
+{
+	int idx;
+
+	idx = rpc->nc;
+	if (0 <= idx && idx < NUMNATIVES) {
+		natives[idx].fp(amx, rpc->params);
+	} else {
+		logprintf("invalid nc idx in rpc_nc: %d", idx);
+	}
+}
+
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
 	static struct sockaddr_in remote_client;
 	static int client_len = sizeof(remote_client);
 	static struct sockaddr* rc = (struct sockaddr*) &remote_client;
 	static char buf[8096];
-	int recvsize;
+
+	int recvsize, rpc;
 
 	recvsize = recvfrom(socketrecv, buf, 2048, 0, rc, &client_len);
-	if (recvsize > 0) {
-		printf("received %d bytes\n", recvsize);
+	if (recvsize > 3) {
+		rpc = ((struct RPC*) buf)->id;
+		switch (rpc) {
+		case MAPEDIT_RPC_RESETOBJECTS:
+			/*TODO*/
+			break;
+		case MAPEDIT_RPC_NATIVECALL:
+			rpc_nativecall((struct RPC_NC*) buf);
+			break;
+		default:
+			logprintf("unknown RPC: %d", rpc);
+			break;
+		}
 	}
 }
 
@@ -280,21 +300,17 @@ AMX_NATIVE_INFO PluginNatives[] =
 static
 void collect_natives()
 {
-	struct NATIVE *n = natives + NUMNATIVES;
+	struct NATIVE *n = natives;
 	AMX_HEADER *header;
-	AMX_FUNCSTUB *func;
-	unsigned char *nativetable;
-	int nativesize;
-	int idx;
+	unsigned char *nattabl;
+	int i;
 
 	header = (AMX_HEADER*) amx->base;
-	nativetable = (unsigned char*) header + header->natives;
-	nativesize = (int) header->defsize;
+	nattabl = (unsigned char*) header + header->natives;
 
-	while (n-- != natives) {
-		amx_FindNative(amx, n->name, &idx);
-		func = (AMX_FUNCSTUB*) (nativetable + idx * nativesize);
-		*n->var = func->address;
+	for (i = 0; i < NUMNATIVES; i++) {
+		/*skipping some steps here...*/
+		natives[i].fp = (AMX_NATIVE) *((int*) (nattabl + i * 8));
 	}
 }
 

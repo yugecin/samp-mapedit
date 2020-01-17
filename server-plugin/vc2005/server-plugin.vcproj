@@ -117,6 +117,14 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="shared"
+				>
+				<File
+					RelativePath="..\..\shared\shared.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
