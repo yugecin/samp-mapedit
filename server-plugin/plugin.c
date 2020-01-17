@@ -226,6 +226,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	socketsend = socket(AF_INET, SOCK_DGRAM, 0);
 	if (socketsend == -1) {
 		closesocket(socketrecv);
+		socketrecv = -1;
 		printf("failed to create send socket\n");
 		return 0;
 	}
@@ -233,23 +234,26 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(SOCKET_PORT_SERVER);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	if (bind(socketsend, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+	if (bind(socketrecv, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		closesocket(socketrecv);
 		closesocket(socketsend);
+		socketrecv = -1;
 		logprintf("socket cannot listen (port %d)", SOCKET_PORT_SERVER);
 		return 0;
 	}
 	/*set socket as non-blocking*/
 	flags = 1;
-	ioctlsocket(socketsend, FIONBIO, (DWORD*) &flags);
+	ioctlsocket(socketrecv, FIONBIO, (DWORD*) &flags);
 
 	return 1;
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
-	closesocket(socketrecv);
-	closesocket(socketsend);
+	if (socketrecv != -1) {
+		closesocket(socketrecv);
+		closesocket(socketsend);
+	}
 }
 
 static

@@ -52,7 +52,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(SolutionDir)\out-$(ConfigurationName)\$(ProjectName).dll"
+				AdditionalLibraryDirectories="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib"
 				IgnoreDefaultLibraryNames="uuid.lib"
 				GenerateDebugInformation="true"
 			/>
@@ -180,6 +182,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\server.c"
+				>
+			</File>
+			<File
+				RelativePath="..\server.h"
+				>
+			</File>
+			<File
 				RelativePath="..\settings.c"
 				>
 			</File>
@@ -263,6 +273,14 @@
 				RelativePath="..\windows.h"
 				>
 			</File>
+			<Filter
+				Name="shared"
+				>
+				<File
+					RelativePath="..\..\shared\shared.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

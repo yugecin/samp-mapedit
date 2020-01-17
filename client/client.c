@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "client.h"
+#include "server.h"
 #include "settings.h"
 #include "ui.h"
 #include <windows.h>
@@ -11,6 +12,7 @@ int reload_requested = 0;
 static
 __declspec(naked) void clientloop()
 {
+	server_recv();
 	ui_render();
 	_asm {
 		pop eax
@@ -102,6 +104,7 @@ static
 void client_finalize()
 {
 	settings_dispose();
+	server_stop();
 	ui_dispose();
 	undetour();
 }
@@ -116,6 +119,7 @@ void client_init()
 {
 	detour();
 	ui_init();
+	server_init();
 	settings_init();
 }
 
