@@ -7,6 +7,29 @@ SetObjectMaterialText) will behave exactly as shown in the editor. The editor
 can also run without SA:MP, but then all specific SA:MP functionality won't
 work.
 
+Install
+-------
+- install CLEO (https://cleo.li)
+- copy mapedit-client-loader-cleo.cleo to CLEO folder
+- copy mapedit.cs to CLEO folder
+- (optional: make mapedit-client.dll.txt in CLEO folder with as contents the
+  path to where mapedit-client.dll gets compiled, for the reload functionality
+  to work)
+- (if not doing the above, copy mapedit-client.dll to CLEO folder)
+- get a sa-mp server, add mapedit-server.dll to plugins and use the cfg from
+  the server dir
+
+Run
+---
+- run the sa-mp server
+- join it
+- hold F9 for ~5 seconds
+- a small text should show at the bottom of the screen
+
+Manual
+------
+todo
+
 Anatomy
 -------
 client: the client

@@ -1,8 +1,8 @@
 @echo off
 :a
 
-COPY /Y out-debug\server-plugin.dll server\plugins\mapedit.dll
-COPY /Y out-debug\server-plugin.pdb server\plugins\mapedit.pdb
+COPY /Y out-debug\server-plugin.dll server\plugins\mapedit-server.dll
+COPY /Y out-debug\server-plugin.pdb server\plugins\mapedit-server.pdb
 
 pushd server
 "samp-server.exe"
