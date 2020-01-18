@@ -62,7 +62,7 @@ void gen_gamemode_script()
 		char i1;
 		short i2;
 		int i4;
-		char buf[1000];
+		char buf[4];
 	} data;
 	struct {
 		int addr, sym;
