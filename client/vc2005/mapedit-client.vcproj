@@ -281,7 +281,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\shared\shared.h"
+					RelativePath="..\..\shared\serverlink.h"
 					>
 				</File>
 				<File

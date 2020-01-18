@@ -5,7 +5,7 @@
 #include "windows.h"
 #include "io.h"
 #include "../shared/sizecheck.h"
-#include "../shared/shared.h"
+#include "../shared/serverlink.h"
 #include <string.h>
 
 logprintf_t logprintf;

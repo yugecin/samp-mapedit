@@ -3,7 +3,7 @@
 #include "common.h"
 #include "sockets.h"
 #include "ui.h"
-#include "../shared/shared.h"
+#include "../shared/serverlink.h"
 #include <windows.h>
 #include <winsock2.h>
 #include <io.h>
