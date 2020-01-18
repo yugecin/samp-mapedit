@@ -4,10 +4,11 @@
 
 #include "CLEO_SDK/CLEO.h"
 #include "../client/client.h"
+#include <stdio.h>
 
 static HMODULE client = NULL;
 
-static char *clientcompilepath = NULL, *clienttargetpath;
+static char *clientcompilepath = NULL;
 static struct CLIENTLINK data;
 
 static
@@ -23,22 +24,21 @@ void unload_client()
 static
 void load_client()
 {
+	if (clientcompilepath != NULL) {
+		CopyFileA(clientcompilepath, "CLEO\\mapedit-client.dll", FALSE);
+	}
 	client = LoadLibrary("CLEO\\mapedit-client.dll");
 	((MapEditMain_t*) GetProcAddress(client, "MapEditMain"))(&data);
 	data.proc_client_clientmain(data);
 }
 
-static
-void copy_client()
-{
-	CopyFileA(clientcompilepath, clienttargetpath, FALSE);
-}
-
+/**
+reloads client, to be called from the client
+*/
 static
 void __cdecl reload_client()
 {
 	unload_client();
-	copy_client();
 	load_client();
 }
 
@@ -54,61 +54,30 @@ OpcodeResult WINAPI opcode_0C62(CScriptThread *thread)
 {
 	if (client != NULL) {
 		unload_client();
-		/*when reloading MPACK, this sleep allows the copy script
-		to copy the file while it's unused (copy script sleeps for 2s)*/
-		Sleep(2750);
 	}
 	load_client();
 	return OR_CONTINUE;
 }
 
-/**
-Moves a file.
-
-Unloads client if it has been loaded and load it again after done moving.
-
-Example:
-{$O 0C63=2,copy client %1d% to %2d% and load}
-0AC6: 0@ = label @FROM offset
-0AC6: 1@ = label @TO offset
-0C63: copy client 0@ to 1@ and load
-0A93: end_custom_thread
-:FROM
-hex
-	"C:\\file.txt" 00
-end
-:TO
-hex
-	"C:\\file2.txt" 00
-end
-*/
-static
-OpcodeResult WINAPI opcode_0C63(CScriptThread *thread)
-{
-	char *from = (char*) CLEO_GetIntOpcodeParam(thread);
-	char *to = (char*) CLEO_GetIntOpcodeParam(thread);
-
-	if (clientcompilepath == NULL) {
-		clientcompilepath = malloc(sizeof(char) * strlen(from));
-		clienttargetpath = malloc(sizeof(char) * strlen(to));
-		strcpy(clientcompilepath, from);
-		strcpy(clienttargetpath, to);
-	}
-	if (client != NULL) {
-		unload_client();
-	}
-	copy_client();
-	load_client();
-	return opcode_0C62(thread);
-}
-
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason_for_call, LPVOID lpResrvd)
 {
+	FILE *f;
+	char *c;
+
 	if (reason_for_call == DLL_PROCESS_ATTACH) {
+		f = fopen("CLEO\\mapedit-client.dll.txt", "r");
+		if (f) {
+			clientcompilepath = malloc(200);
+			fread(clientcompilepath, 200, 1, f);
+			clientcompilepath[199] = 0;
+			c = clientcompilepath;
+			while (*c != 0 && *c != '\n') c++;
+			*c = 0;
+			fclose(f);
+		}
 		data.proc_loader_reload_client = reload_client;
 		data.proc_loader_unload_client = unload_client;
-		return CLEO_RegisterOpcode(0x0C62, &opcode_0C62) &&
-			CLEO_RegisterOpcode(0x0C63, &opcode_0C63);
+		return CLEO_RegisterOpcode(0x0C62, &opcode_0C62);
 	}
 	return TRUE;
 }
