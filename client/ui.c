@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "client.h"
 #include "game.h"
 #include "ui.h"
 #include "vk.h"

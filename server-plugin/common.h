@@ -9,9 +9,6 @@
 #include "vendor/SDK/amx/amx.h"
 #include "vendor/SDK/plugincommon.h"
 
-#define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
-#define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
-
 typedef void (*cb_t)(void* data);
 
 typedef void (*logprintf_t)(char* format, ...);

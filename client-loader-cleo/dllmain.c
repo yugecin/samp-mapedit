@@ -3,7 +3,8 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include "CLEO_SDK/CLEO.h"
-#include "../client/client.h"
+#include "../shared/sizecheck.h"
+#include "../shared/clientlink.h"
 #include <stdio.h>
 
 static HMODULE client = NULL;

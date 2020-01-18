@@ -124,6 +124,10 @@
 					RelativePath="..\..\shared\shared.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\shared\sizecheck.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

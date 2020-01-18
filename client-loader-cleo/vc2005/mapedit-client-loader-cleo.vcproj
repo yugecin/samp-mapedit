@@ -162,6 +162,18 @@
 				RelativePath="..\dllmain.c"
 				>
 			</File>
+			<Filter
+				Name="shared"
+				>
+				<File
+					RelativePath="..\..\shared\clientlink.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\shared\sizecheck.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

@@ -3,7 +3,7 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #define WIN32_LEAN_AND_MEAN
 
-#include "client.h"
+#include "../shared/sizecheck.h"
 #include <stdlib.h>
 #include <stdio.h>
 

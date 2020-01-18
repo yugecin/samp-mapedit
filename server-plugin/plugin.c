@@ -4,6 +4,7 @@
 #include "common.h"
 #include "windows.h"
 #include "io.h"
+#include "../shared/sizecheck.h"
 #include "../shared/shared.h"
 #include <string.h>
 

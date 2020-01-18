@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#include "client.h"
+#include "../shared/sizecheck.h"
+#include "../shared/clientlink.h"
 #include "sockets.h"
 #include "settings.h"
 #include "ui.h"
