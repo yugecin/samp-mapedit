@@ -121,13 +121,6 @@ void gen_gamemode_script()
 	fwrite(data.buf, 2, 1, f); /*max name len (I suppose?)*/
 	size += 2;
 	pubidx = 0;
-#define NATIVE(NAME) \
-	tmp=strlen(NAME)+1;\
-	fwrite(NAME,tmp,1,f);\
-	table_entry->addr=0;\
-	table_entry->sym=size;\
-	table_entry++;\
-	size+=tmp;
 #define PUBLIC(NAME) \
 	tmp=strlen(NAME)+1;\
 	fwrite(NAME,tmp,1,f);\
@@ -145,10 +138,14 @@ void gen_gamemode_script()
 #endif
 	table_entry = (void*) nattbl;
 	for (i = 0; i < NUMNATIVES; i++) {
-		NATIVE(natives[i].name);
+		tmp = strlen(natives[i].name) + 1;
+		fwrite(natives[i].name, tmp, 1, f);
+		table_entry->addr = 0;
+		table_entry->sym = size;
+		table_entry++;
+		size += tmp;
 	}
 #undef PUBLIC
-#undef NATIVE
 
 	cod = size;
 
