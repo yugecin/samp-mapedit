@@ -182,19 +182,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\server.c"
-				>
-			</File>
-			<File
-				RelativePath="..\server.h"
-				>
-			</File>
-			<File
 				RelativePath="..\settings.c"
 				>
 			</File>
 			<File
 				RelativePath="..\settings.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sockets.c"
+				>
+			</File>
+			<File
+				RelativePath="..\sockets.h"
 				>
 			</File>
 			<File

@@ -1,7 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
-#include "server.h"
+#include "sockets.h"
 #include "ui.h"
 #include "../shared/shared.h"
 #include <windows.h>
@@ -11,7 +11,7 @@
 static int inited;
 static int socketsend, socketrecv;
 
-void server_init()
+void sockets_init()
 {
 	struct sockaddr_in addr;
 	int flags;
@@ -65,17 +65,17 @@ void server_init()
 	ioctlsocket(socketrecv, FIONBIO, (DWORD*) &flags);
 }
 
-void server_recv()
+void sockets_recv()
 {
 
 }
 
-void server_send(void *rpc, int len)
+void sockets_send(void *rpc, int len)
 {
 	send(socketsend, (char*) rpc, len, 0);
 }
 
-void server_stop()
+void sockets_dispose()
 {
 	if (socketrecv != -1) {
 		closesocket(socketrecv);
