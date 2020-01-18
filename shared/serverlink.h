@@ -22,6 +22,5 @@ struct RPC {
 struct RPC_NC {
 	struct RPC;
 	int nc;
-	int paramcount;
 	int params[20];
 };

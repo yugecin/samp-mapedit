@@ -276,7 +276,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 
 	int recvsize, rpc;
 
-	recvsize = recvfrom(socketrecv, buf, 2048, 0, rc, &client_len);
+	recvsize = recvfrom(socketrecv, buf, sizeof(buf), 0, rc, &client_len);
 	if (recvsize > 3) {
 		rpc = ((struct RPC*) buf)->id;
 		switch (rpc) {
@@ -284,7 +284,9 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 			/*TODO*/
 			break;
 		case MAPEDIT_RPC_NATIVECALL:
-			rpc_nativecall((struct RPC_NC*) buf);
+			if (recvsize == sizeof(struct RPC_NC)) {
+				rpc_nativecall((struct RPC_NC*) buf);
+			}
 			break;
 		default:
 			logprintf("unknown RPC: %d", rpc);
