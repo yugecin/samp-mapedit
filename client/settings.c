@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "client.h"
 #include "game.h"
 #include "ui.h"
 #include "vk.h"
@@ -20,7 +21,7 @@
 static struct UI_WINDOW *window_settings;
 static struct UI_BUTTON *btn_save_null_when_unchanged;
 static struct RADIOBUTTONGROUP *rdbgroup_movement;
-static struct RADIOBUTTONGROUP *rdbgroup_foliage;
+static struct RADIOBUTTONGROUP *rdbgroup_foliage = NULL;
 static struct RADIOBUTTONGROUP *rdbgroup_keys;
 
 static int saved_fontsize, saved_fontratio;
@@ -44,7 +45,11 @@ void cb_btn_save(struct UI_BUTTON *btn)
 	char buf[80];
 
 	settings_remove_save_button();
-	saved_foliage = (int) ui_rdbgroup_selected_data(rdbgroup_foliage);
+	if (rdbgroup_foliage != NULL) {
+		/*it's not present when in samp*/
+		saved_foliage =
+			(int) ui_rdbgroup_selected_data(rdbgroup_foliage);
+	}
 	saved_zqsd = (int) ui_rdbgroup_selected_data(rdbgroup_keys);
 	saved_dirmov = (int) ui_rdbgroup_selected_data(rdbgroup_movement);
 	saved_fontsize = fontsize;
@@ -73,8 +78,9 @@ static
 int settings_are_changed()
 {
 	return
-		(saved_foliage ^
-			(int) ui_rdbgroup_selected_data(rdbgroup_foliage)) ||
+		/*foliage is not available when in samp*/
+		(rdbgroup_foliage != NULL && (saved_foliage ^
+			(int) ui_rdbgroup_selected_data(rdbgroup_foliage))) ||
 		(saved_zqsd ^
 			(int) ui_rdbgroup_selected_data(rdbgroup_keys)) ||
 		(saved_dirmov ^
@@ -241,7 +247,11 @@ done:
 		ui_push_debug_string();
 	}
 
-	ui_rdb_click_match_userdata(rdbgroup_foliage, (void*) saved_foliage);
+	if (rdbgroup_foliage != NULL) {
+		/*it's not present when in samp*/
+		ui_rdb_click_match_userdata(rdbgroup_foliage,
+			(void*) saved_foliage);
+	}
 	ui_rdb_click_match_userdata(rdbgroup_keys, (void*) saved_zqsd);
 	ui_rdb_click_match_userdata(rdbgroup_movement, (void*) saved_dirmov);
 	ui_set_fontsize(saved_fontsize, saved_fontratio);
@@ -262,16 +272,22 @@ void settings_init()
 	window_settings = ui_wnd_make(500.0f, 500.0f, "Settings");
 	window_settings->columns = 4;
 
-	lbl = ui_lbl_make("Foliage:");
-	ui_wnd_add_child(window_settings, lbl);
-	rdbgroup_foliage = ui_rdbgroup_make(cb_rdb_foliage);
-	rdb = ui_rdb_make("on", rdbgroup_foliage, 1);
-	rdb->_parent._parent.userdata = FOLIAGE_ON;
-	rdb->_parent._parent.span = 2;
-	ui_wnd_add_child(window_settings, rdb);
-	rdb = ui_rdb_make("off", rdbgroup_foliage, 0);
-	rdb->_parent._parent.userdata = FOLIAGE_OFF;
-	ui_wnd_add_child(window_settings, rdb);
+	if (in_samp) {
+		lbl = ui_lbl_make("Foliage_is_always_off_in_samp");
+		lbl->_parent.span = 4;
+		ui_wnd_add_child(window_settings, lbl);
+	} else {
+		lbl = ui_lbl_make("Foliage:");
+		ui_wnd_add_child(window_settings, lbl);
+		rdbgroup_foliage = ui_rdbgroup_make(cb_rdb_foliage);
+		rdb = ui_rdb_make("on", rdbgroup_foliage, 1);
+		rdb->_parent._parent.userdata = FOLIAGE_ON;
+		rdb->_parent._parent.span = 2;
+		ui_wnd_add_child(window_settings, rdb);
+		rdb = ui_rdb_make("off", rdbgroup_foliage, 0);
+		rdb->_parent._parent.userdata = FOLIAGE_OFF;
+		ui_wnd_add_child(window_settings, rdb);
+	}
 
 	lbl = ui_lbl_make("Keys:");
 	ui_wnd_add_child(window_settings, lbl);
@@ -333,5 +349,7 @@ void settings_init()
 void settings_dispose()
 {
 	ui_wnd_dispose(window_settings);
-	toggle_foliage(1);
+	if (!in_samp) {
+		toggle_foliage(1);
+	}
 }

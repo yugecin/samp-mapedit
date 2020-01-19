@@ -9,6 +9,7 @@
 
 struct CLIENTLINK *linkdata;
 int reload_requested = 0;
+int in_samp;
 
 static
 __declspec(naked) void clientloop()
@@ -118,6 +119,7 @@ See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain
 static
 void client_init()
 {
+	in_samp = (int) GetModuleHandle("samp.dll");
 	detour();
 	ui_init();
 	sockets_init();
