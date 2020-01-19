@@ -255,13 +255,13 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 }
 
 static
-void rpc_nativecall(struct RPC_NC *rpc)
+void msg_nativecall(struct MSG_NC *msg)
 {
 	int idx;
 
-	idx = rpc->nc;
+	idx = msg->nc;
 	if (0 <= idx && idx < NUMNATIVES) {
-		natives[idx].fp(amx, rpc->params);
+		natives[idx].fp(amx, msg->params);
 	} else {
 		logprintf("invalid nc idx in rpc_nc: %d", idx);
 	}
@@ -274,22 +274,22 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	static struct sockaddr* rc = (struct sockaddr*) &remote_client;
 	static char buf[8096];
 
-	int recvsize, rpc;
+	int recvsize, msgid;
 
 	recvsize = recvfrom(socketrecv, buf, sizeof(buf), 0, rc, &client_len);
 	if (recvsize > 3) {
-		rpc = ((struct RPC*) buf)->id;
-		switch (rpc) {
-		case MAPEDIT_RPC_RESETOBJECTS:
+		msgid = ((struct MSG*) buf)->id;
+		switch (msgid) {
+		case MAPEDIT_MSG_RESETOBJECTS:
 			/*TODO*/
 			break;
-		case MAPEDIT_RPC_NATIVECALL:
-			if (recvsize == sizeof(struct RPC_NC)) {
-				rpc_nativecall((struct RPC_NC*) buf);
+		case MAPEDIT_MSG_NATIVECALL:
+			if (recvsize == sizeof(struct MSG_NC)) {
+				msg_nativecall((struct MSG_NC*) buf);
 			}
 			break;
 		default:
-			logprintf("unknown RPC: %d", rpc);
+			logprintf("unknown MSG: %d", msgid);
 			break;
 		}
 	}

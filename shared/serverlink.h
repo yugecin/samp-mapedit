@@ -12,15 +12,15 @@
 #define NC_SetObjectRot 5
 #define NC_AddPlayerClass 6
 
-#define MAPEDIT_RPC_RESETOBJECTS 0
-#define MAPEDIT_RPC_NATIVECALL 1
+#define MAPEDIT_MSG_RESETOBJECTS 0
+#define MAPEDIT_MSG_NATIVECALL 1
 
-struct RPC {
+struct MSG {
 	int id;
 };
 
-struct RPC_NC {
-	struct RPC;
+struct MSG_NC {
+	struct MSG;
 	int nc;
 	int params[20];
 };
