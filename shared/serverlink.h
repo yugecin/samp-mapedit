@@ -20,7 +20,10 @@ struct MSG {
 };
 
 struct MSG_NC {
-	struct MSG;
+	struct MSG parent;
 	int nc;
-	int params[20];
+	union {
+		int asint[20];
+		float asflt[20];
+	} params;
 };

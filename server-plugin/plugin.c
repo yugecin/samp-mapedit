@@ -210,6 +210,7 @@ void gen_gamemode_script()
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	struct sockaddr_in addr;
+	struct sockaddr *saddr = (struct sockaddr*) &addr;
 	int flags;
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
@@ -221,6 +222,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 		printf("failed to create recv socket\n");
 		return 0;
 	}
+
 	socketsend = socket(AF_INET, SOCK_DGRAM, 0);
 	if (socketsend == -1) {
 		closesocket(socketrecv);
@@ -228,19 +230,34 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 		printf("failed to create send socket\n");
 		return 0;
 	}
+
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(SOCKET_PORT_SERVER);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	if (bind(socketrecv, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+	if (bind(socketrecv, saddr, sizeof(addr)) == -1) {
 		closesocket(socketrecv);
 		closesocket(socketsend);
 		socketrecv = -1;
 		logprintf("socket cannot listen (port %d)", SOCKET_PORT_SERVER);
 		return 0;
 	}
-	/*set socket as non-blocking*/
+
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	addr.sin_port = htons(SOCKET_PORT_CLIENT);
+	if (connect(socketsend, saddr, sizeof(struct sockaddr)) == -1) {
+		closesocket(socketrecv);
+		closesocket(socketsend);
+		socketrecv = -1;
+		logprintf("send socket cannot connect");
+		return 0;
+	}
+
+	/*set sockets as non-blocking*/
 	flags = 1;
+	ioctlsocket(socketsend, FIONBIO, (DWORD*) &flags);
 	ioctlsocket(socketrecv, FIONBIO, (DWORD*) &flags);
 
 	return 1;
@@ -261,7 +278,7 @@ void msg_nativecall(struct MSG_NC *msg)
 
 	idx = msg->nc;
 	if (0 <= idx && idx < NUMNATIVES) {
-		natives[idx].fp(amx, msg->params);
+		natives[idx].fp(amx, msg->params.asint);
 	} else {
 		logprintf("invalid nc idx in rpc_nc: %d", idx);
 	}

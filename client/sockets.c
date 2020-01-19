@@ -14,6 +14,7 @@ static int socketsend, socketrecv;
 void sockets_init()
 {
 	struct sockaddr_in addr;
+	struct sockaddr *saddr = (struct sockaddr*) &addr;
 	int flags;
 	WSADATA wsaData;
 	WORD wVersionRequested = MAKEWORD(2, 2);
@@ -38,6 +39,7 @@ void sockets_init()
 		ui_push_debug_string();
 		return;
 	}
+
 	socketsend = socket(AF_INET, SOCK_DGRAM, 0);
 	if (socketsend == -1) {
 		closesocket(socketrecv);
@@ -47,11 +49,12 @@ void sockets_init()
 		ui_push_debug_string();
 		return;
 	}
+
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(SOCKET_PORT_CLIENT);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	if (bind(socketrecv, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+	if (bind(socketrecv, saddr, sizeof(addr)) == -1) {
 		closesocket(socketrecv);
 		closesocket(socketsend);
 		socketrecv = -1;
@@ -60,9 +63,24 @@ void sockets_init()
 		ui_push_debug_string();
 		return;
 	}
-	/*set socket as non-blocking*/
+
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	addr.sin_port = htons(SOCKET_PORT_SERVER);
+	if (connect(socketsend, saddr, sizeof(struct sockaddr)) == -1) {
+		closesocket(socketrecv);
+		closesocket(socketsend);
+		socketrecv = -1;
+		sprintf(debugstring, "send socket cannot connect");
+		ui_push_debug_string();
+		return;
+	}
+
+	/*set sockets as non-blocking*/
 	flags = 1;
 	ioctlsocket(socketrecv, FIONBIO, (DWORD*) &flags);
+	ioctlsocket(socketsend, FIONBIO, (DWORD*) &flags);
 }
 
 void sockets_recv()
