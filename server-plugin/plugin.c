@@ -8,6 +8,8 @@
 #include "../shared/serverlink.h"
 #include <string.h>
 
+#define MAX_OBJECTS 1000
+
 logprintf_t logprintf;
 extern void *pAMXFunctions;
 
@@ -37,6 +39,8 @@ struct NATIVE natives[] = {
 	{ "AddPlayerClass", 0 },
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
+
+static char objectidused[MAX_OBJECTS];
 
 static int socketsend, socketrecv;
 
@@ -271,47 +275,6 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 	}
 }
 
-static
-void msg_nativecall(struct MSG_NC *msg)
-{
-	int idx;
-
-	idx = msg->nc;
-	if (0 <= idx && idx < NUMNATIVES) {
-		natives[idx].fp(amx, msg->params.asint);
-	} else {
-		logprintf("invalid nc idx in rpc_nc: %d", idx);
-	}
-}
-
-PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
-{
-	static struct sockaddr_in remote_client;
-	static int client_len = sizeof(remote_client);
-	static struct sockaddr* rc = (struct sockaddr*) &remote_client;
-	static char buf[8096];
-
-	int recvsize, msgid;
-
-	recvsize = recvfrom(socketrecv, buf, sizeof(buf), 0, rc, &client_len);
-	if (recvsize > 3) {
-		msgid = ((struct MSG*) buf)->id;
-		switch (msgid) {
-		case MAPEDIT_MSG_RESETOBJECTS:
-			/*TODO*/
-			break;
-		case MAPEDIT_MSG_NATIVECALL:
-			if (recvsize == sizeof(struct MSG_NC)) {
-				msg_nativecall((struct MSG_NC*) buf);
-			}
-			break;
-		default:
-			logprintf("unknown MSG: %d", msgid);
-			break;
-		}
-	}
-}
-
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
@@ -387,6 +350,8 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 	/*this won't work on linux because linux builds have assertions
 	enabled, but this is only targeted for windows anyways*/
 
+	memset(objectidused, 0, sizeof(objectidused));
+
 	return amx_Register(a, PluginNatives, -1);
 }
 
@@ -395,7 +360,68 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *a)
 	return AMX_ERR_NONE;
 }
 
+static
 void socket_send(char *data, int len)
 {
 	send(socketsend, data, len, 0);
+}
+
+static
+void msg_resetobjects()
+{
+	int idx;
+	AMX_NATIVE nc_destroy;
+
+	nc_destroy = natives[NC_DestroyObject].fp;
+	for (idx = 0; idx < MAX_OBJECTS; idx++) {
+		if (objectidused[idx]) {
+			nc_params.asint[1] = idx;
+			nc_destroy(amx, nc_params.asint);
+			objectidused[idx] = 0;
+		}
+	}
+}
+
+static
+void msg_nativecall(struct MSG_NC *msg)
+{
+	int idx, res;
+
+	idx = msg->nc;
+	if (0 <= idx && idx < NUMNATIVES) {
+		res = natives[idx].fp(amx, msg->params.asint);
+		if (idx == NC_CreateObject) {
+			objectidused[res] = 1;
+		}
+	} else {
+		logprintf("invalid nc idx in rpc_nc: %d", idx);
+	}
+}
+
+PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
+{
+	static struct sockaddr_in remote_client;
+	static int client_len = sizeof(remote_client);
+	static struct sockaddr* rc = (struct sockaddr*) &remote_client;
+	static char buf[8096];
+
+	int recvsize, msgid;
+
+	recvsize = recvfrom(socketrecv, buf, sizeof(buf), 0, rc, &client_len);
+	if (recvsize > 3) {
+		msgid = ((struct MSG*) buf)->id;
+		switch (msgid) {
+		case MAPEDIT_MSG_RESETOBJECTS:
+			msg_resetobjects();
+			break;
+		case MAPEDIT_MSG_NATIVECALL:
+			if (recvsize == sizeof(struct MSG_NC)) {
+				msg_nativecall((struct MSG_NC*) buf);
+			}
+			break;
+		default:
+			logprintf("unknown MSG: %d", msgid);
+			break;
+		}
+	}
 }

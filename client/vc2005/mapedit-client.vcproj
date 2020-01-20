@@ -182,6 +182,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\objects.c"
+				>
+			</File>
+			<File
+				RelativePath="..\objects.h"
+				>
+			</File>
+			<File
 				RelativePath="..\settings.c"
 				>
 			</File>

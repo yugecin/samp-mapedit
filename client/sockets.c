@@ -85,12 +85,17 @@ void sockets_init()
 
 void sockets_recv()
 {
-
+	if (socketrecv != -1) {
+	}
 }
 
 void sockets_send(void *rpc, int len)
 {
-	send(socketsend, (char*) rpc, len, 0);
+	/*checking just socketrecv because either both or neither work*/
+	/*and socketrecv is reassigned, socketsend is not*/
+	if (socketrecv != -1) {
+		send(socketsend, (char*) rpc, len, 0);
+	}
 }
 
 void sockets_dispose()

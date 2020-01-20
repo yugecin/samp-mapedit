@@ -2,6 +2,7 @@
 
 #include "../shared/sizecheck.h"
 #include "../shared/clientlink.h"
+#include "objects.h"
 #include "sockets.h"
 #include "settings.h"
 #include "ui.h"
@@ -105,6 +106,7 @@ Called from the loader, do not call directly (use proc_unload)
 static
 void client_finalize()
 {
+	objects_dispose();
 	settings_dispose();
 	sockets_dispose();
 	ui_dispose();
@@ -124,6 +126,7 @@ void client_init()
 	ui_init();
 	sockets_init();
 	settings_init();
+	objects_init();
 }
 
 __declspec(dllexport) void __cdecl MapEditMain(struct CLIENTLINK *data)
