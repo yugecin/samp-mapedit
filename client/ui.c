@@ -3,6 +3,7 @@
 #include "common.h"
 #include "client.h"
 #include "game.h"
+#include "project.h"
 #include "ui.h"
 #include "vk.h"
 #include "windows.h"
@@ -33,7 +34,8 @@ char debugstr[DEBUG_STRING_POOL * DEBUG_STRING_LEN];
 char *debugstring = debugstr;
 char debugstringidx = 0;
 
-void* ui_element_being_clicked;
+void *ui_element_being_clicked;
+void *ui_active_element;
 int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
 
@@ -121,7 +123,7 @@ void ui_init()
 	ui_set_fontsize(UI_DEFAULT_FONT_SIZE, UI_DEFAULT_FONT_RATIO);
 	cursorx = fresx / 2.0f;
 	cursory = fresy / 2.0f;
-	ui_elem_init(&dummy_element, DUMMY);
+	ui_elem_init(&dummy_element, UIE_DUMMY);
 	dummy_element.pref_height = dummy_element.pref_width = 0.0f;
 	ui_colpick_init();
 	background_element = ui_cnt_make();
@@ -138,6 +140,7 @@ void ui_init()
 	btn->_parent.y = 900.0f;
 	ui_cnt_add_child(background_element, btn);
 	wnd_init();
+	prj_init();
 	racecheckpoints[0].colABGR = 0xFFFF0000;
 	racecheckpoints[0].free = 0;
 	racecheckpoints[0].used = 1;
@@ -440,6 +443,7 @@ void ui_render()
 		game_ScreenToWorld(&click, fresx / 2.0f, fresy / 2.0f, 20.0f);
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
+			ui_active_element = NULL;
 			if ((active_window != NULL &&
 				ui_wnd_mousedown(active_window)) ||
 				ui_cnt_mousedown(background_element));
@@ -500,4 +504,5 @@ void ui_dispose()
 	ui_deactivate();
 	ui_cnt_dispose(background_element);
 	wnd_dispose();
+	prj_dispose();
 }

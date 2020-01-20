@@ -190,6 +190,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\project.c"
+				>
+			</File>
+			<File
+				RelativePath="..\project.h"
+				>
+			</File>
+			<File
 				RelativePath="..\settings.c"
 				>
 			</File>
@@ -243,6 +251,14 @@
 			</File>
 			<File
 				RelativePath="..\ui_element.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_input.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ui_input.h"
 				>
 			</File>
 			<File

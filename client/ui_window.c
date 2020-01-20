@@ -15,7 +15,7 @@ struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 
 	textlenandzero = strlen(title) + 1;
 	wnd = malloc(sizeof(struct UI_WINDOW));
-	ui_elem_init(wnd, WINDOW);
+	ui_elem_init(wnd, UIE_WINDOW);
 	wnd->_parent._parent.x = x;
 	wnd->_parent._parent.y = y;
 	wnd->_parent._parent.proc_dispose = (ui_method*) ui_wnd_dispose;

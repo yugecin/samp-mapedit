@@ -3,6 +3,7 @@
 #include "ui_element.h"
 #include "ui_container.h"
 
+#include "ui_input.h"
 #include "ui_label.h"
 #include "ui_button.h"
 #include "ui_radiobutton.h"
@@ -23,7 +24,8 @@ extern char directional_movement;
 extern float font_size_x, font_size_y;
 extern int fontsize, fontratio;
 extern float fontheight, buttonheight, fontpadx, fontpady;
-extern void* ui_element_being_clicked;
+extern void *ui_element_being_clicked;
+extern void *ui_active_element;
 extern int ui_mouse_is_just_down;
 extern int ui_mouse_is_just_up;
 extern struct UI_CONTAINER *background_element;

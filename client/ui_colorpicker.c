@@ -81,8 +81,7 @@ struct UI_COLORPICKER *ui_colpick_make(float size, colpickcb *cb)
 	struct UI_COLORPICKER *colpick;
 
 	colpick = malloc(sizeof(struct UI_COLORPICKER));
-	ui_elem_init(colpick, COLORPICKER);
-	colpick->_parent.type = COLORPICKER;
+	ui_elem_init(colpick, UIE_COLORPICKER);
 	colpick->_parent.pref_width = size + size / 10.0f;
 	colpick->_parent.pref_height = size;
 	colpick->_parent.proc_dispose = (ui_method*) ui_colpick_dispose;

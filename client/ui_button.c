@@ -12,9 +12,8 @@ struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 
 	textlenandzero = strlen(text) + 1;
 	btn = malloc(sizeof(struct UI_BUTTON));
-	ui_elem_init(btn, BUTTON);
+	ui_elem_init(btn, UIE_BUTTON);
 	btn->_parent.proc_dispose = (ui_method*) ui_btn_dispose;
-	btn->_parent.proc_update = (ui_method*) ui_btn_update;
 	btn->_parent.proc_draw = (ui_method*) ui_btn_draw;
 	btn->_parent.proc_mousedown = (ui_method*) ui_btn_mousedown;
 	btn->_parent.proc_mouseup = (ui_method*) ui_btn_mouseup;
@@ -31,10 +30,6 @@ void ui_btn_dispose(struct UI_BUTTON *btn)
 {
 	free(btn->text);
 	free(btn);
-}
-
-void ui_btn_update(struct UI_BUTTON *btn)
-{
 }
 
 void ui_btn_draw(struct UI_BUTTON *btn)
