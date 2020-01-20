@@ -5,6 +5,14 @@
 #include "ui.h"
 #include <string.h>
 
+static
+int ui_in_accept_key(struct UI_INPUT *in)
+{
+	in->value[0] = ui_last_key_down;
+	in->value[1] = 0;
+	return 1;
+}
+
 struct UI_INPUT *ui_in_make(inputcb *cb)
 {
 	struct UI_INPUT *in;
@@ -17,6 +25,7 @@ struct UI_INPUT *ui_in_make(inputcb *cb)
 	in->_parent.proc_mousedown = (ui_method*) ui_in_mousedown;
 	in->_parent.proc_mouseup = (ui_method*) ui_in_mouseup;
 	in->_parent.proc_recalc_size = (ui_method*) ui_in_recalc_size;
+	in->_parent.proc_accept_key = (ui_method*) ui_in_accept_key;
 	in->cb = cb;
 	in->value[0] = 0;
 	ui_in_recalc_size(in);

@@ -46,6 +46,13 @@ struct UI_ELEMENT {
 	Also called when the container's position changed.
 	*/
 	ui_method *proc_post_layout;
+	/**
+	Called when the element is active and a key was pressed.
+
+	Key character can be found in ui_last_key_down
+	Return 0 to let the event bubble through.
+	*/
+	ui_method *proc_accept_key;
 	void *userdata;
 };
 

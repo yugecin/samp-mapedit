@@ -52,7 +52,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib user32.lib"
 				OutputFile="$(SolutionDir)\out-$(ConfigurationName)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib"
 				IgnoreDefaultLibraryNames="uuid.lib"

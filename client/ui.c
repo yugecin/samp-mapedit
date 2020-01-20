@@ -9,6 +9,7 @@
 #include "windows.h"
 #include <math.h>
 #include <string.h>
+#include <windows.h>
 
 float fresx, fresy;
 float canvasx, canvasy;
@@ -36,6 +37,7 @@ char debugstringidx = 0;
 
 void *ui_element_being_clicked;
 void *ui_active_element;
+char ui_last_key_down;
 int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
 
@@ -380,9 +382,32 @@ void ui_draw_debug_strings()
 	} while (i != debugstringidx);
 }
 
+static
+char getlastkey()
+{
+	short *active;
+	short *current;
+	int i;
+
+	active = activeKeyState->standards;
+	current = currentKeyState->standards;
+	for (i = VK_A; i <= VK_Z; i++) {
+		if (active[i] && !current[i]) {
+			i = 'A' + i - VK_A;
+			/*for some reason CKeyState shift stuff don't work*/
+			if (!((GetAsyncKeyState(VK_SHIFT) & 0x8000) >> 15)) {
+				i |= 0x20;
+			}
+			return i;
+		}
+	}
+	return 0;
+}
+
 void ui_render()
 {
 	struct RwV3D v, click;
+	int activate_key_pressed;
 
 	ui_default_font();
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
@@ -390,15 +415,11 @@ void ui_render()
 		/*TODO: recalculate element sizes*/
 	}
 
-
-	if (currentKeyState->standards[VK_R] &&
-		!prevKeyState->standards[VK_R])
-	{
-		if (active) {
-			ui_deactivate();
-		} else {
-			ui_activate();
-		}
+	activate_key_pressed = prevKeyState->standards[VK_R] &&
+		!currentKeyState->standards[VK_R];
+	if (!active && activate_key_pressed) {
+		ui_activate();
+		activate_key_pressed = 0;
 	}
 
 	if (active) {
@@ -421,7 +442,15 @@ void ui_render()
 			ui_do_cursor_movement();
 		}
 
-		if (activeKeyState->standards[VK_Y] &&
+		ui_last_key_down = getlastkey();
+
+		if (ui_last_key_down != 0 &&
+			ui_active_element != NULL &&
+			((struct UI_ELEMENT*) ui_active_element)->
+			proc_accept_key((struct UI_ELEMENT*) ui_active_element))
+		{
+			;
+		} else if (activeKeyState->standards[VK_Y] &&
 			!currentKeyState->standards[VK_Y])
 		{
 			game_CameraRestoreWithJumpCut();
@@ -433,6 +462,9 @@ void ui_render()
 			!activeKeyState->standards[VK_Y])
 		{
 			ui_store_camera();
+		} else if (activate_key_pressed) {
+			ui_deactivate();
+			goto justdeactivated;
 		}
 
 		if (need_camera_update) {
@@ -486,6 +518,7 @@ void ui_render()
 		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
 			"~w~press ~r~Y ~w~to reset camera");
 	} else {
+justdeactivated:
 		originalHudScaleX = *hudScaleX;
 		originalHudScaleY = *hudScaleY;
 		*hudScaleX = 0.0009f;

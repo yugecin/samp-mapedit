@@ -26,6 +26,7 @@ extern int fontsize, fontratio;
 extern float fontheight, buttonheight, fontpadx, fontpady;
 extern void *ui_element_being_clicked;
 extern void *ui_active_element;
+extern char ui_last_key_down;
 extern int ui_mouse_is_just_down;
 extern int ui_mouse_is_just_up;
 extern struct UI_CONTAINER *background_element;
