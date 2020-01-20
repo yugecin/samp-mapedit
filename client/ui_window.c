@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define GRABX_VAL_CLOSEBTN -1000
+#define GRABX_VAL_NOGRAB -2000
 
 struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 {
@@ -193,7 +194,8 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 		child->proc_update(child);
 	}
 	if (ui_element_being_clicked == wnd &&
-		wnd->grabx > GRABX_VAL_CLOSEBTN)
+		wnd->grabx != GRABX_VAL_CLOSEBTN &&
+		wnd->grabx != GRABX_VAL_NOGRAB)
 	{
 		x = cursorx - wnd->grabx;
 		y = cursory - wnd->graby;
@@ -282,11 +284,8 @@ int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 {
 	int res;
 
+	wnd->grabx = GRABX_VAL_NOGRAB;
 	if ((res = ui_cnt_mousedown((struct UI_CONTAINER*) wnd))) {
-		/*container can be clicked, but window should not be*/
-		if (ui_element_being_clicked == wnd) {
-			ui_element_being_clicked = NULL;
-		}
 		return res;
 	}
 	if (wnd->_parent._parent.x <= cursorx &&
