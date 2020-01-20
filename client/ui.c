@@ -94,7 +94,8 @@ void cb_btn_objects(struct UI_BUTTON *btn)
 	y = camera->position.y + 100.0f * camera->rotation.y;
 	z = camera->position.z + 100.0f * camera->rotation.z;
 
-	nc.parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.data = 0; /*TODO*/
 	nc.nc = NC_CreateObject;
 	nc.params.asint[1] = 3279;
 	nc.params.asflt[2] = x;
@@ -104,7 +105,6 @@ void cb_btn_objects(struct UI_BUTTON *btn)
 	nc.params.asflt[6] = 0.0f;
 	nc.params.asflt[7] = 0.0f;
 	nc.params.asflt[8] = 500.0f;
-
 	sockets_send(&nc, sizeof(nc));
 }
 

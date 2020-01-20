@@ -37,6 +37,7 @@ struct NATIVE natives[] = {
 	{ "SetObjectPos", 0 },
 	{ "SetObjectRot", 0 },
 	{ "AddPlayerClass", 0 },
+	{ "EditObject", 0 },
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
 
@@ -385,6 +386,7 @@ void msg_resetobjects()
 static
 void msg_nativecall(struct MSG_NC *msg)
 {
+	struct MSG_OBJECT_CREATED createdmsg;
 	int idx, res;
 
 	idx = msg->nc;
@@ -392,6 +394,10 @@ void msg_nativecall(struct MSG_NC *msg)
 		res = natives[idx].fp(amx, msg->params.asint);
 		if (idx == NC_CreateObject) {
 			objectidused[res] = 1;
+			createdmsg._parent.id = MAPEDIT_MSG_OBJECT_CREATED;
+			createdmsg._parent.data = msg->_parent.data;
+			createdmsg.objectid = res;
+			socket_send((char*) &createdmsg, sizeof(createdmsg));
 		}
 	} else {
 		logprintf("invalid nc idx in rpc_nc: %d", idx);

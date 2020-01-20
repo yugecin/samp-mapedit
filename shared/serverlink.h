@@ -11,19 +11,27 @@
 #define NC_SetObjectPos 4
 #define NC_SetObjectRot 5
 #define NC_AddPlayerClass 6
+#define NC_EditObject 7
 
 #define MAPEDIT_MSG_RESETOBJECTS 0
 #define MAPEDIT_MSG_NATIVECALL 1
+#define MAPEDIT_MSG_OBJECT_CREATED 2
 
 struct MSG {
 	int id;
+	int data;
 };
 
 struct MSG_NC {
-	struct MSG parent;
+	struct MSG _parent;
 	int nc;
 	union {
 		int asint[20];
 		float asflt[20];
 	} params;
+};
+
+struct MSG_OBJECT_CREATED {
+	struct MSG _parent;
+	int objectid;
 };
