@@ -6,7 +6,6 @@ struct UI_BUTTON {
 	struct UI_ELEMENT _parent;
 	char *text;
 	btncb *cb;
-	int bufferoverflow;
 	int foregroundABGR;
 };
 
