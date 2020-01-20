@@ -5,6 +5,7 @@ struct UI_WINDOW {
 	short columns;
 	char *title;
 	float grabx, graby;
+	char closeable;
 };
 
 struct UI_WINDOW *ui_wnd_make(float x, float y, char *title);

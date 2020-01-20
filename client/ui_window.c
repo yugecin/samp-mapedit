@@ -5,6 +5,8 @@
 #include "ui.h"
 #include <string.h>
 
+#define GRABX_VAL_CLOSEBTN -1000
+
 struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 {
 	struct UI_WINDOW *wnd;
@@ -27,7 +29,19 @@ struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 	wnd->columns = 1;
 	wnd->title = malloc(sizeof(char) * textlenandzero);
 	memcpy(wnd->title, title, textlenandzero);
+	wnd->closeable = 1;
 	return wnd;
+}
+
+static int is_closebtn_hovered(struct UI_WINDOW *wnd)
+{
+	struct UI_ELEMENT *elem;
+
+	elem = (struct UI_ELEMENT*) wnd;
+	return elem->x + elem->width - buttonheight < cursorx &&
+		cursorx <= elem->x + elem->width &&
+		elem->y - buttonheight < cursory &&
+		cursory <= elem->y;
 }
 
 void ui_wnd_dispose(struct UI_WINDOW *wnd)
@@ -178,7 +192,9 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 		child = wnd->_parent.children[i];
 		child->proc_update(child);
 	}
-	if (ui_element_being_clicked == wnd) {
+	if (ui_element_being_clicked == wnd &&
+		wnd->grabx > GRABX_VAL_CLOSEBTN)
+	{
 		x = cursorx - wnd->grabx;
 		y = cursory - wnd->graby;
 		if (x < 0.0f) {
@@ -238,10 +254,24 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 
 void ui_wnd_draw(struct UI_WINDOW *wnd)
 {
+	int closecol;
 	struct UI_ELEMENT *elem = (struct UI_ELEMENT*) wnd;
 
 	ui_element_draw_background(elem, 0x88000000);
 	game_DrawRect(elem->x, elem->y, elem->width, -buttonheight, 0xcc000000);
+	if (wnd->closeable) {
+		if (is_closebtn_hovered(wnd)) {
+			if (ui_element_being_clicked == wnd) {
+				closecol = 0xffbb1111;
+			} else {
+				closecol = 0xccbb1111;
+			}
+		} else {
+			closecol = 0x99bb1111;
+		}
+		game_DrawRect(elem->x + elem->width, elem->y,
+			-buttonheight, -buttonheight, closecol);
+	}
 	game_TextPrintString(elem->x + fontpadx,
 		elem->y - buttonheight + fontpady,
 		wnd->title);
@@ -264,8 +294,12 @@ int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 		wnd->_parent._parent.y - buttonheight <= cursory &&
 		cursory < wnd->_parent._parent.y)
 	{
-		wnd->grabx = cursorx - wnd->_parent._parent.x;
-		wnd->graby = cursory - wnd->_parent._parent.y;
+		if (is_closebtn_hovered(wnd)) {
+			wnd->grabx = GRABX_VAL_CLOSEBTN;
+		} else {
+			wnd->grabx = cursorx - wnd->_parent._parent.x;
+			wnd->graby = cursory - wnd->_parent._parent.y;
+		}
 		return (int) (ui_element_being_clicked = wnd);
 	}
 	return 0;
@@ -273,6 +307,13 @@ int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 
 int ui_wnd_mouseup(struct UI_WINDOW *wnd)
 {
+	if (wnd->closeable &&
+		wnd->grabx == GRABX_VAL_CLOSEBTN &&
+		is_closebtn_hovered(wnd))
+	{
+		ui_hide_window(wnd);
+		return 1;
+	}
 	return ui_cnt_mouseup((struct UI_CONTAINER*) wnd);
 }
 
