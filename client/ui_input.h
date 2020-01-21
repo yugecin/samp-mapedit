@@ -2,9 +2,21 @@
 
 typedef void (inputcb)(struct UI_INPUT *btn);
 
+#define INPUT_TEXTLEN 5
+
 struct UI_INPUT {
 	struct UI_ELEMENT _parent;
-	char value[144];
+	char value[INPUT_TEXTLEN + 1];
+	/**
+	value but filtered (spaces into underscores)
+	*/
+	char displayvalue[INPUT_TEXTLEN + 1];
+	/**
+	ptr to start of displayvalue to display
+	*/
+	char *displayvaluestart;
+	unsigned char valuelen;
+	unsigned char cursorpos;
 	inputcb *cb;
 };
 
