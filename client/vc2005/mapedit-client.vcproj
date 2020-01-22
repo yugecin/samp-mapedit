@@ -198,6 +198,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\samp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\samp.h"
+				>
+			</File>
+			<File
 				RelativePath="..\settings.c"
 				>
 			</File>

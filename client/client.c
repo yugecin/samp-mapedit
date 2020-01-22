@@ -4,6 +4,7 @@
 #include "../shared/clientlink.h"
 #include "objects.h"
 #include "sockets.h"
+#include "samp.h"
 #include "settings.h"
 #include "ui.h"
 #include <windows.h>
@@ -111,6 +112,7 @@ void client_finalize()
 	sockets_dispose();
 	ui_dispose();
 	undetour();
+	samp_dispose();
 }
 
 /**
@@ -121,7 +123,7 @@ See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain
 static
 void client_init()
 {
-	in_samp = (int) GetModuleHandle("samp.dll");
+	samp_init();
 	detour();
 	ui_init();
 	sockets_init();

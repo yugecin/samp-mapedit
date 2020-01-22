@@ -4,6 +4,7 @@
 #include "client.h"
 #include "game.h"
 #include "project.h"
+#include "samp.h"
 #include "ui.h"
 #include "vk.h"
 #include "windows.h"
@@ -251,6 +252,7 @@ void ui_activate()
 		*hudScaleX = 0.0009f;
 		*hudScaleY = 0.0014f;
 		ui_element_being_clicked = NULL;
+		samp_break_chat_bar();
 	}
 }
 
@@ -264,6 +266,7 @@ void ui_deactivate()
 		*enableHudByOpcode = 1;
 		*hudScaleX = originalHudScaleX;
 		*hudScaleY = originalHudScaleY;
+		samp_restore_chat_bar();
 	}
 }
 

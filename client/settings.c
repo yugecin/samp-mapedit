@@ -3,6 +3,7 @@
 #include "common.h"
 #include "client.h"
 #include "game.h"
+#include "samp.h"
 #include "ui.h"
 #include "vk.h"
 #include <stdio.h>
@@ -272,7 +273,7 @@ void settings_init()
 	window_settings = ui_wnd_make(500.0f, 500.0f, "Settings");
 	window_settings->columns = 4;
 
-	if (in_samp) {
+	if (samp_handle) {
 		lbl = ui_lbl_make("Foliage_is_always_off_in_samp");
 		lbl->_parent.span = 4;
 		ui_wnd_add_child(window_settings, lbl);
@@ -349,7 +350,7 @@ void settings_init()
 void settings_dispose()
 {
 	ui_wnd_dispose(window_settings);
-	if (!in_samp) {
+	if (!samp_handle) {
 		toggle_foliage(1);
 	}
 }
