@@ -402,7 +402,7 @@ void grablastkey()
 			ui_last_key_down = i;
 			i = 'A' + i - VK_A;
 			/*for some reason CKeyState shift stuff don't work*/
-			if (!((GetAsyncKeyState(VK_SHIFT) & 0x8000) >> 15)) {
+			if (!(GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
 				i |= 0x20;
 			}
 			ui_last_char_down = i;
