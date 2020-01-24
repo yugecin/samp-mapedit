@@ -15,7 +15,13 @@ struct UI_INPUT {
 	ptr to start of displayvalue to display
 	*/
 	char *displayvaluestart;
+	/**
+	length of the value, without zero term
+	*/
 	unsigned char valuelen;
+	/**
+	position 0 is before the first character
+	*/
 	unsigned char cursorpos;
 	inputcb *cb;
 };

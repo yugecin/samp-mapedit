@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "ui.h"
+#include "vk.h"
 #include <string.h>
 
 static
@@ -20,15 +21,43 @@ int ui_in_accept_key(struct UI_INPUT *in)
 	int i;
 	char c;
 
-	if (in->cursorpos < INPUT_TEXTLEN && in->valuelen < INPUT_TEXTLEN) {
+	if (ui_last_key_down == VK_BACK) {
+		if (in->cursorpos > 0) {
+			for (i = in->cursorpos - 1; i < in->valuelen; i++) {
+				in->value[i] = in->value[i + 1];
+				in->displayvalue[i] = in->displayvalue[i + 1];
+			}
+			in->cursorpos--;
+			in->valuelen--;
+		}
+	} else if (ui_last_key_down == VK_DELETE) {
+		if (in->cursorpos < in->valuelen) {
+			for (i = in->cursorpos; i < in->valuelen; i++) {
+				in->value[i] = in->value[i + 1];
+				in->displayvalue[i] = in->displayvalue[i + 1];
+			}
+			in->valuelen--;
+		}
+	} else if (ui_last_key_down == VK_LEFT) {
+		if (in->cursorpos > 0) {
+			in->cursorpos--;
+		}
+	} else if (ui_last_key_down == VK_RIGHT) {
+		if (in->cursorpos < in->valuelen) {
+			in->cursorpos++;
+		}
+	} else if (ui_last_char_down != 0 &&
+		in->cursorpos < INPUT_TEXTLEN &&
+		in->valuelen < INPUT_TEXTLEN)
+	{
 		in->valuelen++;
 		for (i = in->valuelen; i > in->cursorpos; i--) {
 			c = in->value[i - 1];
 			in->displayvalue[i] = value_to_display_char(c);
 			in->value[i] = c;
 		}
-		in->displayvalue[in->cursorpos] = ui_last_key_down;
-		in->value[in->cursorpos] = ui_last_key_down;
+		in->displayvalue[in->cursorpos] = ui_last_char_down;
+		in->value[in->cursorpos] = ui_last_char_down;
 		in->displayvalue[in->valuelen] = 0;
 		in->value[in->valuelen] = 0;
 		in->cursorpos++;
@@ -96,7 +125,7 @@ void ui_in_draw(struct UI_INPUT *in)
 		in->displayvalue[in->cursorpos] = tmpchr;
 		game_TextSetColor(0xFFFFFF00);
 		game_TextPrintString(
-			in->_parent.x + fontpadx + cursorx + 1.0f,
+			in->_parent.x + fontpadx + cursorx,
 			in->_parent.y + fontpady + 1.0f,
 			"I");
 		game_TextSetColor(-1);

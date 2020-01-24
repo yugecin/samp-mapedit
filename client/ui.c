@@ -38,7 +38,8 @@ char debugstringidx = 0;
 
 void *ui_element_being_clicked;
 void *ui_active_element;
-char ui_last_key_down;
+char ui_last_char_down;
+int ui_last_key_down;
 int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
 
@@ -386,25 +387,44 @@ void ui_draw_debug_strings()
 }
 
 static
-char getlastkey()
+void grablastkey()
 {
 	short *active;
 	short *current;
 	int i;
 
+	ui_last_char_down = 0;
+
 	active = activeKeyState->standards;
 	current = currentKeyState->standards;
 	for (i = VK_A; i <= VK_Z; i++) {
 		if (active[i] && !current[i]) {
+			ui_last_key_down = i;
 			i = 'A' + i - VK_A;
 			/*for some reason CKeyState shift stuff don't work*/
 			if (!((GetAsyncKeyState(VK_SHIFT) & 0x8000) >> 15)) {
 				i |= 0x20;
 			}
-			return i;
+			ui_last_char_down = i;
+			return;
 		}
 	}
-	return 0;
+
+	if (activeKeyState->back && !currentKeyState->back) {
+		ui_last_key_down = VK_BACK;
+	} else if (activeKeyState->del && !currentKeyState->del) {
+		ui_last_key_down = VK_DELETE;
+	} else if (activeKeyState->up && !currentKeyState->up) {
+		ui_last_key_down = VK_UP;
+	} else if (activeKeyState->down && !currentKeyState->down) {
+		ui_last_key_down = VK_DOWN;
+	} else if (activeKeyState->left && !currentKeyState->left) {
+		ui_last_key_down = VK_LEFT;
+	} else if (activeKeyState->right && !currentKeyState->right) {
+		ui_last_key_down = VK_RIGHT;
+	} else {
+		ui_last_key_down = 0;
+	}
 }
 
 void ui_render()
@@ -445,7 +465,7 @@ void ui_render()
 			ui_do_cursor_movement();
 		}
 
-		ui_last_key_down = getlastkey();
+		grablastkey();
 
 		if (ui_last_key_down != 0 &&
 			ui_active_element != NULL &&
