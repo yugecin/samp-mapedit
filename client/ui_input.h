@@ -2,7 +2,7 @@
 
 typedef void (inputcb)(struct UI_INPUT *btn);
 
-#define INPUT_TEXTLEN 5
+#define INPUT_TEXTLEN 50
 
 struct UI_INPUT {
 	struct UI_ELEMENT _parent;
@@ -23,6 +23,10 @@ struct UI_INPUT {
 	position 0 is before the first character
 	*/
 	unsigned char cursorpos;
+	/**
+	offset from text x to caret x
+	*/
+	float caretoffsetx;
 	inputcb *cb;
 };
 
