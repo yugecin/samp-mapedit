@@ -153,7 +153,7 @@ struct UI_INPUT *ui_in_make(inputcb *cb)
 
 	in = malloc(sizeof(struct UI_INPUT));
 	ui_elem_init(in, UIE_INPUT);
-	in->_parent.pref_width = 50.0f;
+	in->_parent.pref_width = 300.0f;
 	in->_parent.proc_dispose = (ui_method*) ui_in_dispose;
 	in->_parent.proc_draw = (ui_method*) ui_in_draw;
 	in->_parent.proc_mousedown = (ui_method*) ui_in_mousedown;

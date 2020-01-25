@@ -414,6 +414,9 @@ void grablastkey()
 		ui_last_key_down = VK_BACK;
 	} else if (activeKeyState->del && !currentKeyState->del) {
 		ui_last_key_down = VK_DELETE;
+	} else if (active[VK_SPACE] && !current[VK_SPACE]) {
+		ui_last_key_down = VK_SPACE;
+		ui_last_char_down = ' ';
 	} else if (activeKeyState->up && !currentKeyState->up) {
 		ui_last_key_down = VK_UP;
 	} else if (activeKeyState->down && !currentKeyState->down) {
