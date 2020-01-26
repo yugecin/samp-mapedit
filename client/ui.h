@@ -3,6 +3,7 @@
 #include "ui_element.h"
 #include "ui_container.h"
 
+#include "ui_list.h"
 #include "ui_input.h"
 #include "ui_label.h"
 #include "ui_button.h"

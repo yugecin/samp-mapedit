@@ -186,7 +186,7 @@ void ui_in_draw(struct UI_INPUT *in)
 	col = 0xAAFF0000;
 	if (ui_active_element == in) {
 		col = 0xEE00FF00;
-	} else if (ui_element_is_hovered(&in->_parent)) {
+	} else if (ui_element_is_hovered(elem)) {
 		if (ui_element_being_clicked == NULL) {
 			col = 0xEEFF0000;
 		} else if (ui_element_being_clicked == in) {

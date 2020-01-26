@@ -11,6 +11,7 @@ enum eUIElementType {
 	UIE_WINDOW,
 	UIE_LABEL,
 	UIE_INPUT,
+	UIE_LIST,
 };
 
 struct UI_ELEMENT {
