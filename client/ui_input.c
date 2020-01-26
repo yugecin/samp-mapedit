@@ -132,6 +132,9 @@ int ui_in_accept_key(struct UI_INPUT *in)
 
 	in->caretanimbasetime = *timeInGame;
 	make_sure_caret_is_in_bounds(in);
+	if (in->cb != NULL) {
+		in->cb(in);
+	}
 	return 1;
 }
 
