@@ -130,6 +130,7 @@ int ui_in_accept_key(struct UI_INPUT *in)
 		return 1;
 	}
 
+	in->caretanimbasetime = *timeInGame;
 	make_sure_caret_is_in_bounds(in);
 	return 1;
 }
@@ -168,6 +169,7 @@ struct UI_INPUT *ui_in_make(inputcb *cb)
 	in->valuelen = 0;
 	in->caretoffsetx = 0.0f;
 	in->displayvaluestart = in->displayvalue;
+	in->caretanimbasetime = 0;
 	ui_in_recalc_size(in);
 	return in;
 }
@@ -200,7 +202,9 @@ void ui_in_draw(struct UI_INPUT *in)
 		in->_parent.x + fontpadx,
 		in->_parent.y + fontpady,
 		in->displayvaluestart);
-	if (ui_active_element == in && *timeInGame % 500 > 250) {
+	if (ui_active_element == in &&
+		(*timeInGame - in->caretanimbasetime) % 500 < 250)
+	{
 		game_TextSetColor(0xFFFFFF00);
 		game_TextPrintString(
 			in->_parent.x + fontpadx + in->caretoffsetx,

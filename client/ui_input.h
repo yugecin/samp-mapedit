@@ -27,6 +27,7 @@ struct UI_INPUT {
 	offset from text x to caret x
 	*/
 	float caretoffsetx;
+	int caretanimbasetime;
 	inputcb *cb;
 };
 
