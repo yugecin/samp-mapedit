@@ -239,6 +239,7 @@ int ui_in_mouseup(struct UI_INPUT *in)
 	if (ui_element_being_clicked == in) {
 		if (ui_element_is_hovered(&in->_parent)) {
 			ui_active_element = in;
+			in->caretanimbasetime = *timeInGame;
 		}
 		return 1;
 	}
