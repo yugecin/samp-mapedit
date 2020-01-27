@@ -21,6 +21,7 @@ struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 	btn->text = malloc(sizeof(char) * textlenandzero);
 	btn->cb = cb;
 	btn->foregroundABGR = -1;
+	btn->enabled = 1;
 	memcpy(btn->text, text, textlenandzero);
 	ui_btn_recalc_size(btn);
 	return btn;
@@ -36,29 +37,35 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 {
 	int col;
 
-	if (ui_element_is_hovered(&btn->_parent)) {
-		if (ui_element_being_clicked == NULL) {
-			col = 0xEEFF0000;
+	if (btn->enabled) {
+		if (ui_element_is_hovered(&btn->_parent)) {
+			if (ui_element_being_clicked == NULL) {
+				col = 0xEEFF0000;
+			} else if (ui_element_being_clicked == btn) {
+				col = 0xEE0000FF;
+			} else {
+				col = 0xAAFF0000;
+			}
 		} else if (ui_element_being_clicked == btn) {
-			col = 0xEE0000FF;
+			/*being clicked but not hovered = hovered color*/
+			col = 0xEEFF0000;
 		} else {
 			col = 0xAAFF0000;
 		}
-	} else if (ui_element_being_clicked == btn) {
-		/*being clicked but not hovered = hovered color*/
-		col = 0xEEFF0000;
 	} else {
-		col = 0xAAFF0000;
+		col = 0xDD777777;
 	}
 	ui_element_draw_background(&btn->_parent, col);
 	game_TextSetAlign(CENTER);
 	if (btn->foregroundABGR != -1) {
 		game_TextSetColor(btn->foregroundABGR);
 	}
-	game_TextPrintString(
-		btn->_parent.x + btn->_parent.width / 2.0f,
-		btn->_parent.y + fontpady,
-		btn->text);
+	if (btn->text != NULL) {
+		game_TextPrintString(
+			btn->_parent.x + btn->_parent.width / 2.0f,
+			btn->_parent.y + fontpady,
+			btn->text);
+	}
 	if (btn->foregroundABGR != -1) {
 		game_TextSetColor(-1);
 	}
@@ -68,12 +75,16 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 void ui_btn_recalc_size(struct UI_BUTTON *btn)
 {
 	float textw;
-
-	/*width calculations stop at whitespace, should whitespace be replaced
-	with underscores for this size calculations?*/
-	textw = game_TextGetSizeX(btn->text, 0, 0);
-	btn->_parent.pref_width = textw + fontpadx * 2.0f;
+	
 	btn->_parent.pref_height = buttonheight;
+	if (btn->text == NULL) {
+		btn->_parent.pref_height = 20.0f;
+	} else {
+		/*width calculations stop at whitespace, should whitespace be
+		replaced with underscores for this size calculations?*/
+		textw = game_TextGetSizeX(btn->text, 0, 0);
+		btn->_parent.pref_width = textw + fontpadx * 2.0f;
+	}
 	/*tell container it needs to redo its layout*/
 	if (btn->_parent.parent != NULL) {
 		btn->_parent.parent->need_layout = 1;
@@ -82,7 +93,7 @@ void ui_btn_recalc_size(struct UI_BUTTON *btn)
 
 int ui_btn_mousedown(struct UI_BUTTON *btn)
 {
-	if (ui_element_is_hovered(&btn->_parent)) {
+	if (ui_element_is_hovered(&btn->_parent) && btn->enabled) {
 		return (int) (ui_element_being_clicked = btn);
 	}
 	return 0;

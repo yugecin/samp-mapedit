@@ -15,12 +15,21 @@ void cb_btn_project(struct UI_BUTTON *btn)
 }
 
 static
+void cb_createnew_name_err(int btn)
+{
+	ui_show_window(window_project);
+}
+
+static
 void cb_btn_createnew(struct UI_BUTTON *btn)
 {
 	if (in_newprojectname->valuelen <= 0) {
 		msg_message = "Empty_name_is_not_allowed";
 		msg_title = "New_project";
-		msg_show(window_project);
+		msg_btn1text = "Ok";
+		msg_btn2text = NULL;
+		msg_btn3text = NULL;
+		msg_show(cb_createnew_name_err);
 	} else {
 	}
 }

@@ -7,6 +7,7 @@ struct UI_BUTTON {
 	char *text;
 	btncb *cb;
 	int foregroundABGR;
+	char enabled;
 };
 
 struct UI_BUTTON *ui_btn_make(char *text, btncb *cb);
