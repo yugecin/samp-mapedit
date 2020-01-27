@@ -7,6 +7,5 @@ struct UI_LABEL {
 
 struct UI_LABEL *ui_lbl_make(char *text);
 void ui_lbl_dispose(struct UI_LABEL *lbl);
-void ui_lbl_update(struct UI_LABEL *lbl);
 void ui_lbl_draw(struct UI_LABEL *lbl);
 void ui_lbl_recalc_size(struct UI_LABEL *lbl);

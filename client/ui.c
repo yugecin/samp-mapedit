@@ -4,6 +4,7 @@
 #include "client.h"
 #include "game.h"
 #include "project.h"
+#include "msgbox.h"
 #include "samp.h"
 #include "ui.h"
 #include "vk.h"
@@ -145,6 +146,7 @@ void ui_init()
 	ui_cnt_add_child(background_element, btn);
 	wnd_init();
 	prj_init();
+	msg_init();
 	racecheckpoints[0].colABGR = 0xFFFF0000;
 	racecheckpoints[0].free = 0;
 	racecheckpoints[0].used = 1;
@@ -564,4 +566,5 @@ void ui_dispose()
 	ui_cnt_dispose(background_element);
 	wnd_dispose();
 	prj_dispose();
+	msg_dispose();
 }

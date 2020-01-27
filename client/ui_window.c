@@ -11,9 +11,7 @@
 struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 {
 	struct UI_WINDOW *wnd;
-	int textlenandzero;
 
-	textlenandzero = strlen(title) + 1;
 	wnd = malloc(sizeof(struct UI_WINDOW));
 	ui_elem_init(wnd, UIE_WINDOW);
 	wnd->_parent._parent.x = x;
@@ -28,8 +26,7 @@ struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 	wnd->_parent.childcount = 0;
 	wnd->_parent.need_layout = 1;
 	wnd->columns = 1;
-	wnd->title = malloc(sizeof(char) * textlenandzero);
-	memcpy(wnd->title, title, textlenandzero);
+	wnd->title = title;
 	wnd->closeable = 1;
 	return wnd;
 }
@@ -47,7 +44,6 @@ static int is_closebtn_hovered(struct UI_WINDOW *wnd)
 
 void ui_wnd_dispose(struct UI_WINDOW *wnd)
 {
-	free(wnd->title);
 	ui_cnt_dispose((struct UI_CONTAINER*) wnd);
 }
 

@@ -182,6 +182,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\msgbox.c"
+				>
+			</File>
+			<File
+				RelativePath="..\msgbox.h"
+				>
+			</File>
+			<File
 				RelativePath="..\objects.c"
 				>
 			</File>

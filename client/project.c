@@ -2,9 +2,11 @@
 
 #include "common.h"
 #include "ui.h"
+#include "msgbox.h"
 #include <string.h>
 
 static struct UI_WINDOW *window_project;
+static struct UI_INPUT *in_newprojectname;
 
 static
 void cb_btn_project(struct UI_BUTTON *btn)
@@ -13,13 +15,14 @@ void cb_btn_project(struct UI_BUTTON *btn)
 }
 
 static
-void cb_in_projectname(struct UI_INPUT *in)
-{
-}
-
-static
 void cb_btn_createnew(struct UI_BUTTON *btn)
 {
+	if (in_newprojectname->valuelen <= 0) {
+		msg_message = "Empty_name_is_not_allowed";
+		msg_title = "New_project";
+		msg_show(window_project);
+	} else {
+	}
 }
 
 static
@@ -36,7 +39,6 @@ void prj_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
-	struct UI_INPUT *in;
 	struct UI_LIST *lst;
 
 	btn = ui_btn_make("Project", cb_btn_project);
@@ -49,8 +51,8 @@ void prj_init()
 
 	lbl = ui_lbl_make("New:");
 	ui_wnd_add_child(window_project, lbl);
-	in = ui_in_make(cb_in_projectname);
-	ui_wnd_add_child(window_project, in);
+	in_newprojectname = ui_in_make(NULL);
+	ui_wnd_add_child(window_project, in_newprojectname);
 	btn = ui_btn_make("Create", cb_btn_createnew);
 	ui_wnd_add_child(window_project, btn);
 	lbl = ui_lbl_make("Open:");
@@ -65,5 +67,13 @@ void prj_init()
 }
 
 void prj_dispose()
+{
+}
+
+void prj_open(char *name)
+{
+}
+
+void prj_save()
 {
 }
