@@ -123,6 +123,7 @@ See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain
 static
 void client_init()
 {
+	CreateDirectoryA("samp-mapedit", NULL);
 	samp_init();
 	detour();
 	ui_init();

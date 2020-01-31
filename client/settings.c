@@ -341,8 +341,6 @@ void settings_init()
 	btn->_parent.span = 3;
 	ui_wnd_add_child(window_settings, btn);
 
-	CreateDirectoryA("samp-mapedit", NULL);
-
 	btn_save_null_when_unchanged = NULL;
 	cb_btn_reload(NULL); /*loads saved settings*/
 }
