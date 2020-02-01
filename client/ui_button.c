@@ -22,6 +22,7 @@ struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 	btn->cb = cb;
 	btn->foregroundABGR = -1;
 	btn->enabled = 1;
+	/*add to stuff to ui_radiobutton too*/
 	memcpy(btn->text, text, textlenandzero);
 	ui_btn_recalc_size(btn);
 	return btn;
