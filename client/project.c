@@ -84,6 +84,8 @@ void prj_init()
 	btn = ui_btn_make("Open", cb_btn_open);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(window_project, btn);
+
+	ui_show_window(window_project);
 }
 
 void prj_dispose()
