@@ -65,6 +65,10 @@ void prj_init()
 	btn = ui_btn_make("Create/Open", cb_btn_project);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
+	btn = ui_btn_make("Save", cb_btn_project);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(main_menu, btn);
 
 	window_project = ui_wnd_make(500.0f, 500.0f, "Project");
 	window_project->columns = 3;
