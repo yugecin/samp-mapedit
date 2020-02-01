@@ -2,11 +2,14 @@
 
 #include "../shared/sizecheck.h"
 #include "../shared/clientlink.h"
+#include "msgbox.h"
 #include "objects.h"
+#include "project.h"
 #include "sockets.h"
 #include "samp.h"
 #include "settings.h"
 #include "ui.h"
+#include "windows.h"
 #include <windows.h>
 
 struct CLIENTLINK *linkdata;
@@ -110,7 +113,12 @@ void client_finalize()
 	objects_dispose();
 	settings_dispose();
 	sockets_dispose();
+
 	ui_dispose();
+	wnd_dispose();
+	prj_dispose();
+	msg_dispose();
+
 	undetour();
 	samp_dispose();
 }
@@ -126,9 +134,15 @@ void client_init()
 	CreateDirectoryA("samp-mapedit", NULL);
 	samp_init();
 	detour();
+
 	ui_init();
-	sockets_init();
+	/*order of init affects layout of main menu*/
 	settings_init();
+	wnd_init();
+	prj_init();
+	msg_init();
+
+	sockets_init();
 	objects_init();
 }
 

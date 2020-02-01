@@ -59,10 +59,12 @@ void prj_init()
 	struct UI_LABEL *lbl;
 	struct UI_LIST *lst;
 
-	btn = ui_btn_make("Project", cb_btn_project);
-	btn->_parent.x = 10.0f;
-	btn->_parent.y = 650.0f;
-	ui_cnt_add_child(background_element, btn);
+	lbl = ui_lbl_make("=_Project_=");
+	lbl->_parent.span = 2;
+	ui_wnd_add_child(main_menu, lbl);
+	btn = ui_btn_make("Create/Open", cb_btn_project);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
 
 	window_project = ui_wnd_make(500.0f, 500.0f, "Project");
 	window_project->columns = 3;
@@ -86,6 +88,7 @@ void prj_init()
 
 void prj_dispose()
 {
+	ui_wnd_dispose(window_project);
 }
 
 void prj_open(char *name)

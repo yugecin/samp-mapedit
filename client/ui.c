@@ -29,6 +29,7 @@ static char need_camera_update, has_set_camera_once;
 
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
+struct UI_WINDOW *main_menu = NULL;
 
 #define DEBUG_STRING_POOL 10
 #define DEBUG_STRING_LEN 256
@@ -132,21 +133,24 @@ void ui_init()
 	dummy_element.pref_height = dummy_element.pref_width = 0.0f;
 	ui_colpick_init();
 	background_element = ui_cnt_make();
+
+	main_menu = ui_wnd_make(10.0f, 500.0f, "Main_Menu");
+	main_menu->columns = 2;
+	main_menu->closeable = 0;
+
+	btn = ui_btn_make("Reload_client", cb_btn_reload);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
+
 	btn = ui_btn_make("Edit_checkpoint", cb_btn_cpsettings);
 	btn->_parent.x = 300.0f;
 	btn->_parent.y = 550.0f;
-	ui_cnt_add_child(background_element, btn);
-	btn = ui_btn_make("Reload_client", cb_btn_reload);
-	btn->_parent.x = 10.0f;
-	btn->_parent.y = 600.0f;
 	ui_cnt_add_child(background_element, btn);
 	btn = ui_btn_make("Objects?", cb_btn_objects);
 	btn->_parent.x = 10.0f;
 	btn->_parent.y = 900.0f;
 	ui_cnt_add_child(background_element, btn);
-	wnd_init();
-	prj_init();
-	msg_init();
+	
 	racecheckpoints[0].colABGR = 0xFFFF0000;
 	racecheckpoints[0].free = 0;
 	racecheckpoints[0].used = 1;
@@ -459,6 +463,7 @@ void ui_render()
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if ((active_window != NULL &&
 				ui_wnd_mouseup(active_window)) ||
+				ui_wnd_mouseup(main_menu) ||
 				ui_cnt_mouseup(background_element));
 			ui_element_being_clicked = NULL;
 		}
@@ -506,12 +511,14 @@ void ui_render()
 			ui_active_element = NULL;
 			if ((active_window != NULL &&
 				ui_wnd_mousedown(active_window)) ||
+				ui_wnd_mousedown(main_menu) ||
 				ui_cnt_mousedown(background_element));
 		}
 
 		if (active_window != NULL) {
 			ui_wnd_update(active_window);
 		}
+		ui_wnd_update(main_menu);
 		ui_cnt_update(background_element);
 
 		if (racecheckpoints[0].free > 2) {
@@ -522,6 +529,7 @@ void ui_render()
 		}
 
 		ui_cnt_draw(background_element);
+		ui_wnd_draw(main_menu);
 		if (active_window != NULL) {
 			ui_wnd_draw(active_window);
 		}
@@ -564,7 +572,5 @@ void ui_dispose()
 {
 	ui_deactivate();
 	ui_cnt_dispose(background_element);
-	wnd_dispose();
-	prj_dispose();
-	msg_dispose();
+	ui_wnd_dispose(main_menu);
 }

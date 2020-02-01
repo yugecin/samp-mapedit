@@ -266,9 +266,8 @@ void settings_init()
 	struct UI_LABEL *lbl;
 
 	btn = ui_btn_make("Settings", cb_btn_settings);
-	btn->_parent.x = 10.0f;
-	btn->_parent.y = 550.0f;
-	ui_cnt_add_child(background_element, btn);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
 
 	window_settings = ui_wnd_make(500.0f, 500.0f, "Settings");
 	window_settings->columns = 4;
