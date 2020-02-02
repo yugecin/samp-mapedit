@@ -14,3 +14,4 @@ struct UI_LIST {
 };
 
 struct UI_LIST *ui_lst_make(int pagesize, listcb *cb);
+void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems);

@@ -5,9 +5,12 @@
 #include "ui.h"
 #include <string.h>
 
+#define MAX_ITEM_LENGTH 50
+
 static
 void ui_lst_dispose(struct UI_LIST *lst)
 {
+	free(lst->items);
 	free(lst);
 }
 
@@ -16,6 +19,7 @@ void ui_lst_draw(struct UI_LIST *lst)
 {
 	struct UI_ELEMENT *elem;
 	int col;
+	int i, itemend;
 
 	elem = (struct UI_ELEMENT*) lst;
 	col = 0xAAFF0000;
@@ -29,8 +33,20 @@ void ui_lst_draw(struct UI_LIST *lst)
 		}
 	}
 	ui_element_draw_background(elem, col);
-	game_DrawRect(elem->x + 2, elem->y + 2,
-		elem->width - 4, elem->height - 4, 0xFF000000);
+	game_DrawRect(elem->x + 2.0f, elem->y + 2.0f,
+		elem->width - 4.0f, elem->height - 4.0f, 0xFF000000);
+
+	itemend = lst->topoffset + lst->realpagesize;
+	if (itemend > lst->numitems) {
+		itemend = lst->numitems;
+	}
+	/*TODO: scrollbar and don't display out of right bounds*/
+	for (i = lst->topoffset; i < itemend; i++) {
+		game_TextPrintString(
+			elem->x + 2.0f,
+			elem->y + 2.0f + i * fontheight,
+			lst->items[i]);
+	}
 }
 
 static
@@ -93,6 +109,42 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->prefpagesize = pagesize;
 	lst->numitems = 0;
 	lst->topoffset = 0;
+	lst->items = NULL;
+	lst->numitems = 0;
 	ui_lst_recalc_size(lst);
 	return lst;
+}
+
+void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
+{
+	char **table, *names, *currentname, c;
+	int i, j;
+
+	if (lst->items != NULL) {
+		free(lst->items);
+	}
+	if (numitems <= 0) {
+		lst->items = NULL;
+		return;
+	}
+	lst->numitems = numitems;
+	lst->items = malloc((sizeof(char*) + MAX_ITEM_LENGTH) * numitems);
+	table = lst->items;
+	names = ((char*) table) + numitems * sizeof(char*);
+	for (i = 0; i < numitems; i++) {
+		currentname = items[i];
+		for (j = 0;; j++) {
+			c = currentname[j];
+			if (c == ' ') {
+				names[j] = '_';
+			} else if (c == 0 || j == MAX_ITEM_LENGTH - 1) {
+				names[j] = 0;
+				break;
+			}
+			names[j] = c;
+		}
+		*table = names;
+		table++;
+		names += MAX_ITEM_LENGTH;
+	}
 }

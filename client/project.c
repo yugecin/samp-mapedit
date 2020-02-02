@@ -7,10 +7,38 @@
 #include "project.h"
 #include <stdio.h>
 #include <string.h>
+#include <windows.h>
+
+#define MAX_FILES 1000
+#define NAME_LEN 50
 
 static struct UI_WINDOW *window_project;
 static struct UI_INPUT *in_newprojectname;
+static struct UI_LIST *lst_projects;
 static char open_project_name[INPUT_TEXTLEN + 1];
+static char tmp_files[MAX_FILES][NAME_LEN];
+static int numfiles;
+
+static
+void proj_updatelist()
+{
+	char *listdata[MAX_FILES];
+	WIN32_FIND_DATAA data;
+	HANDLE search;
+
+	numfiles = 0;
+	search = FindFirstFileA("samp-mapedit\\*.mep", &data);
+	if (search != INVALID_HANDLE_VALUE) {
+		do {
+			memcpy(tmp_files[numfiles], data.cFileName, NAME_LEN);
+			listdata[numfiles] = tmp_files[numfiles];
+			tmp_files[numfiles][49] = 0;
+			numfiles++;
+		} while (FindNextFileA(search, &data));
+		FindClose(search);
+	}
+	ui_lst_set_data(lst_projects, listdata, numfiles);
+}
 
 static
 void cb_btn_project(struct UI_BUTTON *btn)
@@ -57,7 +85,6 @@ void prj_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
-	struct UI_LIST *lst;
 
 	lbl = ui_lbl_make("=_Project_=");
 	lbl->_parent.span = 2;
@@ -81,15 +108,16 @@ void prj_init()
 	ui_wnd_add_child(window_project, btn);
 	lbl = ui_lbl_make("Open:");
 	ui_wnd_add_child(window_project, lbl);
-	lst = ui_lst_make(20, cb_lst_open);
-	lst->_parent.span = 2;
-	ui_wnd_add_child(window_project, lst);
+	lst_projects = ui_lst_make(20, cb_lst_open);
+	lst_projects->_parent.span = 2;
+	ui_wnd_add_child(window_project, lst_projects);
 	ui_wnd_add_child(window_project, NULL);
 	btn = ui_btn_make("Open", cb_btn_open);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(window_project, btn);
 
 	ui_show_window(window_project);
+	proj_updatelist();
 }
 
 void prj_dispose()
@@ -105,14 +133,14 @@ void prj_save()
 {
 	FILE *f;
 	struct CCam *ccam;
-	char projfile[12 + INPUT_TEXTLEN];
+	char projfile[15 + INPUT_TEXTLEN];
 	char buf[1000];
 	struct {
 		int x, y, z;
 	} *vec3i;
 
 	ccam = &camera->cams[camera->activeCam];
-	sprintf(projfile, "samp-mapedit\\%s", open_project_name);
+	sprintf(projfile, "samp-mapedit\\%s.mep", open_project_name);
 	if ((f = fopen(projfile, "w"))) {
 		vec3i = (void*) &ccam->pos;
 		fwrite(buf, sprintf(buf, "cam.pos.x %d\n", vec3i->x), 1, f);
