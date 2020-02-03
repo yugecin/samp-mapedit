@@ -15,6 +15,7 @@
 static struct UI_WINDOW *window_project;
 static struct UI_INPUT *in_newprojectname;
 static struct UI_LIST *lst_projects;
+static struct UI_BUTTON *btn_main_save;
 static char open_project_name[INPUT_TEXTLEN + 1];
 static char tmp_files[MAX_FILES][NAME_LEN];
 static int numfiles;
@@ -68,6 +69,7 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 			INPUT_TEXTLEN + 1);
 		ui_hide_window(window_project);
 		prj_save();
+		btn_main_save->enabled = 1;
 	}
 }
 
@@ -81,6 +83,12 @@ void cb_btn_open(struct UI_BUTTON *btn)
 {
 }
 
+static
+void cb_btn_save(struct UI_BUTTON *btn)
+{
+	prj_save();
+}
+
 void prj_init()
 {
 	struct UI_BUTTON *btn;
@@ -92,10 +100,10 @@ void prj_init()
 	btn = ui_btn_make("Create/Open", cb_btn_project);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
-	btn = ui_btn_make("Save", cb_btn_project);
-	btn->_parent.span = 2;
-	btn->enabled = 0;
-	ui_wnd_add_child(main_menu, btn);
+	btn_main_save = ui_btn_make("Save", cb_btn_save);
+	btn_main_save->_parent.span = 2;
+	btn_main_save->enabled = 0;
+	ui_wnd_add_child(main_menu, btn_main_save);
 
 	window_project = ui_wnd_make(500.0f, 500.0f, "Project");
 	window_project->columns = 3;
@@ -127,6 +135,7 @@ void prj_dispose()
 
 void prj_open(char *name)
 {
+	btn_main_save->enabled = 1;
 }
 
 void prj_save()
@@ -139,6 +148,7 @@ void prj_save()
 		int x, y, z;
 	} *vec3i;
 
+	/*TODO: this should be freecam pos, not active cam pos*/
 	ccam = &camera->cams[camera->activeCam];
 	sprintf(projfile, "samp-mapedit\\%s.mep", open_project_name);
 	if ((f = fopen(projfile, "w"))) {
