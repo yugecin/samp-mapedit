@@ -141,7 +141,6 @@ void prj_open(char *name)
 void prj_save()
 {
 	FILE *f;
-	struct CCam *ccam;
 	char projfile[15 + INPUT_TEXTLEN];
 	char buf[1000];
 	struct {
@@ -149,14 +148,13 @@ void prj_save()
 	} *vec3i;
 
 	/*TODO: this should be freecam pos, not active cam pos*/
-	ccam = &camera->cams[camera->activeCam];
 	sprintf(projfile, "samp-mapedit\\%s.mep", open_project_name);
 	if ((f = fopen(projfile, "w"))) {
-		vec3i = (void*) &ccam->pos;
+		vec3i = (void*) &camera->position;
 		fwrite(buf, sprintf(buf, "cam.pos.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "cam.pos.y %d\n", vec3i->y), 1, f);
 		fwrite(buf, sprintf(buf, "cam.pos.z %d\n", vec3i->z), 1, f);
-		vec3i = (void*) &ccam->lookVector;
+		vec3i = (void*) &camera->rotation;
 		fwrite(buf, sprintf(buf, "cam.rot.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "cam.rot.y %d\n", vec3i->y), 1, f);
 		fwrite(buf, sprintf(buf, "cam.rot.z %d\n", vec3i->z), 1, f);
