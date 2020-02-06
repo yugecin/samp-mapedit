@@ -18,6 +18,24 @@ float *hudScaleX = (float*) 0x859520;
 float *hudScaleY = (float*) 0x859524;
 struct CRaceCheckpoint *racecheckpoints = (struct CRaceCheckpoint*) 0xC7F158;
 int *timeInGame = (int*) 0xB7CB84;
+int *script_PLAYER_CHAR = (int*) 0xA49968; /* $2=PLAYER_CHAR */
+int *script_PLAYER_ACTOR = (int*) 0xA4996C; /* $3=PLAYER_ACTOR */
+void *player;
+
+__declspec(naked) void game_init()
+{
+	_asm {
+		mov eax, script_PLAYER_ACTOR
+		mov eax, [eax]
+		push eax /*pedHandle*/
+		mov ecx, 0xB74490 /*void *PedPool*/
+		mov ecx, [ecx]
+		mov eax, 0x404910 /*CPed *CPool_CPed::getStructByHandle*/
+		call eax /*__thiscall*/
+		mov player, eax
+		ret
+	}
+}
 
 __declspec(naked) void game_CameraRestore()
 {

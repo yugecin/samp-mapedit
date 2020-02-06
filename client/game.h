@@ -203,6 +203,9 @@ extern struct CRaceCheckpoint *racecheckpoints;
 Resets when player starts a new game.
 */
 extern int *timeInGame;
+extern int *script_PLAYER_CHAR;
+extern int *script_PLAYER_ACTOR;
+extern void *player;
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();
@@ -210,6 +213,7 @@ void __stdcall game_CameraSetOnPoint(
 	struct RwV3D *point, enum eCameraCutMode cutmode, int unk);
 void game_DrawRect(float x, float y, float w, float h, int argb);
 void game_FreezePlayer(char flag);
+void game_init();
 /**
 Seems to not work with standard keys, check enum RsKeyCode for supported ones.
 

@@ -2,6 +2,7 @@
 
 #include "../shared/sizecheck.h"
 #include "../shared/clientlink.h"
+#include "game.h"
 #include "msgbox.h"
 #include "objects.h"
 #include "project.h"
@@ -132,6 +133,8 @@ static
 void client_init()
 {
 	CreateDirectoryA("samp-mapedit", NULL);
+
+	game_init();
 	samp_init();
 	detour();
 
