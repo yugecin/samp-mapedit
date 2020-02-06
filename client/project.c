@@ -158,6 +158,10 @@ void prj_save()
 		fwrite(buf, sprintf(buf, "cam.rot.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "cam.rot.y %d\n", vec3i->y), 1, f);
 		fwrite(buf, sprintf(buf, "cam.rot.z %d\n", vec3i->z), 1, f);
+		game_PedGetPos(player, (struct RwV3D**) &vec3i);
+		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
+		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i->y), 1, f);
+		fwrite(buf, sprintf(buf, "playa.pos.z %d\n", vec3i->z), 1, f);
 		fclose(f);
 	} else {
 		sprintf(debugstring, "failed to write file %s", projfile);

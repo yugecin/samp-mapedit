@@ -184,6 +184,28 @@ struct CRaceCheckpoint
 };
 EXPECT_SIZE(struct CRaceCheckpoint, 0x38);
 #define MAXRACECHECKPOINT 32
+
+struct CPedFlags
+{
+	char flag0;
+	char flag1;
+	char isInCar;
+	char flag3;
+	char moreflags[12];
+};
+EXPECT_SIZE(struct CPedFlags, 0x10);
+
+struct CPed
+{
+	char __parent_CPhysical[0x138];
+	char _pad138[0x46C - 0x138];
+	struct CPedFlags flags;
+	char _pad47C[0x548 - 0x47C];
+	float armor;
+	char _pad54C[0x58C - 0x548];
+	void *vehicle;
+	/*more stuff here*/
+};
 #pragma pack(pop)
 
 extern unsigned int *fontColorABGR;
@@ -205,7 +227,7 @@ Resets when player starts a new game.
 extern int *timeInGame;
 extern int *script_PLAYER_CHAR;
 extern int *script_PLAYER_ACTOR;
-extern void *player;
+extern struct CPed *player;
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();
@@ -221,6 +243,7 @@ idb CInputEvents__isKeyJustPressed
 sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 */
 int __stdcall game_InputWasKeyPressed(short keycode);
+void game_PedGetPos(struct CPed *ped, struct RwV3D **pos);
 int game_RwIm2DPrepareRender();
 int game_RwIm2DRenderPrimitive(int type, void *verts, int numverts);
 void game_RwMatrixInvert(struct CMatrix *out, struct CMatrix *in);

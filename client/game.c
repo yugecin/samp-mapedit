@@ -20,7 +20,7 @@ struct CRaceCheckpoint *racecheckpoints = (struct CRaceCheckpoint*) 0xC7F158;
 int *timeInGame = (int*) 0xB7CB84;
 int *script_PLAYER_CHAR = (int*) 0xA49968; /* $2=PLAYER_CHAR */
 int *script_PLAYER_ACTOR = (int*) 0xA4996C; /* $3=PLAYER_ACTOR */
-void *player;
+struct CPed *player;
 
 __declspec(naked) void game_init()
 {
@@ -93,6 +93,43 @@ __declspec(naked) int __stdcall game_InputWasKeyPressed(short keycode)
 	_asm mov ecx, 0xB70198 /*inputEvents*/
 	_asm mov eax, 0x52E450
 	_asm jmp eax
+}
+
+/**
+opcode 00A0 @0x4677E2
+
+TODO: test this through?
+*/
+__declspec(naked) void game_PedGetPos(struct CPed *ped, struct RwV3D **pos)
+{
+	_asm {
+		push ecx
+
+		mov eax, [esp+0x8] /*ped*/
+		mov ecx, [eax+0x46C] /*CPed.PedFlags.Flag2 (invehicle)*/
+		test ch, 1
+		jz novehicle
+		mov ecx, [eax+0x58C] /*CPed.pVehicle*/
+		test ecx, ecx
+		jz novehicle
+		mov eax, ecx
+novehicle:
+		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
+		test ecx, ecx
+		jz no_explicit_coords
+		lea eax, [ecx+0x30] /*?*/
+		mov ecx, [esp+0xC] /*pos*/
+		mov [ecx], eax
+		pop ecx
+		ret
+
+no_explicit_coords:
+		lea eax, [eax+0x4] /*CPlaceable.placement*/
+		mov ecx, [esp+0xC] /*pos*/
+		mov [ecx], eax
+		pop ecx
+		ret
+	}
 }
 
 __declspec(naked) int game_RwIm2DPrepareRender()

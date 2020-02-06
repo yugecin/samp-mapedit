@@ -45,3 +45,8 @@ are Copyright (c) ITB CompuPhase, 1997-2005
 Files in server-plugin/vendor/SDK (excluding the amx/ directory)
 are Copyright 2004-2009 SA-MP Team
 Modifications in these files are marked as such with comments.
+
+TODO
+----
+test saving project while in vehicle (to test game_PedGetPos)
+test loading project while in vehicle
