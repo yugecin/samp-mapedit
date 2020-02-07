@@ -100,7 +100,10 @@ opcode 00A0 @0x4677E2
 
 TODO: test this through?
 */
-__declspec(naked) void game_PedGetPos(struct CPed *ped, struct RwV3D **pos)
+__declspec(naked) void game_PedGetPos(ped, pos, rot)
+	struct CPed *ped;
+	struct RwV3D **pos;
+	float *rot;
 {
 	_asm {
 		push ecx
@@ -108,12 +111,19 @@ __declspec(naked) void game_PedGetPos(struct CPed *ped, struct RwV3D **pos)
 		mov eax, [esp+0x8] /*ped*/
 		mov ecx, [eax+0x46C] /*CPed.PedFlags.Flag2 (invehicle)*/
 		test ch, 1
-		jz novehicle
+		mov ecx, eax
+		jnz gotplaceable
 		mov ecx, [eax+0x58C] /*CPed.pVehicle*/
 		test ecx, ecx
-		jz novehicle
+		jnz gotplaceable
+		mov ecx, eax
+gotplaceable:
+		mov eax, 0x441DB0 /*CPlaceable__getRotation*/
+		call eax
+		mov eax, [esp+0x10] /*rot*/
+		fmul ds:0x859878 /*_radToDeg*/
+		fstp [eax]
 		mov eax, ecx
-novehicle:
 		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
 		test ecx, ecx
 		jz no_explicit_coords

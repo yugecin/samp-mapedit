@@ -243,7 +243,7 @@ idb CInputEvents__isKeyJustPressed
 sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 */
 int __stdcall game_InputWasKeyPressed(short keycode);
-void game_PedGetPos(struct CPed *ped, struct RwV3D **pos);
+void game_PedGetPos(struct CPed *ped, struct RwV3D **pos, float *rot);
 int game_RwIm2DPrepareRender();
 int game_RwIm2DRenderPrimitive(int type, void *verts, int numverts);
 void game_RwMatrixInvert(struct CMatrix *out, struct CMatrix *in);
