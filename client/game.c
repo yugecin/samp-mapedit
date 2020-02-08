@@ -127,12 +127,7 @@ gotplaceable:
 		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
 		test ecx, ecx
 		jz no_explicit_coords
-		lea eax, [ecx+0x30] /*?*/
-		mov ecx, [esp+0xC] /*pos*/
-		mov [ecx], eax
-		pop ecx
-		ret
-
+		add eax, 0x30-0x4 /*what's at +30h?*/
 no_explicit_coords:
 		lea eax, [eax+0x4] /*CPlaceable.placement*/
 		mov ecx, [esp+0xC] /*pos*/
