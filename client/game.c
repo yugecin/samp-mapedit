@@ -156,6 +156,47 @@ __declspec(naked) void game_PedSetPos(struct CPed *ped, struct RwV3D *pos)
 	}
 }
 
+/*
+opcode 0173 @0x47CB44
+*/
+__declspec(naked) void game_PedSetRot(struct CPed *ped, float rot)
+{
+	_asm {
+		push ecx
+		mov ecx, [esp+0x8] /*ped*/
+		mov eax, [ecx+0x46C] /*CPed.PedFlags.Flag2 (invehicle)*/
+		test ah, 1
+		jz notinvehicle
+		mov eax, [ecx+0x58C] /*CPed.pVehicle*/
+		test eax, eax
+		jnz invehicle
+notinvehicle:
+		fld [esp+0x10] /*rot*/
+		fmul ds:0x8595EC /*_degToRad*/
+		fst [ecx+0x558] /*CPed.currentHeading*/
+		fst [ecx+0x55C] /*CPed.targetHeading*/
+		fstp [esp] /*rot*/
+invehicle:
+		pop ecx
+		ret
+
+/*apparently it works without doing this?*/
+#if 0
+		/*push angle*/
+		/*mov ecx, CPlaceable*/
+		mov eax, 0x43E0C0 /*CPlaceable__setHeading*/
+		call eax
+		mov ecx, [esp+0x8] /*ped*/
+		push edx /*used in call below*/
+		mov eax, 0x446F90 /*CMatrix__updateRW*/
+		call eax
+		pop edx
+		pop ecx
+		ret
+#endif
+	}
+}
+
 __declspec(naked) int game_RwIm2DPrepareRender()
 {
 	_asm {
