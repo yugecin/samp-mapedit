@@ -137,6 +137,25 @@ no_explicit_coords:
 	}
 }
 
+__declspec(naked) void game_PedSetPos(struct CPed *ped, struct RwV3D *pos)
+{
+	_asm {
+		push ecx
+		push 1 /*?*/
+		push 1 /*?*/
+		mov eax, [esp+0x14] /*pos*/
+		push [eax+0x8] /*z*/
+		push [eax+0x4] /*z*/
+		push [eax] /*z*/
+		push [esp+0x1C] /*ped*/
+		/*it acts as a thiscall, but ecx is unused? (though changed)*/
+		mov eax, 0x464DC0
+		call eax /*CPed__putAtCoords*/
+		pop ecx
+		ret
+	}
+}
+
 __declspec(naked) int game_RwIm2DPrepareRender()
 {
 	_asm {
