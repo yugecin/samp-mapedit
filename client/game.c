@@ -174,8 +174,7 @@ notinvehicle:
 		fld [esp+0x10] /*rot*/
 		fmul ds:0x8595EC /*_degToRad*/
 		fst [ecx+0x558] /*CPed.currentHeading*/
-		fst [ecx+0x55C] /*CPed.targetHeading*/
-		fstp [esp] /*rot*/
+		fstp [ecx+0x55C] /*CPed.targetHeading*/
 invehicle:
 		pop ecx
 		ret
