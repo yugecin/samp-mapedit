@@ -58,6 +58,12 @@ void proj_updatelist()
 }
 
 static
+void cb_btn_refreshlist(struct UI_BUTTON *btn)
+{
+	proj_updatelist();
+}
+
+static
 void cb_btn_project(struct UI_BUTTON *btn)
 {
 	ui_show_window(window_project);
@@ -140,6 +146,10 @@ void prj_init()
 	ui_wnd_add_child(window_project, btn);
 	lbl = ui_lbl_make("Open:");
 	ui_wnd_add_child(window_project, lbl);
+	btn = ui_btn_make("Refresh list", cb_btn_refreshlist);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(window_project, btn);
+	ui_wnd_add_child(window_project, NULL);
 	lst_projects = ui_lst_make(20, cb_lst_open);
 	lst_projects->_parent.span = 2;
 	ui_wnd_add_child(window_project, lst_projects);
