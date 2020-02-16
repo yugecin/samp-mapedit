@@ -21,6 +21,7 @@ int *timeInGame = (int*) 0xB7CB84;
 int *script_PLAYER_CHAR = (int*) 0xA49968; /* $2=PLAYER_CHAR */
 int *script_PLAYER_ACTOR = (int*) 0xA4996C; /* $3=PLAYER_ACTOR */
 struct CPed *player;
+void *gameHwnd = (void*) 0xC97C1C;
 
 __declspec(naked) void game_init()
 {

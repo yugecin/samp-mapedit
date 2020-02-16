@@ -105,12 +105,27 @@ void undetour()
 	*((unsigned int*) DETOUR_PARAM) = detour_param;
 }
 
+static WNDPROC hOldProc;
+
+static
+LRESULT APIENTRY NewWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (uMsg == WM_MOUSEWHEEL) {
+		sprintf(debugstring, "ayy mousewheel %d",
+			GET_WHEEL_DELTA_WPARAM(wParam));
+		ui_push_debug_string();
+	}
+	return CallWindowProc(hOldProc, hWnd, uMsg, wParam, lParam);
+}
+
 /**
 Called from the loader, do not call directly (use proc_unload)
 */
 static
 void client_finalize()
 {
+	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
+
 	objects_dispose();
 	settings_dispose();
 	sockets_dispose();
@@ -132,6 +147,8 @@ See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain
 static
 void client_init()
 {
+	HWND ghwnd = *((HWND*) gameHwnd);
+
 	CreateDirectoryA("samp-mapedit", NULL);
 
 	game_init();
@@ -147,6 +164,9 @@ void client_init()
 
 	sockets_init();
 	objects_init();
+
+	hOldProc = (WNDPROC) GetWindowLong(ghwnd, GWL_WNDPROC);
+	SetWindowLong(ghwnd, GWL_WNDPROC, (LONG) NewWndProc);
 }
 
 __declspec(dllexport) void __cdecl MapEditMain(struct CLIENTLINK *data)

@@ -228,6 +228,7 @@ extern int *timeInGame;
 extern int *script_PLAYER_CHAR;
 extern int *script_PLAYER_ACTOR;
 extern struct CPed *player;
+extern void *gameHwnd;
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();
