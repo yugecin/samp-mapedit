@@ -17,8 +17,24 @@ static struct UI_INPUT *in_newprojectname;
 static struct UI_LIST *lst_projects;
 static struct UI_BUTTON *btn_main_save;
 static char open_project_name[INPUT_TEXTLEN + 1];
+static char open_project_file[INPUT_TEXTLEN + 15];
 static char tmp_files[MAX_FILES][NAME_LEN];
 static int numfiles;
+
+static
+void update_project_filename()
+{
+	sprintf(open_project_file, "samp-mapedit\\%s.mep", open_project_name);
+}
+
+/**
+Closes file when done.
+*/
+static
+void prj_open_by_file(FILE *file)
+{
+	fclose(file);
+}
 
 static
 void proj_updatelist()
@@ -56,6 +72,8 @@ void cb_createnew_name_err(int btn)
 static
 void cb_btn_createnew(struct UI_BUTTON *btn)
 {
+	FILE *file;
+
 	if (in_newprojectname->valuelen <= 0) {
 		msg_message = "Empty_name_is_not_allowed";
 		msg_title = "New_project";
@@ -67,9 +85,15 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 		memcpy(open_project_name,
 			in_newprojectname->value,
 			INPUT_TEXTLEN + 1);
+		update_project_filename();
 		ui_hide_window(window_project);
-		prj_save();
 		btn_main_save->enabled = 1;
+		proj_updatelist();
+		if (file = fopen(open_project_file, "r")) {
+			prj_open_by_file(file);
+		} else {
+			prj_save();
+		}
 	}
 }
 
@@ -133,7 +157,7 @@ void prj_dispose()
 	ui_wnd_dispose(window_project);
 }
 
-void prj_open(char *name)
+void prj_open_by_name(char *name)
 {
 	btn_main_save->enabled = 1;
 }
@@ -141,16 +165,14 @@ void prj_open(char *name)
 void prj_save()
 {
 	FILE *f;
-	char projfile[15 + INPUT_TEXTLEN];
 	char buf[1000];
 	float rot;
 	struct {
 		int x, y, z;
 	} *vec3i;
 
-	/*TODO: this should be freecam pos, not active cam pos*/
-	sprintf(projfile, "samp-mapedit\\%s.mep", open_project_name);
-	if ((f = fopen(projfile, "w"))) {
+	update_project_filename();
+	if ((f = fopen(open_project_file, "w"))) {
 		vec3i = (void*) &camera->position;
 		fwrite(buf, sprintf(buf, "cam.pos.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "cam.pos.y %d\n", vec3i->y), 1, f);
@@ -165,8 +187,11 @@ void prj_save()
 		fwrite(buf, sprintf(buf, "playa.pos.z %d\n", vec3i->z), 1, f);
 		fwrite(buf, sprintf(buf, "playa.rot %f\n", rot), 1, f);
 		fclose(f);
+		game_PedSetRot(player, 5.0f);
 	} else {
-		sprintf(debugstring, "failed to write file %s", projfile);
+		sprintf(debugstring,
+			"failed to write file %s",
+			open_project_file);
 		ui_push_debug_string();
 	}
 }
