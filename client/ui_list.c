@@ -89,7 +89,7 @@ int ui_lst_post_layout(struct UI_LIST *lst)
 {
 	/*does topoffset need to be recalc'd here?*/
 	lst->realpagesize =
-		(int) ((lst->_parent.width - fontpady * 2.0f) / fontheight);
+		(int) ((lst->_parent.height - fontpady * 2.0f) / fontheight);
 	return 1;
 }
 
