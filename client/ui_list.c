@@ -136,9 +136,7 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 		currentname = items[i];
 		for (j = 0;; j++) {
 			c = currentname[j];
-			if (c == ' ') {
-				names[j] = '_';
-			} else if (c == 0 || j == MAX_ITEM_LENGTH - 1) {
+			if (c == 0 || j == MAX_ITEM_LENGTH - 1) {
 				names[j] = 0;
 				break;
 			}
