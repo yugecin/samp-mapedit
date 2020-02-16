@@ -15,11 +15,37 @@ void ui_lst_dispose(struct UI_LIST *lst)
 }
 
 static
+void calc_scrollbar_size(struct UI_LIST *lst, float *y, float *height)
+{
+	if (lst->numitems >= lst->realpagesize * 2) {
+		*height = fontheight;
+		if (lst->topoffset == lst->numitems - lst->realpagesize) {
+			*y = lst->_parent.height - 2.0f - fontheight;
+		} else if (lst->topoffset == 0) {
+			*y = 0.0f;
+		} else {
+			*y = lst->_parent.height - 4.0f - *height;
+			*y *= (float) lst->topoffset /
+				(float) (lst->numitems - lst->realpagesize);
+		}
+	} else if (lst->numitems <= lst->realpagesize) {
+		*height = lst->_parent.height - 4.0f;
+		*y = 0.0f;
+	} else {
+		*height = fontheight * (lst->realpagesize -
+			(lst->numitems - lst->realpagesize));
+		*y = fontheight * lst->topoffset;
+	}
+	*y += 2.0f + lst->_parent.y;
+}
+
+static
 void ui_lst_draw(struct UI_LIST *lst)
 {
 	struct UI_ELEMENT *elem;
 	int col;
 	int i, itemend, j;
+	float scrollby, scrollbh;
 
 	elem = (struct UI_ELEMENT*) lst;
 	col = 0xAAFF0000;
@@ -35,6 +61,21 @@ void ui_lst_draw(struct UI_LIST *lst)
 	ui_element_draw_background(elem, col);
 	game_DrawRect(elem->x + 2.0f, elem->y + 2.0f,
 		elem->width - 4.0f, elem->height - 4.0f, 0xFF000000);
+
+	/*scrollbar*/
+	game_DrawRect(
+		elem->x + elem->width - 2.0f - 20.0f,
+		elem->y + 2.0f,
+		20.0f,
+		elem->height - 4.0f,
+		0xFF333333);
+	calc_scrollbar_size(lst, &scrollby, &scrollbh);
+	game_DrawRect(
+		elem->x + elem->width - 2.0f - 20.0f,
+		scrollby,
+		20.0f,
+		scrollbh,
+		0xFFFF0000);
 
 	itemend = lst->topoffset + lst->realpagesize;
 	if (itemend > lst->numitems) {
