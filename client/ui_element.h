@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 typedef (ui_method)(void*);
+typedef (ui_method1)(void*, void*);
 
 enum eUIElementType {
 	UIE_DUMMY,
@@ -37,6 +38,10 @@ struct UI_ELEMENT {
 	@returns non-zero when the event was handled
 	*/
 	ui_method *proc_mouseup;
+	/**
+	@returns non-zero when the event was handled
+	*/
+	ui_method1 *proc_mousewheel;
 	/**
 	Called when ui font or screen resolution changes.
 	*/

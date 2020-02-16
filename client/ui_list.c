@@ -19,7 +19,7 @@ void ui_lst_draw(struct UI_LIST *lst)
 {
 	struct UI_ELEMENT *elem;
 	int col;
-	int i, itemend;
+	int i, itemend, j;
 
 	elem = (struct UI_ELEMENT*) lst;
 	col = 0xAAFF0000;
@@ -42,10 +42,10 @@ void ui_lst_draw(struct UI_LIST *lst)
 	}
 	/*TODO: scrollbar and don't display out of right bounds*/
 	game_TextSetWrapX(fresx);
-	for (i = lst->topoffset; i < itemend; i++) {
+	for (i = lst->topoffset, j = 0; i < itemend; i++, j++) {
 		game_TextPrintString(
 			elem->x + 2.0f,
-			elem->y + 2.0f + i * fontheight,
+			elem->y + 2.0f + j * fontheight,
 			lst->items[i]);
 	}
 }
@@ -84,6 +84,24 @@ int ui_lst_mouseup(struct UI_LIST *lst)
 	return 0;
 }
 
+static int ui_lst_mousewheel(struct UI_LIST *lst, int value)
+{
+	if (ui_active_element == lst) {
+		while (value > 0 && lst->topoffset > 0) {
+			lst->topoffset--;
+			value--;
+		}
+		while (value < 0 &&
+			lst->topoffset + lst->realpagesize < lst->numitems)
+		{
+			lst->topoffset++;
+			value++;
+		}
+		return 1;
+	}
+	return 0;
+}
+
 static
 int ui_lst_post_layout(struct UI_LIST *lst)
 {
@@ -104,6 +122,7 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->_parent.proc_draw = (ui_method*) ui_lst_draw;
 	lst->_parent.proc_mousedown = (ui_method*) ui_lst_mousedown;
 	lst->_parent.proc_mouseup = (ui_method*) ui_lst_mouseup;
+	lst->_parent.proc_mousewheel = (ui_method1*) ui_lst_mousewheel;
 	lst->_parent.proc_recalc_size = (ui_method*) ui_lst_recalc_size;
 	lst->_parent.proc_post_layout = (ui_method*) ui_lst_post_layout;
 	lst->cb = cb;
@@ -145,5 +164,13 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 		*table = names;
 		table++;
 		names += MAX_ITEM_LENGTH;
+	}
+	if (lst->topoffset > 0 &&
+		lst->topoffset + lst->realpagesize > lst->numitems)
+	{
+		lst->topoffset = lst->numitems - lst->realpagesize;
+		if (lst->topoffset < 0) {
+			lst->topoffset = 0;
+		}
 	}
 }

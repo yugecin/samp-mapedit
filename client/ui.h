@@ -45,6 +45,7 @@ void ui_push_debug_string();
 void ui_default_font();
 void ui_dispose();
 void ui_init();
+void ui_on_mousewheel(int value);
 void ui_render();
 void ui_show_window(struct UI_WINDOW *wnd);
 void ui_hide_window(struct UI_WINDOW *wnd);

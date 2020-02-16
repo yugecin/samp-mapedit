@@ -437,6 +437,14 @@ void grablastkey()
 	}
 }
 
+void ui_on_mousewheel(int value)
+{
+	if ((active_window != NULL &&
+		ui_wnd_mousewheel(active_window, value)) ||
+		ui_wnd_mousewheel(main_menu, value) ||
+		ui_cnt_mousewheel(background_element, value));
+}
+
 void ui_render()
 {
 	struct RwV3D v, click;

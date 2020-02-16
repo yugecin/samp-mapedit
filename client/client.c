@@ -111,9 +111,7 @@ static
 LRESULT APIENTRY NewWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (uMsg == WM_MOUSEWHEEL) {
-		sprintf(debugstring, "ayy mousewheel %d",
-			GET_WHEEL_DELTA_WPARAM(wParam));
-		ui_push_debug_string();
+		ui_on_mousewheel(GET_WHEEL_DELTA_WPARAM(wParam) / 120);
 	}
 	return CallWindowProc(hOldProc, hWnd, uMsg, wParam, lParam);
 }

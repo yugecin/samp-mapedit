@@ -104,6 +104,20 @@ int ui_cnt_mouseup(struct UI_CONTAINER *cnt)
 	return 0;
 }
 
+int ui_cnt_mousewheel(struct UI_CONTAINER *cnt, int value)
+{
+	struct UI_ELEMENT *child;
+	int i, ret;
+
+	for (i = 0; i < cnt->childcount; i++) {
+		child = cnt->children[i];
+		if ((ret = child->proc_mousewheel(child, (void*) value))) {
+			return ret;
+		}
+	}
+	return 0;
+}
+
 void ui_cnt_add_child(struct UI_CONTAINER *cnt, void *child)
 {
 	if (cnt->childcount < CONTAINER_MAX_CHILD_COUNT) {
