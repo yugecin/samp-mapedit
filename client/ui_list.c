@@ -41,6 +41,7 @@ void ui_lst_draw(struct UI_LIST *lst)
 		itemend = lst->numitems;
 	}
 	/*TODO: scrollbar and don't display out of right bounds*/
+	game_TextSetWrapX(fresx);
 	for (i = lst->topoffset; i < itemend; i++) {
 		game_TextPrintString(
 			elem->x + 2.0f,
