@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define MAX_ITEM_LENGTH 50
+#define SCROLLBW 20.0f
 
 static
 void ui_lst_dispose(struct UI_LIST *lst)
@@ -64,9 +65,9 @@ void ui_lst_draw(struct UI_LIST *lst)
 
 	/*scrollbar*/
 	game_DrawRect(
-		elem->x + elem->width - 2.0f - 20.0f,
+		elem->x + elem->width - 2.0f - SCROLLBW,
 		elem->y + 2.0f,
-		20.0f,
+		SCROLLBW,
 		elem->height - 4.0f,
 		0xFF333333);
 	calc_scrollbar_size(lst, &scrollby, &scrollbh);
@@ -105,9 +106,38 @@ void ui_lst_recalc_size(struct UI_LIST *lst)
 }
 
 static
+int ui_lst_update(struct UI_LIST *lst)
+{
+	float scrollby, scrollbh, tmp;
+	int i;
+
+	if (lst->scrolling) {
+		calc_scrollbar_size(lst, &scrollby, &scrollbh);
+		tmp = (cursory - lst->_parent.y);
+		tmp /= (lst->_parent.height - 4.0f);
+		i = (int) ((lst->numitems - lst->realpagesize + 1) * tmp);
+		if (i >= 0 && lst->numitems > lst->realpagesize) {
+			if (i > lst->numitems - lst->realpagesize) {
+				lst->topoffset =
+					lst->numitems - lst->realpagesize;
+			} else {
+				lst->topoffset = i;
+			}
+		}
+	}
+	return 0;
+}
+
+static
 int ui_lst_mousedown(struct UI_LIST *lst)
 {
+	float x;
+
 	if (ui_element_is_hovered(&lst->_parent)) {
+		x = lst->_parent.x + lst->_parent.width - 2.0f;
+		if (x - SCROLLBAR_WIDTH <= cursorx && cursorx < x) {
+			lst->scrolling = 1;
+		}
 		return (int) (ui_element_being_clicked = lst);
 	}
 	return 0;
@@ -117,6 +147,7 @@ static
 int ui_lst_mouseup(struct UI_LIST *lst)
 {
 	if (ui_element_being_clicked == lst) {
+		lst->scrolling = 0;
 		if (ui_element_is_hovered(&lst->_parent)) {
 			ui_active_element = lst;
 		}
@@ -161,6 +192,7 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->_parent.pref_width = 300.0f;
 	lst->_parent.proc_dispose = (ui_method*) ui_lst_dispose;
 	lst->_parent.proc_draw = (ui_method*) ui_lst_draw;
+	lst->_parent.proc_update = (ui_method*) ui_lst_update;
 	lst->_parent.proc_mousedown = (ui_method*) ui_lst_mousedown;
 	lst->_parent.proc_mouseup = (ui_method*) ui_lst_mouseup;
 	lst->_parent.proc_mousewheel = (ui_method1*) ui_lst_mousewheel;

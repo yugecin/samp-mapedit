@@ -10,6 +10,7 @@ struct UI_LIST {
 	int numitems;
 	int prefpagesize, realpagesize;
 	int topoffset;
+	int scrolling;
 	listcb *cb;
 };
 
