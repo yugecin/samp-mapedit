@@ -40,19 +40,36 @@ void calc_scrollbar_size(struct UI_LIST *lst, float *y, float *height)
 	*y += 2.0f + lst->_parent.y;
 }
 
+/**
+@return hovered offset from topoffset or -1
+*/
+static
+int calc_list_hovered_offset(struct UI_LIST *lst)
+{
+	int offset;
+
+	offset = (int) ((cursory - lst->_parent.y - 2.0f) / fontheight);
+	if (0 <= offset && offset < lst->realpagesize) {
+		return offset;
+	} else {
+		return -1;
+	}
+}
+
 static
 void ui_lst_draw(struct UI_LIST *lst)
 {
 	struct UI_ELEMENT *elem;
 	int col;
-	int i, itemend, j;
-	float scrollby, scrollbh;
+	int i, itemend, j, ishovered;
+	float scrollby, scrollbh, scrollbx;
 
 	elem = (struct UI_ELEMENT*) lst;
+	ishovered = ui_element_is_hovered(elem);
 	col = 0xAAFF0000;
 	if (ui_active_element == lst) {
 		col = 0xEE00FF00;
-	} else if (ui_element_is_hovered(elem)) {
+	} else if (ishovered) {
 		if (ui_element_being_clicked == NULL) {
 			col = 0xEEFF0000;
 		} else if (ui_element_being_clicked == lst) {
@@ -71,12 +88,25 @@ void ui_lst_draw(struct UI_LIST *lst)
 		elem->height - 4.0f,
 		0xFF333333);
 	calc_scrollbar_size(lst, &scrollby, &scrollbh);
+	scrollbx = elem->x + elem->width - 2.0f - SCROLLBAR_WIDTH;
 	game_DrawRect(
-		elem->x + elem->width - 2.0f - 20.0f,
+		scrollbx,
 		scrollby,
-		20.0f,
+		SCROLLBAR_WIDTH,
 		scrollbh,
 		0xFFFF0000);
+
+	if (ishovered && cursorx < scrollbx) {
+		i = calc_list_hovered_offset(lst);
+		if (i != -1) {
+			game_DrawRect(
+				elem->x + 2.0f,
+				elem->y + 2.0f + fontheight * i,
+				elem->width - 4.0f - SCROLLBAR_WIDTH,
+				fontheight,
+				0xFF000077);
+		}
+	}
 
 	itemend = lst->topoffset + lst->realpagesize;
 	if (itemend > lst->numitems) {
