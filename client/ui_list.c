@@ -52,7 +52,9 @@ int calc_list_hovered_offset(struct UI_LIST *lst)
 	int offset;
 
 	offset = (int) ((cursory - lst->_parent.y - 2.0f) / fontheight);
-	if (0 <= offset && offset < lst->realpagesize) {
+	if (0 <= offset && offset < lst->realpagesize &&
+		offset + lst->topoffset < lst->numitems)
+	{
 		return offset;
 	} else {
 		return -1;
