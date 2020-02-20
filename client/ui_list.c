@@ -18,19 +18,22 @@ void ui_lst_dispose(struct UI_LIST *lst)
 static
 void calc_scrollbar_size(struct UI_LIST *lst, float *y, float *height)
 {
+	float innerheight;
+
+	innerheight = lst->_parent.height - 4.0f;
 	if (lst->numitems >= lst->realpagesize * 2) {
 		*height = fontheight;
 		if (lst->topoffset == lst->numitems - lst->realpagesize) {
-			*y = lst->_parent.height - 2.0f - fontheight;
+			*y = innerheight - fontheight;
 		} else if (lst->topoffset == 0) {
 			*y = 0.0f;
 		} else {
-			*y = lst->_parent.height - 4.0f - *height;
+			*y = innerheight - *height;
 			*y *= (float) lst->topoffset /
 				(float) (lst->numitems - lst->realpagesize);
 		}
 	} else if (lst->numitems <= lst->realpagesize) {
-		*height = lst->_parent.height - 4.0f;
+		*height = innerheight;
 		*y = 0.0f;
 	} else {
 		*height = fontheight * (lst->realpagesize -
@@ -128,7 +131,7 @@ void ui_lst_recalc_size(struct UI_LIST *lst)
 	struct UI_ELEMENT *elem;
 
 	elem = (struct UI_ELEMENT*) lst;
-	elem->pref_height = fontheight * lst->prefpagesize + fontpady * 2.0f;
+	elem->pref_height = fontheight * lst->prefpagesize + 4.0f;
 	/*tell container it needs to redo its layout*/
 	if (elem->parent != NULL) {
 		elem->parent->need_layout = 1;
@@ -208,8 +211,7 @@ static
 int ui_lst_post_layout(struct UI_LIST *lst)
 {
 	/*does topoffset need to be recalc'd here?*/
-	lst->realpagesize =
-		(int) ((lst->_parent.height - fontpady * 2.0f) / fontheight);
+	lst->realpagesize = (int) ((lst->_parent.height - 4.0f) / fontheight);
 	return 1;
 }
 
