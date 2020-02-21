@@ -11,6 +11,7 @@ struct UI_LIST {
 	int prefpagesize, realpagesize;
 	int topoffset;
 	int scrolling;
+	int selectedindex;
 	listcb *cb;
 };
 

@@ -113,6 +113,18 @@ void ui_lst_draw(struct UI_LIST *lst)
 		}
 	}
 
+	if (lst->topoffset <= lst->selectedindex &&
+		lst->selectedindex < lst->topoffset + lst->realpagesize)
+	{
+		i = lst->selectedindex - lst->topoffset;
+		game_DrawRect(
+			elem->x + 2.0f,
+			elem->y + 2.0f + fontheight * i,
+			elem->width - 4.0f - SCROLLBAR_WIDTH,
+			fontheight,
+			0xFF0000CC);
+	}
+
 	itemend = lst->topoffset + lst->realpagesize;
 	if (itemend > lst->numitems) {
 		itemend = lst->numitems;
@@ -166,12 +178,23 @@ int ui_lst_update(struct UI_LIST *lst)
 static
 int ui_lst_mousedown(struct UI_LIST *lst)
 {
+	int offs;
 	float x;
 
 	if (ui_element_is_hovered(&lst->_parent)) {
 		x = lst->_parent.x + lst->_parent.width - 2.0f;
 		if (x - SCROLLBAR_WIDTH <= cursorx && cursorx < x) {
 			lst->scrolling = 1;
+		} else {
+			offs = calc_list_hovered_offset(lst);
+			if (offs > 0) {
+				lst->selectedindex = lst->topoffset + offs;
+				if (lst->cb != NULL) {
+					lst->cb(lst);
+				}
+			} else {
+				lst->selectedindex = -1;
+			}
 		}
 		return (int) (ui_element_being_clicked = lst);
 	}
@@ -238,6 +261,7 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->topoffset = 0;
 	lst->items = NULL;
 	lst->numitems = 0;
+	lst->selectedindex = -1;
 	ui_lst_recalc_size(lst);
 	return lst;
 }
