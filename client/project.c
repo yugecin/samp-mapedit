@@ -51,7 +51,7 @@ void proj_updatelist()
 			listdata[numfiles] = tmp_files[numfiles];
 			tmp_files[numfiles][49] = 0;
 			numfiles++;
-		} while (FindNextFileA(search, &data));
+		} while (FindNextFileA(search, &data) && numfiles < 1000);
 		FindClose(search);
 	}
 	ui_lst_set_data(lst_projects, listdata, numfiles);
