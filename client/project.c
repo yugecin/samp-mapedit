@@ -15,7 +15,7 @@
 static struct UI_WINDOW *window_project;
 static struct UI_INPUT *in_newprojectname;
 static struct UI_LIST *lst_projects;
-static struct UI_BUTTON *btn_main_save;
+static struct UI_BUTTON *btn_main_save, *btn_open;
 static char open_project_name[INPUT_TEXTLEN + 1];
 static char open_project_file[INPUT_TEXTLEN + 15];
 static char tmp_files[MAX_FILES][NAME_LEN];
@@ -27,13 +27,91 @@ void update_project_filename()
 	sprintf(open_project_file, "samp-mapedit\\%s.mep", open_project_name);
 }
 
+void prj_save()
+{
+	FILE *f;
+	char buf[1000];
+	float rot;
+	struct {
+		int x, y, z;
+	} *vec3i;
+	struct RwV3D p, *pp = &p;
+
+	update_project_filename();
+	if ((f = fopen(open_project_file, "w"))) {
+		ui_prj_save(f, buf);
+		game_PedGetPos(player, (struct RwV3D**) &vec3i, &rot);
+		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
+		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i->y), 1, f);
+		fwrite(buf, sprintf(buf, "playa.pos.z %d\n", vec3i->z), 1, f);
+		fwrite(buf, sprintf(buf, "playa.rot %f\n", rot), 1, f);
+		game_PedGetPos(player, &pp, &rot);
+		fclose(f);
+	} else {
+		sprintf(debugstring,
+			"failed to write file %s",
+			open_project_file);
+		ui_push_debug_string();
+	}
+}
+
 /**
 Closes file when done.
 */
 static
 void prj_open_by_file(FILE *file)
 {
+	int pos, i;
+	char buf[512];
+	union {
+		int i;
+		float f;
+		int *p;
+	} value;
+	struct RwV3D playapos;
+
+	pos = 0;
+nextline:
+	memset(buf, 0, sizeof(buf));
+	fseek(file, pos, SEEK_SET);
+	if (fread(buf, 1, sizeof(buf) - 1, file) == 0) {
+		goto done;
+	}
+	if (!ui_prj_load_line(buf)) {
+		if (strncmp("playa.", buf, 6) == 0) {
+			if (strncmp("pos.", buf + 6, 4) == 0) {
+				value.p = (int*) &playapos + buf[10] - 'x';
+				*value.p = atoi(buf + (i = 12));
+			} else if (strncmp("rot ", buf + 6, 4) == 0) {
+				value.i = atoi(buf + (i = 10));
+				game_PedSetRot(player, value.f);
+			}
+		} else {
+			i = 0;
+		}
+	}
+	while (buf[i] != 0 && buf[i] != '\n') {
+		i++;
+	}
+	pos += i + 2;
+	goto nextline;
+done:
 	fclose(file);
+
+	game_PedSetPos(player, &playapos);
+	ui_prj_postload();
+	btn_main_save->enabled = 1;
+}
+
+void prj_open_by_name(char *name)
+{
+	FILE *file;
+
+	memcpy(open_project_name, name, INPUT_TEXTLEN + 1);
+	update_project_filename();
+	if (file = fopen(open_project_file, "r")) {
+		prj_open_by_file(file);
+	}
 }
 
 static
@@ -50,6 +128,8 @@ void proj_updatelist()
 			memcpy(tmp_files[numfiles], data.cFileName, NAME_LEN);
 			listdata[numfiles] = tmp_files[numfiles];
 			tmp_files[numfiles][49] = 0;
+			/*remove extension*/
+			tmp_files[numfiles][strlen(tmp_files[numfiles])-4] = 0;
 			numfiles++;
 		} while (FindNextFileA(search, &data) && numfiles < 1000);
 		FindClose(search);
@@ -106,11 +186,19 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 static
 void cb_lst_open(struct UI_LIST *lst)
 {
+	btn_open->enabled = lst->selectedindex != -1;
 }
 
 static
 void cb_btn_open(struct UI_BUTTON *btn)
 {
+	int idx;
+
+	idx = lst_projects->selectedindex;
+	if (idx != -1) {
+		ui_hide_window(window_project);
+		prj_open_by_name(tmp_files[idx]);
+	}
 }
 
 static
@@ -154,9 +242,10 @@ void prj_init()
 	lst_projects->_parent.span = 2;
 	ui_wnd_add_child(window_project, lst_projects);
 	ui_wnd_add_child(window_project, NULL);
-	btn = ui_btn_make("Open", cb_btn_open);
-	btn->_parent.span = 2;
-	ui_wnd_add_child(window_project, btn);
+	btn_open = ui_btn_make("Open", cb_btn_open);
+	btn_open->_parent.span = 2;
+	btn_open->enabled = 0;
+	ui_wnd_add_child(window_project, btn_open);
 
 	ui_show_window(window_project);
 	proj_updatelist();
@@ -165,43 +254,4 @@ void prj_init()
 void prj_dispose()
 {
 	ui_wnd_dispose(window_project);
-}
-
-void prj_open_by_name(char *name)
-{
-	btn_main_save->enabled = 1;
-}
-
-void prj_save()
-{
-	FILE *f;
-	char buf[1000];
-	float rot;
-	struct {
-		int x, y, z;
-	} *vec3i;
-
-	update_project_filename();
-	if ((f = fopen(open_project_file, "w"))) {
-		vec3i = (void*) &camera->position;
-		fwrite(buf, sprintf(buf, "cam.pos.x %d\n", vec3i->x), 1, f);
-		fwrite(buf, sprintf(buf, "cam.pos.y %d\n", vec3i->y), 1, f);
-		fwrite(buf, sprintf(buf, "cam.pos.z %d\n", vec3i->z), 1, f);
-		vec3i = (void*) &camera->rotation;
-		fwrite(buf, sprintf(buf, "cam.rot.x %d\n", vec3i->x), 1, f);
-		fwrite(buf, sprintf(buf, "cam.rot.y %d\n", vec3i->y), 1, f);
-		fwrite(buf, sprintf(buf, "cam.rot.z %d\n", vec3i->z), 1, f);
-		game_PedGetPos(player, (struct RwV3D**) &vec3i, &rot);
-		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
-		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i->y), 1, f);
-		fwrite(buf, sprintf(buf, "playa.pos.z %d\n", vec3i->z), 1, f);
-		fwrite(buf, sprintf(buf, "playa.rot %f\n", rot), 1, f);
-		fclose(f);
-		game_PedSetRot(player, 5.0f);
-	} else {
-		sprintf(debugstring,
-			"failed to write file %s",
-			open_project_file);
-		ui_push_debug_string();
-	}
 }

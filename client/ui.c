@@ -583,3 +583,41 @@ void ui_dispose()
 	ui_cnt_dispose(background_element);
 	ui_wnd_dispose(main_menu);
 }
+
+void ui_prj_save(FILE *f, char *buf)
+{
+	struct {
+		int x, y, z;
+	} *vec3i;
+
+	vec3i = (void*) &camera->position;
+	fwrite(buf, sprintf(buf, "cam.pos.x %d\n", vec3i->x), 1, f);
+	fwrite(buf, sprintf(buf, "cam.pos.y %d\n", vec3i->y), 1, f);
+	fwrite(buf, sprintf(buf, "cam.pos.z %d\n", vec3i->z), 1, f);
+	vec3i = (void*) &camera->rotation;
+	fwrite(buf, sprintf(buf, "cam.rot.x %d\n", vec3i->x), 1, f);
+	fwrite(buf, sprintf(buf, "cam.rot.y %d\n", vec3i->y), 1, f);
+	fwrite(buf, sprintf(buf, "cam.rot.z %d\n", vec3i->z), 1, f);
+}
+
+int ui_prj_load_line(char *buf)
+{
+	int *p;
+
+	if (strncmp("cam.", buf, 4) == 0) {
+		if (strncmp("pos.", buf + 4, 4) == 0) {
+			p = (int*) &camera->position + buf[8] - 'x';
+			*p = atoi(buf + 10);
+		} else if (strncmp("rot.", buf + 4, 4) == 0) {
+			p = (int*) &camera->rotation + buf[8] - 'x';
+			*p = atoi(buf + 10);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+void ui_prj_postload()
+{
+	ui_update_camera();
+}

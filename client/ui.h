@@ -50,3 +50,6 @@ void ui_render();
 void ui_show_window(struct UI_WINDOW *wnd);
 void ui_hide_window(struct UI_WINDOW *wnd);
 void ui_set_fontsize(int fontsize, int fontratio);
+void ui_prj_save(/*FILE*/ void *f, char *buf);
+int ui_prj_load_line(char *buf);
+void ui_prj_postload();

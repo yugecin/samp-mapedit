@@ -189,11 +189,11 @@ int ui_lst_mousedown(struct UI_LIST *lst)
 			offs = calc_list_hovered_offset(lst);
 			if (offs > 0) {
 				lst->selectedindex = lst->topoffset + offs;
-				if (lst->cb != NULL) {
-					lst->cb(lst);
-				}
 			} else {
 				lst->selectedindex = -1;
+			}
+			if (lst->cb != NULL) {
+				lst->cb(lst);
 			}
 		}
 		return (int) (ui_element_being_clicked = lst);
