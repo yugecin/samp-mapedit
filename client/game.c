@@ -128,7 +128,7 @@ gotplaceable:
 		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
 		test ecx, ecx
 		jz no_explicit_coords
-		add eax, 0x30-0x4 /*what's at +30h?*/
+		lea eax, [ecx+0x30-0x4] /*what's at +30h?*/
 no_explicit_coords:
 		lea eax, [eax+0x4] /*CPlaceable.placement*/
 		mov ecx, [esp+0xC] /*pos*/
@@ -146,8 +146,8 @@ __declspec(naked) void game_PedSetPos(struct CPed *ped, struct RwV3D *pos)
 		push 1 /*?*/
 		mov eax, [esp+0x14] /*pos*/
 		push [eax+0x8] /*z*/
-		push [eax+0x4] /*z*/
-		push [eax] /*z*/
+		push [eax+0x4] /*y*/
+		push [eax] /*x*/
 		push [esp+0x1C] /*ped*/
 		/*it acts as a thiscall, but ecx is unused? (though changed)*/
 		mov eax, 0x464DC0
