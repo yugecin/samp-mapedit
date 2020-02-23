@@ -173,14 +173,16 @@ struct CRaceCheckpoint
 	char type;
 	char free;
 	char used;
-	char __pad3[5];
+	char isgoingup; /*for types: air up down*/
+	char __pad4[4];
 	int colABGR;
 	char __padC[4];
 	struct RwV3D pos;
 	struct RwV3D arrowDirection;
 	char __pad28[4];
 	float fRadius;
-	char __pad30[8];
+	char __pad30[4];
+	float verticaldisplacement; /*for types: air up down*/
 };
 EXPECT_SIZE(struct CRaceCheckpoint, 0x38);
 #define MAXRACECHECKPOINT 32
