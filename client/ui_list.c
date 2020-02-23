@@ -187,7 +187,7 @@ int ui_lst_mousedown(struct UI_LIST *lst)
 			lst->scrolling = 1;
 		} else {
 			offs = calc_list_hovered_offset(lst);
-			if (offs > 0) {
+			if (offs >= 0) {
 				lst->selectedindex = lst->topoffset + offs;
 			} else {
 				lst->selectedindex = -1;
