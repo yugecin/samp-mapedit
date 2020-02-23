@@ -11,6 +11,7 @@
 
 #define MAX_FILES 1000
 #define NAME_LEN 50
+#define FILE_LEN NAME_LEN + 15
 
 static struct UI_WINDOW *window_project;
 static struct UI_INPUT *in_newprojectname;
@@ -18,14 +19,42 @@ static struct UI_LIST *lst_projects;
 static struct UI_BUTTON *btn_main_save, *btn_open;
 static struct UI_LABEL *lbl_current;
 static char open_project_name[INPUT_TEXTLEN + 1];
-static char open_project_file[INPUT_TEXTLEN + 15];
 static char tmp_files[MAX_FILES][NAME_LEN];
 static int numfiles;
 
 static
-void update_project_filename()
+void cb_show_project_window(int btn)
 {
-	sprintf(open_project_file, "samp-mapedit\\%s.mep", open_project_name);
+	ui_show_window(window_project);
+}
+
+static
+void mk_project_filename(char *buf, char *project_name)
+{
+	sprintf(buf, "samp-mapedit\\%s.mep", project_name);
+}
+
+static
+void proj_updatelist()
+{
+	char *listdata[MAX_FILES];
+	WIN32_FIND_DATAA data;
+	HANDLE search;
+
+	numfiles = 0;
+	search = FindFirstFileA("samp-mapedit\\*.mep", &data);
+	if (search != INVALID_HANDLE_VALUE) {
+		do {
+			memcpy(tmp_files[numfiles], data.cFileName, NAME_LEN);
+			listdata[numfiles] = tmp_files[numfiles];
+			tmp_files[numfiles][49] = 0;
+			/*remove extension*/
+			tmp_files[numfiles][strlen(tmp_files[numfiles])-4] = 0;
+			numfiles++;
+		} while (FindNextFileA(search, &data) && numfiles < 1000);
+		FindClose(search);
+	}
+	ui_lst_set_data(lst_projects, listdata, numfiles);
 }
 
 void prj_save()
@@ -38,8 +67,8 @@ void prj_save()
 	} *vec3i;
 	struct RwV3D p, *pp = &p;
 
-	update_project_filename();
-	if ((f = fopen(open_project_file, "w"))) {
+	mk_project_filename(buf, open_project_name);
+	if ((f = fopen(buf, "w"))) {
 		ui_prj_save(f, buf);
 		game_PedGetPos(player, (struct RwV3D**) &vec3i, &rot);
 		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
@@ -49,9 +78,7 @@ void prj_save()
 		game_PedGetPos(player, &pp, &rot);
 		fclose(f);
 	} else {
-		sprintf(debugstring,
-			"failed to write file %s",
-			open_project_file);
+		sprintf(debugstring, "failed to write file %s", buf);
 		ui_push_debug_string();
 	}
 }
@@ -108,35 +135,21 @@ done:
 void prj_open_by_name(char *name)
 {
 	FILE *file;
+	char filename[FILE_LEN];
 
-	memcpy(open_project_name, name, INPUT_TEXTLEN + 1);
-	update_project_filename();
-	if (file = fopen(open_project_file, "r")) {
+	mk_project_filename(filename, name);
+	if (file = fopen(filename, "r")) {
+		memcpy(open_project_name, name, INPUT_TEXTLEN + 1);
 		prj_open_by_file(file);
+	} else {
+		msg_message = "Failed_to_open_project";
+		msg_title = "Open_project";
+		msg_btn1text = "Ok";
+		msg_btn2text = NULL;
+		msg_btn3text = NULL;
+		msg_show(cb_show_project_window);
+		proj_updatelist();
 	}
-}
-
-static
-void proj_updatelist()
-{
-	char *listdata[MAX_FILES];
-	WIN32_FIND_DATAA data;
-	HANDLE search;
-
-	numfiles = 0;
-	search = FindFirstFileA("samp-mapedit\\*.mep", &data);
-	if (search != INVALID_HANDLE_VALUE) {
-		do {
-			memcpy(tmp_files[numfiles], data.cFileName, NAME_LEN);
-			listdata[numfiles] = tmp_files[numfiles];
-			tmp_files[numfiles][49] = 0;
-			/*remove extension*/
-			tmp_files[numfiles][strlen(tmp_files[numfiles])-4] = 0;
-			numfiles++;
-		} while (FindNextFileA(search, &data) && numfiles < 1000);
-		FindClose(search);
-	}
-	ui_lst_set_data(lst_projects, listdata, numfiles);
 }
 
 static
@@ -152,14 +165,9 @@ void cb_btn_project(struct UI_BUTTON *btn)
 }
 
 static
-void cb_createnew_name_err(int btn)
-{
-	ui_show_window(window_project);
-}
-
-static
 void cb_btn_createnew(struct UI_BUTTON *btn)
 {
+	char projectfile[FILE_LEN];
 	FILE *file;
 
 	if (in_newprojectname->valuelen <= 0) {
@@ -168,16 +176,16 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 		msg_btn1text = "Ok";
 		msg_btn2text = NULL;
 		msg_btn3text = NULL;
-		msg_show(cb_createnew_name_err);
+		msg_show(cb_show_project_window);
 	} else {
 		memcpy(open_project_name,
 			in_newprojectname->value,
 			INPUT_TEXTLEN + 1);
-		update_project_filename();
 		ui_hide_window(window_project);
 		btn_main_save->enabled = 1;
 		proj_updatelist();
-		if (file = fopen(open_project_file, "r")) {
+		mk_project_filename(projectfile, open_project_name);
+		if (file = fopen(projectfile, "r")) {
 			prj_open_by_file(file);
 		} else {
 			prj_save();
