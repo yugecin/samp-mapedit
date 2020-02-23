@@ -206,6 +206,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\racecp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\racecp.h"
+				>
+			</File>
+			<File
 				RelativePath="..\samp.c"
 				>
 			</File>

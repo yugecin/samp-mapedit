@@ -6,6 +6,7 @@
 #include "msgbox.h"
 #include "objects.h"
 #include "project.h"
+#include "racecp.h"
 #include "sockets.h"
 #include "samp.h"
 #include "settings.h"
@@ -124,6 +125,7 @@ void client_finalize()
 {
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
+	racecp_dispose();
 	objects_dispose();
 	settings_dispose();
 	sockets_dispose();
@@ -154,7 +156,7 @@ void client_init()
 	detour();
 
 	ui_init();
-	/*order of init affects layout of main menu*/
+	/*order of init affects layout of main menu and context menu*/
 	settings_init();
 	wnd_init();
 	prj_init();
@@ -162,6 +164,7 @@ void client_init()
 
 	sockets_init();
 	objects_init();
+	racecp_init();
 
 	hOldProc = (WNDPROC) GetWindowLong(ghwnd, GWL_WNDPROC);
 	SetWindowLong(ghwnd, GWL_WNDPROC, (LONG) NewWndProc);

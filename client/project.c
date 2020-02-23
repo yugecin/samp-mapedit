@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "msgbox.h"
 #include "project.h"
+#include "racecp.h"
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
@@ -70,6 +71,7 @@ void prj_save()
 	mk_project_filename(buf, open_project_name);
 	if ((f = fopen(buf, "w"))) {
 		ui_prj_save(f, buf);
+		racecp_prj_save(f, buf);
 		game_PedGetPos(player, (struct RwV3D**) &vec3i, &rot);
 		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i->y), 1, f);
@@ -105,7 +107,9 @@ nextline:
 	if (fread(buf, 1, sizeof(buf) - 1, file) == 0) {
 		goto done;
 	}
-	if (!ui_prj_load_line(buf)) {
+	if (!ui_prj_load_line(buf) &&
+		!racecp_prj_load_line(buf))
+	{
 		if (strncmp("playa.", buf, 6) == 0) {
 			if (strncmp("pos.", buf + 6, 4) == 0) {
 				value.p = (int*) &playapos + buf[10] - 'x';
@@ -128,6 +132,7 @@ done:
 
 	game_PedSetPos(player, &playapos);
 	ui_prj_postload();
+	racecp_prj_postload();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;
 }
