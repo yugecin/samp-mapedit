@@ -16,6 +16,7 @@ static struct UI_WINDOW *window_project;
 static struct UI_INPUT *in_newprojectname;
 static struct UI_LIST *lst_projects;
 static struct UI_BUTTON *btn_main_save, *btn_open;
+static struct UI_LABEL *lbl_current;
 static char open_project_name[INPUT_TEXTLEN + 1];
 static char open_project_file[INPUT_TEXTLEN + 15];
 static char tmp_files[MAX_FILES][NAME_LEN];
@@ -101,6 +102,7 @@ done:
 	game_PedSetPos(player, &playapos);
 	ui_prj_postload();
 	btn_main_save->enabled = 1;
+	lbl_current->text = open_project_name;
 }
 
 void prj_open_by_name(char *name)
@@ -179,6 +181,7 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 			prj_open_by_file(file);
 		} else {
 			prj_save();
+			lbl_current->text = open_project_name;
 		}
 	}
 }
@@ -226,6 +229,10 @@ void prj_init()
 	window_project = ui_wnd_make(500.0f, 500.0f, "Project");
 	window_project->columns = 3;
 
+	ui_wnd_add_child(window_project, NULL);
+	lbl_current = ui_lbl_make("no project opened");
+	lbl_current->_parent.span = 2;
+	ui_wnd_add_child(window_project, lbl_current);
 	lbl = ui_lbl_make("New:");
 	ui_wnd_add_child(window_project, lbl);
 	in_newprojectname = ui_in_make(NULL);
