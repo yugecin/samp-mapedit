@@ -35,7 +35,7 @@ extern int ui_last_key_down;
 extern int ui_mouse_is_just_down;
 extern int ui_mouse_is_just_up;
 extern struct UI_CONTAINER *background_element;
-extern struct UI_WINDOW *main_menu;
+extern struct UI_WINDOW *main_menu, *context_menu;
 extern char *debugstring;
 
 /**

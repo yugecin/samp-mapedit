@@ -26,10 +26,12 @@ static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
 static char need_camera_update, has_set_camera_once;
+static int context_menu_active = 0;
 
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
 struct UI_WINDOW *main_menu = NULL;
+struct UI_WINDOW *context_menu = NULL;
 
 #define DEBUG_STRING_POOL 10
 #define DEBUG_STRING_LEN 256
@@ -133,6 +135,10 @@ void ui_init()
 	dummy_element.pref_height = dummy_element.pref_width = 0.0f;
 	ui_colpick_init();
 	background_element = ui_cnt_make();
+
+	context_menu = ui_wnd_make(10.0f, 500.0f, "Actions");
+	context_menu->columns = 1;
+	context_menu->closeable = 0;
 
 	main_menu = ui_wnd_make(10.0f, 500.0f, "Main_Menu");
 	main_menu->columns = 2;
@@ -447,7 +453,7 @@ void ui_on_mousewheel(int value)
 
 void ui_render()
 {
-	struct RwV3D v, click;
+	struct RwV3D v;
 	int activate_key_pressed;
 
 	ui_default_font();
@@ -472,14 +478,25 @@ void ui_render()
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if ((active_window != NULL &&
 				ui_wnd_mouseup(active_window)) ||
+				(context_menu_active &&
+				ui_wnd_mouseup(context_menu)) ||
 				ui_wnd_mouseup(main_menu) ||
 				ui_cnt_mouseup(background_element));
 			ui_element_being_clicked = NULL;
 		}
 
+		if (ui_mouse_is_just_up) {
+			if (context_menu_active == 1) {
+				context_menu_active = 2;
+			} else {
+				context_menu_active = 0;
+			}
+		}
+
 		if (activeMouseState->rmb) {
 			ui_do_mouse_movement();
 			ui_do_key_movement();
+			context_menu_active = 0;
 		} else {
 			ui_do_cursor_movement();
 		}
@@ -514,18 +531,21 @@ void ui_render()
 			need_camera_update = 0;
 		}
 
-		game_ScreenToWorld(&click, fresx / 2.0f, fresy / 2.0f, 20.0f);
-
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
 			ui_active_element = NULL;
 			if ((active_window != NULL &&
 				ui_wnd_mousedown(active_window)) ||
+				(context_menu_active &&
+				ui_wnd_mousedown(context_menu)) ||
 				ui_wnd_mousedown(main_menu) ||
 				ui_cnt_mousedown(background_element));
 		}
 
 		if (active_window != NULL) {
 			ui_wnd_update(active_window);
+		}
+		if (context_menu_active) {
+			ui_wnd_update(context_menu);
 		}
 		ui_wnd_update(main_menu);
 		ui_cnt_update(background_element);
@@ -542,12 +562,20 @@ void ui_render()
 		if (active_window != NULL) {
 			ui_wnd_draw(active_window);
 		}
+		if (context_menu_active) {
+			ui_wnd_draw(context_menu);
+		}
 
 		ui_draw_debug_strings();
 
 		ui_draw_cursor();
 
 		if (ui_element_being_clicked == background_element) {
+			context_menu_active = 1;
+			context_menu->_parent._parent.x = cursorx + 10.0f;
+			context_menu->_parent._parent.y = cursory + 25.0f;
+			context_menu->_parent.need_layout = 1;
+
 			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
 			racecheckpoints[0].type = RACECP_TYPE_NORMAL;
 			/*racecheckpoints[activeRCP].free = 0;*/
