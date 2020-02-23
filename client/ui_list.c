@@ -278,6 +278,7 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 		lst->items = NULL;
 		return;
 	}
+	lst->selectedindex = -1;
 	lst->numitems = numitems;
 	lst->items = malloc((sizeof(char*) + MAX_ITEM_LENGTH) * numitems);
 	table = lst->items;
