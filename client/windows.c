@@ -8,6 +8,8 @@
 
 struct UI_WINDOW *window_cpsettings;
 
+static struct RADIOBUTTONGROUP *rdbgroup;
+
 static
 void cb_rdbgroup_cptype(struct UI_RADIOBUTTON *rdb)
 {
@@ -34,7 +36,7 @@ void cb_btn_cpreset(struct UI_BUTTON *btn)
 	y = racecheckpoints[0].pos.y;
 	z = racecheckpoints[0].pos.z;
 	memset(racecheckpoints, 0, sizeof(struct CRaceCheckpoint));
-	racecheckpoints[0].pos.z = z;
+	racecheckpoints[0].pos.x = x;
 	racecheckpoints[0].pos.y = y;
 	racecheckpoints[0].pos.z = z;
 	racecheckpoints[0].arrowDirection.x = x + 100.0f;
@@ -45,11 +47,11 @@ void cb_btn_cpreset(struct UI_BUTTON *btn)
 	racecheckpoints[0].free = 3;
 	racecheckpoints[0].type = 0;
 	racecheckpoints[0].fRadius = 10.0f;
+	ui_rdb_click_match_userdata(rdbgroup, (void*) 0);
 }
 
 void wnd_init()
 {
-	struct RADIOBUTTONGROUP *rdbgroup;
 	struct UI_RADIOBUTTON *rdb;
 	struct UI_LABEL *lbl;
 	struct UI_BUTTON *btn;
