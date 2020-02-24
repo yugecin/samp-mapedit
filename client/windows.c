@@ -12,6 +12,8 @@ static
 void cb_rdbgroup_cptype(struct UI_RADIOBUTTON *rdb)
 {
 	racecheckpoints[0].type = (char) rdb->_parent._parent.userdata;
+	racecheckpoints[0].used = 1;
+	racecheckpoints[0].free = 0;
 }
 
 static
