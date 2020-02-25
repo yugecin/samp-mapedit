@@ -1,14 +1,22 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#include "common.h"
+#define _CRT_SECURE_NO_DEPRECATE
+
 #include "windows.h"
 #include "io.h"
 #include "../shared/sizecheck.h"
 #include "../shared/serverlink.h"
+#include "vendor/SDK/amx/amx.h"
+#include "vendor/SDK/plugincommon.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #define MAX_OBJECTS 1000
+
+typedef void (*cb_t)(void* data);
+typedef void (*logprintf_t)(char* format, ...);
 
 logprintf_t logprintf;
 extern void *pAMXFunctions;
@@ -19,10 +27,28 @@ EXPECT_SIZE(int, 4);
 EXPECT_SIZE(cell, 4);
 EXPECT_SIZE(float, 4);
 
-AMX *amx;
-struct FAKEAMX_DATA fakeamx_data;
+/*in cells*/
+#define STACK_HEAP_SIZE 1024
 
-union NCDATA nc_params;
+AMX *amx;
+struct FAKEAMX_DATA {
+	union {
+		cell ascell[144];
+		char aschr[144 * sizeof(cell)];
+		float asflt[144];
+	} a144;
+	cell _stackheap[STACK_HEAP_SIZE];
+} fakeamx_data;
+#define basea ((int) &fakeamx_data)
+#define buf144a ((int) &fakeamx_data.a144 - basea)
+#define buf144 (fakeamx_data.a144.ascell)
+#define cbuf144 fakeamx_data.a144.aschr
+#define fbuf144 fakeamx_data.a144.asflt
+
+union NCDATA {
+	cell asint[20];
+	float asflt[20];
+} nc_params;
 
 struct NATIVE {
 	char *name;

@@ -94,10 +94,6 @@
 			UniqueIdentifier="{684CEF6A-23EC-4AF8-85DF-5508CE723369}"
 			>
 			<File
-				RelativePath="..\common.h"
-				>
-			</File>
-			<File
 				RelativePath="..\plugin.c"
 				>
 			</File>
