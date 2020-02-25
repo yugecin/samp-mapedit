@@ -249,14 +249,6 @@
 				RelativePath="..\vk.h"
 				>
 			</File>
-			<File
-				RelativePath="..\windows.c"
-				>
-			</File>
-			<File
-				RelativePath="..\windows.h"
-				>
-			</File>
 			<Filter
 				Name="shared"
 				>

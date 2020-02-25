@@ -11,7 +11,6 @@
 #include "samp.h"
 #include "settings.h"
 #include "ui.h"
-#include "windows.h"
 #include <windows.h>
 
 struct CLIENTLINK *linkdata;
@@ -131,7 +130,6 @@ void client_finalize()
 	sockets_dispose();
 
 	ui_dispose();
-	wnd_dispose();
 	prj_dispose();
 	msg_dispose();
 
@@ -158,7 +156,6 @@ void client_init()
 	ui_init();
 	/*order of init affects layout of main menu and context menu*/
 	settings_init();
-	wnd_init();
 	prj_init();
 	msg_init();
 
