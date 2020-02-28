@@ -48,12 +48,6 @@ int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
 
 static
-void cb_btn_cpsettings(struct UI_BUTTON *btn)
-{
-	ui_show_window(window_cpsettings);
-}
-
-static
 void cb_btn_reload(struct UI_BUTTON *btn)
 {
 	reload_requested = 1;
@@ -148,10 +142,6 @@ void ui_init()
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 
-	btn = ui_btn_make("Edit_checkpoint", cb_btn_cpsettings);
-	btn->_parent.x = 300.0f;
-	btn->_parent.y = 550.0f;
-	ui_cnt_add_child(background_element, btn);
 	btn = ui_btn_make("Objects?", cb_btn_objects);
 	btn->_parent.x = 10.0f;
 	btn->_parent.y = 900.0f;

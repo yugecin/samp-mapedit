@@ -12,6 +12,7 @@ static struct RADIOBUTTONGROUP *rdbgroup_cptype;
 static
 void cb_btn_mkracecp(struct UI_BUTTON *btn)
 {
+	ui_show_window(window_cpsettings);
 }
 
 static
