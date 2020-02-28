@@ -86,32 +86,6 @@ void ui_push_debug_string()
 	debugstring = debugstr + DEBUG_STRING_LEN * debugstringidx;
 }
 
-#include "../shared/serverlink.h"
-#include "sockets.h"
-static
-void cb_btn_objects(struct UI_BUTTON *btn)
-{
-	struct MSG_NC nc;
-	float x, y, z;
-
-	x = camera->position.x + 100.0f * camera->rotation.x;
-	y = camera->position.y + 100.0f * camera->rotation.y;
-	z = camera->position.z + 100.0f * camera->rotation.z;
-
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0; /*TODO*/
-	nc.nc = NC_CreateObject;
-	nc.params.asint[1] = 3279;
-	nc.params.asflt[2] = x;
-	nc.params.asflt[3] = y;
-	nc.params.asflt[4] = z;
-	nc.params.asflt[5] = 0.0f;
-	nc.params.asflt[6] = 0.0f;
-	nc.params.asflt[7] = 0.0f;
-	nc.params.asflt[8] = 500.0f;
-	sockets_send(&nc, sizeof(nc));
-}
-
 void ui_init()
 {
 	struct UI_BUTTON *btn;
@@ -141,11 +115,6 @@ void ui_init()
 	btn = ui_btn_make("Reload_client", cb_btn_reload);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
-
-	btn = ui_btn_make("Objects?", cb_btn_objects);
-	btn->_parent.x = 10.0f;
-	btn->_parent.y = 900.0f;
-	ui_cnt_add_child(background_element, btn);
 	
 	racecheckpoints[0].colABGR = 0xFFFF0000;
 	racecheckpoints[0].free = 0;
