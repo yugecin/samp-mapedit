@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "objects.h"
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
@@ -90,7 +91,6 @@ void sockets_recv()
 	static struct sockaddr* rc = (struct sockaddr*) &remote_client;
 	static char buf[8096];
 
-	struct MSG_NC nc;
 	int recvsize, msgid;
 
 	if (socketrecv != -1) {
@@ -99,14 +99,8 @@ void sockets_recv()
 			msgid = ((struct MSG*) buf)->id;
 			switch (msgid) {
 			case MAPEDIT_MSG_OBJECT_CREATED:
-				nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-				nc._parent.data = 0;
-				nc.nc = NC_EditObject;
-				nc.params.asint[1] = 0;
-				nc.params.asint[2] =
-					((struct MSG_OBJECT_CREATED*) buf)->
-						objectid;
-				sockets_send(&nc, sizeof(nc));
+				objects_server_object_created(
+					(struct MSG_OBJECT_CREATED*) buf);
 				break;
 			default:
 				sprintf(debugstring, "unknown MSG: %d", msgid);
