@@ -13,6 +13,7 @@ read-only
 */
 static int *chat_bar_visible;
 static unsigned char *chat_bar_enable_op;
+static unsigned char isR2;
 
 int samp_handle;
 
@@ -24,6 +25,15 @@ void samp_init()
 	pCmdWindow += samp_handle;
 	chat_bar_visible = (int*) (*((int*) pCmdWindow) + 0x14E0);
 	chat_bar_enable_op = (unsigned char*) (TOREL(0x3C057E0) + samp_handle);
+
+	isR2 = 0;
+	/*check for "-R2 " string in startup message*/
+	if (*((int*) (samp_handle + 0xD3988)) == 0x7B203252) {
+		isR2 = 1;
+		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x658B0);
+		/*TODO: char_bar_visible*/
+	}
+
 	VirtualProtect(chat_bar_enable_op, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 }
 
