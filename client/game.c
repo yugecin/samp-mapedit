@@ -150,6 +150,7 @@ __declspec(naked) void game_PedSetPos(struct CPed *ped, struct RwV3D *pos)
 		push [eax] /*x*/
 		push [esp+0x1C] /*ped*/
 		/*it acts as a thiscall, but ecx is unused? (though changed)*/
+		mov ecx, [esp]
 		mov eax, 0x464DC0
 		call eax /*CPed__putAtCoords*/
 		pop ecx
