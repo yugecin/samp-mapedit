@@ -1,7 +1,12 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #define _CRT_SECURE_NO_DEPRECATE
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
+
+/*pragmas seen in win10 api files that vc2005 can't handle*/
+#pragma warning(disable : 4068)
+#pragma warning(disable : 4163)
 
 #include "../shared/sizecheck.h"
 #include <stdlib.h>
