@@ -188,7 +188,6 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 			INPUT_TEXTLEN + 1);
 		ui_hide_window(window_project);
 		btn_main_save->enabled = 1;
-		proj_updatelist();
 		mk_project_filename(projectfile, open_project_name);
 		if (file = fopen(projectfile, "r")) {
 			prj_open_by_file(file);
@@ -196,6 +195,7 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 			prj_save();
 			lbl_current->text = open_project_name;
 		}
+		proj_updatelist();
 	}
 }
 
