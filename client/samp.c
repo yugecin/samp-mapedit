@@ -3,11 +3,7 @@
 #include "samp.h"
 #include <windows.h>
 
-#define BASE 0x3BA0000
-#define PCMDWINDOW 0x3DBA0E8
-#define TOREL(X) (X - BASE)
-
-static int pCmdWindow = TOREL(PCMDWINDOW);
+static int pCmdWindow;
 /**
 read-only
 */
@@ -23,17 +19,19 @@ void samp_init()
 
 	samp_handle = (int) GetModuleHandle("samp.dll");
 	pCmdWindow += samp_handle;
-	chat_bar_visible = (int*) (*((int*) pCmdWindow) + 0x14E0);
-	chat_bar_enable_op = (unsigned char*) (TOREL(0x3C057E0) + samp_handle);
 
 	isR2 = 0;
 	/*check for "-R2 " string in startup message*/
 	if (*((int*) (samp_handle + 0xD3988)) == 0x7B203252) {
 		isR2 = 1;
+		pCmdWindow = samp_handle + 0x21A0F0;
 		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x658B0);
-		/*TODO: char_bar_visible*/
+	} else {
+		pCmdWindow = samp_handle + 0x21A0E8;
+		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x657E0);
 	}
 
+	chat_bar_visible = (int*) (*((int*) pCmdWindow) + 0x14E0);
 	VirtualProtect(chat_bar_enable_op, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 }
 
@@ -65,7 +63,7 @@ __declspec(naked) int _samp_show_chat_bar()
 {
 	_asm {
 		mov ecx, pCmdWindow
-		mov eax, TOREL(0x3C057E0)
+		mov eax, 0x657E0
 		add eax, samp_handle
 		jmp eax
 	}
@@ -75,7 +73,7 @@ __declspec(naked) int _samp_hide_chat_bar()
 {
 	_asm {
 		mov ecx, pCmdWindow
-		mov eax, TOREL(0x3C058E0)
+		mov eax, 0x658E0
 		add eax, samp_handle
 		jmp eax
 	}
