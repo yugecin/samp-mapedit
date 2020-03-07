@@ -45,4 +45,7 @@ void ui_lbl_recalc_size(struct UI_LABEL *lbl)
 		textw = game_TextGetSizeX(lbl->text, 0, 0);
 		lbl->_parent.pref_width = textw + fontpadx * 2.0f;
 	}
+	if (lbl->_parent.parent != NULL) {
+		lbl->_parent.parent->need_layout = 1;
+	}
 }

@@ -151,8 +151,6 @@ void prj_open_by_name(char *name)
 		msg_message = "Failed_to_open_project";
 		msg_title = "Open_project";
 		msg_btn1text = "Ok";
-		msg_btn2text = NULL;
-		msg_btn3text = NULL;
 		msg_show(cb_show_project_window);
 		proj_updatelist();
 	}
@@ -180,8 +178,6 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 		msg_message = "Empty_name_is_not_allowed";
 		msg_title = "New_project";
 		msg_btn1text = "Ok";
-		msg_btn2text = NULL;
-		msg_btn3text = NULL;
 		msg_show(cb_show_project_window);
 	} else {
 		memcpy(open_project_name,

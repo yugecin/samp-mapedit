@@ -1,7 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#include "../shared/sizecheck.h"
-#include "../shared/clientlink.h"
+#include "common.h"
 #include "game.h"
 #include "msgbox.h"
 #include "objects.h"
@@ -11,6 +10,7 @@
 #include "samp.h"
 #include "settings.h"
 #include "ui.h"
+#include "../shared/clientlink.h"
 #include <windows.h>
 
 struct CLIENTLINK *linkdata;

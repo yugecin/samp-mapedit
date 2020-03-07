@@ -276,6 +276,8 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 	}
 	if (numitems <= 0) {
 		lst->items = NULL;
+		lst->numitems = 0;
+		lst->selectedindex = -1;
 		return;
 	}
 	lst->selectedindex = -1;
@@ -304,5 +306,12 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 		if (lst->topoffset < 0) {
 			lst->topoffset = 0;
 		}
+	}
+}
+
+void ui_lst_set_selected_index(struct UI_LIST *lst, int idx)
+{
+	if (0 <= idx && idx < lst->numitems) {
+		lst->selectedindex = idx;
 	}
 }

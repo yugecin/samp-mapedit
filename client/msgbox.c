@@ -5,11 +5,11 @@
 #include "msgbox.h"
 #include <string.h>
 
-char *msg_title, *msg_message;
-char *msg_btn1text, *msg_btn2text, *msg_btn3text;
+char *msg_title, *msg_message, *msg_message2 = "";
+char *msg_btn1text = NULL, *msg_btn2text = NULL, *msg_btn3text = NULL;
 
 static struct UI_WINDOW *msg_wnd;
-static struct UI_LABEL *msg_lbl;
+static struct UI_LABEL *msg_lbl, *msg_lbl2;
 static struct UI_BUTTON *msg_btn1, *msg_btn2, *msg_btn3;
 
 static msgboxcb *result_cb;
@@ -18,6 +18,10 @@ static
 void cb_btn(struct UI_BUTTON *btn)
 {
 	ui_hide_window(msg_wnd);
+	msg_message2 = "";
+	msg_btn1text = NULL;
+	msg_btn2text = NULL;
+	msg_btn3text = NULL;
 	if (result_cb != NULL) {
 		result_cb((int) btn->_parent.userdata);
 	}
@@ -32,6 +36,9 @@ void msg_init()
 	msg_lbl = ui_lbl_make(NULL);
 	msg_lbl->_parent.span = 3;
 	ui_wnd_add_child(msg_wnd, msg_lbl);
+	msg_lbl2 = ui_lbl_make(NULL);
+	msg_lbl2->_parent.span = 3;
+	ui_wnd_add_child(msg_wnd, msg_lbl2);
 	msg_btn1 = ui_btn_make("a", cb_btn);
 	msg_btn1->_parent.userdata = (void*) MSGBOX_RESULT_1;
 	ui_wnd_add_child(msg_wnd, msg_btn1);
@@ -55,6 +62,8 @@ void msg_show(msgboxcb *cb)
 	result_cb = cb;
 	msg_lbl->text = msg_message;
 	msg_lbl->_parent.proc_recalc_size(msg_lbl);
+	msg_lbl2->text = msg_message2;
+	msg_lbl2->_parent.proc_recalc_size(msg_lbl2);
 	msg_wnd->title = msg_title;
 	msg_btn1->text = msg_btn1text;
 	msg_btn2->text = msg_btn2text;

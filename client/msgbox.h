@@ -6,7 +6,7 @@ typedef void (msgboxcb)(int);
 #define MSGBOX_RESULT_2	2
 #define MSGBOX_RESULT_3	3
 
-extern char *msg_title, *msg_message;
+extern char *msg_title, *msg_message, *msg_message2;
 /**
 NULL to disable the button
 */

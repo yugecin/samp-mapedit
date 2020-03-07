@@ -245,3 +245,18 @@ int ui_in_mouseup(struct UI_INPUT *in)
 	}
 	return 0;
 }
+
+void ui_in_set_text(struct UI_INPUT *in, char *text)
+{
+	int i;
+
+	memcpy(in->value, text, sizeof(in->value));
+	in->value[sizeof(in->value) - 1] = 0;
+	in->valuelen = strlen(in->value);
+	for (i = 0; i < sizeof(in->value); i++) {
+		in->displayvalue[i] = value_to_display_char(in->value[i]);
+	}
+	in->cursorpos = in->valuelen;
+	in->displayvaluestart = in->displayvalue;
+	make_sure_caret_is_in_bounds(in);
+}

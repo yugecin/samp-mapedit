@@ -38,3 +38,4 @@ void ui_in_draw(struct UI_INPUT *in);
 void ui_in_recalc_size(struct UI_INPUT *in);
 int ui_in_mousedown(struct UI_INPUT *in);
 int ui_in_mouseup(struct UI_INPUT *in);
+void ui_in_set_text(struct UI_INPUT *in, char *text);
