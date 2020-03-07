@@ -223,6 +223,7 @@ nextline:
 		if (fread(buf, 1, sizeof(buf) - 1, ini) == 0) {
 			goto done;
 		}
+		i = 0;
 		if (strncmp("fontsize ", buf, 9) == 0) {
 			saved_fontsize = atoi(buf + (i = 9));
 		} else if (strncmp("fontratio ", buf, 10) == 0) {

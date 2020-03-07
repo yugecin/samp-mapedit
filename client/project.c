@@ -107,6 +107,7 @@ nextline:
 	if (fread(buf, 1, sizeof(buf) - 1, file) == 0) {
 		goto done;
 	}
+	i = 0;
 	if (!ui_prj_load_line(buf) &&
 		!racecp_prj_load_line(buf))
 	{
