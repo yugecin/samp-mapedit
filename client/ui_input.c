@@ -15,7 +15,7 @@ char value_to_display_char(char value)
 	return value;
 }
 
-static
+/*static*/
 void make_sure_caret_is_in_bounds(struct UI_INPUT *in)
 {
 	int i, min, max, lasti;
@@ -253,10 +253,10 @@ void ui_in_set_text(struct UI_INPUT *in, char *text)
 	memcpy(in->value, text, sizeof(in->value));
 	in->value[sizeof(in->value) - 1] = 0;
 	in->valuelen = strlen(in->value);
-	for (i = 0; i < sizeof(in->value); i++) {
+	for (i = 0; i < in->valuelen; i++) {
 		in->displayvalue[i] = value_to_display_char(in->value[i]);
 	}
+	in->displayvalue[in->valuelen] = 0;
 	in->cursorpos = in->valuelen;
 	in->displayvaluestart = in->displayvalue;
-	make_sure_caret_is_in_bounds(in);
 }

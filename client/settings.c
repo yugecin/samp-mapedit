@@ -39,7 +39,7 @@ void settings_remove_save_button()
 }
 
 static
-void cb_btn_save(struct UI_BUTTON *btn)
+void cb_btn_save_settngs(struct UI_BUTTON *btn)
 {
 	FILE *ini;
 	int len;
@@ -97,7 +97,7 @@ void settings_changed()
 
 	if (settings_are_changed()) {
 		if (btn_save_null_when_unchanged == NULL) {
-			btn = ui_btn_make("save_settings", cb_btn_save);
+			btn = ui_btn_make("save_settings", cb_btn_save_settngs);
 			btn->_parent.span = window_settings->columns;
 			btn->_parent.userdata = btn->_parent.proc_update;
 			ui_wnd_add_child(window_settings, btn);
@@ -202,7 +202,7 @@ void cb_btn_settings(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_reload(struct UI_BUTTON *btn)
+void cb_btn_reload_settings(struct UI_BUTTON *btn)
 {
 	FILE *ini;
 	int pos, i;
@@ -337,12 +337,12 @@ void settings_init()
 	ui_wnd_add_child(window_settings, btn);
 
 	ui_wnd_add_child(window_settings, NULL);
-	btn = ui_btn_make("reload_saved_settings", cb_btn_reload);
+	btn = ui_btn_make("reload_saved_settings", cb_btn_reload_settings);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(window_settings, btn);
 
 	btn_save_null_when_unchanged = NULL;
-	cb_btn_reload(NULL); /*loads saved settings*/
+	cb_btn_reload_settings(NULL); /*loads saved settings*/
 }
 
 void settings_dispose()

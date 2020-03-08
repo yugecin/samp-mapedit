@@ -4,6 +4,7 @@
 #include "game.h"
 #include "ui.h"
 #include "msgbox.h"
+#include "objects.h"
 #include "project.h"
 #include "racecp.h"
 #include <stdio.h>
@@ -72,6 +73,7 @@ void prj_save()
 	if ((f = fopen(buf, "w"))) {
 		ui_prj_save(f, buf);
 		racecp_prj_save(f, buf);
+		objects_prj_save(f, buf);
 		game_PedGetPos(player, (struct RwV3D**) &vec3i, &rot);
 		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i->y), 1, f);
@@ -100,6 +102,8 @@ void prj_open_by_file(FILE *file)
 	} value;
 	struct RwV3D playapos;
 
+	objects_prj_preload();
+
 	pos = 0;
 nextline:
 	memset(buf, 0, sizeof(buf));
@@ -109,7 +113,8 @@ nextline:
 	}
 	i = 0;
 	if (!ui_prj_load_line(buf) &&
-		!racecp_prj_load_line(buf))
+		!racecp_prj_load_line(buf) &&
+		!objects_prj_load_line(buf))
 	{
 		if (strncmp("playa.", buf, 6) == 0) {
 			if (strncmp("pos.", buf + 6, 4) == 0) {
@@ -133,6 +138,7 @@ done:
 
 	game_PedSetPos(player, &playapos);
 	ui_prj_postload();
+	objects_prj_postload();
 	racecp_prj_postload();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;

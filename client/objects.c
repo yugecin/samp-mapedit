@@ -7,6 +7,7 @@
 #include "objects.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
+#include <string.h>
 
 static struct UI_WINDOW *window_layers;
 static struct UI_LABEL *lbl_layer;
@@ -244,4 +245,73 @@ void objects_server_object_created(struct MSG_OBJECT_CREATED *msg)
 	nc.params.asint[1] = 0;
 	nc.params.asint[2] = msg->objectid;
 	sockets_send(&nc, sizeof(nc));
+}
+
+void objects_prj_save(FILE *f, char *buf)
+{
+	int i;
+
+	for (i = 0; i < numlayers; i++) {
+		_asm push f
+		_asm push 1
+		_asm push 0
+		_asm push buf
+		sprintf(buf, "obj.layer.%c.name %s\n", i + 'a', layers[i].name);
+		_asm mov [esp+0x4], eax
+		_asm call fwrite
+		sprintf(buf, "obj.layer.%c.col %d\n", i + 'a', layers[i].color);
+		_asm mov [esp+0x4], eax
+		_asm call fwrite
+		sprintf(buf, "obj.numlayers %d\n", numlayers);
+		_asm mov [esp+0x4], eax
+		_asm call fwrite
+		_asm add esp, 0x10
+	}
+}
+
+int objects_prj_load_line(char *buf)
+{
+	int idx, i, j;
+
+	if (strncmp("obj.layer.", buf, 10) == 0) {
+		idx = buf[10] - 'a';
+		if (0 <= idx && idx < MAX_LAYERS) {
+			if (strncmp(".name", buf + 11, 5) == 0) {
+				i = 17;
+				j = 0;
+				while (j < sizeof(layers[idx].name)) {
+					if (buf[i] == 0 || buf[i] == '\n') {
+						j++;
+						break;
+					}
+					layers[idx].name[j] = buf[i];
+					j++;
+					i++;
+				}
+				layers[idx].name[j - 1] = 0;
+			} else if (strncmp(".col", buf + 11, 4) == 0) {
+				layers[idx].color = atoi(buf + 16);
+			}
+		}
+		return 1;
+	} else if (strncmp("obj.numlayers", buf, 13) == 0) {
+		numlayers = atoi(buf + 14);
+		return 1;
+	}
+	return 0;
+}
+
+void objects_prj_preload()
+{
+	numlayers = 0;
+	active_layer = NULL;
+	activelayeridx = 0;
+	lbl_layer->text = "<none>";
+	ui_lbl_recalc_size(lbl_layer);
+	ui_in_set_text(in_layername, "");
+}
+
+void objects_prj_postload()
+{
+	update_layer_list();
 }
