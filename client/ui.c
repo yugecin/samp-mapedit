@@ -576,28 +576,42 @@ void ui_prj_save(FILE *f, char *buf)
 	struct {
 		int x, y, z;
 	} *vec3i;
+	union {
+		int i;
+		float f;
+	} value;
 
 	vec3i = (void*) &camera->position;
 	fwrite(buf, sprintf(buf, "cam.pos.x %d\n", vec3i->x), 1, f);
 	fwrite(buf, sprintf(buf, "cam.pos.y %d\n", vec3i->y), 1, f);
 	fwrite(buf, sprintf(buf, "cam.pos.z %d\n", vec3i->z), 1, f);
-	vec3i = (void*) &camera->rotation;
-	fwrite(buf, sprintf(buf, "cam.rot.x %d\n", vec3i->x), 1, f);
-	fwrite(buf, sprintf(buf, "cam.rot.y %d\n", vec3i->y), 1, f);
-	fwrite(buf, sprintf(buf, "cam.rot.z %d\n", vec3i->z), 1, f);
+	value.f = horizLookAngle;
+	fwrite(buf, sprintf(buf, "cam.rot.x %d\n", value.i), 1, f);
+	value.f = vertLookAngle;
+	fwrite(buf, sprintf(buf, "cam.rot.y %d\n", value.i), 1, f);
 }
 
 int ui_prj_load_line(char *buf)
 {
 	int *p;
+	union {
+		int i;
+		float f;
+	} value;
 
 	if (strncmp("cam.", buf, 4) == 0) {
 		if (strncmp("pos.", buf + 4, 4) == 0) {
 			p = (int*) &camera->position + buf[8] - 'x';
 			*p = atoi(buf + 10);
 		} else if (strncmp("rot.", buf + 4, 4) == 0) {
-			p = (int*) &camera->rotation + buf[8] - 'x';
-			*p = atoi(buf + 10);
+			value.i = atoi(buf + 10);
+			if (value.f == value.f) { /*nan check*/
+				if (buf[8] == 'x') {
+					horizLookAngle = value.f;
+				} else {
+					vertLookAngle = value.f;
+				}
+			}
 		}
 		return 1;
 	}
@@ -606,5 +620,6 @@ int ui_prj_load_line(char *buf)
 
 void ui_prj_postload()
 {
-	ui_update_camera();
+	activeMouseState->x = 1.0f; /*to force update*/
+	ui_do_mouse_movement();
 }
