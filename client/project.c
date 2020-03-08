@@ -63,23 +63,25 @@ void prj_save()
 {
 	FILE *f;
 	char buf[1000];
-	float rot;
+	union {
+		int i;
+		float f;
+		int *p;
+	} value;
 	struct {
 		int x, y, z;
 	} *vec3i;
-	struct RwV3D p, *pp = &p;
 
 	mk_project_filename(buf, open_project_name);
 	if ((f = fopen(buf, "w"))) {
 		ui_prj_save(f, buf);
 		racecp_prj_save(f, buf);
 		objects_prj_save(f, buf);
-		game_PedGetPos(player, (struct RwV3D**) &vec3i, &rot);
+		game_PedGetPos(player, (struct RwV3D**) &vec3i, &value.f);
 		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i->y), 1, f);
 		fwrite(buf, sprintf(buf, "playa.pos.z %d\n", vec3i->z), 1, f);
-		fwrite(buf, sprintf(buf, "playa.rot %f\n", rot), 1, f);
-		game_PedGetPos(player, &pp, &rot);
+		fwrite(buf, sprintf(buf, "playa.rot %d\n", value.i), 1, f);
 		fclose(f);
 	} else {
 		sprintf(debugstring, "failed to write file %s", buf);
@@ -101,7 +103,9 @@ void prj_open_by_file(FILE *file)
 		int *p;
 	} value;
 	struct RwV3D playapos;
+	float playarot;
 
+	playarot = 0.0f;
 	objects_prj_preload();
 
 	pos = 0;
@@ -122,7 +126,7 @@ nextline:
 				*value.p = atoi(buf + (i = 12));
 			} else if (strncmp("rot ", buf + 6, 4) == 0) {
 				value.i = atoi(buf + (i = 10));
-				game_PedSetRot(player, value.f);
+				playarot = value.f;
 			}
 		} else {
 			i = 0;
@@ -137,6 +141,7 @@ done:
 	fclose(file);
 
 	game_PedSetPos(player, &playapos);
+	game_PedSetRot(player, playarot);
 	ui_prj_postload();
 	objects_prj_postload();
 	racecp_prj_postload();
