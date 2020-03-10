@@ -28,10 +28,24 @@ static int activelayeridx = 0;
 static int numlayers = 0;
 
 static
+void cb_msg_mkobject_needlayer(int choice)
+{
+	ui_show_window(window_layers);
+}
+
+static
 void cb_btn_mkobject(struct UI_BUTTON *btn)
 {
 	struct MSG_NC nc;
 	float x, y, z;
+
+	if (active_layer == NULL) {
+		msg_message = "Create_and_select_an_object_layer_first!";
+		msg_title = "Objects";
+		msg_btn1text = "Ok";
+		msg_show(cb_msg_mkobject_needlayer);
+		return;
+	}
 
 	x = camera->position.x + 100.0f * camera->rotation.x;
 	y = camera->position.y + 100.0f * camera->rotation.y;
