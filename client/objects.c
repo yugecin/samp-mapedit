@@ -12,6 +12,8 @@
 static struct UI_WINDOW *window_layers;
 static struct UI_LABEL *lbl_layer;
 
+static struct UI_BUTTON *btn_mainmenu_layers;
+static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_LIST *lst_layers;
 static struct UI_INPUT *in_layername;
 
@@ -211,6 +213,8 @@ void objects_init()
 	/*context menu entry*/
 	btn = ui_btn_make("Make_Object", cb_btn_mkobject);
 	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_mkobject = btn;
 
 	/*main menu entries*/
 	lbl = ui_lbl_make("=_Objects_=");
@@ -219,6 +223,8 @@ void objects_init()
 	btn = ui_btn_make("Layers", (btncb*) cb_show_layers_window);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
+	btn->enabled = 0;
+	btn_mainmenu_layers = btn;
 	lbl = ui_lbl_make("Layer:");
 	ui_wnd_add_child(main_menu, lbl);
 	lbl_layer = ui_lbl_make("<none>");
@@ -328,4 +334,6 @@ void objects_prj_preload()
 void objects_prj_postload()
 {
 	update_layer_list();
+	btn_contextmenu_mkobject->enabled = 1;
+	btn_mainmenu_layers->enabled = 1;
 }
