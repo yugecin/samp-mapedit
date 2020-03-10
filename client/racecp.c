@@ -7,6 +7,8 @@
 
 struct UI_WINDOW *window_cpsettings;
 
+static struct UI_BUTTON *btn_mainmenu_cplist;
+static struct UI_BUTTON *btn_contextmenu_mkracecp;
 static struct RADIOBUTTONGROUP *rdbgroup_cptype;
 
 static
@@ -70,6 +72,8 @@ void racecp_init()
 	/*context menu entry*/
 	btn = ui_btn_make("Make_race_CP", cb_btn_mkracecp);
 	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_mkracecp = btn;
 
 	/*main menu entry*/
 	lbl = ui_lbl_make("=_Race_CPs_=");
@@ -78,6 +82,8 @@ void racecp_init()
 	btn = ui_btn_make("List", cb_btn_cplist);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
+	btn->enabled = 0;
+	btn_mainmenu_cplist = btn;
 
 	/*checkpoint settings window*/
 	window_cpsettings = ui_wnd_make(500.0f, 500.0f, "Checkpoint");
@@ -155,4 +161,6 @@ int racecp_prj_load_line(char *buf)
 
 void racecp_prj_postload()
 {
+	btn_mainmenu_cplist->enabled = 1;
+	btn_contextmenu_mkracecp->enabled = 1;
 }
