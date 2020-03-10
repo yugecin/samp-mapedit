@@ -8,6 +8,7 @@
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
+#include <windows.h>
 
 static struct UI_WINDOW *window_layers;
 static struct UI_LABEL *lbl_layer;
@@ -200,12 +201,43 @@ void cb_btn_delete_layer()
 	}
 }
 
+static
+void objects_object_created(int model, float x, float y, float z)
+{
+}
+
+static int detour_original_param;
+static int *detour_param;
+
+/**
+calls to _createObject get rerouted to here
+*/
+static
+__declspec(naked) void opcode_0107_detour()
+{
+
+	_asm {
+		pop eax
+		mov eax, 0x5A1F60 /*_createObject*/
+		call eax
+		sub esp, 0x4
+		mov dword ptr [esp], 0x4697A0 /*after call to _createObject*/
+		ret
+	}
+}
+
 void objects_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
 	struct UI_COLORPICKER *cp;
 	struct MSG msg;
+	DWORD oldvp;
+
+	detour_param = (int*) 0x46979C;
+	VirtualProtect(detour_param, 4, PAGE_EXECUTE_READWRITE, &oldvp);
+	detour_original_param = *detour_param;
+	*detour_param = (int) opcode_0107_detour - ((int) detour_param + 4);
 
 	msg.id = MAPEDIT_MSG_RESETOBJECTS;
 	sockets_send(&msg, sizeof(msg));
@@ -253,6 +285,7 @@ void objects_init()
 
 void objects_dispose()
 {
+	*detour_param = detour_original_param;
 }
 
 void objects_server_object_created(struct MSG_OBJECT_CREATED *msg)
