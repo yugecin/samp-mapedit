@@ -23,6 +23,7 @@ struct OBJECTLAYER *active_layer = NULL;
 static struct OBJECTLAYER layers[MAX_LAYERS];
 static int activelayeridx = 0;
 static int numlayers = 0;
+static struct RwV3D nextObjectPosition;
 
 static
 void cb_msg_mkobject_needlayer(int choice)
@@ -33,8 +34,6 @@ void cb_msg_mkobject_needlayer(int choice)
 static
 void cb_btn_mkobject(struct UI_BUTTON *btn)
 {
-	float x, y, z;
-
 	if (active_layer == NULL) {
 		msg_message = "Create_and_select_an_object_layer_first!";
 		msg_title = "Objects";
@@ -51,11 +50,7 @@ void cb_btn_mkobject(struct UI_BUTTON *btn)
 		return;
 	}
 
-	x = camera->position.x + 100.0f * camera->rotation.x;
-	y = camera->position.y + 100.0f * camera->rotation.y;
-	z = camera->position.z + 100.0f * camera->rotation.z;
-
-	objbase_mkobject(active_layer, 3279, x, y, z);
+	objbase_mkobject(active_layer, 3279, &nextObjectPosition);
 }
 
 static
@@ -315,4 +310,20 @@ void objects_prj_postload()
 	update_layer_list();
 	btn_contextmenu_mkobject->enabled = 1;
 	btn_mainmenu_layers->enabled = 1;
+}
+
+void objects_on_background_element_just_clicked(colpoint, entity)
+	struct CColPoint *colpoint;
+	void *entity;
+{
+	if (colpoint && entity) {
+		nextObjectPosition = colpoint->pos;
+		sprintf(debugstring, "%f %f %f", nextObjectPosition.x,
+			nextObjectPosition.y,
+			nextObjectPosition.z);
+		ui_push_debug_string();
+	} else {
+		game_ScreenToWorld(
+			&nextObjectPosition, bgclickx, bgclicky, 40.0f);
+	}
 }

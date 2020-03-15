@@ -6,6 +6,8 @@ void objects_prj_save(/*FILE*/ void *f, char *buf);
 int objects_prj_load_line(char *buf);
 void objects_prj_preload();
 void objects_prj_postload();
+void objects_on_background_element_just_clicked(
+	struct CColPoint* colpoint, void *entity);
 
 #define MAX_LAYERS 10
 

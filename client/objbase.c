@@ -54,9 +54,7 @@ void objects_set_position_after_creation(struct OBJECT *object)
 struct OBJECT *objbase_mkobject(
 	struct OBJECTLAYER *layer,
 	int model,
-	float x,
-	float y,
-	float z)
+	struct RwV3D *pos)
 {
 	struct OBJECT *object;
 	struct MSG_NC nc;
@@ -69,7 +67,7 @@ struct OBJECT *objbase_mkobject(
 	layer->needupdate = 1;
 
 	object->model = model;
-	object->temp_x = x;
+	object->temp_x = pos->x;
 	object->justcreated = 1;
 	object->samp_objectid = -1;
 
@@ -78,8 +76,8 @@ struct OBJECT *objbase_mkobject(
 	nc.nc = NC_CreateObject;
 	nc.params.asint[1] = 3279;
 	nc.params.asint[2] = (int) object;
-	nc.params.asflt[3] = y;
-	nc.params.asflt[4] = z;
+	nc.params.asflt[3] = pos->y;
+	nc.params.asflt[4] = pos->z;
 	nc.params.asflt[5] = 0.0f;
 	nc.params.asflt[6] = 0.0f;
 	nc.params.asflt[7] = 0.0f;

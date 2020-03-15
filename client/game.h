@@ -158,6 +158,24 @@ struct CKeyState {
 };
 EXPECT_SIZE(struct CKeyState, 0x270);
 
+struct CColPoint
+{
+	struct RwV3D pos;
+	float field_C;
+	struct RwV3D normal;
+	float field_1C;
+	unsigned char m_nSurfaceTypeA;
+	unsigned char m_nPieceTypeA;
+	char m_nLightingA;
+	char _pad;
+	unsigned char m_nSurfaceTypeB;
+	unsigned char m_nPieceTypeB;
+	char m_nLightingB;
+	char _pad2;
+	float depth;
+};
+EXPECT_SIZE(struct CColPoint, 0x2C);
+
 #define RACECP_TYPE_ARROW 0
 #define RACECP_TYPE_FINISH 1
 #define RACECP_TYPE_NORMAL 2
@@ -246,6 +264,30 @@ idb CInputEvents__isKeyJustPressed
 sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 */
 int __stdcall game_InputWasKeyPressed(short keycode);
+/**
+@return 1 on collision
+*/
+int game_Intersect(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint **collidedColpoint,
+	void **collidedEntity,
+	int buildings,
+	int vehicles,
+	int peds,
+	int objects,
+	int dummies,
+	int doSeeThroughCheck,
+	int doCameraIgnoreCheck,
+	int doShootThroughCheck);
+/**
+@return 1 on collision
+*/
+int game_IntersectBuildingObject(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint *colpoint,
+	void *collidedEntity);
 void game_ObjectGetPos(void *object, struct RwV3D *pos);
 void game_PedGetPos(struct CPed *ped, struct RwV3D **pos, float *rot);
 void game_PedSetPos(struct CPed *ped, struct RwV3D *pos);

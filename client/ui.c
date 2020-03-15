@@ -3,6 +3,8 @@
 #include "common.h"
 #include "client.h"
 #include "game.h"
+#include "objbase.h"
+#include "objects.h"
 #include "project.h"
 #include "msgbox.h"
 #include "samp.h"
@@ -16,6 +18,7 @@
 float fresx, fresy;
 float canvasx, canvasy;
 float cursorx, cursory;
+float bgclickx, bgclicky;
 float font_size_x, font_size_y;
 int fontsize, fontratio;
 float fontheight, buttonheight, fontpadx, fontpady;
@@ -410,9 +413,23 @@ void ui_on_mousewheel(int value)
 		ui_cnt_mousewheel(background_element, value));
 }
 
+static
+void background_element_just_clicked()
+{
+	struct RwV3D target, *from = &camera->position;
+	struct CColPoint cp;
+	void *entity;
+
+	game_ScreenToWorld(&target, cursorx, cursory, 300.0f);
+	if (!game_IntersectBuildingObject(from, &target, &cp, &entity)) {
+		entity = NULL;
+	}
+
+	objects_on_background_element_just_clicked(&cp, entity);
+}
+
 void ui_render()
 {
-	struct RwV3D v;
 	int activate_key_pressed;
 
 	ui_default_font();
@@ -441,6 +458,9 @@ void ui_render()
 				ui_wnd_mouseup(context_menu)) ||
 				ui_wnd_mouseup(main_menu) ||
 				ui_cnt_mouseup(background_element));
+			if (ui_element_being_clicked == background_element) {
+				background_element_just_clicked();
+			}
 			ui_element_being_clicked = NULL;
 		}
 
@@ -530,20 +550,13 @@ void ui_render()
 		ui_draw_cursor();
 
 		if (ui_element_being_clicked == background_element) {
+			bgclickx = cursorx;
+			bgclicky = cursory;
+
 			context_menu_active = 1;
 			context_menu->_parent._parent.x = cursorx + 10.0f;
 			context_menu->_parent._parent.y = cursory + 25.0f;
 			context_menu->_parent.need_layout = 1;
-
-			game_ScreenToWorld(&v, cursorx, cursory, 40.0f);
-			racecheckpoints[0].type = RACECP_TYPE_NORMAL;
-			/*racecheckpoints[activeRCP].free = 0;*/
-			/*racecheckpoints[activeRCP].used = 1;*/
-			/*racecheckpoints[activeRCP].colABGR = 0xFFFF0000;*/
-			racecheckpoints[0].fRadius = 5.0f;
-			racecheckpoints[0].pos.x = v.x;
-			racecheckpoints[0].pos.y = v.y;
-			racecheckpoints[0].pos.z = v.z;
 		}
 
 		game_TextSetAlign(CENTER);
