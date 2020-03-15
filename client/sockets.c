@@ -99,8 +99,7 @@ void sockets_recv()
 			msgid = ((struct MSG*) buf)->id;
 			switch (msgid) {
 			case MAPEDIT_MSG_OBJECT_CREATED:
-				objects_server_object_created(
-					(struct MSG_OBJECT_CREATED*) buf);
+				objects_server_object_created((void*) buf);
 				break;
 			default:
 				sprintf(debugstring, "unknown MSG: %d", msgid);

@@ -97,6 +97,34 @@ __declspec(naked) int __stdcall game_InputWasKeyPressed(short keycode)
 }
 
 /**
+see opcode 01BB @0x47D567
+*/
+__declspec(naked) void game_ObjectGetPos(void *object, struct RwV3D *pos)
+{
+	_asm {
+		push ecx
+		push esi
+		mov eax, [esp+0xC] /*object*/
+		mov esi, [esp+0x10] /*pos*/
+		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
+		test ecx, ecx
+		jz no_explicit_coords
+		lea eax, [ecx+0x30-0x4]
+no_explicit_coords:
+		add eax, 4
+		mov ecx, [eax]
+		mov [esi], ecx
+		mov ecx, [eax+0x4]
+		mov [esi+0x4], ecx
+		mov ecx, [eax+0x8]
+		mov [esi+0x8], ecx
+		pop esi
+		pop ecx
+		ret
+	}
+}
+
+/**
 opcode 00A0 @0x4677E2
 
 TODO: test this through?

@@ -422,7 +422,8 @@ void msg_nativecall(struct MSG_NC *msg)
 			objectidused[res] = 1;
 			createdmsg._parent.id = MAPEDIT_MSG_OBJECT_CREATED;
 			createdmsg._parent.data = msg->_parent.data;
-			createdmsg.objectid = res;
+			createdmsg.object = (void*) msg->params.asint[2]; /*x*/
+			createdmsg.samp_objectid = res;
 			socket_send((char*) &createdmsg, sizeof(createdmsg));
 		}
 	} else {

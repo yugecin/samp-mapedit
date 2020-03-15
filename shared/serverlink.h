@@ -33,5 +33,6 @@ struct MSG_NC {
 
 struct MSG_OBJECT_CREATED {
 	struct MSG _parent;
-	int objectid;
+	int samp_objectid;
+	struct OBJECT *object;
 };
