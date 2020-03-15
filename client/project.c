@@ -4,6 +4,7 @@
 #include "game.h"
 #include "ui.h"
 #include "msgbox.h"
+#include "objbase.h"
 #include "objects.h"
 #include "project.h"
 #include "racecp.h"

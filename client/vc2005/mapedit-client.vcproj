@@ -190,6 +190,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\objbase.c"
+				>
+			</File>
+			<File
+				RelativePath="..\objbase.h"
+				>
+			</File>
+			<File
 				RelativePath="..\objects.c"
 				>
 			</File>

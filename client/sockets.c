@@ -1,7 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
-#include "objects.h"
+#include "objbase.h"
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
@@ -99,7 +99,7 @@ void sockets_recv()
 			msgid = ((struct MSG*) buf)->id;
 			switch (msgid) {
 			case MAPEDIT_MSG_OBJECT_CREATED:
-				objects_server_object_created((void*) buf);
+				objbase_server_object_created((void*) buf);
 				break;
 			default:
 				sprintf(debugstring, "unknown MSG: %d", msgid);

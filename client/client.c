@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "msgbox.h"
+#include "objbase.h"
 #include "objects.h"
 #include "project.h"
 #include "racecp.h"
@@ -128,6 +129,7 @@ void client_finalize()
 
 	racecp_dispose();
 	objects_dispose();
+	objbase_dispose();
 	settings_dispose();
 	sockets_dispose();
 
@@ -162,6 +164,7 @@ void client_init()
 	msg_init();
 
 	sockets_init();
+	objbase_init();
 	objects_init();
 	racecp_init();
 
