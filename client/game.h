@@ -164,14 +164,14 @@ struct CColPoint
 	float field_C;
 	struct RwV3D normal;
 	float field_1C;
-	unsigned char m_nSurfaceTypeA;
-	unsigned char m_nPieceTypeA;
-	char m_nLightingA;
-	char _pad;
-	unsigned char m_nSurfaceTypeB;
-	unsigned char m_nPieceTypeB;
-	char m_nLightingB;
-	char _pad2;
+	unsigned char surfaceTypeA;
+	unsigned char pieceTypeA;
+	char field_1F;
+	char field_20;
+	unsigned char surfaceTypeB;
+	unsigned char pieceTypeB;
+	char lightingB;
+	char field_24;
 	float depth;
 };
 EXPECT_SIZE(struct CColPoint, 0x2C);
@@ -270,7 +270,7 @@ int __stdcall game_InputWasKeyPressed(short keycode);
 int game_Intersect(
 	struct RwV3D *origin,
 	struct RwV3D *direction,
-	struct CColPoint **collidedColpoint,
+	struct CColPoint *collidedColpoint,
 	void **collidedEntity,
 	int buildings,
 	int vehicles,
@@ -287,7 +287,7 @@ int game_IntersectBuildingObject(
 	struct RwV3D *origin,
 	struct RwV3D *direction,
 	struct CColPoint *colpoint,
-	void *collidedEntity);
+	void **collidedEntity);
 void game_ObjectGetPos(void *object, struct RwV3D *pos);
 void game_PedGetPos(struct CPed *ped, struct RwV3D **pos, float *rot);
 void game_PedSetPos(struct CPed *ped, struct RwV3D *pos);

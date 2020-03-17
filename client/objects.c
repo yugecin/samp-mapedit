@@ -318,12 +318,8 @@ void objects_on_background_element_just_clicked(colpoint, entity)
 {
 	if (colpoint && entity) {
 		nextObjectPosition = colpoint->pos;
-		sprintf(debugstring, "%f %f %f", nextObjectPosition.x,
-			nextObjectPosition.y,
-			nextObjectPosition.z);
-		ui_push_debug_string();
 	} else {
 		game_ScreenToWorld(
-			&nextObjectPosition, bgclickx, bgclicky, 40.0f);
+			&nextObjectPosition, bgclickx, bgclicky, 60.0f);
 	}
 }

@@ -416,12 +416,13 @@ void ui_on_mousewheel(int value)
 static
 void background_element_just_clicked()
 {
-	struct RwV3D target, *from = &camera->position;
+	struct RwV3D target, from;
 	struct CColPoint cp;
 	void *entity;
 
+	from = camera->position;
 	game_ScreenToWorld(&target, cursorx, cursory, 300.0f);
-	if (!game_IntersectBuildingObject(from, &target, &cp, &entity)) {
+	if (!game_IntersectBuildingObject(&from, &target, &cp, &entity)) {
 		entity = NULL;
 	}
 

@@ -99,7 +99,7 @@ __declspec(naked) int __stdcall game_InputWasKeyPressed(short keycode)
 __declspec(naked) int game_Intersect(
 	struct RwV3D *origin,
 	struct RwV3D *direction,
-	struct CColPoint **collidedColpoint,
+	struct CColPoint *collidedColpoint,
 	void **collidedEntity,
 	int buildings,
 	int vehicles,
@@ -118,10 +118,10 @@ int game_IntersectBuildingObject(
 	struct RwV3D *origin,
 	struct RwV3D *direction,
 	struct CColPoint *colpoint,
-	void *collidedEntity)
+	void **collidedEntity)
 {
 	return game_Intersect(
-		origin, direction, &colpoint, &collidedEntity,
+		origin, direction, colpoint, collidedEntity,
 		1, 0, 0, 1, 0, 0, 0, 0);
 }
 
