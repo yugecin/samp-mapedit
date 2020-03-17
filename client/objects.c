@@ -316,7 +316,7 @@ void objects_on_background_element_just_clicked(colpoint, entity)
 	struct CColPoint *colpoint;
 	void *entity;
 {
-	if (colpoint && entity) {
+	if (entity) {
 		nextObjectPosition = colpoint->pos;
 	} else {
 		game_ScreenToWorld(

@@ -427,6 +427,7 @@ void background_element_just_clicked()
 	}
 
 	objects_on_background_element_just_clicked(&cp, entity);
+	prj_on_background_element_just_clicked(&cp, entity);
 }
 
 void ui_render()
