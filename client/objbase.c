@@ -98,9 +98,89 @@ void objbase_server_object_created(struct MSG_OBJECT_CREATED *msg)
 	}
 }
 
+/*RpClump *RpClumpForAllAtomics
+	(RpClump* clump, RpAtomicCallBack callback, void* pData)*/
+#define RpClumpForAllAtomics 0x749B70
+/*RpGeometry *RpGeometryForAllMaterials
+	(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* pData);*/
+#define RpGeometryForAllMaterials 0x74C790
+#define rpGEOMETRYMODULATEMATERIALCOLOR 0x00000040
+
+static
+__declspec(naked) void *objbase_obj_material_cb(void *material, void *data)
+{
+	_asm {
+		mov eax, [esp+0x4]
+		push esi
+		mov esi, [eax]
+		mov [esi+0x4], 0xFF0000FF
+		pop esi
+		/*mov eax, [esp+0x4]*/
+		ret
+	}
+}
+
+/*
+See
+
+https://github.com/DK22Pac/plugin-sdk/blob/\
+master/examples/ColouredObjects/Main.cpp
+
+https://github.com/DK22Pac/plugin-sdk/blob/\
+8d4d2ff5502ffcb3a741cbcac238d49664689808/plugin_sa/game_sa/rw/rpworld.h#L1424
+*/
+static
+__declspec(naked) void *objbase_obj_atomic_cb(void *material, void *data)
+{
+	_asm {
+		push esi
+		mov esi, [esp+0x8] /*geometry*/
+		test esi, esi
+		jz nogeometry
+		mov eax, [esi];
+		add eax, 0x8 /*flags*/
+		or [eax], rpGEOMETRYMODULATEMATERIALCOLOR
+		push [esp+0xC] /*data*/
+		push objbase_obj_material_cb /*cb*/
+		push esi /*geometry*/
+		mov eax, RpGeometryForAllMaterials
+		call eax
+		add esp, 0xC
+nogeometry:
+		pop esi
+		mov eax, [esp+0x4]
+		ret
+	}
+}
+
+static
+void objbase_on_object_render(void *sa_object)
+{
+	void *rwObject;
+	int type;
+
+	rwObject = ((char*) sa_object + 0x18);
+	if (rwObject) {
+		type = *((int*) rwObject);
+		if (type == rpCLUMP) {
+			_asm pushad
+			_asm push 0 /*data*/
+			_asm push objbase_obj_atomic_cb /*cb*/
+			_asm push rwObject /*clump*/
+			_asm mov eax, RpClumpForAllAtomics
+			_asm call eax
+			_asm add esp, 0xC
+			_asm popad
+		} else {
+			objbase_obj_atomic_cb(rwObject, NULL);
+		}
+	}
+}
+
 #define _CScriptThread__getNumberParams 0x464080
 #define _CScriptThread__setNumberParams 0x464370
 #define _opcodeParameters 0xA43C78
+#define _CObject_vtable_CEntity_render 0x534310
 
 static
 void objbase_object_created(object, sa_object, sa_handle)
@@ -125,6 +205,20 @@ void objbase_object_rotation_changed(int sa_handle)
 				objects_set_position_after_creation(object);
 			}
 		}
+	}
+}
+
+static
+__declspec(naked) void render_object_detour()
+{
+	_asm {
+		pushad
+		push ecx
+		call objbase_on_object_render
+		add esp, 0x4
+		popad
+		mov eax, _CObject_vtable_CEntity_render
+		jmp eax
 	}
 }
 
@@ -178,6 +272,7 @@ struct DETOUR {
 static struct DETOUR detour_0107;
 /*0453=4,set_object %1d% XYZ_rotation %2d% %3d% %4d%*/
 static struct DETOUR detour_0453;
+static struct DETOUR detour_render_object;
 
 void objbase_install_detour(struct DETOUR *detour)
 {
@@ -199,12 +294,16 @@ void objbase_init()
 	detour_0107.new_target = (int) opcode_0107_detour;
 	detour_0453.target = (int*) 0x48A355;
 	detour_0453.new_target = (int) opcode_0453_detour;
+	detour_render_object.target = (int*) 0x59F1EE;
+	detour_render_object.new_target = (int) render_object_detour;
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0453);
+	objbase_install_detour(&detour_render_object);
 }
 
 void objbase_dispose()
 {
 	objbase_uninstall_detour(&detour_0107);
 	objbase_uninstall_detour(&detour_0453);
+	objbase_uninstall_detour(&detour_render_object);
 }

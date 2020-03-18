@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #define MAX_OBJECTS 1000
+#define rpCLUMP 2
 
 struct OBJECT {
 	void *sa_object;

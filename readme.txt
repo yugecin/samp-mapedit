@@ -9,6 +9,8 @@ work.
 
 Install
 -------
+* certain functions might not work when Silent Patch is used *
+
 - install CLEO (https://cleo.li)
 - copy mapedit-client-loader-cleo.cleo to CLEO folder
 - copy mapedit.cs to CLEO folder
@@ -37,6 +39,14 @@ client-loader-cleo: the cleo plugin and script that loads the client
 client-mpack: the missionpack to load the editor without the backing server
 server-plugin: the plugin for the backing SA:MP server
 shared: code shared between client and server
+
+Acknowledgements
+----------------
+This wouldn't have been possible without following resources:
+- Plugin-SDK: https://github.com/DK22Pac/plugin-sdk
+- MTA:SA: https://github.com/multitheftauto/mtasa-blue
+- The IDA database I have. I can't remember where I found it though.
+- Sanny Builder and CLEO: https://sannybuilder.com
 
 Note
 ----
