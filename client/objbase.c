@@ -111,11 +111,10 @@ __declspec(naked) void *objbase_obj_material_cb(void *material, void *data)
 {
 	_asm {
 		mov eax, [esp+0x4]
-		push esi
-		mov esi, [eax]
-		mov [esi+0x4], 0xFF0000FF
-		pop esi
-		/*mov eax, [esp+0x4]*/
+		/*remove all textures
+		mov dword ptr [eax], 0*/
+		and [eax+0x4], 0xFF000000
+		or [eax+0x4], 0x000000FF
 		ret
 	}
 }
@@ -130,16 +129,17 @@ https://github.com/DK22Pac/plugin-sdk/blob/\
 8d4d2ff5502ffcb3a741cbcac238d49664689808/plugin_sa/game_sa/rw/rpworld.h#L1424
 */
 static
-__declspec(naked) void *objbase_obj_atomic_cb(void *material, void *data)
+__declspec(naked) void *objbase_obj_atomic_cb(void *atomic, void *data)
 {
 	_asm {
 		push esi
-		mov esi, [esp+0x8] /*geometry*/
+		mov esi, [esp+0x8] /*atomic*/
+		mov esi, [esi+0x18] /*geometry*/
 		test esi, esi
 		jz nogeometry
-		mov eax, [esi];
+		mov eax, esi
 		add eax, 0x8 /*flags*/
-		or [eax], rpGEOMETRYMODULATEMATERIALCOLOR
+		or dword ptr [eax], rpGEOMETRYMODULATEMATERIALCOLOR
 		push [esp+0xC] /*data*/
 		push objbase_obj_material_cb /*cb*/
 		push esi /*geometry*/
@@ -154,26 +154,32 @@ nogeometry:
 }
 
 static
-void objbase_on_object_render(void *sa_object)
+__declspec(naked) void render_centity_detour(void *centity)
 {
-	void *rwObject;
-	int type;
-
-	rwObject = ((char*) sa_object + 0x18);
-	if (rwObject) {
-		type = *((int*) rwObject);
-		if (type == rpCLUMP) {
-			_asm pushad
-			_asm push 0 /*data*/
-			_asm push objbase_obj_atomic_cb /*cb*/
-			_asm push rwObject /*clump*/
-			_asm mov eax, RpClumpForAllAtomics
-			_asm call eax
-			_asm add esp, 0xC
-			_asm popad
-		} else {
-			objbase_obj_atomic_cb(rwObject, NULL);
-		}
+	_asm {
+		mov esi, ecx
+		mov eax, [esi+0x18]
+		test eax, eax
+		jz noobject
+		push eax
+		cmp byte ptr [eax], 0x2
+		jne noclump
+		push 0 /*data*/
+		push objbase_obj_atomic_cb /*cb*/
+		push eax /*clump*/
+		mov eax, RpClumpForAllAtomics
+		call eax
+		add esp, 0xC
+		jmp wasclump
+noclump:
+		push 0
+		push eax
+		call objbase_obj_atomic_cb
+		add esp, 0x8
+wasclump:
+		pop eax
+noobject:
+		ret
 	}
 }
 
@@ -188,6 +194,7 @@ void objbase_object_created(object, sa_object, sa_handle)
 	void *sa_object;
 	int sa_handle;
 {
+	/*TODO: this can cause crashes when reconnecting to the server*/
 	object->sa_object = sa_object;
 	object->sa_handle = sa_handle;
 }
@@ -212,11 +219,24 @@ static
 __declspec(naked) void render_object_detour()
 {
 	_asm {
-		pushad
-		push ecx
-		call objbase_on_object_render
-		add esp, 0x4
-		popad
+		mov eax, [ecx+0x18]
+		test eax, eax
+		jz noobject
+		cmp byte ptr [eax], 0x2
+		jne noclump
+		push 0 /*data*/
+		push objbase_obj_atomic_cb /*cb*/
+		push eax /*clump*/
+		mov eax, RpClumpForAllAtomics
+		call eax
+		add esp, 0xC
+		jmp noobject
+noclump:
+		push 0
+		push eax
+		call objbase_obj_atomic_cb
+		add esp, 0x8
+noobject:
 		mov eax, _CObject_vtable_CEntity_render
 		jmp eax
 	}
@@ -273,6 +293,7 @@ static struct DETOUR detour_0107;
 /*0453=4,set_object %1d% XYZ_rotation %2d% %3d% %4d%*/
 static struct DETOUR detour_0453;
 static struct DETOUR detour_render_object;
+static struct DETOUR detour_render_centity;
 
 void objbase_install_detour(struct DETOUR *detour)
 {
@@ -290,15 +311,22 @@ void objbase_uninstall_detour(struct DETOUR *detour)
 
 void objbase_init()
 {
+	DWORD oldvp;
+
 	detour_0107.target = (int*) 0x469896;
 	detour_0107.new_target = (int) opcode_0107_detour;
 	detour_0453.target = (int*) 0x48A355;
 	detour_0453.new_target = (int) opcode_0453_detour;
 	detour_render_object.target = (int*) 0x59F1EE;
 	detour_render_object.new_target = (int) render_object_detour;
+	detour_render_centity.target = (int*) 0x534313;
+	detour_render_centity.new_target = (int) render_centity_detour;
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0453);
 	objbase_install_detour(&detour_render_object);
+	objbase_install_detour(&detour_render_centity);
+	VirtualProtect((void*) 0x534310, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+	*((char*) 0x534312) = 0xE8;
 }
 
 void objbase_dispose()
@@ -306,4 +334,7 @@ void objbase_dispose()
 	objbase_uninstall_detour(&detour_0107);
 	objbase_uninstall_detour(&detour_0453);
 	objbase_uninstall_detour(&detour_render_object);
+	objbase_uninstall_detour(&detour_render_centity);
+	*((char*) 0x534312) = 0x51;
+	*((int*) 0x534313) = 0x8BF18B56;
 }
