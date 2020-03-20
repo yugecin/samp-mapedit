@@ -11,6 +11,7 @@
 #include "samp.h"
 #include "settings.h"
 #include "ui.h"
+#include "../shared/serverlink.h"
 #include "../shared/clientlink.h"
 #include <windows.h>
 
@@ -149,6 +150,7 @@ See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain
 static
 void client_init()
 {
+	struct MSG_NC nc;
 	HWND ghwnd = *((HWND*) gameHwnd);
 
 	CreateDirectoryA("samp-mapedit", NULL);
@@ -167,6 +169,25 @@ void client_init()
 	objbase_init();
 	objects_init();
 	racecp_init();
+
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.data = 0;
+	nc.nc = NC_DestroyVehicle;
+	nc.params.asint[1] = 1;
+	sockets_send(&nc, sizeof(nc));
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.data = 0;
+	nc.nc = NC_CreateVehicle;
+	nc.params.asint[1] = 411;
+	nc.params.asflt[2] = 10.0f;
+	nc.params.asflt[3] = 0.0f;
+	nc.params.asflt[4] = 5.0f;
+	nc.params.asflt[5] = 0.0f;
+	nc.params.asint[6] = 3;
+	nc.params.asint[7] = 1;
+	nc.params.asint[8] = -1;
+	nc.params.asint[9] = 0;
+	sockets_send(&nc, sizeof(nc));
 
 	hOldProc = (WNDPROC) GetWindowLong(ghwnd, GWL_WNDPROC);
 	SetWindowLong(ghwnd, GWL_WNDPROC, (LONG) NewWndProc);
