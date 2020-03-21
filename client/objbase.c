@@ -9,6 +9,11 @@
 #include <string.h>
 #include <windows.h>
 
+static struct {
+	void *entity;
+	int lit_flag_mask;
+} selected_entity;
+
 /**
 TODO: optimize this
 */
@@ -110,11 +115,13 @@ static
 __declspec(naked) void *objbase_obj_material_cb(void *material, void *data)
 {
 	_asm {
-		mov eax, [esp+0x4]
+		push esi
+		mov eax, [esp+0x8]
 		/*remove all textures
 		mov dword ptr [eax], 0*/
-		and [eax+0x4], 0xFF000000
-		or [eax+0x4], 0x000000FF
+		mov esi, [esp+0xC]
+		mov dword ptr [eax+0x4], esi
+		pop esi
 		ret
 	}
 }
@@ -132,15 +139,23 @@ static
 __declspec(naked) void *objbase_obj_atomic_cb(void *atomic, void *data)
 {
 	_asm {
+		push edx
 		push esi
-		mov esi, [esp+0x8] /*atomic*/
+		mov esi, [esp+0xC] /*atomic*/
 		mov esi, [esi+0x18] /*geometry*/
 		test esi, esi
 		jz nogeometry
 		mov eax, esi
 		add eax, 0x8 /*flags*/
+		mov edx, [esp+0x10] /*data*/
+		test edx, edx
+		jnz setcolorflag
+		and dword ptr [eax], ~rpGEOMETRYMODULATEMATERIALCOLOR
+		jmp setcolor
+setcolorflag:
 		or dword ptr [eax], rpGEOMETRYMODULATEMATERIALCOLOR
-		push [esp+0xC] /*data*/
+setcolor:
+		push [esp+0x10] /*data*/
 		push objbase_obj_material_cb /*cb*/
 		push esi /*geometry*/
 		mov eax, RpGeometryForAllMaterials
@@ -148,38 +163,88 @@ __declspec(naked) void *objbase_obj_atomic_cb(void *atomic, void *data)
 		add esp, 0xC
 nogeometry:
 		pop esi
+		pop edx
 		mov eax, [esp+0x4]
 		ret
 	}
 }
 
 static
-__declspec(naked) void render_centity_detour(void *centity)
+__declspec(naked) void set_entity_color_agbr(void *centity, int color)
 {
 	_asm {
-		mov esi, ecx
-		mov eax, [esi+0x18]
+		mov eax, [esp+0x4]
+		mov eax, [eax+0x18]
 		test eax, eax
-		jz noobject
-		push eax
+		jz nogeometry
+		push [esp+0x8] /*data*/
 		cmp byte ptr [eax], 0x2
 		jne noclump
-		push 0 /*data*/
 		push objbase_obj_atomic_cb /*cb*/
 		push eax /*clump*/
 		mov eax, RpClumpForAllAtomics
 		call eax
 		add esp, 0xC
-		jmp wasclump
+		jmp nogeometry
 noclump:
-		push 0
-		push eax
+		push eax /*atomic*/
 		call objbase_obj_atomic_cb
 		add esp, 0x8
-wasclump:
-		pop eax
-noobject:
+nogeometry:
 		ret
+	}
+}
+
+static
+__declspec(naked) void render_centity_detour_restore_material_color()
+{
+	_asm {
+		push 0 /*color*/
+		push ecx /*entity*/
+		call set_entity_color_agbr
+		add esp, 0x8
+		ret
+	}
+}
+
+static
+__declspec(naked) void render_centity_detour()
+{
+	_asm {
+		cmp ecx, selected_entity.entity
+		jne notthisone
+		push 0xFFFF00FF /*color*/
+		push ecx /*entity*/
+		call set_entity_color_agbr
+		add esp, 0x8
+		push render_centity_detour_restore_material_color
+notthisone:
+		mov esi, ecx
+		mov eax, [esi+0x18]
+		ret
+	}
+}
+
+/*https://github.com/DK22Pac/plugin-sdk/blob/
+8d4d2ff5502ffcb3a741cbcac238d49664689808/plugin_sa/game_sa/CEntity.h#L58*/
+#define CObject_flags_lit 0x10000000
+
+void objbase_select_entity(void *entity)
+{
+	int *flags;
+
+	if (selected_entity.entity != NULL) {
+		flags = (int*) ((char*) selected_entity.entity + 0x1C);
+		set_entity_color_agbr(selected_entity.entity, 0);
+		*flags &= selected_entity.lit_flag_mask | ~CObject_flags_lit;
+	}
+
+	selected_entity.entity = entity;
+	if (entity != NULL) {
+		flags = (int*) ((char*) selected_entity.entity + 0x1C);
+		set_entity_color_agbr(selected_entity.entity, 0xFF0000FF);
+		selected_entity.lit_flag_mask = *flags & CObject_flags_lit;
+		*flags |= CObject_flags_lit;
 	}
 }
 
@@ -212,33 +277,6 @@ void objbase_object_rotation_changed(int sa_handle)
 				objects_set_position_after_creation(object);
 			}
 		}
-	}
-}
-
-static
-__declspec(naked) void render_object_detour()
-{
-	_asm {
-		mov eax, [ecx+0x18]
-		test eax, eax
-		jz noobject
-		cmp byte ptr [eax], 0x2
-		jne noclump
-		push 0 /*data*/
-		push objbase_obj_atomic_cb /*cb*/
-		push eax /*clump*/
-		mov eax, RpClumpForAllAtomics
-		call eax
-		add esp, 0xC
-		jmp noobject
-noclump:
-		push 0
-		push eax
-		call objbase_obj_atomic_cb
-		add esp, 0x8
-noobject:
-		mov eax, _CObject_vtable_CEntity_render
-		jmp eax
 	}
 }
 
@@ -313,28 +351,34 @@ void objbase_init()
 {
 	DWORD oldvp;
 
+	memset(&selected_entity, 0, sizeof(selected_entity));
+
 	detour_0107.target = (int*) 0x469896;
 	detour_0107.new_target = (int) opcode_0107_detour;
 	detour_0453.target = (int*) 0x48A355;
 	detour_0453.new_target = (int) opcode_0453_detour;
 	detour_render_object.target = (int*) 0x59F1EE;
-	detour_render_object.new_target = (int) render_object_detour;
+	//detour_render_object.new_target = (int) render_object_detour;
 	detour_render_centity.target = (int*) 0x534313;
 	detour_render_centity.new_target = (int) render_centity_detour;
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0453);
-	objbase_install_detour(&detour_render_object);
-	objbase_install_detour(&detour_render_centity);
-	VirtualProtect((void*) 0x534310, 1, PAGE_EXECUTE_READWRITE, &oldvp);
-	*((char*) 0x534312) = 0xE8;
+	//objbase_install_detour(&detour_render_object);
+	//objbase_install_detour(&detour_render_centity);
+	//VirtualProtect((void*) 0x534310, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+	//*((char*) 0x534312) = 0xE8;
+
 }
 
 void objbase_dispose()
 {
 	objbase_uninstall_detour(&detour_0107);
 	objbase_uninstall_detour(&detour_0453);
-	objbase_uninstall_detour(&detour_render_object);
-	objbase_uninstall_detour(&detour_render_centity);
-	*((char*) 0x534312) = 0x51;
-	*((int*) 0x534313) = 0x8BF18B56;
+	//objbase_uninstall_detour(&detour_render_object);
+	//objbase_uninstall_detour(&detour_render_centity);
+	//*((char*) 0x534312) = 0x51;
+	//*((int*) 0x534313) = 0x8BF18B56;
+
+	objbase_select_entity(NULL);
+
 }
