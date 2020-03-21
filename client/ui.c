@@ -129,11 +129,18 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	active_window = wnd;
 	wnd->_parent._parent.proc_recalc_size(wnd);
 	/*recalc_size queues layout update, so not needed here anymore*/
+	objects_on_active_window_changed(wnd);
 }
 
 void ui_hide_window(struct UI_WINDOW *wnd)
 {
 	active_window = NULL;
+	objects_on_active_window_changed(NULL);
+}
+
+struct UI_WINDOW *ui_get_active_window()
+{
+	return active_window;
 }
 
 static

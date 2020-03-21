@@ -19,6 +19,17 @@ static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_LIST *lst_layers;
 static struct UI_INPUT *in_layername;
 
+static struct UI_WINDOW *window_objinfo;
+static struct UI_LABEL *lbl_objentity;
+static struct UI_LABEL *lbl_objflags;
+
+static char txt_objentity[9];
+static char txt_objtype[9];
+static char txt_objflags[9];
+static char txt_objgetboundrect[9];
+static char txt_objlodentity[9];
+static char txt_objlodflags[9];
+
 struct OBJECTLAYER *active_layer = NULL;
 static struct OBJECTLAYER layers[MAX_LAYERS];
 static int activelayeridx = 0;
@@ -124,6 +135,12 @@ void cb_show_layers_window()
 }
 
 static
+void cb_show_objinfo_window()
+{
+	ui_show_window(window_objinfo);
+}
+
+static
 void cb_btn_add_layer(struct UI_BUTTON *btn)
 {
 	if (numlayers >= MAX_LAYERS) {
@@ -215,6 +232,9 @@ void objects_init()
 	ui_wnd_add_child(main_menu, lbl);
 	lbl_layer = ui_lbl_make("<none>");
 	ui_wnd_add_child(main_menu, lbl_layer);
+	btn = ui_btn_make("Select_Object", (btncb*) cb_show_objinfo_window);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
 
 	/*layers window*/
 	window_layers = ui_wnd_make(500.0f, 500.0f, "Object_Layers");
@@ -235,6 +255,23 @@ void objects_init()
 	ui_wnd_add_child(window_layers, lbl);
 	cp = ui_colpick_make(35.0f, cb_cp_layercolor);
 	ui_wnd_add_child(window_layers, cp);
+
+	/*objinfo window*/
+	window_objinfo = ui_wnd_make(1500.0f, 400.0f, "Entity_Info");
+	window_objinfo->columns = 2;
+
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("Entity:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objentity));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("Type:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objtype));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("Flags:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objflags));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("GetBoundRect:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objgetboundrect));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Entity:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodentity));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Flags:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodflags));
 }
 
 void objects_dispose()
@@ -312,15 +349,51 @@ void objects_prj_postload()
 	btn_mainmenu_layers->enabled = 1;
 }
 
+static
+void objects_select_entity(void *entity)
+{
+	void *lod;
+
+	objbase_select_entity(entity);
+	if (entity != NULL) {
+		lod = *((int**) ((char*) entity + 0x30));
+		sprintf(txt_objentity, "%p", entity);
+		sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
+		sprintf(txt_objflags, "%p", *((int*) entity + 7));
+		sprintf(txt_objgetboundrect, "%p", (*((int**) entity))[9]);
+		if ((int) lod == -1 || lod == NULL) {
+			strcpy(txt_objlodentity, "00000000");
+			strcpy(txt_objlodflags, "00000000");
+		} else {
+			sprintf(txt_objlodentity, "%p", (int) lod);
+			sprintf(txt_objlodflags, "%p", *((int*) lod + 7));
+		}
+	} else {
+		strcpy(txt_objentity, "00000000");
+		strcpy(txt_objtype, "00000000");
+		strcpy(txt_objflags, "00000000");
+		strcpy(txt_objgetboundrect, "00000000");
+		strcpy(txt_objlodentity, "00000000");
+		strcpy(txt_objlodflags, "00000000");
+	}
+}
+
 void objects_on_background_element_just_clicked(colpoint, entity)
 	struct CColPoint *colpoint;
 	void *entity;
 {
-	objbase_select_entity(entity);
+	if (ui_get_active_window() == window_objinfo) {
+		objects_select_entity(entity);
+	}
 	if (entity) {
 		nextObjectPosition = colpoint->pos;
 	} else {
 		game_ScreenToWorld(
 			&nextObjectPosition, bgclickx, bgclicky, 60.0f);
 	}
+}
+
+void objects_on_active_window_changed(struct UI_WINDOW *wnd)
+{
+	objects_select_entity(NULL);
 }
