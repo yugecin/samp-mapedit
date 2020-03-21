@@ -177,6 +177,11 @@ void client_init()
 	sockets_send(&nc, sizeof(nc));
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0;
+	nc.nc = NC_SetWorldTime;
+	nc.params.asint[1] = 13;
+	sockets_send(&nc, sizeof(nc));
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.data = 0;
 	nc.nc = NC_CreateVehicle;
 	nc.params.asint[1] = 411;
 	nc.params.asflt[2] = 10.0f;
