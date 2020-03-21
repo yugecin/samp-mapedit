@@ -255,6 +255,7 @@ void game_CameraRestoreWithJumpCut();
 void __stdcall game_CameraSetOnPoint(
 	struct RwV3D *point, enum eCameraCutMode cutmode, int unk);
 void game_DrawRect(float x, float y, float w, float h, int argb);
+void game_EntitySetAlpha(void *entity, float alpha);
 void game_FreezePlayer(char flag);
 void game_init();
 /**

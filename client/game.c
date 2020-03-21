@@ -77,6 +77,18 @@ void game_DrawRect(float x, float y, float w, float h, int argb)
 	game_RwIm2DRenderPrimitive(4, verts, 4);
 }
 
+
+void __declspec(naked) game_EntitySetAlpha(void *entity, float alpha)
+{
+	_asm {
+		mov ecx, [esp+0x4]
+		push [esp+0x8]
+		mov eax, 0x5332C0
+		call eax
+		ret
+	}
+}
+
 void game_FreezePlayer(char flag)
 {
 	/*see CPlayer__makePlayerSafe 0x56E870
