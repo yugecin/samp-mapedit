@@ -38,8 +38,16 @@ void ui_element_draw_background(struct UI_ELEMENT *elem, int argb)
 
 int ui_element_is_hovered(struct UI_ELEMENT *element)
 {
-	return element->x <= cursorx &&
-		element->y <= cursory &&
+	if (element->x <= cursorx &&
 		cursorx < element->x + element->width &&
-		cursory < element->y + element->height;
+		cursory < element->y + element->height)
+	{
+		/*window's titlebar is outside of it's dimensions*/
+		if (element->type == UIE_WINDOW) {
+			return element->y - buttonheight <= cursory;
+		} else {
+			return element->y <= cursory;
+		}
+	}
+	return 0;
 }

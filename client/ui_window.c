@@ -278,16 +278,15 @@ void ui_wnd_draw(struct UI_WINDOW *wnd)
 
 int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 {
+	struct UI_ELEMENT *elem;
 	int res;
 
+	elem = (void*) wnd;
 	wnd->grabx = GRABX_VAL_NOGRAB;
-	if ((res = ui_cnt_mousedown((struct UI_CONTAINER*) wnd))) {
-		return res;
-	}
-	if (wnd->_parent._parent.x <= cursorx &&
-		cursorx < wnd->_parent._parent.x + wnd->_parent._parent.width &&
-		wnd->_parent._parent.y - buttonheight <= cursory &&
-		cursory < wnd->_parent._parent.y)
+	if (elem->x <= cursorx &&
+		cursorx < elem->x + elem->width &&
+		elem->y - buttonheight <= cursory &&
+		cursory < elem->y)
 	{
 		if (is_closebtn_hovered(wnd)) {
 			wnd->grabx = GRABX_VAL_CLOSEBTN;
@@ -296,6 +295,9 @@ int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 			wnd->graby = cursory - wnd->_parent._parent.y;
 		}
 		return (int) (ui_element_being_clicked = wnd);
+	}
+	if ((res = ui_cnt_mousedown((struct UI_CONTAINER*) wnd))) {
+		return res;
 	}
 	return 0;
 }

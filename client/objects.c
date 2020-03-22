@@ -382,7 +382,7 @@ int objects_on_background_element_just_clicked(colpoint, entity)
 	struct CColPoint *colpoint;
 	void *entity;
 {
-	if (ui_get_active_window() == window_objinfo) {
+	if (objects_is_currently_selecting_object()) {
 		objects_select_entity(entity);
 		return 0;
 	}
@@ -399,4 +399,9 @@ int objects_on_background_element_just_clicked(colpoint, entity)
 void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 {
 	objects_select_entity(NULL);
+}
+
+int objects_is_currently_selecting_object()
+{
+	return ui_get_active_window() == window_objinfo;
 }

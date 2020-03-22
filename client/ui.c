@@ -420,18 +420,24 @@ void ui_on_mousewheel(int value)
 		ui_cnt_mousewheel(background_element, value));
 }
 
-static
-void background_element_just_clicked()
+void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint)
 {
 	struct RwV3D target, from;
-	struct CColPoint cp;
-	void *entity;
 
 	from = camera->position;
 	game_ScreenToWorld(&target, cursorx, cursory, 300.0f);
-	if (!game_IntersectBuildingObject(&from, &target, &cp, &entity)) {
-		entity = NULL;
+	if (!game_IntersectBuildingObject(&from, &target, colpoint, entity)) {
+		*entity = NULL;
 	}
+}
+
+static
+void background_element_just_clicked()
+{
+	struct CColPoint cp;
+	void *entity;
+
+	ui_get_entity_pointed_at(&entity, &cp);
 
 	if (objects_on_background_element_just_clicked(&cp, entity) &&
 		prj_on_background_element_just_clicked(&cp, entity))
@@ -542,6 +548,8 @@ void ui_render()
 		ui_wnd_update(main_menu);
 		ui_cnt_update(background_element);
 
+		objbase_do_hover();
+
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;
 		} else if (racecheckpoints[0].free == 2) {
@@ -643,4 +651,14 @@ void ui_prj_postload()
 {
 	activeMouseState->x = 1.0f; /*to force update*/
 	ui_do_mouse_movement();
+}
+
+int ui_is_cursor_hovering_any_window()
+{
+	return
+		(active_window != NULL &&
+			ui_element_is_hovered((void*) active_window)) ||
+		(context_menu_active &&
+			ui_element_is_hovered((void*) context_menu)) ||
+		ui_element_is_hovered((void*) main_menu);
 }

@@ -12,6 +12,7 @@ void objects_prj_postload();
 int objects_on_background_element_just_clicked(
 	struct CColPoint* colpoint, void *entity);
 void objects_on_active_window_changed(struct UI_WINDOW *wnd);
+int objects_is_currently_selecting_object();
 
 #define MAX_LAYERS 10
 

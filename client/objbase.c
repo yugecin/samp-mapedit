@@ -5,15 +5,18 @@
 #include "objbase.h"
 #include "objects.h"
 #include "sockets.h"
+#include "ui.h"
 #include "../shared/serverlink.h"
 #include <string.h>
 #include <windows.h>
 
-static struct {
+struct ENTITYCOLORINFO {
 	void *entity;
 	int lit_flag_mask[2]; /*one for entity + one for LOD*/
 	int lod_lit_flag_mask;
-} selected_entity;
+};
+
+static struct ENTITYCOLORINFO selected_entity, hovered_entity;
 
 /**
 TODO: optimize this
@@ -254,17 +257,53 @@ void objbase_color_entity(void *entity, int color, int *lit_flag_mask)
 	}
 }
 
-void objbase_select_entity(void *entity)
+/**
+@return 1 if the entity is now colored, and was not already colored
+*/
+static
+int objbase_color_new_entity(info, entity, color)
+	struct ENTITYCOLORINFO *info;
+	void *entity;
+	int color;
 {
-	if (selected_entity.entity != NULL) {
-		objbase_color_entity(selected_entity.entity, 0,
-			selected_entity.lit_flag_mask);
+	if (entity == info->entity) {
+		return 0;
 	}
 
-	selected_entity.entity = entity;
-	if (entity != NULL) {
-		objbase_color_entity(entity, 0xFF0000FF,
-			selected_entity.lit_flag_mask);
+	if (info->entity != NULL) {
+		objbase_color_entity(info->entity, 0, info->lit_flag_mask);
+	}
+
+	if ((info->entity = entity) != NULL) {
+		objbase_color_entity(info->entity, color, info->lit_flag_mask);
+		return 1;
+	}
+	return 0;
+}
+
+void objbase_select_entity(void *entity)
+{
+	/*remove hovered entity to revert its changes first*/
+	objbase_color_new_entity(&hovered_entity, NULL, 0);
+	objbase_color_new_entity(&selected_entity, entity, 0xFF0000FF);
+}
+
+void objbase_do_hover()
+{
+	struct CColPoint cp;
+	void *entity;
+
+	if (objects_is_currently_selecting_object())
+	{
+		if (ui_is_cursor_hovering_any_window()) {
+			entity = NULL;
+		} else {
+			ui_get_entity_pointed_at(&entity, &cp);
+			if (entity == selected_entity.entity) {
+				entity = NULL;
+			}
+		}
+		objbase_color_new_entity(&hovered_entity, entity, 0xFFFF00FF);
 	}
 }
 
@@ -399,5 +438,6 @@ void objbase_dispose()
 	//*((char*) 0x534312) = 0x51;
 	//*((int*) 0x534313) = 0x8BF18B56;
 
-	objbase_select_entity(NULL);
+	objbase_color_new_entity(&selected_entity, NULL, 0);
+	objbase_color_new_entity(&hovered_entity, NULL, 0);
 }
