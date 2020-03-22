@@ -6,7 +6,10 @@ void objects_prj_save(/*FILE*/ void *f, char *buf);
 int objects_prj_load_line(char *buf);
 void objects_prj_preload();
 void objects_prj_postload();
-void objects_on_background_element_just_clicked(
+/**
+@return 0 when context menu should be suppressed
+*/
+int objects_on_background_element_just_clicked(
 	struct CColPoint* colpoint, void *entity);
 void objects_on_active_window_changed(struct UI_WINDOW *wnd);
 

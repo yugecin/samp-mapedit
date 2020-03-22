@@ -296,7 +296,7 @@ void prj_dispose()
 	ui_wnd_dispose(window_project);
 }
 
-void prj_on_background_element_just_clicked(colpoint, entity)
+int prj_on_background_element_just_clicked(colpoint, entity)
 	struct CColPoint *colpoint;
 	void *entity;
 {
@@ -306,4 +306,5 @@ void prj_on_background_element_just_clicked(colpoint, entity)
 	} else {
 		btn_context_tphere->enabled = 0;
 	}
+	return 1;
 }

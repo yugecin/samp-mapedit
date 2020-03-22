@@ -378,19 +378,22 @@ void objects_select_entity(void *entity)
 	}
 }
 
-void objects_on_background_element_just_clicked(colpoint, entity)
+int objects_on_background_element_just_clicked(colpoint, entity)
 	struct CColPoint *colpoint;
 	void *entity;
 {
 	if (ui_get_active_window() == window_objinfo) {
 		objects_select_entity(entity);
+		return 0;
 	}
+
 	if (entity) {
 		nextObjectPosition = colpoint->pos;
 	} else {
 		game_ScreenToWorld(
 			&nextObjectPosition, bgclickx, bgclicky, 60.0f);
 	}
+	return 1;
 }
 
 void objects_on_active_window_changed(struct UI_WINDOW *wnd)

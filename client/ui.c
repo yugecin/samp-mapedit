@@ -433,8 +433,14 @@ void background_element_just_clicked()
 		entity = NULL;
 	}
 
-	objects_on_background_element_just_clicked(&cp, entity);
-	prj_on_background_element_just_clicked(&cp, entity);
+	if (objects_on_background_element_just_clicked(&cp, entity) &&
+		prj_on_background_element_just_clicked(&cp, entity))
+	{
+		context_menu_active = 1;
+		context_menu->_parent._parent.x = cursorx + 10.0f;
+		context_menu->_parent._parent.y = cursory + 25.0f;
+		context_menu->_parent.need_layout = 1;
+	}
 }
 
 void ui_render()
@@ -467,18 +473,11 @@ void ui_render()
 				ui_wnd_mouseup(context_menu)) ||
 				ui_wnd_mouseup(main_menu) ||
 				ui_cnt_mouseup(background_element));
+			context_menu_active = 0;
 			if (ui_element_being_clicked == background_element) {
 				background_element_just_clicked();
 			}
 			ui_element_being_clicked = NULL;
-		}
-
-		if (ui_mouse_is_just_up) {
-			if (context_menu_active == 1) {
-				context_menu_active = 2;
-			} else {
-				context_menu_active = 0;
-			}
 		}
 
 		if (activeMouseState->rmb) {
@@ -526,7 +525,12 @@ void ui_render()
 				(context_menu_active &&
 				ui_wnd_mousedown(context_menu)) ||
 				ui_wnd_mousedown(main_menu) ||
-				ui_cnt_mousedown(background_element));
+				ui_cnt_mousedown(background_element))
+			{
+				;
+			} else {
+				context_menu_active = 0;
+			}
 		}
 
 		if (active_window != NULL) {
@@ -561,11 +565,6 @@ void ui_render()
 		if (ui_element_being_clicked == background_element) {
 			bgclickx = cursorx;
 			bgclicky = cursory;
-
-			context_menu_active = 1;
-			context_menu->_parent._parent.x = cursorx + 10.0f;
-			context_menu->_parent._parent.y = cursory + 25.0f;
-			context_menu->_parent.need_layout = 1;
 		}
 
 		game_TextSetAlign(CENTER);
