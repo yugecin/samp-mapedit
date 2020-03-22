@@ -11,7 +11,8 @@
 
 static struct {
 	void *entity;
-	int lit_flag_mask;
+	int lit_flag_mask[2]; /*one for entity + one for LOD*/
+	int lod_lit_flag_mask;
 } selected_entity;
 
 /**
@@ -229,22 +230,41 @@ notthisone:
 8d4d2ff5502ffcb3a741cbcac238d49664689808/plugin_sa/game_sa/CEntity.h#L58*/
 #define CObject_flags_lit 0x10000000
 
-void objbase_select_entity(void *entity)
+#define __MaybeCBuilding_GetBoundingBox 0x534120
+#define __MaybeCObject_GetBoundingBox 0x5449B0
+
+static
+void objbase_color_entity(void *entity, int color, int *lit_flag_mask)
 {
+	void *lod;
 	int *flags;
 
+	set_entity_color_agbr(entity, color);
+	flags = (int*) ((char*) entity + 0x1C);
+	if (color) {
+		*lit_flag_mask = *flags & CObject_flags_lit;
+		*flags |= CObject_flags_lit;
+	} else {
+		*flags &= *lit_flag_mask | ~CObject_flags_lit;
+	}
+
+	lod = *((int**) ((char*) entity + 0x30));
+	if (lod != NULL) {
+		objbase_color_entity(lod, color, lit_flag_mask + 1);
+	}
+}
+
+void objbase_select_entity(void *entity)
+{
 	if (selected_entity.entity != NULL) {
-		flags = (int*) ((char*) selected_entity.entity + 0x1C);
-		set_entity_color_agbr(selected_entity.entity, 0);
-		*flags &= selected_entity.lit_flag_mask | ~CObject_flags_lit;
+		objbase_color_entity(selected_entity.entity, 0,
+			selected_entity.lit_flag_mask);
 	}
 
 	selected_entity.entity = entity;
 	if (entity != NULL) {
-		flags = (int*) ((char*) selected_entity.entity + 0x1C);
-		set_entity_color_agbr(selected_entity.entity, 0xFF0000FF);
-		selected_entity.lit_flag_mask = *flags & CObject_flags_lit;
-		*flags |= CObject_flags_lit;
+		objbase_color_entity(entity, 0xFF0000FF,
+			selected_entity.lit_flag_mask);
 	}
 }
 
@@ -380,5 +400,4 @@ void objbase_dispose()
 	//*((int*) 0x534313) = 0x8BF18B56;
 
 	objbase_select_entity(NULL);
-
 }
