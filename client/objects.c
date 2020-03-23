@@ -34,6 +34,8 @@ static struct OBJECTLAYER layers[MAX_LAYERS];
 static int activelayeridx = 0;
 static int numlayers = 0;
 static struct RwV3D nextObjectPosition;
+static struct RwV3D player_pos_before_selecting;
+static int is_selecting_object = 0;
 
 static
 void cb_msg_mkobject_needlayer(int choice)
@@ -391,9 +393,48 @@ int objects_on_background_element_just_clicked(colpoint, entity)
 	return 1;
 }
 
+static
+void objects_prepare_selecting_object()
+{
+	float rot;
+	struct RwV3D *pos;
+
+	game_EntitySetAlpha(player, 0);
+	game_PedGetPos(player, &pos, &rot);
+	player_pos_before_selecting = *pos;
+}
+
+static
+void objects_restore_selecting_object()
+{
+	game_EntitySetAlpha(player, 255);
+	game_PedSetPos(player, &player_pos_before_selecting);
+}
+
 void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 {
+	if (wnd == window_objinfo) {
+		is_selecting_object = 1;
+		objects_prepare_selecting_object();
+	} else if (is_selecting_object) {
+		is_selecting_object = 0;
+		objects_restore_selecting_object();
+	}
 	objects_select_entity(NULL);
+}
+
+void objects_ui_activated()
+{
+	if (is_selecting_object) {
+		objects_prepare_selecting_object();
+	}
+}
+
+void objects_ui_deactivated()
+{
+	if (is_selecting_object) {
+		objects_restore_selecting_object();
+	}
 }
 
 int objects_is_currently_selecting_object()

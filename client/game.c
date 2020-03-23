@@ -78,7 +78,7 @@ void game_DrawRect(float x, float y, float w, float h, int argb)
 }
 
 
-void __declspec(naked) game_EntitySetAlpha(void *entity, float alpha)
+void __declspec(naked) game_EntitySetAlpha(void *entity, unsigned char alpha)
 {
 	_asm {
 		mov ecx, [esp+0x4]

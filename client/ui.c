@@ -235,6 +235,7 @@ void ui_activate()
 		*hudScaleY = 0.0014f;
 		ui_element_being_clicked = NULL;
 		samp_break_chat_bar();
+		objects_ui_activated();
 	}
 }
 
@@ -249,6 +250,7 @@ void ui_deactivate()
 		*hudScaleX = originalHudScaleX;
 		*hudScaleY = originalHudScaleY;
 		samp_restore_chat_bar();
+		objects_ui_deactivated();
 	}
 }
 

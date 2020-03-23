@@ -13,6 +13,8 @@ int objects_on_background_element_just_clicked(
 	struct CColPoint* colpoint, void *entity);
 void objects_on_active_window_changed(struct UI_WINDOW *wnd);
 int objects_is_currently_selecting_object();
+void objects_ui_activated();
+void objects_ui_deactivated();
 
 #define MAX_LAYERS 10
 

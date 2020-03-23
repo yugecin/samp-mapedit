@@ -299,6 +299,9 @@ void objbase_do_hover()
 			entity = NULL;
 		} else {
 			ui_get_entity_pointed_at(&entity, &cp);
+			if (entity != NULL) {
+				game_PedSetPos(player, &cp.pos);
+			}
 			if (entity == selected_entity.entity) {
 				entity = NULL;
 			}
