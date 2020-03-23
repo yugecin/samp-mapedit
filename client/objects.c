@@ -26,7 +26,6 @@ static struct UI_LABEL *lbl_objflags;
 static char txt_objentity[9];
 static char txt_objtype[9];
 static char txt_objflags[9];
-static char txt_objgetboundrect[9];
 static char txt_objlodentity[9];
 static char txt_objlodflags[9];
 
@@ -266,8 +265,6 @@ void objects_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objtype));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Flags:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objflags));
-	ui_wnd_add_child(window_objinfo, ui_lbl_make("GetBoundRect:"));
-	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objgetboundrect));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Entity:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodentity));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Flags:"));
@@ -360,7 +357,6 @@ void objects_select_entity(void *entity)
 		sprintf(txt_objentity, "%p", entity);
 		sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
 		sprintf(txt_objflags, "%p", *((int*) entity + 7));
-		sprintf(txt_objgetboundrect, "%p", (*((int**) entity))[9]);
 		if ((int) lod == -1 || lod == NULL) {
 			strcpy(txt_objlodentity, "00000000");
 			strcpy(txt_objlodflags, "00000000");
@@ -372,7 +368,6 @@ void objects_select_entity(void *entity)
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objtype, "00000000");
 		strcpy(txt_objflags, "00000000");
-		strcpy(txt_objgetboundrect, "00000000");
 		strcpy(txt_objlodentity, "00000000");
 		strcpy(txt_objlodflags, "00000000");
 	}

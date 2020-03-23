@@ -548,7 +548,7 @@ void ui_render()
 		ui_wnd_update(main_menu);
 		ui_cnt_update(background_element);
 
-		objbase_do_hover();
+		objbase_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;

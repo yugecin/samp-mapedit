@@ -288,13 +288,13 @@ void objbase_select_entity(void *entity)
 	objbase_color_new_entity(&selected_entity, entity, 0xFF0000FF);
 }
 
+static
 void objbase_do_hover()
 {
 	struct CColPoint cp;
 	void *entity;
 
-	if (objects_is_currently_selecting_object())
-	{
+	if (objects_is_currently_selecting_object()) {
 		if (ui_is_cursor_hovering_any_window()) {
 			entity = NULL;
 		} else {
@@ -305,6 +305,110 @@ void objbase_do_hover()
 		}
 		objbase_color_new_entity(&hovered_entity, entity, 0xFFFF00FF);
 	}
+}
+
+#if 0
+static
+void objbase_draw_entity_bound_rect(void *entity, int color)
+{
+	void *proc;
+	void *bb;
+	void *colmodel;
+	struct Rect boundrect;
+	struct RwV3D world[4], *a, *b, *c, *d;
+	struct RwV3D screen[4];
+	struct IM2DVERTEX verts[] = {
+		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
+		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
+		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
+		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
+	};
+	struct RwV3D *min, *max;
+
+	a = world;
+	b = a + 1;
+	c = b + 1;
+	d = c + 1;
+	if (entity != NULL) {
+		/*
+
+		use this: (getcolmodel) with CPlaceable::GetRightDirection etc
+		_asm mov ecx, entity
+		_asm mov eax, 0x535300
+		_asm call eax
+		_asm mov colmodel, eax
+		if (colmodel) {
+			min = (struct RwV3D*) colmodel;
+			max = (struct RwV3D*) ((char*) colmodel + 0xC);
+		}
+		game_WorldToScreen(screen + 0, min);
+		game_WorldToScreen(screen + 1, max);
+		game_TextPrintString(screen[0].x, screen[0].y, "hi");
+		game_TextPrintString(screen[1].x, screen[1].y, "hi");
+
+
+		*/
+		/*proc = (*((void***) entity))[9];
+		bb = &boundrect;
+		_asm {
+			mov ecx, entity
+			push bb
+			call proc
+		}
+		sprintf(debugstring, "%f %f %f %f",
+			boundrect.top, boundrect.bottom, boundrect.left,
+			boundrect.right);
+		ui_push_debug_string();
+		sprintf(debugstring, "OKE",
+			boundrect.top, boundrect.bottom, boundrect.left,
+			boundrect.right);
+		ui_push_debug_string();*/
+		/*
+		_asm {
+			mov ecx, entity
+			push a
+			push b
+			push c
+			push d
+			mov eax, 0x535340
+			call eax
+		}
+		game_WorldToScreen(screen + 0, world + 0);
+		game_WorldToScreen(screen + 1, world + 1);
+		game_WorldToScreen(screen + 2, world + 2);
+		game_WorldToScreen(screen + 3, world + 3);
+		game_TextPrintString(screen[0].x, screen[0].y, "hi");
+		game_TextPrintString(screen[1].x, screen[1].y, "hi");
+		game_TextPrintString(screen[2].x, screen[2].y, "hi");
+		game_TextPrintString(screen[3].x, screen[3].y, "hi");
+		*/
+		/*
+		game_RwIm2DPrepareRender();
+		verts[0].x = screen[0].x;
+		verts[0].y = screen[0].y;
+		verts[1].x = screen[1].x;
+		verts[1].y = screen[1].y;
+		verts[2].x = screen[3].x;
+		verts[2].y = screen[3].y;
+		verts[3].x = screen[2].x;
+		verts[3].y = screen[2].y;
+		game_RwIm2DRenderPrimitive(4, verts, 4);
+		game_RwIm2DRenderPrimitive(4, verts, 4);
+		game_RwIm2DRenderPrimitive(4, verts, 4);
+		game_RwIm2DRenderPrimitive(4, verts, 4);
+		game_RwIm2DRenderPrimitive(4, verts, 4);
+		game_RwIm2DRenderPrimitive(4, verts, 4);*/
+	}
+}
+#endif
+
+void objbase_frame_update()
+{
+	objbase_do_hover();
+#if 0
+	objbase_draw_entity_bound_rect(selected_entity.entity, 0xFFFF00FF);
+	objbase_draw_entity_bound_rect(hovered_entity.entity, 0xFFFF00FF);
+#endif
 }
 
 #define _CScriptThread__getNumberParams 0x464080
