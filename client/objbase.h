@@ -19,3 +19,4 @@ struct OBJECT *objbase_mkobject(struct OBJECTLAYER*, int, struct RwV3D*);
 void objbase_server_object_created(struct MSG_OBJECT_CREATED *msg);
 void objbase_select_entity(void *entity);
 void objbase_frame_update();
+void objbase_set_entity_to_render_exclusively(void *entity);

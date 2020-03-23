@@ -17,6 +17,12 @@ struct ENTITYCOLORINFO {
 };
 
 static struct ENTITYCOLORINFO selected_entity, hovered_entity;
+static void *exclusiveEntity = NULL;
+
+void objbase_set_entity_to_render_exclusively(void *entity)
+{
+	exclusiveEntity = entity;
+}
 
 /**
 TODO: optimize this
@@ -58,6 +64,8 @@ void objects_set_position_after_creation(struct OBJECT *object)
 	nc.params.asflt[3] = pos.y;
 	nc.params.asflt[4] = pos.z;
 	sockets_send(&nc, sizeof(nc));
+
+	/*objbase_set_entity_to_render_exclusively(object->sa_object);*/
 }
 
 struct OBJECT *objbase_mkobject(
@@ -83,7 +91,7 @@ struct OBJECT *objbase_mkobject(
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0; /*TODO*/
 	nc.nc = NC_CreateObject;
-	nc.params.asint[1] = 3279;
+	nc.params.asint[1] = model;
 	nc.params.asint[2] = (int) object;
 	nc.params.asflt[3] = pos->y;
 	nc.params.asflt[4] = pos->z;
@@ -200,29 +208,19 @@ nogeometry:
 }
 
 static
-__declspec(naked) void render_centity_detour_restore_material_color()
-{
-	_asm {
-		push 0 /*color*/
-		push ecx /*entity*/
-		call set_entity_color_agbr
-		add esp, 0x8
-		ret
-	}
-}
-
-static
 __declspec(naked) void render_centity_detour()
 {
 	_asm {
-		cmp ecx, selected_entity.entity
-		jne notthisone
-		push 0xFFFF00FF /*color*/
-		push ecx /*entity*/
-		call set_entity_color_agbr
-		add esp, 0x8
-		push render_centity_detour_restore_material_color
-notthisone:
+		mov eax, exclusiveEntity
+		test eax, eax
+		jz continuerender
+		cmp ecx, exclusiveEntity
+		je continuerender
+		pop esi
+		pop esi
+		pop ecx
+		ret
+continuerender:
 		mov esi, ecx
 		mov eax, [esi+0x18]
 		ret
@@ -530,9 +528,9 @@ void objbase_init()
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0453);
 	//objbase_install_detour(&detour_render_object);
-	//objbase_install_detour(&detour_render_centity);
-	//VirtualProtect((void*) 0x534310, 1, PAGE_EXECUTE_READWRITE, &oldvp);
-	//*((char*) 0x534312) = 0xE8;
+	objbase_install_detour(&detour_render_centity);
+	VirtualProtect((void*) 0x534312, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+	*((char*) 0x534312) = 0xE8;
 
 }
 
@@ -541,9 +539,9 @@ void objbase_dispose()
 	objbase_uninstall_detour(&detour_0107);
 	objbase_uninstall_detour(&detour_0453);
 	//objbase_uninstall_detour(&detour_render_object);
-	//objbase_uninstall_detour(&detour_render_centity);
-	//*((char*) 0x534312) = 0x51;
-	//*((int*) 0x534313) = 0x8BF18B56;
+	objbase_uninstall_detour(&detour_render_centity);
+	*((char*) 0x534312) = 0x51;
+	*((int*) 0x534313) = 0x8BF18B56;
 
 	objbase_color_new_entity(&selected_entity, NULL, 0);
 	objbase_color_new_entity(&hovered_entity, NULL, 0);
