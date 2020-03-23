@@ -11,6 +11,7 @@
 #define GAME_RESOLUTION_X *(int*)(0xC17044)
 #define GAME_RESOLUTION_Y *(int*)(0xC17048)
 #define CPAD 0xB73458
+#define _opcodeParameters 0xA43C78
 
 enum eTextdrawAlignment {
 	CENTER = 0,
@@ -290,6 +291,7 @@ int game_IntersectBuildingObject(
 	struct CColPoint *colpoint,
 	void **collidedEntity);
 void game_ObjectGetPos(void *object, struct RwV3D *pos);
+void game_ObjectSetPos(void *object, struct RwV3D *pos);
 void game_PedGetPos(struct CPed *ped, struct RwV3D **pos, float *rot);
 void game_PedSetPos(struct CPed *ped, struct RwV3D *pos);
 void game_PedSetRot(struct CPed *ped, float rot);

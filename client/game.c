@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "ui.h"
+#include <windows.h>
 
 unsigned int *fontColorABGR = (unsigned int*) 0xC71A97;
 unsigned char *enableHudByOpcode = (unsigned char*) 0xA444A0;
@@ -22,10 +23,19 @@ int *script_PLAYER_CHAR = (int*) 0xA49968; /* $2=PLAYER_CHAR */
 int *script_PLAYER_ACTOR = (int*) 0xA4996C; /* $3=PLAYER_ACTOR */
 struct CPed *player;
 void *gameHwnd = (void*) 0xC97C1C;
+void *_opcode0815ret = (void*) 0x473BEE;
+
+void unprotect_stuff()
+{
+	DWORD oldvp;
+
+	VirtualProtect(_opcode0815ret, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+}
 
 __declspec(naked) void game_init()
 {
 	_asm {
+		call unprotect_stuff
 		mov eax, script_PLAYER_ACTOR
 		mov eax, [eax]
 		push eax /*pedHandle*/
@@ -161,6 +171,42 @@ no_explicit_coords:
 		mov [esi+0x8], ecx
 		pop esi
 		pop ecx
+		ret
+	}
+}
+
+/**
+using opcode 0815 @0x473A01
+*/
+__declspec(naked) void game_ObjectSetPos(void *object, struct RwV3D *pos)
+{
+	_asm {
+		push esi
+		mov eax, _opcode0815ret
+		push [eax]
+		mov byte ptr [eax], 0xC3
+
+		/*esi: object*/
+		/*ecx: x*/
+		/*edx: y*/
+		/*eax: z (_opcodeParameters+0xC)*/
+
+		mov eax, [esp+0x10] /*pos*/
+		mov ecx, [eax] /*x*/
+		mov edx, [eax+0x4] /*y*/
+		mov esi, [eax+0x8] /*z*/
+		mov eax, _opcodeParameters
+		mov [eax+0xC], esi /*z*/
+		mov esi, [esp+0xC] /*object*/
+		mov eax, 0x473A29
+		sub esp, 0x1A4 /*see 0x474386*/
+		call eax
+		add esp, 0x1A4
+
+		pop eax
+		mov esi, _opcode0815ret
+		mov byte ptr [esi], al
+		pop esi
 		ret
 	}
 }

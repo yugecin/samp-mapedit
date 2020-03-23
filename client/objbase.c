@@ -50,20 +50,11 @@ to be reset.
 static
 void objects_set_position_after_creation(struct OBJECT *object)
 {
-	struct MSG_NC nc;
 	struct RwV3D pos;
 
 	game_ObjectGetPos(object->sa_object, &pos);
 	pos.x = object->temp_x;
-
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
-	nc.nc = NC_SetObjectPos;
-	nc.params.asint[1] = object->samp_objectid;
-	nc.params.asflt[2] = pos.x;
-	nc.params.asflt[3] = pos.y;
-	nc.params.asflt[4] = pos.z;
-	sockets_send(&nc, sizeof(nc));
+	game_ObjectSetPos(object->sa_object, &pos);
 
 	/*objbase_set_entity_to_render_exclusively(object->sa_object);*/
 }
@@ -414,7 +405,6 @@ void objbase_frame_update()
 
 #define _CScriptThread__getNumberParams 0x464080
 #define _CScriptThread__setNumberParams 0x464370
-#define _opcodeParameters 0xA43C78
 #define _CObject_vtable_CEntity_render 0x534310
 
 static
