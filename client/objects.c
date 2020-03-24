@@ -23,6 +23,7 @@ static struct UI_WINDOW *window_objinfo;
 static struct UI_LABEL *lbl_objentity;
 static struct UI_LABEL *lbl_objflags;
 static struct UI_BUTTON *btn_remove_building;
+static struct UI_BUTTON *btn_objclone;
 static struct UI_BUTTON *btn_move_obj_samp;
 static struct UI_BUTTON *btn_move_obj_click;
 
@@ -215,6 +216,11 @@ void cb_btn_remove_building(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_objclone(struct UI_BUTTON *btn)
+{
+}
+
+static
 void cb_btn_move_obj_samp(struct UI_BUTTON *btn)
 {
 	struct MSG_NC nc;
@@ -305,6 +311,10 @@ void objects_init()
 	btn->_parent.span = 2;
 	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_remove_building = btn);
+	btn = ui_btn_make("Clone", cb_btn_objclone);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(window_objinfo, btn_objclone = btn);
 	btn = ui_btn_make("Move_Object_(samp)", cb_btn_move_obj_samp);
 	btn->_parent.span = 2;
 	btn->enabled = 0;
@@ -404,6 +414,7 @@ void objects_select_entity(void *entity)
 
 	objbase_select_entity(entity);
 	if (entity != NULL) {
+		btn_objclone->enabled = 1;
 		lod = *((int**) ((char*) entity + 0x30));
 		sprintf(txt_objentity, "%p", entity);
 		sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
@@ -426,6 +437,7 @@ void objects_select_entity(void *entity)
 			btn_move_obj_click->enabled = 1;
 		}
 	} else {
+		btn_objclone->enabled = 0;
 		selected_object = NULL;
 		btn_remove_building->enabled = 0;
 		btn_move_obj_samp->enabled = 0;
