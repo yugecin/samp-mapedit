@@ -441,3 +441,12 @@ int objects_is_currently_selecting_object()
 {
 	return ui_get_active_window() == window_objinfo;
 }
+
+void objects_frame_update()
+{
+	if (is_selecting_object) {
+		game_TextSetAlign(CENTER);
+		game_TextPrintString(fresx / 2.0f, 50.0f,
+			"~w~Hover over an object and ~r~click~w~ to select it");
+	}
+}

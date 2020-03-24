@@ -550,6 +550,7 @@ void ui_render()
 		ui_wnd_update(main_menu);
 		ui_cnt_update(background_element);
 
+		objects_frame_update();
 		objbase_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
