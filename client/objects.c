@@ -22,6 +22,9 @@ static struct UI_INPUT *in_layername;
 static struct UI_WINDOW *window_objinfo;
 static struct UI_LABEL *lbl_objentity;
 static struct UI_LABEL *lbl_objflags;
+static struct UI_BUTTON *btn_remove_building;
+static struct UI_BUTTON *btn_move_obj_samp;
+static struct UI_BUTTON *btn_move_obj_click;
 
 static char txt_objentity[9];
 static char txt_objtype[9];
@@ -29,6 +32,7 @@ static char txt_objflags[9];
 static char txt_objlodentity[9];
 static char txt_objlodflags[9];
 
+static struct OBJECT *selected_object;
 struct OBJECTLAYER *active_layer = NULL;
 static struct OBJECTLAYER layers[MAX_LAYERS];
 static int activelayeridx = 0;
@@ -204,6 +208,31 @@ void cb_btn_delete_layer()
 	}
 }
 
+static
+void cb_btn_remove_building(struct UI_BUTTON *btn)
+{
+}
+
+static
+void cb_btn_move_obj_samp(struct UI_BUTTON *btn)
+{
+	struct MSG_NC nc;
+
+	if (selected_object != NULL) {
+		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+		nc._parent.data = 0;
+		nc.nc = NC_EditObject;
+		nc.params.asint[1] = 0;
+		nc.params.asint[2] = selected_object->samp_objectid;
+		sockets_send(&nc, sizeof(nc));
+	}
+}
+
+static
+void cb_btn_move_obj_click(struct UI_BUTTON *btn)
+{
+}
+
 void objects_init()
 {
 	struct UI_BUTTON *btn;
@@ -271,6 +300,20 @@ void objects_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodentity));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Flags:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodflags));
+	btn = ui_btn_make("Remove_Building", cb_btn_remove_building);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(window_objinfo, btn_remove_building = btn);
+	btn = ui_btn_make("Move_Object_(samp)", cb_btn_move_obj_samp);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(window_objinfo, btn_move_obj_samp = btn);
+	btn = ui_btn_make("Move_Object_(click)", cb_btn_move_obj_click);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(window_objinfo, btn_move_obj_click = btn);
+
+	selected_object = NULL;
 }
 
 void objects_dispose()
@@ -366,7 +409,21 @@ void objects_select_entity(void *entity)
 			sprintf(txt_objlodentity, "%p", (int) lod);
 			sprintf(txt_objlodflags, "%p", *((int*) lod + 7));
 		}
+		selected_object = objects_find_by_sa_object(entity);
+		if (selected_object == NULL) {
+			btn_remove_building->enabled = 1;
+			btn_move_obj_samp->enabled = 0;
+			btn_move_obj_click->enabled = 0;
+		} else {
+			btn_remove_building->enabled = 0;
+			btn_move_obj_samp->enabled = 1;
+			btn_move_obj_click->enabled = 1;
+		}
 	} else {
+		selected_object = NULL;
+		btn_remove_building->enabled = 0;
+		btn_move_obj_samp->enabled = 0;
+		btn_move_obj_click->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objtype, "00000000");
 		strcpy(txt_objflags, "00000000");
@@ -416,6 +473,9 @@ void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 	if (wnd == window_objinfo) {
 		is_selecting_object = 1;
 		objects_prepare_selecting_object();
+		btn_remove_building->enabled = 0;
+		btn_move_obj_samp->enabled = 0;
+		btn_move_obj_click->enabled = 0;
 	} else if (is_selecting_object) {
 		is_selecting_object = 0;
 		objects_restore_selecting_object();

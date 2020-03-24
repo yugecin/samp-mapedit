@@ -15,6 +15,7 @@ struct OBJECT {
 void objbase_init();
 void objbase_dispose();
 struct OBJECT *objects_find_by_sa_handle(int sa_handle);
+struct OBJECT *objects_find_by_sa_object(void *sa_object);
 struct OBJECT *objbase_mkobject(struct OBJECTLAYER*, int, struct RwV3D*);
 void objbase_server_object_created(struct MSG_OBJECT_CREATED *msg);
 void objbase_select_entity(void *entity);

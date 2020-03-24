@@ -44,6 +44,25 @@ struct OBJECT *objects_find_by_sa_handle(int sa_handle)
 }
 
 /**
+TODO: optimize this
+*/
+struct OBJECT *objects_find_by_sa_object(void *sa_object)
+{
+	int i;
+	struct OBJECT *objects;
+
+	if (active_layer != NULL) {
+		objects = active_layer->objects;
+		for (i = active_layer->numobjects - 1; i >= 0; i--) {
+			if (objects[i].sa_object == sa_object) {
+				return objects + i;
+			}
+		}
+	}
+	return NULL;
+}
+
+/**
 Since x-coord of creation is a pointer to the object handle, the position needs
 to be reset.
 */

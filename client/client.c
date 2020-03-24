@@ -170,6 +170,8 @@ void client_init()
 	objects_init();
 	racecp_init();
 
+	prj_do_show_window();
+
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0;
 	nc.nc = NC_DestroyVehicle;

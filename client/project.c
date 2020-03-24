@@ -286,7 +286,10 @@ void prj_init()
 	btn_open->_parent.span = 2;
 	btn_open->enabled = 0;
 	ui_wnd_add_child(window_project, btn_open);
+}
 
+void prj_do_show_window()
+{
 	ui_show_window(window_project);
 	proj_updatelist();
 }
