@@ -376,6 +376,11 @@ int objects_prj_load_line(char *buf)
 
 void objects_prj_preload()
 {
+	struct MSG msg;
+
+	msg.id = MAPEDIT_MSG_RESETOBJECTS;
+	sockets_send(&msg, sizeof(msg));
+
 	numlayers = 0;
 	active_layer = NULL;
 	activelayeridx = 0;
