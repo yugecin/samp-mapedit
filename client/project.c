@@ -92,6 +92,22 @@ void prj_save()
 	}
 }
 
+static
+void prj_preload()
+{
+	objects_prj_preload();
+}
+
+static
+void prj_postload()
+{
+	ui_prj_postload();
+	objects_prj_postload();
+	racecp_prj_postload();
+	btn_main_save->enabled = 1;
+	lbl_current->text = open_project_name;
+}
+
 /**
 Closes file when done.
 */
@@ -109,7 +125,7 @@ void prj_open_by_file(FILE *file)
 	float playarot;
 
 	playarot = 0.0f;
-	objects_prj_preload();
+	prj_preload();
 
 	pos = 0;
 nextline:
@@ -145,11 +161,7 @@ done:
 
 	game_PedSetPos(player, &playapos);
 	game_PedSetRot(player, playarot);
-	ui_prj_postload();
-	objects_prj_postload();
-	racecp_prj_postload();
-	btn_main_save->enabled = 1;
-	lbl_current->text = open_project_name;
+	prj_postload();
 }
 
 void prj_open_by_name(char *name)
@@ -204,7 +216,8 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 			prj_open_by_file(file);
 		} else {
 			prj_save();
-			lbl_current->text = open_project_name;
+			prj_preload();
+			prj_postload();
 		}
 		proj_updatelist();
 	}
