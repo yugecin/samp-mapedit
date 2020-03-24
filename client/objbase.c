@@ -91,7 +91,6 @@ struct OBJECT *objbase_mkobject(
 	}
 
 	object = layer->objects + layer->numobjects++;
-	layer->needupdate = 1;
 
 	object->model = model;
 	object->temp_x = pos->x;

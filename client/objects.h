@@ -24,7 +24,6 @@ struct OBJECTLAYER {
 	int color;
 	struct OBJECT objects[MAX_OBJECTS];
 	int numobjects;
-	char needupdate;
 };
 
 extern struct OBJECTLAYER *active_layer;
