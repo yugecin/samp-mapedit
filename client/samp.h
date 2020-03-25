@@ -4,5 +4,7 @@ void samp_init();
 void samp_dispose();
 void samp_break_chat_bar();
 void samp_restore_chat_bar();
+void samp_hide_ui_f10();
+void samp_show_ui_f10();
 
 extern int samp_handle;

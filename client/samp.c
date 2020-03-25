@@ -10,6 +10,8 @@ read-only
 static int *chat_bar_visible;
 static unsigned char *chat_bar_enable_op;
 static unsigned char isR2;
+static int *ui_mode;
+static int old_ui_mode_value;
 
 int samp_handle;
 
@@ -20,13 +22,14 @@ void samp_init()
 	samp_handle = (int) GetModuleHandle("samp.dll");
 	pCmdWindow += samp_handle;
 
-	isR2 = 0;
 	/*check for "-R2 " string in startup message*/
 	if (*((int*) (samp_handle + 0xD3988)) == 0x7B203252) {
 		isR2 = 1;
+		ui_mode = *((int**) (samp_handle + 0x21A0EC)) + 2;
 		pCmdWindow = samp_handle + 0x21A0F0;
 		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x658B0);
 	} else {
+		isR2 = 0;
 		pCmdWindow = samp_handle + 0x21A0E8;
 		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x657E0);
 	}
@@ -56,6 +59,17 @@ void samp_restore_chat_bar()
 		*chat_bar_enable_op = chat_bar_overwritten_op;
 		chat_bar_overwritten_op = 0;
 	}
+}
+
+void samp_hide_ui_f10()
+{
+	old_ui_mode_value = *ui_mode;
+	*ui_mode = 0;
+}
+
+void samp_show_ui_f10()
+{
+	*ui_mode = old_ui_mode_value;
 }
 
 /*untested (also needs samp_handle check)

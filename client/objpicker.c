@@ -7,6 +7,7 @@
 #include "objbase.h"
 #include "objects.h"
 #include "sockets.h"
+#include "samp.h"
 #include "../shared/serverlink.h"
 #include <string.h>
 #include <windows.h>
@@ -89,6 +90,7 @@ void restore_after_hide()
 	ui_update_camera();
 	objbase_set_entity_to_render_exclusively(NULL);
 	ui_hide_window(wnd);
+	samp_show_ui_f10();
 }
 
 static
@@ -125,6 +127,7 @@ void objpick_show(struct RwV3D *positionToCreate)
 	ui_update_camera();
 	create_object();
 	ui_show_window(wnd);
+	samp_hide_ui_f10();
 }
 
 void objpick_init()
