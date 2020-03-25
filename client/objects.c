@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "objbase.h"
 #include "objects.h"
+#include "objpicker.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
@@ -56,18 +57,14 @@ void cb_btn_mkobject(struct UI_BUTTON *btn)
 		msg_title = "Objects";
 		msg_btn1text = "Ok";
 		msg_show(cb_msg_mkobject_needlayer);
-		return;
-	}
-
-	if (active_layer->numobjects == MAX_OBJECTS) {
+	} else if (active_layer->numobjects == MAX_OBJECTS) {
 		msg_message = "Layer_object_limit_reached.";
 		msg_title = "Objects";
 		msg_btn1text = "Ok";
 		msg_show(NULL);
-		return;
+	} else {
+		objpick_show(&nextObjectPosition);
 	}
-
-	objbase_mkobject(active_layer, 3279, &nextObjectPosition);
 }
 
 static
@@ -405,6 +402,7 @@ void objects_prj_postload()
 	update_layer_list();
 	btn_contextmenu_mkobject->enabled = 1;
 	btn_mainmenu_layers->enabled = 1;
+	objbase_create_dummy_entity();
 }
 
 static

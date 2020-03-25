@@ -4,6 +4,7 @@
 #include "game.h"
 #include "objbase.h"
 #include "objects.h"
+#include "objpicker.h"
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
@@ -17,11 +18,20 @@ struct ENTITYCOLORINFO {
 };
 
 static struct ENTITYCOLORINFO selected_entity, hovered_entity;
+
+static struct OBJECT exclusiveExtraObject;
+static void *exclusiveExtraEntity = NULL;
 static void *exclusiveEntity = NULL;
 
 void objbase_set_entity_to_render_exclusively(void *entity)
 {
+	struct RwV3D pos;
+
 	exclusiveEntity = entity;
+	if (entity != NULL && exclusiveExtraEntity != NULL) {
+		game_ObjectGetPos(entity, &pos);
+		game_ObjectSetPos(exclusiveExtraEntity, &pos);
+	}
 }
 
 /**
@@ -31,6 +41,11 @@ struct OBJECT *objects_find_by_sa_handle(int sa_handle)
 {
 	int i;
 	struct OBJECT *objects;
+
+	objects = objpick_object_by_handle(sa_handle);
+	if (objects != NULL) {
+		return objects;
+	}
 
 	if (active_layer != NULL) {
 		objects = active_layer->objects;
@@ -67,32 +82,32 @@ Since x-coord of creation is a pointer to the object handle, the position needs
 to be reset.
 */
 static
-void objects_set_position_after_creation(struct OBJECT *object)
+void objbase_set_position_after_creation(struct OBJECT *object)
 {
 	struct RwV3D pos;
 
 	game_ObjectGetPos(object->sa_object, &pos);
 	pos.x = object->temp_x;
 	game_ObjectSetPos(object->sa_object, &pos);
-
-	/*objbase_set_entity_to_render_exclusively(object->sa_object);*/
 }
 
-struct OBJECT *objbase_mkobject(
-	struct OBJECTLAYER *layer,
-	int model,
-	struct RwV3D *pos)
+static
+void objbase_object_creation_confirmed(struct OBJECT *object)
 {
-	struct OBJECT *object;
+	objbase_set_position_after_creation(object);
+
+	if (object == &exclusiveExtraObject) {
+		exclusiveExtraEntity = object->sa_object;
+		*(float*)((char*) object->sa_object + 0x15C) = 0.1f; /*scale*/
+	} else {
+		objpick_object_created(object);
+	}
+}
+
+void objbase_mkobject(struct OBJECT *object, struct RwV3D *pos)
+{
 	struct MSG_NC nc;
 
-	if (layer->numobjects >= MAX_OBJECTS) {
-		return NULL;
-	}
-
-	object = layer->objects + layer->numobjects++;
-
-	object->model = model;
 	object->temp_x = pos->x;
 	object->justcreated = 1;
 	object->samp_objectid = -1;
@@ -100,7 +115,7 @@ struct OBJECT *objbase_mkobject(
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0; /*TODO*/
 	nc.nc = NC_CreateObject;
-	nc.params.asint[1] = model;
+	nc.params.asint[1] = object->model;
 	nc.params.asint[2] = (int) object;
 	nc.params.asflt[3] = pos->y;
 	nc.params.asflt[4] = pos->z;
@@ -109,7 +124,6 @@ struct OBJECT *objbase_mkobject(
 	nc.params.asflt[7] = 0.0f;
 	nc.params.asflt[8] = 500.0f;
 	sockets_send(&nc, sizeof(nc));
-	return object;
 }
 
 void objbase_server_object_created(struct MSG_OBJECT_CREATED *msg)
@@ -120,7 +134,7 @@ void objbase_server_object_created(struct MSG_OBJECT_CREATED *msg)
 	object->samp_objectid = msg->samp_objectid;
 	if (!object->justcreated) {
 		/*race with objects_object_rotation_changed*/
-		objects_set_position_after_creation(object);
+		objbase_object_creation_confirmed(object);
 	}
 }
 
@@ -225,7 +239,9 @@ __declspec(naked) void render_centity_detour()
 		jz continuerender
 		cmp ecx, exclusiveEntity
 		je continuerender
-		pop esi
+		cmp ecx, exclusiveExtraEntity
+		je continuerender
+		add esp, 0x4
 		pop esi
 		pop ecx
 		ret
@@ -233,6 +249,26 @@ continuerender:
 		mov esi, ecx
 		mov eax, [esi+0x18]
 		ret
+	}
+}
+
+static
+__declspec(naked) void render_water_detour()
+{
+	_asm {
+		mov eax, exclusiveEntity
+		test eax, eax
+		jz continuerender
+		add esp, 0x4
+		pop edi
+		pop esi
+		pop ebp
+		pop ebx
+		add esp, 0x5C
+		ret
+continuerender:
+		mov eax, 0x53C4B0
+		jmp eax
 	}
 }
 
@@ -431,7 +467,6 @@ void objbase_object_created(object, sa_object, sa_handle)
 	void *sa_object;
 	int sa_handle;
 {
-	/*TODO: this can cause crashes when reconnecting to the server*/
 	object->sa_object = sa_object;
 	object->sa_handle = sa_handle;
 }
@@ -441,13 +476,18 @@ void objbase_object_rotation_changed(int sa_handle)
 	struct OBJECT *object;
 
 	object = objects_find_by_sa_handle(sa_handle);
-	if (object != NULL) {
-		if (object->justcreated) {
-			object->justcreated = 0;
-			/*race with objects_server_object_created*/
-			if (object->samp_objectid != -1) {
-				objects_set_position_after_creation(object);
-			}
+	if (object == NULL) {
+		if (exclusiveExtraObject.sa_handle == sa_handle) {
+			object = &exclusiveExtraObject;
+		} else {
+			return;
+		}
+	}
+	if (object->justcreated) {
+		object->justcreated = 0;
+		/*race with objects_server_object_created*/
+		if (object->samp_objectid != -1) {
+			objbase_object_creation_confirmed(object);
 		}
 	}
 }
@@ -504,6 +544,7 @@ static struct DETOUR detour_0107;
 static struct DETOUR detour_0453;
 static struct DETOUR detour_render_object;
 static struct DETOUR detour_render_centity;
+static struct DETOUR detour_render_water;
 
 void objbase_install_detour(struct DETOUR *detour)
 {
@@ -517,6 +558,17 @@ void objbase_install_detour(struct DETOUR *detour)
 void objbase_uninstall_detour(struct DETOUR *detour)
 {
 	*detour->target = detour->old_target;
+}
+
+void objbase_create_dummy_entity()
+{
+	struct RwV3D pos;
+
+	pos.x = 0.0f;
+	pos.y = 0.0f;
+	pos.z = -10000.0f;
+	exclusiveExtraObject.model = 1212;
+	objbase_mkobject(&exclusiveExtraObject, &pos);
 }
 
 void objbase_init()
@@ -533,12 +585,15 @@ void objbase_init()
 	//detour_render_object.new_target = (int) render_object_detour;
 	detour_render_centity.target = (int*) 0x534313;
 	detour_render_centity.new_target = (int) render_centity_detour;
+	detour_render_water.target = (int*) 0x6EF658;
+	detour_render_water.new_target = (int) render_water_detour;
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0453);
 	//objbase_install_detour(&detour_render_object);
 	objbase_install_detour(&detour_render_centity);
 	VirtualProtect((void*) 0x534312, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x534312) = 0xE8;
+	objbase_install_detour(&detour_render_water);
 
 }
 
@@ -550,6 +605,7 @@ void objbase_dispose()
 	objbase_uninstall_detour(&detour_render_centity);
 	*((char*) 0x534312) = 0x51;
 	*((int*) 0x534313) = 0x8BF18B56;
+	objbase_uninstall_detour(&detour_render_water);
 
 	objbase_color_new_entity(&selected_entity, NULL, 0);
 	objbase_color_new_entity(&hovered_entity, NULL, 0);

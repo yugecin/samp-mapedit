@@ -60,3 +60,4 @@ void ui_prj_postload();
 int ui_is_cursor_hovering_any_window();
 void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint);
 struct UI_WINDOW *ui_get_active_window();
+void ui_update_camera();

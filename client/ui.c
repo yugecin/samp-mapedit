@@ -190,7 +190,6 @@ void ui_draw_cursor()
 	game_DrawRect(cursorx - ihr, cursory - iwr, ihd, iwd, 0xFFFFFFFF);
 }
 
-static
 void ui_update_camera()
 {
 	camera->lookAt = camera->position;

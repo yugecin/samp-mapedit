@@ -206,6 +206,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\objpicker.c"
+				>
+			</File>
+			<File
+				RelativePath="..\objpicker.h"
+				>
+			</File>
+			<File
 				RelativePath="..\project.c"
 				>
 			</File>
