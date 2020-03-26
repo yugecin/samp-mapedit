@@ -32,10 +32,19 @@ struct OBJECT *objbrowser_object_by_handle(int sa_handle)
 
 int objbrowser_object_created(struct OBJECT *object)
 {
+	struct RwV3D pos;
+	void *entity;
+	float d;
+
 	if (object == &picking_object) {
 		btn_cancel->enabled = btn_create->enabled = 1;
 		btn_next->enabled = btn_prev->enabled = 1;
-		objbase_set_entity_to_render_exclusively(object->sa_object);
+		entity = object->sa_object;
+		objbase_set_entity_to_render_exclusively(entity);
+		game_ObjectGetPos(entity, &pos);
+		d = game_EntityGetDistanceFromCentreOfMassToBaseOfModel(entity);
+		pos.z -= d;
+		game_ObjectSetPos(entity, &pos);
 		return 1;
 	}
 	return 0;

@@ -87,8 +87,17 @@ void game_DrawRect(float x, float y, float w, float h, int argb)
 	game_RwIm2DRenderPrimitive(4, verts, 4);
 }
 
+__declspec(naked)
+float game_EntityGetDistanceFromCentreOfMassToBaseOfModel(void *entity)
+{
+	_asm {
+		mov ecx, [esp+0x4]
+		mov eax, 0x536BE0
+		jmp eax
+	}
+}
 
-void __declspec(naked) game_EntitySetAlpha(void *entity, unsigned char alpha)
+__declspec(naked) void game_EntitySetAlpha(void *entity, unsigned char alpha)
 {
 	_asm {
 		mov ecx, [esp+0x4]
