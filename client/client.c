@@ -5,7 +5,7 @@
 #include "msgbox.h"
 #include "objbase.h"
 #include "objects.h"
-#include "objpicker.h"
+#include "objbrowser.h"
 #include "project.h"
 #include "racecp.h"
 #include "sockets.h"
@@ -130,7 +130,7 @@ void client_finalize()
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
 	racecp_dispose();
-	objpick_dispose();
+	objbrowser_dispose();
 	objects_dispose();
 	objbase_dispose();
 	settings_dispose();
@@ -170,7 +170,7 @@ void client_init()
 	sockets_init();
 	objbase_init();
 	objects_init();
-	objpick_init();
+	objbrowser_init();
 	racecp_init();
 
 	prj_do_show_window();

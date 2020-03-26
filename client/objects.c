@@ -6,7 +6,7 @@
 #include "ui.h"
 #include "objbase.h"
 #include "objects.h"
-#include "objpicker.h"
+#include "objbrowser.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
@@ -63,7 +63,7 @@ void cb_btn_mkobject(struct UI_BUTTON *btn)
 		msg_btn1text = "Ok";
 		msg_show(NULL);
 	} else {
-		objpick_show(&nextObjectPosition);
+		objbrowser_show(&nextObjectPosition);
 	}
 }
 

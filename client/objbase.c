@@ -4,7 +4,7 @@
 #include "game.h"
 #include "objbase.h"
 #include "objects.h"
-#include "objpicker.h"
+#include "objbrowser.h"
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
@@ -42,7 +42,7 @@ struct OBJECT *objects_find_by_sa_handle(int sa_handle)
 	int i;
 	struct OBJECT *objects;
 
-	objects = objpick_object_by_handle(sa_handle);
+	objects = objbrowser_object_by_handle(sa_handle);
 	if (objects != NULL) {
 		return objects;
 	}
@@ -100,7 +100,7 @@ void objbase_object_creation_confirmed(struct OBJECT *object)
 		exclusiveExtraEntity = object->sa_object;
 		*(float*)((char*) object->sa_object + 0x15C) = 0.1f; /*scale*/
 	} else {
-		objpick_object_created(object);
+		objbrowser_object_created(object);
 	}
 }
 

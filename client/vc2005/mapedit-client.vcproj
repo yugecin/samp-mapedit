@@ -198,19 +198,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\objbrowser.c"
+				>
+			</File>
+			<File
+				RelativePath="..\objbrowser.h"
+				>
+			</File>
+			<File
 				RelativePath="..\objects.c"
 				>
 			</File>
 			<File
 				RelativePath="..\objects.h"
-				>
-			</File>
-			<File
-				RelativePath="..\objpicker.c"
-				>
-			</File>
-			<File
-				RelativePath="..\objpicker.h"
 				>
 			</File>
 			<File

@@ -4,6 +4,7 @@
 #include "game.h"
 #include "msgbox.h"
 #include "ui.h"
+#include "objbrowser.h"
 #include "objbase.h"
 #include "objects.h"
 #include "sockets.h"
@@ -21,7 +22,7 @@ static struct OBJECT picking_object;
 static struct RwV3D *positionToCommit;
 static struct RwV3D positionToPreview;
 
-struct OBJECT *objpick_object_by_handle(int sa_handle)
+struct OBJECT *objbrowser_object_by_handle(int sa_handle)
 {
 	if (picking_object.sa_handle == sa_handle) {
 		return &picking_object;
@@ -29,7 +30,7 @@ struct OBJECT *objpick_object_by_handle(int sa_handle)
 	return NULL;
 }
 
-int objpick_object_created(struct OBJECT *object)
+int objbrowser_object_created(struct OBJECT *object)
 {
 	if (object == &picking_object) {
 		btn_cancel->enabled = btn_create->enabled = 1;
@@ -113,7 +114,7 @@ void cb_btn_cancel(struct UI_BUTTON *btn)
 	restore_after_hide();
 }
 
-void objpick_show(struct RwV3D *positionToCreate)
+void objbrowser_show(struct RwV3D *positionToCreate)
 {
 	positionToCommit = positionToCreate;
 	originalCameraPos = camera->position;
@@ -130,7 +131,7 @@ void objpick_show(struct RwV3D *positionToCreate)
 	samp_hide_ui_f10();
 }
 
-void objpick_init()
+void objbrowser_init()
 {
 	picking_object.model = 3279;
 
@@ -147,7 +148,7 @@ void objpick_init()
 	ui_wnd_add_child(wnd, btn_cancel);
 }
 
-void objpick_dispose()
+void objbrowser_dispose()
 {
 	ui_wnd_dispose(wnd);
 }
