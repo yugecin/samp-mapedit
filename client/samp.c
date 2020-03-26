@@ -21,6 +21,7 @@ void samp_init()
 
 	samp_handle = (int) GetModuleHandle("samp.dll");
 	pCmdWindow += samp_handle;
+	old_ui_mode_value = -1;
 
 	/*check for "-R2 " string in startup message*/
 	if (*((int*) (samp_handle + 0xD3988)) == 0x7B203252) {
@@ -41,6 +42,7 @@ void samp_init()
 void samp_dispose()
 {
 	samp_restore_chat_bar();
+	samp_restore_ui_f7();
 }
 
 static unsigned char chat_bar_overwritten_op = 0;
@@ -61,15 +63,18 @@ void samp_restore_chat_bar()
 	}
 }
 
-void samp_hide_ui_f10()
+void samp_hide_ui_f7()
 {
 	old_ui_mode_value = *ui_mode;
 	*ui_mode = 0;
 }
 
-void samp_show_ui_f10()
+void samp_restore_ui_f7()
 {
-	*ui_mode = old_ui_mode_value;
+	if (old_ui_mode_value != -1) {
+		*ui_mode = old_ui_mode_value;
+		old_ui_mode_value = -1;
+	}
 }
 
 /*untested (also needs samp_handle check)

@@ -100,7 +100,7 @@ void restore_after_hide()
 	ui_update_camera();
 	objbase_set_entity_to_render_exclusively(NULL);
 	ui_hide_window(wnd);
-	samp_show_ui_f10();
+	samp_restore_ui_f7();
 }
 
 static
@@ -137,7 +137,7 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	ui_update_camera();
 	create_object();
 	ui_show_window(wnd);
-	samp_hide_ui_f10();
+	samp_hide_ui_f7();
 }
 
 void objbrowser_init()
