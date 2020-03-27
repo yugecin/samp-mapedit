@@ -474,10 +474,10 @@ void ui_render()
 			prevMouseState->lmb && !activeMouseState->lmb;
 
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
-			if ((active_window != NULL &&
-				ui_wnd_mouseup(active_window)) ||
-				(context_menu_active &&
+			if ((context_menu_active &&
 				ui_wnd_mouseup(context_menu)) ||
+				(active_window != NULL &&
+				ui_wnd_mouseup(active_window)) ||
 				ui_wnd_mouseup(main_menu) ||
 				ui_cnt_mouseup(background_element));
 			context_menu_active = 0;
@@ -527,10 +527,10 @@ void ui_render()
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
 			ui_active_element = NULL;
-			if ((active_window != NULL &&
-				ui_wnd_mousedown(active_window)) ||
-				(context_menu_active &&
+			if ((context_menu_active &&
 				ui_wnd_mousedown(context_menu)) ||
+				(active_window != NULL &&
+				ui_wnd_mousedown(active_window)) ||
 				ui_wnd_mousedown(main_menu) ||
 				ui_cnt_mousedown(background_element))
 			{
