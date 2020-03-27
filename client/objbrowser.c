@@ -17,10 +17,13 @@ static struct UI_WINDOW *wnd;
 static struct UI_BUTTON *btn_next, *btn_prev;
 static struct UI_BUTTON *btn_create, *btn_cancel;
 
+static int isactive = 0;
+static int hasvalidobject = 0;
 static struct RwV3D originalCameraPos, originalCameraRot;
 static struct OBJECT picking_object;
 static struct RwV3D *positionToCommit;
 static struct RwV3D positionToPreview;
+static int rotationStartTime;
 
 struct OBJECT *objbrowser_object_by_handle(int sa_handle)
 {
@@ -45,6 +48,8 @@ int objbrowser_object_created(struct OBJECT *object)
 		d = game_EntityGetDistanceFromCentreOfMassToBaseOfModel(entity);
 		pos.z -= d;
 		game_ObjectSetPos(entity, &pos);
+		rotationStartTime = *timeInGame;
+		hasvalidobject = 1;
 		return 1;
 	}
 	return 0;
@@ -62,6 +67,7 @@ static void destroy_object()
 {
 	struct MSG_NC nc;
 
+	hasvalidobject = 0;
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0;
 	nc.nc = NC_DestroyObject;
@@ -101,6 +107,8 @@ void restore_after_hide()
 	objbase_set_entity_to_render_exclusively(NULL);
 	ui_hide_window(wnd);
 	samp_restore_ui_f7();
+	isactive = 0;
+	hasvalidobject = 0;
 }
 
 static
@@ -138,6 +146,7 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	create_object();
 	ui_show_window(wnd);
 	samp_hide_ui_f7();
+	isactive = 1;
 }
 
 void objbrowser_init()
@@ -160,4 +169,16 @@ void objbrowser_init()
 void objbrowser_dispose()
 {
 	ui_wnd_dispose(wnd);
+}
+
+void objbrowser_frame_update()
+{
+	struct RwV3D rot;
+
+	if (hasvalidobject) {
+		rot.x = 0.0;
+		rot.y = 0.0f;
+		rot.z = (*timeInGame - rotationStartTime) * 0.00175f;
+		game_ObjectSetRotRad(picking_object.sa_object, &rot);
+	}
 }

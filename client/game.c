@@ -221,6 +221,42 @@ __declspec(naked) void game_ObjectSetPos(void *object, struct RwV3D *pos)
 }
 
 /**
+see opcode 0453 @0x48A350
+*/
+__declspec(naked) void game_ObjectSetRotRad(void *object, struct RwV3D *rot)
+{
+	_asm {
+		push [esp+0x4] /*object*/
+		mov eax, 0x563280 /*__cdecl CWorld::Remove*/
+		call eax
+		pop eax
+
+		mov ecx, [esp+0x4] /*this*/
+		mov eax, [esp+0x8]
+		push [eax+0x8] /*z*/
+		push [eax+0x4] /*y*/
+		push [eax] /*x*/
+		mov eax, 0x439A80 /*__thiscall CPlaceable::SetOrientation*/
+		call eax
+
+		mov ecx, [esp+0x4] /*this*/
+		mov eax, 0x446F90 /*__cdecl CMatrix::updateRW*/
+		call eax
+
+		mov ecx, [esp+0x4] /*this*/
+		mov eax, 0x532B00 /*__thiscall CEntity::updateRwFrame()*/
+		call eax
+
+		push [esp+0x4] /*object*/
+		mov eax, 0x563220 /*__cdecl CWorld::Add*/
+		call eax
+		pop eax
+
+		ret
+	}
+}
+
+/**
 opcode 00A0 @0x4677E2
 
 TODO: test this through?

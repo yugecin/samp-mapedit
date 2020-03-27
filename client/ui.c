@@ -3,6 +3,7 @@
 #include "common.h"
 #include "client.h"
 #include "game.h"
+#include "objbrowser.h"
 #include "objbase.h"
 #include "objects.h"
 #include "project.h"
@@ -551,6 +552,7 @@ void ui_render()
 
 		objects_frame_update();
 		objbase_frame_update();
+		objbrowser_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;
