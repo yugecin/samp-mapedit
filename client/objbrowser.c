@@ -137,11 +137,12 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	originalCameraPos = camera->position;
 	originalCameraRot = camera->rotation;
 	camera->position.z = 70.0f;
-	camera->rotation.x = 0.0f;
+	camera->rotation.x = 30.0f;
 	camera->rotation.y = 0.0f;
-	camera->rotation.z = 0.0f;
-	positionToPreview = camera->position;
-	positionToPreview.x += 30.0f;
+	camera->rotation.z = -10.0f;
+	positionToPreview.x = camera->position.x + camera->rotation.x;
+	positionToPreview.y = camera->position.y + camera->rotation.y;
+	positionToPreview.z = camera->position.z + camera->rotation.z;
 	ui_update_camera();
 	create_object();
 	ui_show_window(wnd);
