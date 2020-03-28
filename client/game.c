@@ -259,6 +259,8 @@ __declspec(naked) void game_ObjectSetRotRad(void *object, struct RwV3D *rot)
 /**
 opcode 00A0 @0x4677E2
 
+2 is subtracted from the z value, because setPos sets the player slightly above
+
 TODO: test this through?
 */
 __declspec(naked) void game_PedGetPos(ped, pos, rot)
@@ -300,8 +302,10 @@ no_explicit_coords:
 		mov [ecx], esi
 		mov esi, [eax+0x4]
 		mov [ecx+0x4], esi
-		mov esi, [eax+0x8]
-		mov [ecx+0x8], esi
+		fld [eax+0x8]
+		fld1
+		fsubp ST(1), ST(0)
+		fstp [ecx+0x8]
 		pop esi
 		pop ecx
 		ret
@@ -353,8 +357,8 @@ invehicle:
 
 /*apparently it works without doing this?*/
 #if 0
-		/*push angle*/
-		/*mov ecx, CPlaceable*/
+		push [esp+0xC]
+		mov ecx, [esp+0xC]
 		mov eax, 0x43E0C0 /*CPlaceable__setHeading*/
 		call eax
 		mov ecx, [esp+0x8] /*ped*/
