@@ -345,6 +345,9 @@ void objbase_do_hover()
 			ui_get_entity_pointed_at(&entity, &cp);
 			if (entity != NULL) {
 				player_position = cp.pos;
+			} else {
+				game_ScreenToWorld(&player_position,
+					cursorx, cursory, 200.0f);
 			}
 			if (entity == selected_entity.entity) {
 				entity = NULL;
