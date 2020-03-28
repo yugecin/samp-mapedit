@@ -468,7 +468,7 @@ void background_element_just_clicked()
 void ui_render()
 {
 	int activate_key_pressed;
-	char speedtext[45];
+	char buf[64];
 	int i;
 
 	ui_default_font();
@@ -600,14 +600,23 @@ void ui_render()
 		game_TextSetAlign(CENTER);
 		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
 			"~w~press ~r~Y ~w~to reset camera");
-		sprintf(speedtext, "Movement_speed_(scrollwheel):_-------");
+		sprintf(buf, "Movement_speed_(scrollwheel):_-------");
 		for (i = 0; i < speedmod; i++) {
-			speedtext[30 + i] = '+';
+			buf[30 + i] = '+';
 		}
 		game_TextPrintStringFromBottom(
 			fresx / 2.0f,
 			fresy - fontheight - 4.0f,
-			speedtext);
+			buf);
+		sprintf(buf,
+			"x%.2f y%.2f z%.2f",
+			camera->position.x,
+			camera->position.y,
+			camera->position.z);
+		game_TextPrintStringFromBottom(
+			fresx / 2.0f,
+			fresy - fontheight - fontheight - 6.0f,
+			buf);
 	} else {
 justdeactivated:
 		originalHudScaleX = *hudScaleX;
