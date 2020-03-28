@@ -7,6 +7,7 @@
 #include "objbrowser.h"
 #include "objbase.h"
 #include "objects.h"
+#include "player.h"
 #include "sockets.h"
 #include "samp.h"
 #include "timeweather.h"
@@ -141,6 +142,23 @@ void cb_btn_next_model(struct UI_BUTTON *btn)
 }
 
 static
+void objbrowser_do_ui()
+{
+	struct RwV3D rot;
+
+	game_PedSetPos(player, &player_position);
+
+	ui_do_exclusive_mode_basics(wnd);
+
+	if (hasvalidobject) {
+		rot.x = 0.0;
+		rot.y = 0.0f;
+		rot.z = (*timeInGame - rotationStartTime) * 0.00175f;
+		game_ObjectSetRotRad(picking_object.sa_object, &rot);
+	}
+}
+
+static
 void restore_after_hide()
 {
 	camera->position = originalCameraPos;
@@ -152,6 +170,8 @@ void restore_after_hide()
 	isactive = 0;
 	hasvalidobject = 0;
 	timeweather_resync();
+	ui_set_trapped_in_ui(0);
+	ui_exclusive_mode = NULL;
 }
 
 static
@@ -189,6 +209,8 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	isactive = 1;
 	timeweather_set_time(12);
 	timeweather_set_weather(0);
+	ui_set_trapped_in_ui(1);
+	ui_exclusive_mode = objbrowser_do_ui;
 }
 
 void objbrowser_init()
@@ -215,16 +237,4 @@ void objbrowser_init()
 void objbrowser_dispose()
 {
 	ui_wnd_dispose(wnd);
-}
-
-void objbrowser_frame_update()
-{
-	struct RwV3D rot;
-
-	if (hasvalidobject) {
-		rot.x = 0.0;
-		rot.y = 0.0f;
-		rot.z = (*timeInGame - rotationStartTime) * 0.00175f;
-		game_ObjectSetRotRad(picking_object.sa_object, &rot);
-	}
 }

@@ -31,6 +31,7 @@ extern int fontsize, fontratio;
 extern float fontheight, buttonheight, fontpadx, fontpady;
 extern void *ui_element_being_clicked;
 extern void *ui_active_element;
+extern void (*ui_exclusive_mode)();
 /**
 Last char that was down, if it's not printable this will be 0
 */
@@ -51,6 +52,8 @@ void ui_dispose();
 void ui_init();
 void ui_on_mousewheel(int value);
 void ui_render();
+void ui_do_cursor_movement();
+void ui_grablastkey();
 void ui_show_window(struct UI_WINDOW *wnd);
 void ui_hide_window(struct UI_WINDOW *wnd);
 void ui_set_fontsize(int fontsize, int fontratio);
@@ -62,3 +65,6 @@ void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint);
 struct UI_WINDOW *ui_get_active_window();
 void ui_update_camera();
 void ui_set_trapped_in_ui(int flag);
+void ui_draw_debug_strings();
+void ui_draw_cursor();
+void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd);

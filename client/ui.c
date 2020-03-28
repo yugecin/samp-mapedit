@@ -26,6 +26,7 @@ int fontsize, fontratio;
 float fontheight, buttonheight, fontpadx, fontpady;
 char key_w, key_a, key_s, key_d;
 char directional_movement;
+void (*ui_exclusive_mode)() = NULL;
 
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
@@ -148,7 +149,6 @@ struct UI_WINDOW *ui_get_active_window()
 	return active_window;
 }
 
-static
 void ui_do_cursor_movement()
 {
 	cursorx += activeMouseState->x;
@@ -169,7 +169,6 @@ void ui_do_cursor_movement()
 	}
 }
 
-static
 void ui_draw_cursor()
 {
 	/*TODO because this is drawn with rects, it draws below textdraws...*/
@@ -376,8 +375,7 @@ void ui_draw_debug_strings()
 	} while (i != debugstringidx);
 }
 
-static
-void grablastkey()
+void ui_grablastkey()
 {
 	short *active;
 	short *current;
@@ -465,6 +463,29 @@ void background_element_just_clicked()
 	}
 }
 
+void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd)
+{
+	if (ui_element_being_clicked && ui_mouse_is_just_up) {
+		wnd && ui_wnd_mouseup(wnd);
+		ui_element_being_clicked = NULL;
+	}
+	ui_do_cursor_movement();
+	ui_grablastkey();
+	wnd && UIPROC(wnd, proc_accept_key);
+	if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
+		ui_active_element = NULL;
+		wnd && ui_wnd_mousedown(wnd);
+	}
+
+	if (wnd) {
+		UIPROC(wnd, proc_update);
+		UIPROC(wnd, proc_draw);
+	}
+
+	ui_draw_debug_strings();
+	ui_draw_cursor();
+}
+
 void ui_render()
 {
 	int activate_key_pressed;
@@ -485,12 +506,17 @@ void ui_render()
 	}
 
 	if (active) {
-		game_PedSetPos(player, &player_position);
-
 		ui_mouse_is_just_down =
 			activeMouseState->lmb && !prevMouseState->lmb;
 		ui_mouse_is_just_up =
 			prevMouseState->lmb && !activeMouseState->lmb;
+
+		if (ui_exclusive_mode != NULL) {
+			ui_exclusive_mode();
+			return;
+		}
+
+		game_PedSetPos(player, &player_position);
 
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if ((context_menu_active &&
@@ -514,12 +540,11 @@ void ui_render()
 			ui_do_cursor_movement();
 		}
 
-		grablastkey();
+		ui_grablastkey();
 
 		if (ui_last_key_down != 0 &&
 			ui_active_element != NULL &&
-			((struct UI_ELEMENT*) ui_active_element)->
-			proc_accept_key((struct UI_ELEMENT*) ui_active_element))
+			UIPROC(ui_active_element, proc_accept_key))
 		{
 			;
 		} else if (activeKeyState->standards[VK_Y] &&
@@ -570,7 +595,6 @@ void ui_render()
 
 		objects_frame_update();
 		objbase_frame_update();
-		objbrowser_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;
