@@ -33,6 +33,8 @@ static float horizLookAngle, vertLookAngle;
 static char need_camera_update, has_set_camera_once;
 static int context_menu_active = 0;
 static int trapped_in_ui;
+static int speedmod = 3;
+static float speeds[] = { 0.1f, 0.2f, 0.5f, 1.0f, 3.0f, 8.0f, 12.0f, 16.0f };
 
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
@@ -317,6 +319,7 @@ void ui_do_key_movement()
 {
 	float speed = 1.0f, angle, xylen;
 
+	speed = speeds[speedmod];
 	if (currentKeyState->standards[key_w]) {
 		xylen = directional_movement ? sinf(vertLookAngle) : 1.0f;
 		camera->position.x += cosf(horizLookAngle) * xylen * speed;
@@ -419,10 +422,18 @@ void grablastkey()
 
 void ui_on_mousewheel(int value)
 {
-	if ((active_window != NULL &&
-		ui_wnd_mousewheel(active_window, value)) ||
-		ui_wnd_mousewheel(main_menu, value) ||
-		ui_cnt_mousewheel(background_element, value));
+	if (!(active_window != NULL &&
+		ui_wnd_mousewheel(active_window, value)) &&
+		!ui_wnd_mousewheel(main_menu, value) &&
+		!ui_cnt_mousewheel(background_element, value))
+	{
+		speedmod += value;
+		if (speedmod < 0) {
+			speedmod = 0;
+		} else if (speedmod > 7) {
+			speedmod = 7;
+		}
+	}
 }
 
 void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint)
@@ -457,6 +468,8 @@ void background_element_just_clicked()
 void ui_render()
 {
 	int activate_key_pressed;
+	char speedtext[45];
+	int i;
 
 	ui_default_font();
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
@@ -587,6 +600,14 @@ void ui_render()
 		game_TextSetAlign(CENTER);
 		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
 			"~w~press ~r~Y ~w~to reset camera");
+		sprintf(speedtext, "Movement_speed_(scrollwheel):_-------");
+		for (i = 0; i < speedmod; i++) {
+			speedtext[30 + i] = '+';
+		}
+		game_TextPrintStringFromBottom(
+			fresx / 2.0f,
+			fresy - fontheight - 4.0f,
+			speedtext);
 	} else {
 justdeactivated:
 		originalHudScaleX = *hudScaleX;
