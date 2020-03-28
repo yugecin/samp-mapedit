@@ -22,23 +22,43 @@ static int hour;
 static
 void timeweather_synctime()
 {
-	struct MSG_NC nc;
-
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc.nc = NC_SetWorldTime;
-	nc.params.asint[1] = hour;
-	sockets_send((char*) &nc, sizeof(nc));
+	timeweather_set_time(hour);
 }
 
 static
 void cb_weathergroup_changed(struct UI_RADIOBUTTON *btn)
 {
+	timeweather_set_weather(weather = (int) btn->_parent._parent.userdata);
+}
+
+void timeweather_set_time(int time)
+{
+	struct MSG_NC nc;
+
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc.nc = NC_SetWorldTime;
+	nc.params.asint[1] = time;
+	sockets_send((char*) &nc, sizeof(nc));
+}
+
+void timeweather_set_weather(int weatherid)
+{
 	struct MSG_NC nc;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc.nc = NC_SetWeather;
-	nc.params.asint[1] = weather = (int) btn->_parent._parent.userdata;
+	nc.params.asint[1] = weatherid;
 	sockets_send((char*) &nc, sizeof(nc));
+}
+
+void timeweather_resync()
+{
+	struct UI_RADIOBUTTON *btn;
+
+	timeweather_synctime();
+	if ((btn = weathergroup->activebutton) != NULL) {
+		timeweather_set_weather((int) btn->_parent._parent.userdata);
+	}
 }
 
 static

@@ -9,6 +9,7 @@
 #include "objects.h"
 #include "sockets.h"
 #include "samp.h"
+#include "timeweather.h"
 #include "../shared/serverlink.h"
 #include <string.h>
 #include <windows.h>
@@ -109,6 +110,7 @@ void restore_after_hide()
 	samp_restore_ui_f7();
 	isactive = 0;
 	hasvalidobject = 0;
+	timeweather_resync();
 }
 
 static
@@ -148,6 +150,8 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	ui_show_window(wnd);
 	samp_hide_ui_f7();
 	isactive = 1;
+	timeweather_set_time(12);
+	timeweather_set_weather(0);
 }
 
 void objbrowser_init()

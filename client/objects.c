@@ -16,7 +16,7 @@
 static struct UI_WINDOW *window_layers;
 static struct UI_LABEL *lbl_layer;
 
-static struct UI_BUTTON *btn_mainmenu_layers;
+static struct UI_BUTTON *btn_mainmenu_layers, *btn_mainmenu_selectobject;
 static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_LIST *lst_layers;
 static struct UI_INPUT *in_layername;
@@ -269,6 +269,8 @@ void objects_init()
 	ui_wnd_add_child(main_menu, lbl_layer);
 	btn = ui_btn_make("Select_Object", (btncb*) cb_show_objinfo_window);
 	btn->_parent.span = 2;
+	btn->enabled = 0;
+	btn_mainmenu_selectobject = btn;
 	ui_wnd_add_child(main_menu, btn);
 
 	/*layers window*/
@@ -403,6 +405,7 @@ void objects_prj_postload()
 	update_layer_list();
 	btn_contextmenu_mkobject->enabled = 1;
 	btn_mainmenu_layers->enabled = 1;
+	btn_mainmenu_selectobject->enabled = 1;
 	objbase_create_dummy_entity();
 }
 
