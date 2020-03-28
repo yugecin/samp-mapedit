@@ -25,6 +25,47 @@ static struct OBJECT picking_object;
 static struct RwV3D *positionToCommit;
 static struct RwV3D positionToPreview;
 static int rotationStartTime;
+static float camera_distance;
+static ui_method1 *wnd_original_mousewheel_proc;
+static ui_method *wnd_original_draw_proc;
+
+static
+void objbrowser_update_camera()
+{
+	float heightdiff;
+
+	camera->position.x = positionToPreview.x - camera_distance;
+	camera->rotation.x = camera_distance;
+	camera->position.y = positionToPreview.y;
+	camera->rotation.y = 0;
+	heightdiff = camera_distance * 0.2f;
+	camera->position.z = positionToPreview.z + heightdiff;
+	camera->rotation.z = -heightdiff;
+	ui_update_camera();
+}
+
+static
+void objbrowser_draw_wnd(void *wnd)
+{
+	wnd_original_draw_proc(wnd);
+	game_TextSetAlign(CENTER);
+	game_TextPrintString(fresx / 2.0f, 50.0f,
+		"~r~Left-lick_drag~w~_to_rotate,_~r~mousewheel~w~_to_zoom.");
+}
+
+static
+int objbrowser_on_mousewheel(void *wnd, int value)
+{
+	if (wnd_original_mousewheel_proc(wnd, (void*) value)) {
+		return 1;
+	}
+	if (isactive) {
+		camera_distance -= 3.0f * value;
+		objbrowser_update_camera();
+		return 1;
+	}
+	return 0;
+}
 
 struct OBJECT *objbrowser_object_by_handle(int sa_handle)
 {
@@ -122,7 +163,6 @@ void cb_btn_create(struct UI_BUTTON *btn)
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
 	picking_object.model = 0;
 	game_ObjectSetPos(object->sa_object, positionToCommit);
-	/*game_ObjectSetRot();//TODO*/
 	restore_after_hide();
 }
 
@@ -138,14 +178,11 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	positionToCommit = positionToCreate;
 	originalCameraPos = camera->position;
 	originalCameraRot = camera->rotation;
-	camera->position.z = 70.0f;
-	camera->rotation.x = 30.0f;
-	camera->rotation.y = 0.0f;
-	camera->rotation.z = -10.0f;
-	positionToPreview.x = camera->position.x + camera->rotation.x;
-	positionToPreview.y = camera->position.y + camera->rotation.y;
-	positionToPreview.z = camera->position.z + camera->rotation.z;
-	ui_update_camera();
+	positionToPreview.x = camera->position.x;
+	positionToPreview.y = camera->position.y;
+	positionToPreview.z = 60.0f;
+	camera_distance = 30.0f;
+	objbrowser_update_camera();
 	create_object();
 	ui_show_window(wnd);
 	samp_hide_ui_f7();
@@ -158,8 +195,12 @@ void objbrowser_init()
 {
 	picking_object.model = 3279;
 
-	wnd = ui_wnd_make(10.0f, 200.0f, "Objects");
+	wnd = ui_wnd_make(10.0f, 200.0f, "Object_browser");
 	wnd->closeable = 0;
+	wnd_original_mousewheel_proc = wnd->_parent._parent.proc_mousewheel;
+	wnd->_parent._parent.proc_mousewheel = (void*) objbrowser_on_mousewheel;
+	wnd_original_draw_proc = wnd->_parent._parent.proc_draw;
+	wnd->_parent._parent.proc_draw = (void*) objbrowser_draw_wnd;
 
 	btn_next = ui_btn_make("Next_model", cb_btn_next_model);
 	ui_wnd_add_child(wnd, btn_next);

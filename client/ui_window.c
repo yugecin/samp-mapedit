@@ -270,6 +270,7 @@ void ui_wnd_draw(struct UI_WINDOW *wnd)
 		game_DrawRect(elem->x + elem->width, elem->y,
 			-buttonheight, -buttonheight, closecol);
 	}
+	game_TextSetAlign(LEFT);
 	game_TextPrintString(elem->x + fontpadx,
 		elem->y - buttonheight + fontpady,
 		wnd->title);

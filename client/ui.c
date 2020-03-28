@@ -423,7 +423,7 @@ void grablastkey()
 void ui_on_mousewheel(int value)
 {
 	if (!(active_window != NULL &&
-		ui_wnd_mousewheel(active_window, value)) &&
+		UIPROC(active_window, proc_mousewheel, (void*) value)) &&
 		!ui_wnd_mousewheel(main_menu, value) &&
 		!ui_cnt_mousewheel(background_element, value))
 	{
@@ -582,7 +582,7 @@ void ui_render()
 		ui_cnt_draw(background_element);
 		ui_wnd_draw(main_menu);
 		if (active_window != NULL) {
-			ui_wnd_draw(active_window);
+			UIPROC(active_window, proc_draw);
 		}
 		if (context_menu_active) {
 			ui_wnd_draw(context_menu);

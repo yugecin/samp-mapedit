@@ -3,6 +3,9 @@
 typedef (ui_method)(void*);
 typedef (ui_method1)(void*, void*);
 
+#define UIPROC(ELEM,PROC,...) \
+	((struct UI_ELEMENT*) ELEM)->PROC(ELEM,__VA_ARGS__)
+
 enum eUIElementType {
 	UIE_DUMMY,
 	UIE_BACKGROUND,
