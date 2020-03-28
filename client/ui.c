@@ -32,6 +32,7 @@ static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
 static char need_camera_update, has_set_camera_once;
 static int context_menu_active = 0;
+static int trapped_in_ui;
 
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
@@ -520,7 +521,7 @@ void ui_render()
 			!activeKeyState->standards[VK_Y])
 		{
 			ui_store_camera();
-		} else if (activate_key_pressed) {
+		} else if (activate_key_pressed && !trapped_in_ui) {
 			ui_deactivate();
 			goto justdeactivated;
 		}
@@ -669,4 +670,9 @@ int ui_is_cursor_hovering_any_window()
 		(context_menu_active &&
 			ui_element_is_hovered((void*) context_menu)) ||
 		ui_element_is_hovered((void*) main_menu);
+}
+
+void ui_set_trapped_in_ui(int flag)
+{
+	trapped_in_ui = flag;
 }
