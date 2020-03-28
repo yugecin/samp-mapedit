@@ -125,9 +125,11 @@ void prj_open_by_file(FILE *file)
 		float f;
 		int *p;
 	} value;
-	struct RwV3D playapos;
 	float playarot;
 
+	player_position.x = 0.0f;
+	player_position.y = 0.0f;
+	player_position.z = 2.5f;
 	playarot = 0.0f;
 	prj_preload();
 
@@ -146,7 +148,8 @@ nextline:
 	{
 		if (strncmp("playa.", buf, 6) == 0) {
 			if (strncmp("pos.", buf + 6, 4) == 0) {
-				value.p = (int*) &playapos + buf[10] - 'x';
+				value.p = (int*) &player_position;
+				value.p += buf[10] - 'x';
 				*value.p = atoi(buf + (i = 12));
 			} else if (strncmp("rot ", buf + 6, 4) == 0) {
 				value.i = atoi(buf + (i = 10));
@@ -164,7 +167,6 @@ nextline:
 done:
 	fclose(file);
 
-	game_PedSetPos(player, &playapos);
 	game_PedSetRot(player, playarot);
 	prj_postload();
 }
@@ -255,7 +257,7 @@ void cb_btn_save(struct UI_BUTTON *btn)
 static
 void cb_btn_tphere(struct UI_BUTTON *btn)
 {
-	game_PedSetPos(player, &tphere_position);
+	player_position = tphere_position;
 }
 
 void prj_init()

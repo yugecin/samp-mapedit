@@ -25,6 +25,7 @@ int fontsize, fontratio;
 float fontheight, buttonheight, fontpadx, fontpady;
 char key_w, key_a, key_s, key_d;
 char directional_movement;
+struct RwV3D player_position;
 
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
@@ -219,8 +220,13 @@ void ui_store_camera()
 static
 void ui_activate()
 {
+	struct RwV3D *ppos;
+	float player_rotation;
+
 	if (!active) {
 		active = 1;
+		game_PedGetPos(player, &ppos, &player_rotation);
+		player_position = *ppos;
 		game_FreezePlayer(1);
 		if (!has_set_camera_once) {
 			ui_store_camera();
@@ -469,6 +475,8 @@ void ui_render()
 	}
 
 	if (active) {
+		game_PedSetPos(player, &player_position);
+
 		ui_mouse_is_just_down =
 			activeMouseState->lmb && !prevMouseState->lmb;
 		ui_mouse_is_just_up =

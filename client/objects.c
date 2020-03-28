@@ -469,19 +469,15 @@ int objects_on_background_element_just_clicked(colpoint, entity)
 static
 void objects_prepare_selecting_object()
 {
-	float rot;
-	struct RwV3D *pos;
-
 	game_EntitySetAlpha(player, 0);
-	game_PedGetPos(player, &pos, &rot);
-	player_pos_before_selecting = *pos;
+	player_pos_before_selecting = player_position;
 }
 
 static
 void objects_restore_selecting_object()
 {
 	game_EntitySetAlpha(player, 255);
-	game_PedSetPos(player, &player_pos_before_selecting);
+	player_position = player_pos_before_selecting;
 }
 
 void objects_on_active_window_changed(struct UI_WINDOW *wnd)
