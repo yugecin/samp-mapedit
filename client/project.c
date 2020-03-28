@@ -8,6 +8,7 @@
 #include "objects.h"
 #include "project.h"
 #include "racecp.h"
+#include "timeweather.h"
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
@@ -80,6 +81,7 @@ void prj_save()
 		ui_prj_save(f, buf);
 		racecp_prj_save(f, buf);
 		objects_prj_save(f, buf);
+		timeweather_save(f, buf);
 		game_PedGetPos(player, (struct RwV3D**) &vec3i, &value.f);
 		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i->x), 1, f);
 		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i->y), 1, f);
@@ -96,6 +98,7 @@ static
 void prj_preload()
 {
 	objects_prj_preload();
+	timeweather_preload();
 }
 
 static
@@ -104,6 +107,7 @@ void prj_postload()
 	ui_prj_postload();
 	objects_prj_postload();
 	racecp_prj_postload();
+	timeweather_postload();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;
 }
@@ -137,7 +141,8 @@ nextline:
 	i = 0;
 	if (!ui_prj_load_line(buf) &&
 		!racecp_prj_load_line(buf) &&
-		!objects_prj_load_line(buf))
+		!objects_prj_load_line(buf) &&
+		!timeweather_load_line(buf))
 	{
 		if (strncmp("playa.", buf, 6) == 0) {
 			if (strncmp("pos.", buf + 6, 4) == 0) {

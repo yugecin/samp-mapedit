@@ -11,6 +11,7 @@
 #include "sockets.h"
 #include "samp.h"
 #include "settings.h"
+#include "timeweather.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
 #include "../shared/clientlink.h"
@@ -137,6 +138,7 @@ void client_finalize()
 	sockets_dispose();
 
 	ui_dispose();
+	timeweather_dispose();
 	prj_dispose();
 	msg_dispose();
 
@@ -165,6 +167,7 @@ void client_init()
 	/*order of init affects layout of main menu and context menu*/
 	settings_init();
 	prj_init();
+	timeweather_init();
 	msg_init();
 
 	sockets_init();

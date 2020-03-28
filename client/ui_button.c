@@ -20,6 +20,7 @@ struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 	btn->_parent.proc_recalc_size = (ui_method*) ui_btn_recalc_size;
 	btn->text = malloc(sizeof(char) * textlenandzero);
 	btn->cb = cb;
+	btn->alignment = CENTER;
 	btn->foregroundABGR = -1;
 	btn->enabled = 1;
 	/*add to stuff to ui_radiobutton too*/
@@ -57,20 +58,36 @@ void ui_btn_draw(struct UI_BUTTON *btn)
 		col = 0xDD777777;
 	}
 	ui_element_draw_background(&btn->_parent, col);
-	game_TextSetAlign(CENTER);
 	if (btn->foregroundABGR != -1) {
 		game_TextSetColor(btn->foregroundABGR);
 	}
 	if (btn->text != NULL) {
-		game_TextPrintString(
-			btn->_parent.x + btn->_parent.width / 2.0f,
-			btn->_parent.y + fontpady,
-			btn->text);
+		game_TextSetAlign(btn->alignment);
+		switch (btn->alignment) {
+		case CENTER:
+			game_TextPrintString(
+				btn->_parent.x + btn->_parent.width / 2.0f,
+				btn->_parent.y + fontpady,
+				btn->text);
+			break;
+		case LEFT:
+			game_TextPrintString(
+				btn->_parent.x + fontpadx,
+				btn->_parent.y + fontpady,
+				btn->text);
+			break;
+		case RIGHT:
+			game_TextPrintString(
+				btn->_parent.x + btn->_parent.width - fontpadx,
+				btn->_parent.y + fontpady,
+				btn->text);
+			break;
+		}
+		game_TextSetAlign(LEFT);
 	}
 	if (btn->foregroundABGR != -1) {
 		game_TextSetColor(-1);
 	}
-	game_TextSetAlign(LEFT);
 }
 
 void ui_btn_recalc_size(struct UI_BUTTON *btn)

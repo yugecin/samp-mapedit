@@ -67,6 +67,7 @@ struct NATIVE natives[] = {
 	{ "CreateVehicle", 0 },
 	{ "DestroyVehicle", 0 },
 	{ "SetWorldTime", 0 },
+	{ "SetWeather", 0 },
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
 

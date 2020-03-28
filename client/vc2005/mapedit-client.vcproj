@@ -254,6 +254,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\timeweather.c"
+				>
+			</File>
+			<File
+				RelativePath="..\timeweather.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ui.c"
 				>
 			</File>

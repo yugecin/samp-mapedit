@@ -15,6 +15,7 @@
 #define NC_CreateVehicle 8
 #define NC_DestroyVehicle 9
 #define NC_SetWorldTime 10
+#define NC_SetWeather 11
 
 #define MAPEDIT_MSG_RESETOBJECTS 0
 #define MAPEDIT_MSG_NATIVECALL 1
