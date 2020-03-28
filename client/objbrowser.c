@@ -29,6 +29,9 @@ static int rotationStartTime;
 static float camera_distance;
 static ui_method1 *wnd_original_mousewheel_proc;
 static ui_method *wnd_original_draw_proc;
+static int manual_rotate;
+static float manual_rotation_base_x, manual_rotation_base_z;
+static float clickx, clicky;
 
 static
 void objbrowser_update_camera()
@@ -93,6 +96,9 @@ int objbrowser_object_created(struct OBJECT *object)
 		game_ObjectSetPos(entity, &pos);
 		rotationStartTime = *timeInGame;
 		hasvalidobject = 1;
+		manual_rotate = 0;
+		manual_rotation_base_x = 0;
+		manual_rotation_base_z = 0;
 		return 1;
 	}
 	return 0;
@@ -145,15 +151,40 @@ static
 void objbrowser_do_ui()
 {
 	struct RwV3D rot;
+	int ignore;
 
 	game_PedSetPos(player, &player_position);
 
+	ignore = ui_element_being_clicked != NULL;
 	ui_do_exclusive_mode_basics(wnd);
+	ignore |= ui_element_being_clicked != NULL;
 
 	if (hasvalidobject) {
-		rot.x = 0.0;
 		rot.y = 0.0f;
+		rot.x = 0.0f;
 		rot.z = (*timeInGame - rotationStartTime) * 0.00175f;
+		if (ui_mouse_is_just_down && !ignore) {
+			if (!manual_rotate) {
+				manual_rotation_base_x = rot.x;
+				manual_rotation_base_z = rot.z;
+				manual_rotate = 1;
+			}
+			clickx = cursorx;
+			clicky = cursory;
+		}
+		if (manual_rotate) {
+			rot.z = manual_rotation_base_z;
+			rot.z += (cursorx - clickx) * 0.0075f;
+			rot.x = manual_rotation_base_x;
+			rot.x += (cursory - clicky) * 0.0075f;
+			if (ui_mouse_is_just_up && !ignore) {
+				manual_rotation_base_x = rot.x;
+				manual_rotation_base_z = rot.z;
+			}
+			if (!activeMouseState->lmb || ignore) {
+				return;
+			}
+		}
 		game_ObjectSetRotRad(picking_object.sa_object, &rot);
 	}
 }
