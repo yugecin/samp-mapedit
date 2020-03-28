@@ -135,7 +135,7 @@ void timeweather_dispose()
 	ui_wnd_dispose(wnd);
 }
 
-void timeweather_save(/*FILE*/ void *f, char *buf)
+void timeweather_prj_save(FILE *f, char *buf)
 {
 	_asm push f
 	_asm push 1
@@ -150,7 +150,7 @@ void timeweather_save(/*FILE*/ void *f, char *buf)
 	_asm add esp, 0x10
 }
 
-int timeweather_load_line(char *buf)
+int timeweather_prj_load_line(char *buf)
 {
 	if (strncmp("hour ", buf, 5) == 0) {
 		hour = atoi(buf + 5);
@@ -162,13 +162,13 @@ int timeweather_load_line(char *buf)
 	return 0;
 }
 
-void timeweather_preload()
+void timeweather_prj_preload()
 {
 	hour = 12;
 	weather = 0;
 }
 
-void timeweather_postload()
+void timeweather_prj_postload()
 {
 	char timetextvalue[11];
 

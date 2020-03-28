@@ -214,6 +214,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\player.c"
+				>
+			</File>
+			<File
+				RelativePath="..\player.h"
+				>
+			</File>
+			<File
 				RelativePath="..\project.c"
 				>
 			</File>

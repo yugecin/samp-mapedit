@@ -41,7 +41,6 @@ extern int ui_mouse_is_just_up;
 extern struct UI_CONTAINER *background_element;
 extern struct UI_WINDOW *main_menu, *context_menu;
 extern char *debugstring;
-extern struct RwV3D player_position;
 
 /**
 To be called after writing to debugstring

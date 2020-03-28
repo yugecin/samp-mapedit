@@ -6,6 +6,7 @@
 #include "objbrowser.h"
 #include "objbase.h"
 #include "objects.h"
+#include "player.h"
 #include "project.h"
 #include "msgbox.h"
 #include "samp.h"
@@ -25,7 +26,6 @@ int fontsize, fontratio;
 float fontheight, buttonheight, fontpadx, fontpady;
 char key_w, key_a, key_s, key_d;
 char directional_movement;
-struct RwV3D player_position;
 
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;

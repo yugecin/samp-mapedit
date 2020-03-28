@@ -6,6 +6,7 @@
 #include "msgbox.h"
 #include "objbase.h"
 #include "objects.h"
+#include "player.h"
 #include "project.h"
 #include "racecp.h"
 #include "timeweather.h"
@@ -67,26 +68,14 @@ void prj_save()
 {
 	FILE *f;
 	char buf[1000];
-	union {
-		int i;
-		float f;
-		int *p;
-	} value;
-	struct {
-		int x, y, z;
-	} vec3i;
 
 	mk_project_filename(buf, open_project_name);
 	if ((f = fopen(buf, "w"))) {
 		ui_prj_save(f, buf);
 		racecp_prj_save(f, buf);
 		objects_prj_save(f, buf);
-		timeweather_save(f, buf);
-		game_PedGetPos(player, (struct RwV3D*) &vec3i, &value.f);
-		fwrite(buf, sprintf(buf, "playa.pos.x %d\n", vec3i.x), 1, f);
-		fwrite(buf, sprintf(buf, "playa.pos.y %d\n", vec3i.y), 1, f);
-		fwrite(buf, sprintf(buf, "playa.pos.z %d\n", vec3i.z), 1, f);
-		fwrite(buf, sprintf(buf, "playa.rot %d\n", value.i), 1, f);
+		player_prj_save(f, buf);
+		timeweather_prj_save(f, buf);
 		fclose(f);
 	} else {
 		sprintf(debugstring, "failed to write file %s", buf);
@@ -98,7 +87,8 @@ static
 void prj_preload()
 {
 	objects_prj_preload();
-	timeweather_preload();
+	player_prj_preload();
+	timeweather_prj_preload();
 }
 
 static
@@ -107,7 +97,7 @@ void prj_postload()
 	ui_prj_postload();
 	objects_prj_postload();
 	racecp_prj_postload();
-	timeweather_postload();
+	timeweather_prj_postload();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;
 }
@@ -120,17 +110,7 @@ void prj_open_by_file(FILE *file)
 {
 	int pos, i;
 	char buf[512];
-	union {
-		int i;
-		float f;
-		int *p;
-	} value;
-	float playarot;
 
-	player_position.x = 0.0f;
-	player_position.y = 0.0f;
-	player_position.z = 2.5f;
-	playarot = 0.0f;
 	prj_preload();
 
 	pos = 0;
@@ -140,25 +120,12 @@ nextline:
 	if (fread(buf, 1, sizeof(buf) - 1, file) == 0) {
 		goto done;
 	}
+	ui_prj_load_line(buf) ||
+		racecp_prj_load_line(buf) ||
+		objects_prj_load_line(buf) ||
+		player_prj_load_line(buf) ||
+		timeweather_prj_load_line(buf);
 	i = 0;
-	if (!ui_prj_load_line(buf) &&
-		!racecp_prj_load_line(buf) &&
-		!objects_prj_load_line(buf) &&
-		!timeweather_load_line(buf))
-	{
-		if (strncmp("playa.", buf, 6) == 0) {
-			if (strncmp("pos.", buf + 6, 4) == 0) {
-				value.p = (int*) &player_position;
-				value.p += buf[10] - 'x';
-				*value.p = atoi(buf + (i = 12));
-			} else if (strncmp("rot ", buf + 6, 4) == 0) {
-				value.i = atoi(buf + (i = 10));
-				playarot = value.f;
-			}
-		} else {
-			i = 0;
-		}
-	}
 	while (buf[i] != 0 && buf[i] != '\n') {
 		i++;
 	}
@@ -167,7 +134,6 @@ nextline:
 done:
 	fclose(file);
 
-	game_PedSetRot(player, playarot);
 	prj_postload();
 }
 

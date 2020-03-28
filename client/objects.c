@@ -7,6 +7,7 @@
 #include "objbase.h"
 #include "objects.h"
 #include "objbrowser.h"
+#include "player.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
