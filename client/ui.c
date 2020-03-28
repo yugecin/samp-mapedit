@@ -220,13 +220,9 @@ void ui_store_camera()
 static
 void ui_activate()
 {
-	struct RwV3D *ppos;
-	float player_rotation;
-
 	if (!active) {
 		active = 1;
-		game_PedGetPos(player, &ppos, &player_rotation);
-		player_position = *ppos;
+		game_PedGetPos(player, &player_position, NULL);
 		game_FreezePlayer(1);
 		if (!has_set_camera_once) {
 			ui_store_camera();

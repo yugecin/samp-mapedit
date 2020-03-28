@@ -282,8 +282,11 @@ gotplaceable:
 		mov eax, 0x441DB0 /*CPlaceable__getRotation*/
 		call eax
 		mov eax, [esp+0x10] /*rot*/
+		test eax, eax
+		jz skiprotation
 		fmul ds:0x859878 /*_radToDeg*/
 		fstp [eax]
+skiprotation:
 		mov eax, ecx
 		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
 		test ecx, ecx
@@ -292,7 +295,14 @@ gotplaceable:
 no_explicit_coords:
 		lea eax, [eax+0x4] /*CPlaceable.placement*/
 		mov ecx, [esp+0xC] /*pos*/
-		mov [ecx], eax
+		push esi
+		mov esi, [eax]
+		mov [ecx], esi
+		mov esi, [eax+0x4]
+		mov [ecx+0x4], esi
+		mov esi, [eax+0x8]
+		mov [ecx+0x8], esi
+		pop esi
 		pop ecx
 		ret
 	}

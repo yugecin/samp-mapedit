@@ -294,7 +294,10 @@ int game_IntersectBuildingObject(
 void game_ObjectGetPos(void *object, struct RwV3D *pos);
 void game_ObjectSetPos(void *object, struct RwV3D *pos);
 void game_ObjectSetRotRad(void *object, struct RwV3D *rot);
-void game_PedGetPos(struct CPed *ped, struct RwV3D **pos, float *rot);
+/**
+@param rot can be {@code NULL} when not needed
+*/
+void game_PedGetPos(struct CPed *ped, struct RwV3D *pos, float *rot);
 void game_PedSetPos(struct CPed *ped, struct RwV3D *pos);
 void game_PedSetRot(struct CPed *ped, float rot);
 int game_RwIm2DPrepareRender();
