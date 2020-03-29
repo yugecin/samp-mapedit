@@ -30,9 +30,11 @@ static struct UI_BUTTON *btn_move_obj_samp;
 static struct UI_BUTTON *btn_move_obj_click;
 
 static char txt_objentity[9];
+static char txt_objmodel[9];
 static char txt_objtype[9];
 static char txt_objflags[9];
 static char txt_objlodentity[9];
+static char txt_objlodmodel[9];
 static char txt_objlodflags[9];
 
 static struct OBJECT *selected_object;
@@ -299,12 +301,16 @@ void objects_init()
 
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Entity:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objentity));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("Model:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objmodel));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Type:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objtype));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Flags:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objflags));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Entity:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodentity));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Model:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodmodel));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Flags:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodflags));
 	btn = ui_btn_make("Remove_Building", cb_btn_remove_building);
@@ -419,6 +425,7 @@ void objects_select_entity(void *entity)
 		btn_objclone->enabled = 1;
 		lod = *((int**) ((char*) entity + 0x30));
 		sprintf(txt_objentity, "%p", entity);
+		sprintf(txt_objmodel, "%hd", *((short*) entity + 0x11));
 		sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
 		sprintf(txt_objflags, "%p", *((int*) entity + 7));
 		if ((int) lod == -1 || lod == NULL) {
@@ -426,6 +433,7 @@ void objects_select_entity(void *entity)
 			strcpy(txt_objlodflags, "00000000");
 		} else {
 			sprintf(txt_objlodentity, "%p", (int) lod);
+			sprintf(txt_objlodmodel, "%hd", *((short*) lod + 0x11));
 			sprintf(txt_objlodflags, "%p", *((int*) lod + 7));
 		}
 		selected_object = objects_find_by_sa_object(entity);
@@ -445,9 +453,11 @@ void objects_select_entity(void *entity)
 		btn_move_obj_samp->enabled = 0;
 		btn_move_obj_click->enabled = 0;
 		strcpy(txt_objentity, "00000000");
+		strcpy(txt_objmodel, "0");
 		strcpy(txt_objtype, "00000000");
 		strcpy(txt_objflags, "00000000");
 		strcpy(txt_objlodentity, "00000000");
+		strcpy(txt_objlodmodel, "0");
 		strcpy(txt_objlodflags, "00000000");
 	}
 }
