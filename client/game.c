@@ -297,6 +297,8 @@ skiprotation:
 no_explicit_coords:
 		lea eax, [eax+0x4] /*CPlaceable.placement*/
 		mov ecx, [esp+0xC] /*pos*/
+		test ecx, ecx
+		jz skipposition
 		push esi
 		mov esi, [eax]
 		mov [ecx], esi
@@ -307,6 +309,7 @@ no_explicit_coords:
 		fsubp ST(1), ST(0)
 		fstp [ecx+0x8]
 		pop esi
+skipposition:
 		pop ecx
 		ret
 	}

@@ -295,6 +295,7 @@ void game_ObjectGetPos(void *object, struct RwV3D *pos);
 void game_ObjectSetPos(void *object, struct RwV3D *pos);
 void game_ObjectSetRotRad(void *object, struct RwV3D *rot);
 /**
+@param pos can be {@code NULL} when not needed
 @param rot can be {@code NULL} when not needed
 */
 void game_PedGetPos(struct CPed *ped, struct RwV3D *pos, float *rot);

@@ -27,6 +27,7 @@ float fontheight, buttonheight, fontpadx, fontpady;
 char key_w, key_a, key_s, key_d;
 char directional_movement;
 void (*ui_exclusive_mode)() = NULL;
+struct RwV3D *player_position_for_camera = &player_position;
 
 static char active = 0;
 static float originalHudScaleX, originalHudScaleY;
@@ -486,6 +487,24 @@ void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd)
 	ui_draw_cursor();
 }
 
+static
+void ui_place_camera_behind_player()
+{
+	float rotation;
+	float x, y;
+
+	game_PedGetPos(player, NULL, &rotation);
+	rotation = (rotation + 90.0f) * M_PI / 180.0f;
+	x = 4.0f * cosf(rotation);
+	y = 4.0f * sinf(rotation);
+	camera->position.x = player_position_for_camera->x - x;
+	camera->position.y = player_position_for_camera->y - y;
+	camera->position.z = player_position_for_camera->z + 2.0f;
+	camera->rotation.x = x;
+	camera->rotation.y = y;
+	camera->rotation.z = -0.25f;
+}
+
 void ui_render()
 {
 	int activate_key_pressed;
@@ -550,11 +569,8 @@ void ui_render()
 		} else if (activeKeyState->standards[VK_Y] &&
 			!currentKeyState->standards[VK_Y])
 		{
-			game_CameraRestoreWithJumpCut();
-			/*need to store camera but camera is only applied
-			on the next frame(?), so make sure camera doesn't update
-			now and check for Y key release*/
-			need_camera_update = 0;
+			ui_place_camera_behind_player();
+			need_camera_update = 1;
 		} else  if (currentKeyState->standards[VK_Y] &&
 			!activeKeyState->standards[VK_Y])
 		{

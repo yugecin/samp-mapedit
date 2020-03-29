@@ -475,6 +475,7 @@ void objects_prepare_selecting_object()
 {
 	game_EntitySetAlpha(player, 0);
 	player_pos_before_selecting = player_position;
+	player_position_for_camera = &player_pos_before_selecting;
 }
 
 static
@@ -483,6 +484,7 @@ void objects_restore_selecting_object()
 	game_EntitySetAlpha(player, 255);
 	player_position = player_pos_before_selecting;
 	game_PedSetPos(player, &player_position);
+	player_position_for_camera = &player_position;
 }
 
 void objects_on_active_window_changed(struct UI_WINDOW *wnd)
