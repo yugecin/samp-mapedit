@@ -18,7 +18,7 @@
 
 static struct UI_WINDOW *wnd;
 static struct UI_BUTTON *btn_next, *btn_prev;
-static struct UI_BUTTON *btn_create, *btn_cancel;
+static struct UI_BUTTON *btn_create;
 
 static int isactive = 0;
 static int hasvalidobject = 0;
@@ -95,38 +95,10 @@ struct OBJECT *objbrowser_object_by_handle(int sa_handle)
 	return NULL;
 }
 
-int objbrowser_object_created(struct OBJECT *object)
-{
-	struct RwV3D pos;
-	void *entity;
-	float d;
-
-	if (object == &picking_object) {
-		btn_cancel->enabled = btn_create->enabled = 1;
-		btn_next->enabled = btn_prev->enabled = 1;
-		entity = object->sa_object;
-		objbase_set_entity_to_render_exclusively(entity);
-		game_ObjectGetPos(entity, &pos);
-		d = game_EntityGetDistanceFromCentreOfMassToBaseOfModel(entity);
-		pos.z -= d;
-		game_ObjectSetPos(entity, &pos);
-		rotationStartTime = *timeInGame;
-		hasvalidobject = 1;
-		manual_rotate = 0;
-		manual_rotation_x = M_PI - atanf(1.0f / DEFAULT_ANGLE_RATIO);
-		manual_rotation_z = 0.0f;
-		manual_rotation_base_x = 0.0f;
-		manual_rotation_base_z = 0.0f;
-		objbrowser_update_camera();
-		return 1;
-	}
-	return 0;
-}
-
 static
 void create_object()
 {
-	btn_cancel->enabled = btn_create->enabled = 0;
+	btn_create->enabled = 0;
 	btn_prev->enabled = btn_next->enabled = 0;
 	objbase_mkobject(&picking_object, &positionToPreview);
 }
@@ -148,6 +120,38 @@ void recreate_object()
 {
 	destroy_object();
 	create_object();
+}
+
+int objbrowser_object_created(struct OBJECT *object)
+{
+	struct RwV3D pos;
+	void *entity;
+	float d;
+
+	if (object == &picking_object) {
+		if (!isactive) {
+			destroy_object();
+			return 1;
+		}
+		btn_create->enabled = 1;
+		btn_next->enabled = btn_prev->enabled = 1;
+		entity = object->sa_object;
+		objbase_set_entity_to_render_exclusively(entity);
+		game_ObjectGetPos(entity, &pos);
+		d = game_EntityGetDistanceFromCentreOfMassToBaseOfModel(entity);
+		pos.z -= d;
+		game_ObjectSetPos(entity, &pos);
+		rotationStartTime = *timeInGame;
+		hasvalidobject = 1;
+		manual_rotate = 0;
+		manual_rotation_x = M_PI - atanf(1.0f / DEFAULT_ANGLE_RATIO);
+		manual_rotation_z = 0.0f;
+		manual_rotation_base_x = 0.0f;
+		manual_rotation_base_z = 0.0f;
+		objbrowser_update_camera();
+		return 1;
+	}
+	return 0;
 }
 
 static
@@ -290,8 +294,7 @@ void objbrowser_init()
 	ui_wnd_add_child(wnd, btn_prev);
 	btn_create = ui_btn_make("Create", cb_btn_create);
 	ui_wnd_add_child(wnd, btn_create);
-	btn_cancel = ui_btn_make("Cancel", cb_btn_cancel);
-	ui_wnd_add_child(wnd, btn_cancel);
+	ui_wnd_add_child(wnd, ui_btn_make("Cancel", cb_btn_cancel));
 }
 
 void objbrowser_dispose()
