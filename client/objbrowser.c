@@ -12,6 +12,7 @@
 #include "samp.h"
 #include "timeweather.h"
 #include "../shared/serverlink.h"
+#include <math.h>
 #include <string.h>
 #include <windows.h>
 
@@ -31,20 +32,32 @@ static ui_method1 *wnd_original_mousewheel_proc;
 static ui_method *wnd_original_draw_proc;
 static int manual_rotate;
 static float manual_rotation_base_x, manual_rotation_base_z;
+static float manual_rotation_x, manual_rotation_z;
 static float clickx, clicky;
+
+#define DEFAULT_ANGLE_RATIO 0.2f
 
 static
 void objbrowser_update_camera()
 {
-	float heightdiff;
+	float x, y, z, xylen;
 
-	camera->position.x = positionToPreview.x - camera_distance;
-	camera->rotation.x = camera_distance;
-	camera->position.y = positionToPreview.y;
-	camera->rotation.y = 0;
-	heightdiff = camera_distance * 0.2f;
-	camera->position.z = positionToPreview.z + heightdiff;
-	camera->rotation.z = -heightdiff;
+	if (manual_rotate) {
+		xylen = sinf(manual_rotation_x);
+		x = camera_distance * cosf(manual_rotation_z) * xylen;
+		y = camera_distance * sinf(manual_rotation_z) * xylen;
+		z = camera_distance * cosf(manual_rotation_x);
+	} else {
+		x = camera_distance;
+		y = 0.0f;
+		z = -camera_distance * DEFAULT_ANGLE_RATIO;
+	}
+	camera->position.x = positionToPreview.x - x;
+	camera->position.y = positionToPreview.y - y;
+	camera->position.z = positionToPreview.z - z;
+	camera->rotation.x = x;
+	camera->rotation.y = y;
+	camera->rotation.z = z;
 	ui_update_camera();
 }
 
@@ -97,8 +110,11 @@ int objbrowser_object_created(struct OBJECT *object)
 		rotationStartTime = *timeInGame;
 		hasvalidobject = 1;
 		manual_rotate = 0;
-		manual_rotation_base_x = 0;
-		manual_rotation_base_z = 0;
+		manual_rotation_x = M_PI - atanf(1.0f / DEFAULT_ANGLE_RATIO);
+		manual_rotation_z = 0.0f;
+		manual_rotation_base_x = 0.0f;
+		manual_rotation_base_z = 0.0f;
+		objbrowser_update_camera();
 		return 1;
 	}
 	return 0;
@@ -159,32 +175,42 @@ void objbrowser_do_ui()
 	ui_do_exclusive_mode_basics(wnd);
 	ignore |= ui_element_being_clicked != NULL;
 
-	if (hasvalidobject) {
-		rot.y = 0.0f;
-		rot.x = 0.0f;
-		rot.z = (*timeInGame - rotationStartTime) * 0.00175f;
-		if (ui_mouse_is_just_down && !ignore) {
-			if (!manual_rotate) {
-				manual_rotation_base_x = rot.x;
-				manual_rotation_base_z = rot.z;
-				manual_rotate = 1;
-			}
-			clickx = cursorx;
-			clicky = cursory;
+	if (!hasvalidobject) {
+		return;
+	}
+
+	rot.y = 0.0f;
+	rot.x = 0.0f;
+	rot.z = (*timeInGame - rotationStartTime) * 0.00175f;
+	if (ui_mouse_is_just_down && !ignore) {
+		if (!manual_rotate) {
+			manual_rotation_base_x = manual_rotation_x;
+			manual_rotation_base_z = manual_rotation_z;
+			manual_rotate = 1;
 		}
-		if (manual_rotate) {
-			rot.z = manual_rotation_base_z;
-			rot.z += (cursorx - clickx) * 0.0075f;
-			rot.x = manual_rotation_base_x;
-			rot.x += (cursory - clicky) * 0.0075f;
-			if (ui_mouse_is_just_up && !ignore) {
-				manual_rotation_base_x = rot.x;
-				manual_rotation_base_z = rot.z;
+		clickx = cursorx;
+		clicky = cursory;
+	}
+	if (manual_rotate) {
+		if ((ui_mouse_is_just_up || activeMouseState->lmb) && !ignore) {
+			manual_rotation_x = manual_rotation_base_x;
+			manual_rotation_x += (cursory - clicky) * 0.005f;
+			manual_rotation_z = manual_rotation_base_z;
+			manual_rotation_z -= (cursorx - clickx) * 0.0075f;
+			if (manual_rotation_x > M_PI * 0.99f) {
+				manual_rotation_x = M_PI * 0.99f;
+			} else if (manual_rotation_x < 0.01f) {
+				manual_rotation_x = 0.01f;
 			}
-			if (!activeMouseState->lmb || ignore) {
-				return;
+			if (ui_mouse_is_just_up) {
+				manual_rotation_base_x = manual_rotation_x;
+				manual_rotation_base_z = manual_rotation_z;
+			}
+			if (activeMouseState->lmb) {
+				objbrowser_update_camera();
 			}
 		}
+	} else {
 		game_ObjectSetRotRad(picking_object.sa_object, &rot);
 	}
 }
