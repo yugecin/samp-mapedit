@@ -539,3 +539,12 @@ void objects_frame_update()
 			"~w~Hover over an object and ~r~click~w~ to select it");
 	}
 }
+
+int objects_handle_esc()
+{
+	if (is_selecting_object) {
+		ui_hide_window(NULL);
+		return 1;
+	}
+	return 0;
+}

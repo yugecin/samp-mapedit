@@ -506,6 +506,12 @@ void ui_place_camera_behind_player()
 	camera->rotation.z = -0.25f;
 }
 
+int ui_handle_esc()
+{
+	return objbrowser_handle_esc() ||
+		objects_handle_esc();
+}
+
 void ui_render()
 {
 	int activate_key_pressed;

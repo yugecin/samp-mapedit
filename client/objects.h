@@ -16,6 +16,7 @@ int objects_is_currently_selecting_object();
 void objects_ui_activated();
 void objects_ui_deactivated();
 void objects_frame_update();
+int objects_handle_esc();
 
 #define MAX_LAYERS 10
 

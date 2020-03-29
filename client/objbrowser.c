@@ -281,7 +281,7 @@ void cb_btn_create(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_cancel(struct UI_BUTTON *btn)
+void cb_btn_cancel()
 {
 	destroy_object();
 	restore_after_hide();
@@ -345,10 +345,19 @@ void objbrowser_init()
 	ui_wnd_add_child(wnd, btn);
 	btn_create = ui_btn_make("Create", cb_btn_create);
 	ui_wnd_add_child(wnd, btn_create);
-	ui_wnd_add_child(wnd, ui_btn_make("Cancel", cb_btn_cancel));
+	ui_wnd_add_child(wnd, ui_btn_make("Cancel", (void*) cb_btn_cancel));
 }
 
 void objbrowser_dispose()
 {
 	ui_wnd_dispose(wnd);
+}
+
+int objbrowser_handle_esc()
+{
+	if (isactive) {
+		cb_btn_cancel();
+		return 1;
+	}
+	return 0;
 }
