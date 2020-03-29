@@ -113,6 +113,7 @@ void objbase_mkobject(struct OBJECT *object, struct RwV3D *pos)
 	object->temp_x = pos->x;
 	object->justcreated = 1;
 	object->samp_objectid = -1;
+	object->sa_object = NULL;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0; /*TODO*/

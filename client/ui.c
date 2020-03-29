@@ -363,6 +363,7 @@ void ui_draw_debug_strings()
 {
 	int i, j;
 
+	game_TextSetAlign(LEFT);
 	i = debugstringidx;
 	j = 0;
 	do {
