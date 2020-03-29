@@ -35,6 +35,8 @@ static float manual_rotation_base_x, manual_rotation_base_z;
 static float manual_rotation_x, manual_rotation_z;
 static float clickx, clicky;
 static int desired_time;
+static unsigned char *cloud_render_opcode;
+static unsigned char cloud_render_original_opcode;
 
 #define DEFAULT_ANGLE_RATIO 0.2f
 
@@ -263,6 +265,7 @@ void restore_after_hide()
 	timeweather_resync();
 	ui_set_trapped_in_ui(0);
 	ui_exclusive_mode = NULL;
+	*cloud_render_opcode = cloud_render_original_opcode;
 }
 
 static
@@ -302,7 +305,7 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	originalCameraRot = camera->rotation;
 	positionToPreview.x = camera->position.x;
 	positionToPreview.y = camera->position.y;
-	positionToPreview.z = 60.0f;
+	positionToPreview.z = 560.0f;
 	objbrowser_update_camera();
 	create_object();
 	ui_show_window(wnd);
@@ -312,14 +315,20 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	timeweather_set_weather(17); /*DE extra sunny*/
 	ui_set_trapped_in_ui(1);
 	ui_exclusive_mode = objbrowser_do_ui;
+	cloud_render_original_opcode = *cloud_render_opcode;
+	*cloud_render_opcode = 0xC3; /*ret*/
 }
 
 void objbrowser_init()
 {
 	struct UI_BUTTON *btn;
+	DWORD oldvp;
 
 	picking_object.model = 3279;
 	desired_time = 12;
+
+	cloud_render_opcode = (unsigned char*) 0x716380;
+	VirtualProtect(cloud_render_opcode, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 
 	wnd = ui_wnd_make(10.0f, 200.0f, "Object_browser");
 	wnd->closeable = 0;
