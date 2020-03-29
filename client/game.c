@@ -205,22 +205,28 @@ __declspec(naked) void game_ObjectSetPos(void *object, struct RwV3D *pos)
 		push [eax]
 		mov byte ptr [eax], 0xC3
 
+		mov eax, esp
+		pushad
+
 		/*esi: object*/
 		/*ecx: x*/
 		/*edx: y*/
 		/*eax: z (_opcodeParameters+0xC)*/
 
-		mov eax, [esp+0x10] /*pos*/
+		push [eax+0xC] /*object*/
+		mov eax, [eax+0x10] /*pos*/
 		mov ecx, [eax] /*x*/
 		mov edx, [eax+0x4] /*y*/
 		mov esi, [eax+0x8] /*z*/
 		mov eax, _opcodeParameters
 		mov [eax+0xC], esi /*z*/
-		mov esi, [esp+0xC] /*object*/
+		pop esi /*object*/
 		mov eax, 0x473A29
 		sub esp, 0x1A4 /*see 0x474386*/
 		call eax
 		add esp, 0x1A4
+
+		popad
 
 		pop eax
 		mov esi, _opcode0815ret
