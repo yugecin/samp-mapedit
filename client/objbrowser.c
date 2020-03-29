@@ -78,6 +78,9 @@ int objbrowser_on_mousewheel(void *wnd, int value)
 	}
 	if (isactive) {
 		camera_distance -= 3.0f * value;
+		if (camera_distance < 1.0f) {
+			camera_distance = 1.0f;
+		}
 		objbrowser_update_camera();
 		return 1;
 	}
