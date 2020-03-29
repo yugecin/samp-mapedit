@@ -122,6 +122,26 @@ void recreate_object()
 	create_object();
 }
 
+void objbrowser_try_find_optimal_camera_distance(struct CColModel *colmodel)
+{
+	struct RwV3D colsize;
+
+	if (colmodel == NULL) {
+		camera_distance = 30.0f;
+	} else {
+		colsize.x = (float) fabs(colmodel->max.x - colmodel->min.x);
+		colsize.y = (float) fabs(colmodel->max.y - colmodel->min.y);
+		if (colsize.y > colsize.x) {
+			colsize.x = colsize.y;
+		}
+		colsize.z = (float) fabs(colmodel->max.z - colmodel->min.z);
+		if (colsize.z > colsize.x) {
+			colsize.x = colsize.z;
+		}
+		camera_distance = colsize.x * 2.0f;
+	}
+}
+
 int objbrowser_object_created(struct OBJECT *object)
 {
 	struct RwV3D pos;
@@ -145,11 +165,15 @@ int objbrowser_object_created(struct OBJECT *object)
 		}
 		rotationStartTime = *timeInGame;
 		hasvalidobject = 1;
-		manual_rotate = 0;
-		manual_rotation_x = M_PI - atanf(1.0f / DEFAULT_ANGLE_RATIO);
+		manual_rotation_x = 0.0f;
 		manual_rotation_z = 0.0f;
 		manual_rotation_base_x = 0.0f;
 		manual_rotation_base_z = 0.0f;
+		manual_rotate = 1;
+		objbrowser_update_camera(); /*for function below to work*/
+		objbrowser_try_find_optimal_camera_distance(colmodel);
+		manual_rotate = 0;
+		manual_rotation_x = M_PI - atanf(1.0f / DEFAULT_ANGLE_RATIO);
 		objbrowser_update_camera();
 		return 1;
 	}
@@ -267,7 +291,6 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	positionToPreview.x = camera->position.x;
 	positionToPreview.y = camera->position.y;
 	positionToPreview.z = 60.0f;
-	camera_distance = 30.0f;
 	objbrowser_update_camera();
 	create_object();
 	ui_show_window(wnd);
