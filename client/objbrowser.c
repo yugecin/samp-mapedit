@@ -34,6 +34,7 @@ static int manual_rotate;
 static float manual_rotation_base_x, manual_rotation_base_z;
 static float manual_rotation_x, manual_rotation_z;
 static float clickx, clicky;
+static int desired_time;
 
 #define DEFAULT_ANGLE_RATIO 0.2f
 
@@ -283,6 +284,17 @@ void cb_btn_cancel(struct UI_BUTTON *btn)
 	restore_after_hide();
 }
 
+static
+void cb_btn_switchtime(struct UI_BUTTON *btn)
+{
+	if (desired_time == 1) {
+		desired_time = 12;
+	} else {
+		desired_time = 1;
+	}
+	timeweather_set_time(desired_time);
+}
+
 void objbrowser_show(struct RwV3D *positionToCreate)
 {
 	positionToCommit = positionToCreate;
@@ -296,15 +308,18 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	ui_show_window(wnd);
 	samp_hide_ui_f7();
 	isactive = 1;
-	timeweather_set_time(12);
-	timeweather_set_weather(0);
+	timeweather_set_time(desired_time);
+	timeweather_set_weather(17); /*DE extra sunny*/
 	ui_set_trapped_in_ui(1);
 	ui_exclusive_mode = objbrowser_do_ui;
 }
 
 void objbrowser_init()
 {
+	struct UI_BUTTON *btn;
+
 	picking_object.model = 3279;
+	desired_time = 12;
 
 	wnd = ui_wnd_make(10.0f, 200.0f, "Object_browser");
 	wnd->closeable = 0;
@@ -317,6 +332,8 @@ void objbrowser_init()
 	ui_wnd_add_child(wnd, btn_next);
 	btn_prev = ui_btn_make("Previous_model", cb_btn_prev_model);
 	ui_wnd_add_child(wnd, btn_prev);
+	btn = ui_btn_make("Switch_day/night", cb_btn_switchtime);
+	ui_wnd_add_child(wnd, btn);
 	btn_create = ui_btn_make("Create", cb_btn_create);
 	ui_wnd_add_child(wnd, btn_create);
 	ui_wnd_add_child(wnd, ui_btn_make("Cancel", cb_btn_cancel));
