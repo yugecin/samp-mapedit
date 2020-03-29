@@ -106,7 +106,7 @@ struct CCamera {
 	char __pad81C[0x860 - 0x81C];
 	struct RwV3D lookAt; /*+860*/
 	struct RwV3D position; /*+86C*/
-	struct RwV3D rotation; /*+878*/
+	struct RwV3D lookVector; /*+878*/
 	char __pad884[0x958 - 0x884];
 	int *targetEntity; /*+958*/
 	char __pad95C[0xA04 - 0x95C];

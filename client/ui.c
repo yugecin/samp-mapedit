@@ -198,9 +198,9 @@ void ui_draw_cursor()
 void ui_update_camera()
 {
 	camera->lookAt = camera->position;
-	camera->lookAt.x += camera->rotation.x;
-	camera->lookAt.y += camera->rotation.y;
-	camera->lookAt.z += camera->rotation.z;
+	camera->lookAt.x += camera->lookVector.x;
+	camera->lookAt.y += camera->lookVector.y;
+	camera->lookAt.z += camera->lookVector.z;
 	game_CameraSetOnPoint(&camera->lookAt, CUT, 1);
 }
 
@@ -208,16 +208,16 @@ static
 void ui_store_camera()
 {
 	struct CCam *ccam;
-	struct RwV3D rot;
+	struct RwV3D lookVec;
 	float xylen;
 
 	ccam = &camera->cams[camera->activeCam];
 	camera->position = ccam->pos;
-	camera->rotation = ccam->lookVector;
-	rot = camera->rotation;
-	horizLookAngle = atan2f(rot.y, rot.x);
-	xylen = sqrtf(rot.x * rot.x + rot.y * rot.y);
-	vertLookAngle = atan2f(xylen, rot.z);
+	camera->lookVector = ccam->lookVector;
+	lookVec = camera->lookVector;
+	horizLookAngle = atan2f(lookVec.y, lookVec.x);
+	xylen = sqrtf(lookVec.x * lookVec.x + lookVec.y * lookVec.y);
+	vertLookAngle = atan2f(xylen, lookVec.z);
 }
 
 static
@@ -292,7 +292,7 @@ void ui_default_font()
 static
 void ui_do_mouse_movement()
 {
-	struct RwV3D rot;
+	struct RwV3D lookVec;
 	float mx, my, xylen;
 
 	mx = activeMouseState->x;
@@ -305,11 +305,11 @@ void ui_do_mouse_movement()
 		} else if (vertLookAngle > M_PI - 0.001f) {
 			vertLookAngle = M_PI - 0.001f;
 		}
-		rot.z = cosf(vertLookAngle);
+		lookVec.z = cosf(vertLookAngle);
 		xylen = sinf(vertLookAngle);
-		rot.x = cosf(horizLookAngle) * xylen;
-		rot.y = sinf(horizLookAngle) * xylen;
-		camera->rotation = rot;
+		lookVec.x = cosf(horizLookAngle) * xylen;
+		lookVec.y = sinf(horizLookAngle) * xylen;
+		camera->lookVector = lookVec;
 		need_camera_update = 1;
 	}
 }
@@ -501,9 +501,9 @@ void ui_place_camera_behind_player()
 	camera->position.x = player_position_for_camera->x - x;
 	camera->position.y = player_position_for_camera->y - y;
 	camera->position.z = player_position_for_camera->z + 2.0f;
-	camera->rotation.x = x;
-	camera->rotation.y = y;
-	camera->rotation.z = -0.25f;
+	camera->lookVector.x = x;
+	camera->lookVector.y = y;
+	camera->lookVector.z = -0.25f;
 }
 
 int ui_handle_esc()

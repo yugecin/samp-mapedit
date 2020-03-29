@@ -58,9 +58,9 @@ void objbrowser_update_camera()
 	camera->position.x = positionToPreview.x - x;
 	camera->position.y = positionToPreview.y - y;
 	camera->position.z = positionToPreview.z - z;
-	camera->rotation.x = x;
-	camera->rotation.y = y;
-	camera->rotation.z = z;
+	camera->lookVector.x = x;
+	camera->lookVector.y = y;
+	camera->lookVector.z = z;
 	ui_update_camera();
 }
 
@@ -255,7 +255,7 @@ static
 void restore_after_hide()
 {
 	camera->position = originalCameraPos;
-	camera->rotation = originalCameraRot;
+	camera->lookVector = originalCameraRot;
 	ui_update_camera();
 	objbase_set_entity_to_render_exclusively(NULL);
 	ui_hide_window();
@@ -302,7 +302,7 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 {
 	positionToCommit = positionToCreate;
 	originalCameraPos = camera->position;
-	originalCameraRot = camera->rotation;
+	originalCameraRot = camera->lookVector;
 	positionToPreview.x = camera->position.x;
 	positionToPreview.y = camera->position.y;
 	positionToPreview.z = 560.0f;
