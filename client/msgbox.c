@@ -17,7 +17,7 @@ static msgboxcb *result_cb;
 static
 void cb_btn(struct UI_BUTTON *btn)
 {
-	ui_hide_window(msg_wnd);
+	ui_hide_window();
 	msg_message2 = "";
 	msg_btn1text = NULL;
 	msg_btn2text = NULL;

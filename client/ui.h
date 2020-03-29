@@ -56,7 +56,7 @@ void ui_render();
 void ui_do_cursor_movement();
 void ui_grablastkey();
 void ui_show_window(struct UI_WINDOW *wnd);
-void ui_hide_window(struct UI_WINDOW *wnd);
+void ui_hide_window();
 void ui_set_fontsize(int fontsize, int fontratio);
 void ui_prj_save(/*FILE*/ void *f, char *buf);
 int ui_prj_load_line(char *buf);

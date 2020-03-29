@@ -139,7 +139,7 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	objects_on_active_window_changed(wnd);
 }
 
-void ui_hide_window(struct UI_WINDOW *wnd)
+void ui_hide_window()
 {
 	active_window = NULL;
 	objects_on_active_window_changed(NULL);

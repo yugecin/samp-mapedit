@@ -182,7 +182,7 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 		memcpy(open_project_name,
 			in_newprojectname->value,
 			INPUT_TEXTLEN + 1);
-		ui_hide_window(window_project);
+		ui_hide_window();
 		btn_main_save->enabled = 1;
 		mk_project_filename(projectfile, open_project_name);
 		if (file = fopen(projectfile, "r")) {
@@ -209,7 +209,7 @@ void cb_btn_open(struct UI_BUTTON *btn)
 
 	idx = lst_projects->selectedindex;
 	if (idx != -1) {
-		ui_hide_window(window_project);
+		ui_hide_window();
 		prj_open_by_name(tmp_files[idx]);
 	}
 }

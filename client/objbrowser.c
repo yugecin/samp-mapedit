@@ -258,7 +258,7 @@ void restore_after_hide()
 	camera->rotation = originalCameraRot;
 	ui_update_camera();
 	objbase_set_entity_to_render_exclusively(NULL);
-	ui_hide_window(wnd);
+	ui_hide_window();
 	samp_restore_ui_f7();
 	isactive = 0;
 	hasvalidobject = 0;

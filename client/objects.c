@@ -543,7 +543,7 @@ void objects_frame_update()
 int objects_handle_esc()
 {
 	if (is_selecting_object) {
-		ui_hide_window(NULL);
+		ui_hide_window();
 		return 1;
 	}
 	return 0;

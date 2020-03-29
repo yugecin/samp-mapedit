@@ -309,7 +309,7 @@ int ui_wnd_mouseup(struct UI_WINDOW *wnd)
 		wnd->grabx == GRABX_VAL_CLOSEBTN &&
 		is_closebtn_hovered(wnd))
 	{
-		ui_hide_window(wnd);
+		ui_hide_window();
 		return 1;
 	}
 	return ui_cnt_mouseup((struct UI_CONTAINER*) wnd);
