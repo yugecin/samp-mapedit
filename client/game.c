@@ -88,6 +88,16 @@ void game_DrawRect(float x, float y, float w, float h, int argb)
 }
 
 __declspec(naked)
+struct CColModel *game_EntityGetColModel(void *entity)
+{
+	_asm {
+		mov ecx, [esp+0x4]
+		mov eax, 0x535300
+		jmp eax
+	}
+}
+
+__declspec(naked)
 float game_EntityGetDistanceFromCentreOfMassToBaseOfModel(void *entity)
 {
 	_asm {
@@ -169,7 +179,7 @@ __declspec(naked) void game_ObjectGetPos(void *object, struct RwV3D *pos)
 		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
 		test ecx, ecx
 		jz no_explicit_coords
-		lea eax, [ecx+0x30-0x4]
+		lea eax, [ecx+0x30-0x4] /*CMatrix.pos*/
 no_explicit_coords:
 		add eax, 4
 		mov ecx, [eax]
@@ -293,7 +303,7 @@ skiprotation:
 		mov ecx, [eax+0x14] /*CPlaceable.m_pCoords*/
 		test ecx, ecx
 		jz no_explicit_coords
-		lea eax, [ecx+0x30-0x4] /*what's at +30h?*/
+		lea eax, [ecx+0x30-0x4] /*CMatrix.pos*/
 no_explicit_coords:
 		lea eax, [eax+0x4] /*CPlaceable.placement*/
 		mov ecx, [esp+0xC] /*pos*/

@@ -13,6 +13,16 @@
 #define CPAD 0xB73458
 #define _opcodeParameters 0xA43C78
 
+/**
+See https://github.com/DK22Pac/plugin-sdk/blob/
+8d4d2ff5502ffcb3a741cbcac238d49664689808/plugin_sa/game_sa/rw/rwplcore.h#L3936
+*/
+enum RwPrimitiveType {
+    rwPRIMTYPETRILIST = 3,
+    rwPRIMTYPETRISTRIP = 4,
+    rwPRIMTYPETRIFAN = 5,
+};
+
 enum eTextdrawAlignment {
 	CENTER = 0,
 	LEFT = 1,
@@ -42,6 +52,20 @@ struct RwV3D {
 };
 EXPECT_SIZE(struct RwV3D, 0xC);
 
+struct CColModel
+{
+	struct RwV3D min;
+	struct RwV3D max;
+	/*incomplete*/
+};
+
+struct CSimpleTransform
+{
+	struct RwV3D pos;
+	float heading;
+};
+EXPECT_SIZE(struct CSimpleTransform, 0x10);
+
 struct CMatrix {
 	struct RwV3D right;
 	float pad0;
@@ -55,6 +79,14 @@ struct CMatrix {
 	int haveRwMatrix;
 };
 EXPECT_SIZE(struct CMatrix, 0x48);
+
+struct CPlaceable
+{
+	void *__vmt;
+	struct CSimpleTransform placement;
+	struct CMatrix *matrix;
+	/*incomplete*/
+};
 
 struct CCam {
 	char __pad0[0x190];
@@ -256,6 +288,7 @@ void game_CameraRestoreWithJumpCut();
 void __stdcall game_CameraSetOnPoint(
 	struct RwV3D *point, enum eCameraCutMode cutmode, int unk);
 void game_DrawRect(float x, float y, float w, float h, int argb);
+struct CColModel *game_EntityGetColModel(void *entity);
 float game_EntityGetDistanceFromCentreOfMassToBaseOfModel(void *entity);
 void game_EntitySetAlpha(void *entity, unsigned char alpha);
 void game_FreezePlayer(char flag);

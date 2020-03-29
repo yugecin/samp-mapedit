@@ -9,6 +9,7 @@
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
+#include <math.h>
 #include <string.h>
 #include <windows.h>
 
@@ -357,108 +358,121 @@ void objbase_do_hover()
 	}
 }
 
-#if 0
 static
-void objbase_draw_entity_bound_rect(void *entity, int color)
+void objbase_draw_entity_bound_rect(struct CPlaceable *entity, int col)
 {
-	void *proc;
-	void *bb;
-	void *colmodel;
-	struct Rect boundrect;
-	struct RwV3D world[4], *a, *b, *c, *d;
-	struct RwV3D screen[4];
+#define P(A,B,C,D) \
+	if(A.z>0.0f&&B.z>0.0f&&C.z>0.0f&&D.z>0.0f){\
+	verts[0].x = A.x; verts[0].y = A.y;\
+	verts[1].x = B.x; verts[1].y = B.y;\
+	verts[2].x = C.x; verts[2].y = C.y;\
+	verts[3].x = D.x; verts[3].y = D.y;\
+	game_RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, verts, 4);}
+
+	struct CColModel *colmodel;
+	struct CMatrix mat;
+	struct RwV3D _a, _b, _c, _d, _e, _f, _g, _h, a, b, c, d, e, f, g, h;
+	struct RwV3D colsize;
 	struct IM2DVERTEX verts[] = {
-		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
-		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
-		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
-		{0, 0, 0, 0x40555556, 0x660000FF, 1.0f, 0.0f},
+		{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
+		{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
+		{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
+		{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
 	};
-	struct RwV3D *min, *max;
 
-	a = world;
-	b = a + 1;
-	c = b + 1;
-	d = c + 1;
-	if (entity != NULL) {
-		/*
-
-		use this: (getcolmodel) with CPlaceable::GetRightDirection etc
-		_asm mov ecx, entity
-		_asm mov eax, 0x535300
-		_asm call eax
-		_asm mov colmodel, eax
-		if (colmodel) {
-			min = (struct RwV3D*) colmodel;
-			max = (struct RwV3D*) ((char*) colmodel + 0xC);
+	if (entity != NULL &&
+		(colmodel = game_EntityGetColModel(entity)) != NULL)
+	{
+		if (entity->matrix != NULL) {
+			mat = *entity->matrix;
+		} else {
+			/*TODO*/
+			return;
 		}
-		game_WorldToScreen(screen + 0, min);
-		game_WorldToScreen(screen + 1, max);
-		game_TextPrintString(screen[0].x, screen[0].y, "hi");
-		game_TextPrintString(screen[1].x, screen[1].y, "hi");
 
+		colsize.x = colmodel->max.x - colmodel->min.x;
+		colsize.y = colmodel->max.y - colmodel->min.y;
+		colsize.z = colmodel->max.z - colmodel->min.z;
 
-		*/
-		/*proc = (*((void***) entity))[9];
-		bb = &boundrect;
-		_asm {
-			mov ecx, entity
-			push bb
-			call proc
-		}
-		sprintf(debugstring, "%f %f %f %f",
-			boundrect.top, boundrect.bottom, boundrect.left,
-			boundrect.right);
-		ui_push_debug_string();
-		sprintf(debugstring, "OKE",
-			boundrect.top, boundrect.bottom, boundrect.left,
-			boundrect.right);
-		ui_push_debug_string();*/
-		/*
-		_asm {
-			mov ecx, entity
-			push a
-			push b
-			push c
-			push d
-			mov eax, 0x535340
-			call eax
-		}
-		game_WorldToScreen(screen + 0, world + 0);
-		game_WorldToScreen(screen + 1, world + 1);
-		game_WorldToScreen(screen + 2, world + 2);
-		game_WorldToScreen(screen + 3, world + 3);
-		game_TextPrintString(screen[0].x, screen[0].y, "hi");
-		game_TextPrintString(screen[1].x, screen[1].y, "hi");
-		game_TextPrintString(screen[2].x, screen[2].y, "hi");
-		game_TextPrintString(screen[3].x, screen[3].y, "hi");
-		*/
-		/*
+		/*up and at seem to be switched in my head*/
+
+		_a.x = mat.pos.x;
+		_a.x += mat.at.x * colmodel->min.z;
+		_a.x += mat.up.x * colmodel->min.y;
+		_a.x += mat.right.x * colmodel->min.x;
+		_a.y = mat.pos.y;
+		_a.y += mat.at.y * colmodel->min.z;
+		_a.y += mat.up.y * colmodel->min.y;
+		_a.y += mat.right.y * colmodel->min.x;
+		_a.z = mat.pos.z;
+		_a.z += mat.at.z * colmodel->min.z;
+		_a.z += mat.up.z * colmodel->min.y;
+		_a.z += mat.right.z * colmodel->min.x;
+
+		_b.x = _a.x + mat.right.x * colsize.x;
+		_b.y = _a.y + mat.right.y * colsize.x;
+		_b.z = _a.z + mat.right.z * colsize.x;
+
+		_c.x = _b.x + mat.up.x * colsize.y;
+		_c.y = _b.y + mat.up.y * colsize.y;
+		_c.z = _b.z + mat.up.z * colsize.y;
+
+		_d.x = _a.x + mat.up.x * colsize.y;
+		_d.y = _a.y + mat.up.y * colsize.y;
+		_d.z = _a.z + mat.up.z * colsize.y;
+
+		_e.x = _a.x + mat.at.x * colsize.z;
+		_e.y = _a.y + mat.at.y * colsize.z;
+		_e.z = _a.z + mat.at.z * colsize.z;
+
+		_f.x = _b.x + mat.at.x * colsize.z;
+		_f.y = _b.y + mat.at.y * colsize.z;
+		_f.z = _b.z + mat.at.z * colsize.z;
+
+		_g.x = _c.x + mat.at.x * colsize.z;
+		_g.y = _c.y + mat.at.y * colsize.z;
+		_g.z = _c.z + mat.at.z * colsize.z;
+
+		_h.x = _d.x + mat.at.x * colsize.z;
+		_h.y = _d.y + mat.at.y * colsize.z;
+		_h.z = _d.z + mat.at.z * colsize.z;
+
+		game_WorldToScreen(&a, &_a);
+		game_WorldToScreen(&b, &_b);
+		game_WorldToScreen(&c, &_c);
+		game_WorldToScreen(&d, &_d);
+		game_WorldToScreen(&e, &_e);
+		game_WorldToScreen(&f, &_f);
+		game_WorldToScreen(&g, &_g);
+		game_WorldToScreen(&h, &_h);
+
+		verts[0].col = verts[1].col = verts[2].col = verts[3].col = col;
 		game_RwIm2DPrepareRender();
-		verts[0].x = screen[0].x;
-		verts[0].y = screen[0].y;
-		verts[1].x = screen[1].x;
-		verts[1].y = screen[1].y;
-		verts[2].x = screen[3].x;
-		verts[2].y = screen[3].y;
-		verts[3].x = screen[2].x;
-		verts[3].y = screen[2].y;
-		game_RwIm2DRenderPrimitive(4, verts, 4);
-		game_RwIm2DRenderPrimitive(4, verts, 4);
-		game_RwIm2DRenderPrimitive(4, verts, 4);
-		game_RwIm2DRenderPrimitive(4, verts, 4);
-		game_RwIm2DRenderPrimitive(4, verts, 4);
-		game_RwIm2DRenderPrimitive(4, verts, 4);*/
+		P(a, b, c, d);
+		P(e, f, g, h);
+		P(a, b, f, e);
+		P(b, c, g, f);
+		P(c, d, h, g);
+		P(d, a, e, h);
 	}
+#undef P
 }
-#endif
 
 void objbase_frame_update()
 {
+	union {
+		int full;
+		struct {
+			char b, g, r, a;
+		} comps;
+	} color;
+
+	color.full = 0x00FF0000;
+	color.comps.a = (char) (55 * (1.0f - fabs(sinf(*timeInGame * 0.004f))));
 	objbase_do_hover();
-#if 0
-	objbase_draw_entity_bound_rect(selected_entity.entity, 0xFFFF00FF);
-	objbase_draw_entity_bound_rect(hovered_entity.entity, 0xFFFF00FF);
-#endif
+	objbase_draw_entity_bound_rect(selected_entity.entity, color.full);
+	color.comps.b = 0xFF;
+	objbase_draw_entity_bound_rect(hovered_entity.entity, color.full);
 }
 
 #define _CScriptThread__getNumberParams 0x464080
