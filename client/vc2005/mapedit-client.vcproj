@@ -182,6 +182,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ide.c"
+				>
+			</File>
+			<File
+				RelativePath="..\ide.h"
+				>
+			</File>
+			<File
 				RelativePath="..\msgbox.c"
 				>
 			</File>

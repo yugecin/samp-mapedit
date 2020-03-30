@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "ide.h"
 #include "msgbox.h"
 #include "objbase.h"
 #include "objects.h"
@@ -178,6 +179,8 @@ void client_init()
 	objects_init();
 	objbrowser_init();
 	racecp_init();
+
+	ide_load();
 
 	prj_do_show_window();
 
