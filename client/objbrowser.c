@@ -136,6 +136,12 @@ void recreate_object()
 	create_object();
 }
 
+static
+void cb_force_buttons_enabled(struct UI_BUTTON *btn)
+{
+	btn_next->enabled = btn_prev->enabled = 1;
+}
+
 void objbrowser_try_find_optimal_camera_distance(struct CColModel *colmodel)
 {
 	struct RwV3D colsize;
@@ -153,6 +159,9 @@ void objbrowser_try_find_optimal_camera_distance(struct CColModel *colmodel)
 			colsize.x = colsize.z;
 		}
 		camera_distance = colsize.x * 2.0f;
+		if (camera_distance < 3.0f) {
+			camera_distance = 3.0f;
+		}
 	}
 }
 
@@ -360,6 +369,8 @@ void objbrowser_init()
 	ui_wnd_add_child(wnd, btn_next);
 	btn_prev = ui_btn_make("Previous_model", cb_btn_prev_model);
 	ui_wnd_add_child(wnd, btn_prev);
+	btn = ui_btn_make("Help_UI_is_stuck", cb_force_buttons_enabled);
+	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Switch_day/night", cb_btn_switchtime);
 	ui_wnd_add_child(wnd, btn);
 	btn_create = ui_btn_make("Create", cb_btn_create);
