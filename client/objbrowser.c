@@ -188,15 +188,12 @@ int objbrowser_object_created(struct OBJECT *object)
 		}
 		rotationStartTime = *timeInGame;
 		hasvalidobject = 1;
-		manual_rotation_x = 0.0f;
+		manual_rotate = 0;
+		manual_rotation_x = M_PI - atanf(1.0f / DEFAULT_ANGLE_RATIO);
 		manual_rotation_z = 0.0f;
 		manual_rotation_base_x = 0.0f;
 		manual_rotation_base_z = 0.0f;
-		manual_rotate = 1;
-		objbrowser_update_camera(); /*for function below to work*/
 		objbrowser_try_find_optimal_camera_distance(colmodel);
-		manual_rotate = 0;
-		manual_rotation_x = M_PI - atanf(1.0f / DEFAULT_ANGLE_RATIO);
 		objbrowser_update_camera();
 		return 1;
 	}
