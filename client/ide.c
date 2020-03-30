@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 
-char *modelNames[MAX_MODEL_ID];
+char *modelNames[MAX_MODELS];
 static char names[20000 * 16];
 static char *nameptr;
 static char *files[] = {
@@ -104,7 +104,7 @@ nextline:
 		} else if (inobj) {
 			amount++;
 			modelid = atoi(buf);
-			if (modelid < 0 || MAX_MODEL_ID < modelid) {
+			if (modelid < 0 || MAX_MODELS <= modelid) {
 				sprintf(debugstring,
 					"model id %d in file %s oob",
 					modelid,

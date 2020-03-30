@@ -197,16 +197,22 @@ int objbrowser_object_created(struct OBJECT *object)
 static
 void cb_btn_prev_model(struct UI_BUTTON *btn)
 {
-	if (picking_object.model > 0) {
-		picking_object.model--;
-	}
+	do {
+		if (--picking_object.model <= 0) {
+			picking_object.model = MAX_MODELS - 1;
+		}
+	} while (modelNames[picking_object.model] == NULL);
 	recreate_object();
 }
 
 static
 void cb_btn_next_model(struct UI_BUTTON *btn)
 {
-	picking_object.model++;
+	do {
+		if (++picking_object.model >= MAX_MODELS) {
+			picking_object.model = 1;
+		}
+	} while (modelNames[picking_object.model] == NULL);
 	recreate_object();
 }
 
@@ -286,7 +292,6 @@ void cb_btn_create(struct UI_BUTTON *btn)
 
 	object = active_layer->objects + active_layer->numobjects++;
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
-	picking_object.model = 0;
 	game_ObjectSetPos(object->sa_object, positionToCommit);
 	restore_after_hide();
 }
