@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "ide.h"
 #include "msgbox.h"
 #include "ui.h"
 #include "objbrowser.h"
@@ -19,6 +20,8 @@
 static struct UI_WINDOW *wnd;
 static struct UI_BUTTON *btn_next, *btn_prev;
 static struct UI_BUTTON *btn_create;
+static struct UI_LABEL *lbl_modelname;
+static char lbltxt_modelid[7], lbltxt_modelname[40];
 
 static int isactive = 0;
 static int hasvalidobject = 0;
@@ -101,6 +104,14 @@ struct OBJECT *objbrowser_object_by_handle(int sa_handle)
 static
 void create_object()
 {
+	sprintf(lbltxt_modelid, "%d", picking_object.model);
+	if (modelNames[picking_object.model] != NULL) {
+		strcpy(lbltxt_modelname, modelNames[picking_object.model]);
+		ui_lbl_recalc_size(lbl_modelname);
+	} else {
+		lbltxt_modelname[0] = '?';
+		lbltxt_modelname[1] = 0;
+	}
 	btn_create->enabled = 0;
 	btn_prev->enabled = btn_next->enabled = 0;
 	objbase_mkobject(&picking_object, &positionToPreview);
@@ -300,6 +311,7 @@ void cb_btn_switchtime(struct UI_BUTTON *btn)
 
 void objbrowser_show(struct RwV3D *positionToCreate)
 {
+	lbltxt_modelid[0] = lbltxt_modelname[0] = 0;
 	positionToCommit = positionToCreate;
 	originalCameraPos = camera->position;
 	originalCameraRot = camera->lookVector;
@@ -337,6 +349,8 @@ void objbrowser_init()
 	wnd_original_draw_proc = wnd->_parent._parent.proc_draw;
 	wnd->_parent._parent.proc_draw = (void*) objbrowser_draw_wnd;
 
+	ui_wnd_add_child(wnd, ui_lbl_make(lbltxt_modelid));
+	ui_wnd_add_child(wnd, lbl_modelname = ui_lbl_make(lbltxt_modelname));
 	btn_next = ui_btn_make("Next_model", cb_btn_next_model);
 	ui_wnd_add_child(wnd, btn_next);
 	btn_prev = ui_btn_make("Previous_model", cb_btn_prev_model);
