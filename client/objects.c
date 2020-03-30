@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "ide.h"
 #include "msgbox.h"
 #include "ui.h"
 #include "objbase.h"
@@ -24,6 +25,7 @@ static struct UI_INPUT *in_layername;
 static struct UI_WINDOW *window_objinfo;
 static struct UI_LABEL *lbl_objentity;
 static struct UI_LABEL *lbl_objflags;
+static struct UI_LABEL *lbl_objmodelname;
 static struct UI_BUTTON *btn_remove_building;
 static struct UI_BUTTON *btn_objclone;
 static struct UI_BUTTON *btn_move_obj_samp;
@@ -31,6 +33,7 @@ static struct UI_BUTTON *btn_move_obj_click;
 
 static char txt_objentity[9];
 static char txt_objmodel[9];
+static char txt_objmodelname[45];
 static char txt_objtype[9];
 static char txt_objflags[9];
 static char txt_objlodentity[9];
@@ -303,6 +306,9 @@ void objects_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objentity));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Model:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objmodel));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("Model:"));
+	lbl_objmodelname = ui_lbl_make(txt_objmodelname);
+	ui_wnd_add_child(window_objinfo, lbl_objmodelname);
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Type:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objtype));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Flags:"));
@@ -419,13 +425,17 @@ static
 void objects_select_entity(void *entity)
 {
 	void *lod;
+	unsigned short modelid;
 
 	objbase_select_entity(entity);
 	if (entity != NULL) {
 		btn_objclone->enabled = 1;
 		lod = *((int**) ((char*) entity + 0x30));
+		modelid = *((unsigned short*) entity + 0x11);
 		sprintf(txt_objentity, "%p", entity);
-		sprintf(txt_objmodel, "%hd", *((short*) entity + 0x11));
+		sprintf(txt_objmodel, "%hd", modelid);
+		strcpy(txt_objmodelname, modelNames[modelid]);
+		ui_lbl_recalc_size(lbl_objmodelname);
 		sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
 		sprintf(txt_objflags, "%p", *((int*) entity + 7));
 		if ((int) lod == -1 || lod == NULL) {
@@ -454,6 +464,7 @@ void objects_select_entity(void *entity)
 		btn_move_obj_click->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objmodel, "0");
+		strcpy(txt_objmodelname, "?");
 		strcpy(txt_objtype, "00000000");
 		strcpy(txt_objflags, "00000000");
 		strcpy(txt_objlodentity, "00000000");
