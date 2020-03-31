@@ -289,7 +289,7 @@ int ui_wnd_mousedown(struct UI_WINDOW *wnd)
 		elem->y - buttonheight <= cursory &&
 		cursory < elem->y)
 	{
-		if (is_closebtn_hovered(wnd)) {
+		if (wnd->closeable && is_closebtn_hovered(wnd)) {
 			wnd->grabx = GRABX_VAL_CLOSEBTN;
 		} else {
 			wnd->grabx = cursorx - wnd->_parent._parent.x;
