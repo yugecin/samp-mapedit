@@ -479,6 +479,20 @@ void objbase_frame_update()
 #define _CScriptThread__getNumberParams 0x464080
 #define _CScriptThread__setNumberParams 0x464370
 #define _CObject_vtable_CEntity_render 0x534310
+#define _CWorld__remove 0x563280
+
+static
+void remove_rope_registered_on_object(void *object)
+{
+	int i;
+
+	for (i = 0; i < MAX_ROPES; i++) {
+		if (ropes[i].ropeHolder == object) {
+			game_RopeRemove(ropes + i);
+			return;
+		}
+	}
+}
 
 static
 void objbase_object_created(object, sa_object, sa_handle)
@@ -533,6 +547,27 @@ __declspec(naked) void opcode_0107_detour()
 }
 
 /**
+opcode 0108 destroy_object
+Hooked on the call to CWorld__remove to remove attached ropes, for example for
+model 1385, the game automagically attaches a rope to it (and reattaches one
+as soon as the rope is deleted?). The client crashes when this object is
+deleted, so in here the rope is deleted as well.
+*/
+static
+__declspec(naked) void opcode_0108_detour()
+{
+	_asm {
+		pushad
+		push edi
+		call remove_rope_registered_on_object
+		add esp, 0x4
+		popad
+		mov eax, _CWorld__remove
+		jmp eax
+	}
+}
+
+/**
 calls to _CScriptThread__getNumberParams at the beginning of opcode 0453 handler
 get redirected here
 */
@@ -559,6 +594,8 @@ struct DETOUR {
 
 /*0107=5,%5d% = create_object %1o% at %2d% %3d% %4d%*/
 static struct DETOUR detour_0107;
+/*0108=1,destroy_object %1d%*/
+static struct DETOUR detour_0108;
 /*0453=4,set_object %1d% XYZ_rotation %2d% %3d% %4d%*/
 static struct DETOUR detour_0453;
 static struct DETOUR detour_render_object;
@@ -598,6 +635,8 @@ void objbase_init()
 
 	detour_0107.target = (int*) 0x469896;
 	detour_0107.new_target = (int) opcode_0107_detour;
+	detour_0108.target = (int*) 0x4698E5;
+	detour_0108.new_target = (int) opcode_0108_detour;
 	detour_0453.target = (int*) 0x48A355;
 	detour_0453.new_target = (int) opcode_0453_detour;
 	detour_render_object.target = (int*) 0x59F1EE;
@@ -607,6 +646,7 @@ void objbase_init()
 	detour_render_water.target = (int*) 0x6EF658;
 	detour_render_water.new_target = (int) render_water_detour;
 	objbase_install_detour(&detour_0107);
+	objbase_install_detour(&detour_0108);
 	objbase_install_detour(&detour_0453);
 	//objbase_install_detour(&detour_render_object);
 	objbase_install_detour(&detour_render_centity);
@@ -619,6 +659,7 @@ void objbase_init()
 void objbase_dispose()
 {
 	objbase_uninstall_detour(&detour_0107);
+	objbase_uninstall_detour(&detour_0108);
 	objbase_uninstall_detour(&detour_0453);
 	//objbase_uninstall_detour(&detour_render_object);
 	objbase_uninstall_detour(&detour_render_centity);

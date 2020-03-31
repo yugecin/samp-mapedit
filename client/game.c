@@ -5,6 +5,7 @@
 #include "ui.h"
 #include <windows.h>
 
+struct CRope *ropes = (struct CRope*) 0xB768B8;
 unsigned int *fontColorABGR = (unsigned int*) 0xC71A97;
 unsigned char *enableHudByOpcode = (unsigned char*) 0xA444A0;
 struct CMouseState *activeMouseState = (struct CMouseState*) 0xB73404;
@@ -388,6 +389,19 @@ invehicle:
 		pop ecx
 		ret
 #endif
+	}
+}
+
+__declspec(naked)
+void game_RopeRemove(struct CRope *rope)
+{
+	_asm {
+		push ecx
+		mov ecx, [esp+0x8] /*rope*/
+		mov eax, 0x556780
+		call eax
+		pop ecx
+		ret
 	}
 }
 

@@ -259,8 +259,29 @@ struct CPed
 	void *vehicle;
 	/*more stuff here*/
 };
+
+struct CRope {
+	struct RwV3D segments[32];
+	struct RwV3D segmentsReleased[32];
+	int id;
+	float field_304;
+	float mass;
+	float ropeTotalLength;
+	void *ropeHolder;
+	void *attachedObject;
+	void *attachedEntity;
+	float ropeSegmentLength;
+	int time;
+	char numsegments;
+	char type;
+	unsigned short flags;
+};
+EXPECT_SIZE(struct CRope, 0x328);
 #pragma pack(pop)
 
+#define MAX_ROPES 8
+
+extern struct CRope *ropes;
 extern unsigned int *fontColorABGR;
 extern unsigned char *enableHudByOpcode;
 extern struct CMouseState *activeMouseState;
@@ -334,6 +355,7 @@ void game_ObjectSetRotRad(void *object, struct RwV3D *rot);
 void game_PedGetPos(struct CPed *ped, struct RwV3D *pos, float *rot);
 void game_PedSetPos(struct CPed *ped, struct RwV3D *pos);
 void game_PedSetRot(struct CPed *ped, float rot);
+void game_RopeRemove(struct CRope *rope);
 int game_RwIm2DPrepareRender();
 int game_RwIm2DRenderPrimitive(int type, void *verts, int numverts);
 void game_RwMatrixInvert(struct CMatrix *out, struct CMatrix *in);
