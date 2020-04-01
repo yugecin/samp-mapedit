@@ -40,6 +40,7 @@ static float clickx, clicky;
 static int desired_time;
 static unsigned char *cloud_render_opcode;
 static unsigned char cloud_render_original_opcode;
+static char blacklistedObjects[MAX_MODELS];
 
 #define DEFAULT_ANGLE_RATIO 0.2f
 
@@ -207,7 +208,8 @@ void cb_btn_prev_model(struct UI_BUTTON *btn)
 		if (--picking_object.model <= 0) {
 			picking_object.model = MAX_MODELS - 1;
 		}
-	} while (modelNames[picking_object.model] == NULL);
+	} while (modelNames[picking_object.model] == NULL ||
+		blacklistedObjects[picking_object.model]);
 	recreate_object();
 }
 
@@ -218,7 +220,8 @@ void cb_btn_next_model(struct UI_BUTTON *btn)
 		if (++picking_object.model >= MAX_MODELS) {
 			picking_object.model = 1;
 		}
-	} while (modelNames[picking_object.model] == NULL);
+	} while (modelNames[picking_object.model] == NULL ||
+		blacklistedObjects[picking_object.model]);
 	recreate_object();
 }
 
@@ -342,6 +345,24 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	*cloud_render_opcode = 0xC3; /*ret*/
 }
 
+static
+void objbrowser_init_blacklist()
+{
+	memset(blacklistedObjects, 0, sizeof(blacklistedObjects));
+	/*Train cross barrier pole. Shows error in SA:MP chatbox when deleted*/
+	blacklistedObjects[1373] = 1;
+	/*Various crane elements that spawn a rope.*/
+	/*When deleting the object, the game will crash if the rope is not
+	manually deleted. This is done in the mapeditor, but when actually
+	exporting and using it on a live server, clients will crash.*/
+	blacklistedObjects[1382] = 1; /*dock crane*/
+	blacklistedObjects[1385] = 1; /*tower crane movable element*/
+	blacklistedObjects[16329] = 1; /*tower crane movable element*/
+	/*1374 is the barrier itself, it seems to move but not produce errors.*/
+	/*Crashes (caught by SA:MP) when the object is being created.*/
+	blacklistedObjects[3118] = 1; /*imy_shash_LOD*/
+}
+
 void objbrowser_init()
 {
 	struct UI_BUTTON *btn;
@@ -349,6 +370,8 @@ void objbrowser_init()
 
 	picking_object.model = 3279;
 	desired_time = 12;
+
+	objbrowser_init_blacklist();
 
 	cloud_render_opcode = (unsigned char*) 0x716380;
 	VirtualProtect(cloud_render_opcode, 1, PAGE_EXECUTE_READWRITE, &oldvp);
