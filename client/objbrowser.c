@@ -122,12 +122,14 @@ static void destroy_object()
 {
 	struct MSG_NC nc;
 
-	hasvalidobject = 0;
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
-	nc.nc = NC_DestroyObject;
-	nc.params.asint[1] = picking_object.samp_objectid;
-	sockets_send(&nc, sizeof(nc));
+	if (hasvalidobject) {
+		hasvalidobject = 0;
+		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+		nc._parent.data = 0;
+		nc.nc = NC_DestroyObject;
+		nc.params.asint[1] = picking_object.samp_objectid;
+		sockets_send(&nc, sizeof(nc));
+	}
 }
 
 static
@@ -280,6 +282,7 @@ void objbrowser_do_ui()
 static
 void restore_after_hide()
 {
+	destroy_object();
 	camera->position = originalCameraPos;
 	camera->lookVector = originalCameraRot;
 	ui_update_camera();
@@ -301,14 +304,13 @@ void cb_btn_create(struct UI_BUTTON *btn)
 
 	object = active_layer->objects + active_layer->numobjects++;
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
-	game_ObjectSetPos(object->sa_object, positionToCommit);
+	objbase_mkobject(object, positionToCommit);
 	restore_after_hide();
 }
 
 static
 void cb_btn_cancel()
 {
-	destroy_object();
 	restore_after_hide();
 }
 
