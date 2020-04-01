@@ -401,7 +401,7 @@ void objbrowser_set_list_data()
 
 	numnames = 0;
 	for (i = 0; i < 20000; i++) {
-		if (modelNames[i] != NULL) {
+		if (modelNames[i] != NULL && !blacklistedObjects[i]) {
 			lst_index_to_model_mapping[numnames] = i;
 			lst_model_to_index_mapping[i] = numnames;
 			names[numnames] = modelNames[i];
