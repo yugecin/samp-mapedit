@@ -9,6 +9,24 @@
 #define SCROLLBW 20.0f
 
 static
+int ui_lst_is_index_visible(struct UI_LIST *lst, int idx)
+{
+	return
+		lst->topoffset <= idx &&
+		idx < lst->topoffset + lst->realpagesize;
+}
+
+static
+void ui_lst_ensure_topoffset_in_range(struct UI_LIST *lst)
+{
+	if (lst->topoffset < 0) {
+		lst->topoffset = 0;
+	} else if (lst->topoffset > lst->numitems - lst->realpagesize) {
+		lst->topoffset = lst->numitems - lst->realpagesize;
+	}
+}
+
+static
 void ui_lst_dispose(struct UI_LIST *lst)
 {
 	free(lst->items);
@@ -313,5 +331,7 @@ void ui_lst_set_selected_index(struct UI_LIST *lst, int idx)
 {
 	if (0 <= idx && idx < lst->numitems) {
 		lst->selectedindex = idx;
+		lst->topoffset = idx - lst->realpagesize / 2;
+		ui_lst_ensure_topoffset_in_range(lst);
 	}
 }

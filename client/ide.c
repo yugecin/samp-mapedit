@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 char *modelNames[MAX_MODELS];
-static char names[20000 * 16];
+static char names[MAX_MODELS * 20];
 static char *nameptr;
 static char *files[] = {
 	"data/maps/country/countn2.ide",
@@ -112,7 +112,7 @@ nextline:
 				ui_push_debug_string();
 				goto nextline;
 			}
-			if (nameptr - names > sizeof(names) - 25) {
+			if (nameptr - names > sizeof(names) - 30) {
 				sprintf(debugstring, "ide name pool depleted");
 				ui_push_debug_string();
 				goto nextline;
@@ -121,6 +121,8 @@ nextline:
 			while (buf[pos++] != ',');
 			while (buf[pos] == ' ') pos++;
 			modelNames[modelid] = nameptr;
+			sprintf(nameptr, "%05d: ", modelid);
+			nameptr += 7;
 nextchr:
 			*nameptr = buf[pos];
 			if (*nameptr == ',' || *nameptr == ' ') {
@@ -152,8 +154,7 @@ void ide_load()
 	while (files[i][0]) {
 		num += ide_load_file(files[i++]);
 	}
-	/*
-	sprintf(debugstring,
+	/*sprintf(debugstring,
 		"loaded %d modelnames, %dB/%dB used",
 		num,
 		nameptr - names,

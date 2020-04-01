@@ -435,7 +435,7 @@ void objects_select_entity(void *entity)
 		sprintf(txt_objentity, "%p", entity);
 		sprintf(txt_objmodel, "%hd", modelid);
 		if (modelNames[modelid]) {
-			strcpy(txt_objmodelname, modelNames[modelid]);
+			strcpy(txt_objmodelname, modelNames[modelid] + 7);
 		} else {
 			strcpy(txt_objmodelname, "?");
 		}

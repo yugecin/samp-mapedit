@@ -168,6 +168,8 @@ void client_init()
 	detour();
 
 	ui_init();
+	ide_load();
+
 	/*order of init affects layout of main menu and context menu*/
 	settings_init();
 	prj_init();
@@ -179,8 +181,6 @@ void client_init()
 	objects_init();
 	objbrowser_init();
 	racecp_init();
-
-	ide_load();
 
 	prj_do_show_window();
 

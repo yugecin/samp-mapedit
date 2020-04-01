@@ -21,7 +21,12 @@ static struct UI_WINDOW *wnd;
 static struct UI_BUTTON *btn_next, *btn_prev;
 static struct UI_BUTTON *btn_create;
 static struct UI_LABEL *lbl_modelname;
+static struct UI_LIST *lst_browser;
 static char lbltxt_modelid[7], lbltxt_modelname[40];
+static int lst_index_to_model_mapping[MAX_MODELS];
+static int lst_model_to_index_mapping[MAX_MODELS];
+static int list_req_sel_index;
+static ui_method *proc_orig_lst_post_layout;
 
 static int isactive = 0;
 static int hasvalidobject = 0;
@@ -107,7 +112,7 @@ void create_object()
 {
 	sprintf(lbltxt_modelid, "%d", picking_object.model);
 	if (modelNames[picking_object.model] != NULL) {
-		strcpy(lbltxt_modelname, modelNames[picking_object.model]);
+		strcpy(lbltxt_modelname, modelNames[picking_object.model] + 7);
 		ui_lbl_recalc_size(lbl_modelname);
 	} else {
 		lbltxt_modelname[0] = '?';
@@ -204,6 +209,15 @@ int objbrowser_object_created(struct OBJECT *object)
 }
 
 static
+void objbrowser_object_changed_by_button()
+{
+	int list_index;
+
+	list_index = lst_model_to_index_mapping[picking_object.model];
+	ui_lst_set_selected_index(lst_browser, list_index);
+}
+
+static
 void cb_btn_prev_model(struct UI_BUTTON *btn)
 {
 	do {
@@ -213,6 +227,7 @@ void cb_btn_prev_model(struct UI_BUTTON *btn)
 	} while (modelNames[picking_object.model] == NULL ||
 		blacklistedObjects[picking_object.model]);
 	recreate_object();
+	objbrowser_object_changed_by_button();
 }
 
 static
@@ -225,6 +240,7 @@ void cb_btn_next_model(struct UI_BUTTON *btn)
 	} while (modelNames[picking_object.model] == NULL ||
 		blacklistedObjects[picking_object.model]);
 	recreate_object();
+	objbrowser_object_changed_by_button();
 }
 
 static
@@ -348,6 +364,17 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 }
 
 static
+void cb_lst_object_selected(struct UI_LIST *lst)
+{
+	int idx;
+
+	if ((idx = lst->selectedindex) != -1) {
+		picking_object.model = lst_index_to_model_mapping[idx];
+		recreate_object();
+	}
+}
+
+static
 void objbrowser_init_blacklist()
 {
 	memset(blacklistedObjects, 0, sizeof(blacklistedObjects));
@@ -363,6 +390,38 @@ void objbrowser_init_blacklist()
 	/*1374 is the barrier itself, it seems to move but not produce errors.*/
 	/*Crashes (caught by SA:MP) when the object is being created.*/
 	blacklistedObjects[3118] = 1; /*imy_shash_LOD*/
+}
+
+static
+void objbrowser_set_list_data()
+{
+	char *names[MAX_MODELS];
+	int numnames;
+	int i;
+
+	numnames = 0;
+	for (i = 0; i < 20000; i++) {
+		if (modelNames[i] != NULL) {
+			lst_index_to_model_mapping[numnames] = i;
+			lst_model_to_index_mapping[i] = numnames;
+			names[numnames] = modelNames[i];
+			numnames++;
+		}
+	}
+	ui_lst_set_data(lst_browser, names, numnames);
+}
+
+static
+int objbrowser_lst_post_layout(void *lst)
+{
+	int result;
+
+	result = proc_orig_lst_post_layout(lst);
+	if (list_req_sel_index != -1) {
+		ui_lst_set_selected_index(lst_browser, list_req_sel_index);
+		list_req_sel_index = -1;
+	}
+	return result;
 }
 
 void objbrowser_init()
@@ -398,6 +457,14 @@ void objbrowser_init()
 	btn_create = ui_btn_make("Create", cb_btn_create);
 	ui_wnd_add_child(wnd, btn_create);
 	ui_wnd_add_child(wnd, ui_btn_make("Cancel", (void*) cb_btn_cancel));
+	lst_browser = ui_lst_make(35, cb_lst_object_selected);
+	lst_browser->_parent.pref_width = 400.0f;
+	proc_orig_lst_post_layout = lst_browser->_parent.proc_post_layout;
+	lst_browser->_parent.proc_post_layout = objbrowser_lst_post_layout;
+	ui_wnd_add_child(wnd, lst_browser);
+
+	objbrowser_set_list_data();
+	list_req_sel_index = lst_model_to_index_mapping[picking_object.model];
 }
 
 void objbrowser_dispose()
