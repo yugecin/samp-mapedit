@@ -434,7 +434,11 @@ void objects_select_entity(void *entity)
 		modelid = *((unsigned short*) entity + 0x11);
 		sprintf(txt_objentity, "%p", entity);
 		sprintf(txt_objmodel, "%hd", modelid);
-		strcpy(txt_objmodelname, modelNames[modelid]);
+		if (modelNames[modelid]) {
+			strcpy(txt_objmodelname, modelNames[modelid]);
+		} else {
+			strcpy(txt_objmodelname, "?");
+		}
 		ui_lbl_recalc_size(lbl_objmodelname);
 		sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
 		sprintf(txt_objflags, "%p", *((int*) entity + 7));
