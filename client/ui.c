@@ -473,7 +473,9 @@ void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd)
 	}
 	ui_do_cursor_movement();
 	ui_grablastkey();
-	wnd && UIPROC(wnd, proc_accept_key);
+	ui_last_key_down != 0 &&
+		ui_active_element != NULL &&
+		UIPROC(ui_active_element, proc_accept_key);
 	if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
 		ui_active_element = NULL;
 		wnd && ui_wnd_mousedown(wnd);
