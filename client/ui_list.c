@@ -29,7 +29,8 @@ void ui_lst_ensure_topoffset_in_range(struct UI_LIST *lst)
 static
 void ui_lst_dispose(struct UI_LIST *lst)
 {
-	free(lst->items);
+	free(lst->allItems);
+	free(lst->filteredItems);
 	free(lst);
 }
 
@@ -276,12 +277,49 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->cb = cb;
 	lst->prefpagesize = pagesize;
 	lst->numitems = 0;
+	lst->numAllitems = 0;
 	lst->topoffset = 0;
 	lst->items = NULL;
+	lst->allItems = NULL;
 	lst->numitems = 0;
 	lst->selectedindex = -1;
 	ui_lst_recalc_size(lst);
 	return lst;
+}
+
+static
+void ensure_topoffset_in_range(struct UI_LIST *lst)
+{
+	if (lst->topoffset > 0 &&
+		lst->topoffset + lst->realpagesize > lst->numitems)
+	{
+		lst->topoffset = lst->numitems - lst->realpagesize;
+		if (lst->topoffset < 0) {
+			lst->topoffset = 0;
+		}
+	}
+}
+
+void ui_lst_recalculate_filter(struct UI_LIST *lst)
+{
+	int i;
+
+	if (lst->filter == NULL || lst->filter[0] == 0) {
+		lst->items = lst->allItems;
+		lst->numitems = lst->numAllitems;
+		ensure_topoffset_in_range(lst);
+		return;
+	}
+
+	lst->items = lst->filteredItems;
+	lst->numitems = 0;
+	for (i = 0; i < lst->numAllitems; i++) {
+		if (strstr(lst->allItems[i], lst->filter) != NULL) {
+			lst->filteredItems[lst->numitems] = lst->allItems[i];
+			lst->numitems++;
+		}
+	}
+	ensure_topoffset_in_range(lst);
 }
 
 void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
@@ -289,19 +327,22 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 	char **table, *names, *currentname, c;
 	int i, j;
 
-	if (lst->items != NULL) {
-		free(lst->items);
-	}
+	free(lst->allItems);
+	free(lst->filteredItems);
+	lst->allItems = NULL;
+	lst->filteredItems = NULL;
 	if (numitems <= 0) {
 		lst->items = NULL;
 		lst->numitems = 0;
+		lst->numAllitems = 0;
 		lst->selectedindex = -1;
 		return;
 	}
 	lst->selectedindex = -1;
-	lst->numitems = numitems;
-	lst->items = malloc((sizeof(char*) + MAX_ITEM_LENGTH) * numitems);
-	table = lst->items;
+	lst->numAllitems = numitems;
+	lst->allItems = malloc((sizeof(char*) + MAX_ITEM_LENGTH) * numitems);
+	lst->filteredItems = malloc(sizeof(char*) * numitems);
+	table = lst->allItems;
 	names = ((char*) table) + numitems * sizeof(char*);
 	for (i = 0; i < numitems; i++) {
 		currentname = items[i];
@@ -317,14 +358,7 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 		table++;
 		names += MAX_ITEM_LENGTH;
 	}
-	if (lst->topoffset > 0 &&
-		lst->topoffset + lst->realpagesize > lst->numitems)
-	{
-		lst->topoffset = lst->numitems - lst->realpagesize;
-		if (lst->topoffset < 0) {
-			lst->topoffset = 0;
-		}
-	}
+	ui_lst_recalculate_filter(lst);
 }
 
 void ui_lst_set_selected_index(struct UI_LIST *lst, int idx)

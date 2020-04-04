@@ -1,6 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-typedef void (inputcb)(struct UI_INPUT *btn);
+typedef void (inputcb)(struct UI_INPUT *in);
 
 #define INPUT_TEXTLEN 50
 

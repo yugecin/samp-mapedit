@@ -424,8 +424,15 @@ int objbrowser_lst_post_layout(void *lst)
 	return result;
 }
 
+static
+void cb_in_filter_updated(struct UI_INPUT *in)
+{
+	ui_lst_recalculate_filter(lst_browser);
+}
+
 void objbrowser_init()
 {
+	struct UI_INPUT *filter;
 	struct UI_BUTTON *btn;
 	DWORD oldvp;
 
@@ -457,11 +464,14 @@ void objbrowser_init()
 	btn_create = ui_btn_make("Create", cb_btn_create);
 	ui_wnd_add_child(wnd, btn_create);
 	ui_wnd_add_child(wnd, ui_btn_make("Cancel", (void*) cb_btn_cancel));
+	filter = ui_in_make(cb_in_filter_updated);
+	ui_wnd_add_child(wnd, filter);
 	lst_browser = ui_lst_make(35, cb_lst_object_selected);
 	lst_browser->_parent.pref_width = 400.0f;
 	proc_orig_lst_post_layout = lst_browser->_parent.proc_post_layout;
 	lst_browser->_parent.proc_post_layout = objbrowser_lst_post_layout;
 	ui_wnd_add_child(wnd, lst_browser);
+	lst_browser->filter = filter->value;
 
 	objbrowser_set_list_data();
 	list_req_sel_index = lst_model_to_index_mapping[picking_object.model];
