@@ -25,7 +25,6 @@ static struct UI_LIST *lst_browser;
 static char lbltxt_modelid[7], lbltxt_modelname[40];
 static int lst_index_to_model_mapping[MAX_MODELS];
 static int lst_model_to_index_mapping[MAX_MODELS];
-static int list_req_sel_index;
 static ui_method *proc_orig_lst_post_layout;
 
 static int isactive = 0;
@@ -383,6 +382,7 @@ void objbrowser_init_blacklist()
 {
 	memset(blacklistedObjects, 0, sizeof(blacklistedObjects));
 	/*Train cross barrier pole. Shows error in SA:MP chatbox when deleted*/
+	/*1374 is the barrier itself, it seems to move but not produce errors.*/
 	blacklistedObjects[1373] = 1;
 	/*Various crane elements that spawn a rope.*/
 	/*When deleting the object, the game will crash if the rope is not
@@ -391,7 +391,6 @@ void objbrowser_init_blacklist()
 	blacklistedObjects[1382] = 1; /*dock crane*/
 	blacklistedObjects[1385] = 1; /*tower crane movable element*/
 	blacklistedObjects[16329] = 1; /*tower crane movable element*/
-	/*1374 is the barrier itself, it seems to move but not produce errors.*/
 	/*Crashes (caught by SA:MP) when the object is being created.*/
 	blacklistedObjects[3118] = 1; /*imy_shash_LOD*/
 }
@@ -418,15 +417,17 @@ void objbrowser_set_list_data()
 }
 
 static
-int objbrowser_lst_post_layout(void *lst)
+int objbrowser_lst_post_layout(struct UI_LIST *lst)
 {
-	int result;
+	int list_index, result;
 
+	/*need to do original post_layout first, so the height is set, so the
+	set_selected_index will scroll the selected index to the middle of the
+	list's viewport*/
 	result = proc_orig_lst_post_layout(lst);
-	if (list_req_sel_index != -1) {
-		ui_lst_set_selected_index(lst_browser, list_req_sel_index);
-		list_req_sel_index = -1;
-	}
+	list_index = lst_model_to_index_mapping[picking_object.model];
+	ui_lst_set_selected_index(lst_browser, list_index);
+	lst->_parent.proc_post_layout = proc_orig_lst_post_layout;
 	return result;
 }
 
@@ -482,7 +483,6 @@ void objbrowser_init()
 	lst_browser->filter = filter->value;
 
 	objbrowser_set_list_data();
-	list_req_sel_index = lst_model_to_index_mapping[picking_object.model];
 }
 
 void objbrowser_dispose()
