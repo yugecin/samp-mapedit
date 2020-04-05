@@ -209,38 +209,41 @@ int objbrowser_object_created(struct OBJECT *object)
 }
 
 static
-void objbrowser_object_changed_by_button()
+int objbrowser_is_model_pickable(int model)
 {
 	int list_index;
 
-	list_index = lst_model_to_index_mapping[picking_object.model];
-	ui_lst_set_selected_index(lst_browser, list_index);
+	if (modelNames[model]== NULL || blacklistedObjects[model]) {
+		return -1;
+	}
+
+	list_index = lst_model_to_index_mapping[model];
+	if (!ui_lst_is_index_valid(lst_browser, list_index)) {
+		return -1;
+	}
+
+	return list_index;
 }
 
 static
-void cb_btn_prev_model(struct UI_BUTTON *btn)
+void cb_btn_prev_next_model(struct UI_BUTTON *btn)
 {
+	int list_index;
+	int direction;
+
+	direction = (int) btn->_parent.userdata;
 	do {
-		if (--picking_object.model <= 0) {
+		picking_object.model += direction;
+		if (picking_object.model <= 0) {
 			picking_object.model = MAX_MODELS - 1;
 		}
-	} while (modelNames[picking_object.model] == NULL ||
-		blacklistedObjects[picking_object.model]);
-	recreate_object();
-	objbrowser_object_changed_by_button();
-}
-
-static
-void cb_btn_next_model(struct UI_BUTTON *btn)
-{
-	do {
-		if (++picking_object.model >= MAX_MODELS) {
+		if (picking_object.model >= MAX_MODELS) {
 			picking_object.model = 1;
 		}
-	} while (modelNames[picking_object.model] == NULL ||
-		blacklistedObjects[picking_object.model]);
+		list_index = lst_model_to_index_mapping[picking_object.model];
+	} while (list_index == -1);
 	recreate_object();
-	objbrowser_object_changed_by_button();
+	ui_lst_set_selected_index(lst_browser, list_index);
 }
 
 static
@@ -407,7 +410,9 @@ void objbrowser_set_list_data()
 			lst_model_to_index_mapping[i] = numnames;
 			names[numnames] = modelNames[i];
 			numnames++;
+			continue;
 		}
+		lst_model_to_index_mapping[i] = -1;
 	}
 	ui_lst_set_data(lst_browser, names, numnames);
 }
@@ -454,9 +459,11 @@ void objbrowser_init()
 
 	ui_wnd_add_child(wnd, ui_lbl_make(lbltxt_modelid));
 	ui_wnd_add_child(wnd, lbl_modelname = ui_lbl_make(lbltxt_modelname));
-	btn_next = ui_btn_make("Next_model", cb_btn_next_model);
+	btn_next = ui_btn_make("Next_model", cb_btn_prev_next_model);
+	btn_next->_parent.userdata = (void*) 1;
 	ui_wnd_add_child(wnd, btn_next);
-	btn_prev = ui_btn_make("Previous_model", cb_btn_prev_model);
+	btn_prev = ui_btn_make("Previous_model", cb_btn_prev_next_model);
+	btn_prev->_parent.userdata = (void*) -1;
 	ui_wnd_add_child(wnd, btn_prev);
 	btn = ui_btn_make("Help_UI_is_stuck", cb_force_buttons_enabled);
 	ui_wnd_add_child(wnd, btn);

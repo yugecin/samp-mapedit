@@ -367,6 +367,9 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 	ui_lst_recalculate_filter(lst);
 }
 
+/**
+Adjusts index for filter (maps non-filtered to filtered index).
+*/
 static
 int ui_lst_absolute_index_for_filtered_index(struct UI_LIST *lst, int idx)
 {
@@ -404,8 +407,21 @@ int ui_lst_get_selected_index(struct UI_LIST *lst)
 	int idx;
 
 	idx = lst->selectedindex;
-	if (idx != -1) {
+	if (idx == -1) {
+		return -1;
+	}
+	if (lst->items == lst->filteredItems) {
 		idx = lst->filteredIndexMapping[idx];
+	}
+	return idx;
+}
+
+int ui_lst_is_index_valid(struct UI_LIST *lst, int idx)
+{
+	idx = ui_lst_absolute_index_for_filtered_index(lst, idx);
+
+	if (idx < 0 || lst->numitems <= idx) {
+		return -1;
 	}
 	return idx;
 }
