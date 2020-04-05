@@ -31,6 +31,7 @@ void ui_lst_dispose(struct UI_LIST *lst)
 {
 	free(lst->allItems);
 	free(lst->filteredItems);
+	free(lst->filteredIndexMapping);
 	free(lst);
 }
 
@@ -281,6 +282,7 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->topoffset = 0;
 	lst->items = NULL;
 	lst->allItems = NULL;
+	lst->filteredIndexMapping = NULL;
 	lst->numitems = 0;
 	lst->selectedindex = -1;
 	ui_lst_recalc_size(lst);
@@ -316,6 +318,7 @@ void ui_lst_recalculate_filter(struct UI_LIST *lst)
 	for (i = 0; i < lst->numAllitems; i++) {
 		if (strstr(lst->allItems[i], lst->filter) != NULL) {
 			lst->filteredItems[lst->numitems] = lst->allItems[i];
+			lst->filteredIndexMapping[lst->numitems] = i;
 			lst->numitems++;
 		}
 	}
@@ -329,10 +332,12 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 
 	free(lst->allItems);
 	free(lst->filteredItems);
-	lst->allItems = NULL;
-	lst->filteredItems = NULL;
+	free(lst->filteredIndexMapping);
 	if (numitems <= 0) {
 		lst->items = NULL;
+		lst->allItems = NULL;
+		lst->filteredItems = NULL;
+		lst->filteredIndexMapping = NULL;
 		lst->numitems = 0;
 		lst->numAllitems = 0;
 		lst->selectedindex = -1;
@@ -342,6 +347,7 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 	lst->numAllitems = numitems;
 	lst->allItems = malloc((sizeof(char*) + MAX_ITEM_LENGTH) * numitems);
 	lst->filteredItems = malloc(sizeof(char*) * numitems);
+	lst->filteredIndexMapping = malloc(sizeof(short) * numitems);
 	table = lst->allItems;
 	names = ((char*) table) + numitems * sizeof(char*);
 	for (i = 0; i < numitems; i++) {
@@ -361,11 +367,45 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 	ui_lst_recalculate_filter(lst);
 }
 
+static
+int ui_lst_absolute_index_for_filtered_index(struct UI_LIST *lst, int idx)
+{
+	int i;
+
+	if (lst->items == lst->allItems) {
+		return idx; /*no filter*/
+	}
+
+	/*change this to binary search at some point? probably not needed*/
+	for (i = 0; i < lst->numitems; i++) {
+		if (lst->filteredIndexMapping[i] == idx) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 void ui_lst_set_selected_index(struct UI_LIST *lst, int idx)
 {
-	if (0 <= idx && idx < lst->numitems) {
-		lst->selectedindex = idx;
-		lst->topoffset = idx - lst->realpagesize / 2;
-		ui_lst_ensure_topoffset_in_range(lst);
+	idx = ui_lst_absolute_index_for_filtered_index(lst, idx);
+
+	if (idx < 0 || lst->numitems <= idx) {
+		lst->selectedindex = -1;
+		return;
 	}
+
+	lst->selectedindex = idx;
+	lst->topoffset = idx - lst->realpagesize / 2;
+	ui_lst_ensure_topoffset_in_range(lst);
+}
+
+int ui_lst_get_selected_index(struct UI_LIST *lst)
+{
+	int idx;
+
+	idx = lst->selectedindex;
+	if (idx != -1) {
+		idx = lst->filteredIndexMapping[idx];
+	}
+	return idx;
 }

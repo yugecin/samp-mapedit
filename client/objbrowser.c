@@ -368,7 +368,8 @@ void cb_lst_object_selected(struct UI_LIST *lst)
 {
 	int idx;
 
-	if ((idx = lst->selectedindex) != -1) {
+	idx = ui_lst_get_selected_index(lst);
+	if (idx != -1) {
 		picking_object.model = lst_index_to_model_mapping[idx];
 		recreate_object();
 	}

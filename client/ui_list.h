@@ -9,6 +9,8 @@ struct UI_LIST {
 	char **items;
 	char **allItems;
 	char **filteredItems;
+	/*filtered to non-filtered index*/
+	short *filteredIndexMapping;
 	int numitems;
 	int numAllitems;
 	int prefpagesize, realpagesize;
@@ -23,3 +25,4 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb);
 void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems);
 void ui_lst_set_selected_index(struct UI_LIST *lst, int idx);
 void ui_lst_recalculate_filter(struct UI_LIST *lst);
+int ui_lst_get_selected_index(struct UI_LIST *lst);
