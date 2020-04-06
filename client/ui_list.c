@@ -290,19 +290,6 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	return lst;
 }
 
-static
-void ensure_topoffset_in_range(struct UI_LIST *lst)
-{
-	if (lst->topoffset > 0 &&
-		lst->topoffset + lst->realpagesize > lst->numitems)
-	{
-		lst->topoffset = lst->numitems - lst->realpagesize;
-		if (lst->topoffset < 0) {
-			lst->topoffset = 0;
-		}
-	}
-}
-
 void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 {
 	char **table, *names, *currentname, c;
@@ -401,7 +388,7 @@ void ui_lst_recalculate_filter(struct UI_LIST *lst)
 	if (lst->filter == NULL || lst->filter[0] == 0) {
 		lst->items = lst->allItems;
 		lst->numitems = lst->numAllitems;
-		ensure_topoffset_in_range(lst);
+		ui_lst_ensure_topoffset_in_range(lst);
 		return;
 	}
 
@@ -419,5 +406,5 @@ void ui_lst_recalculate_filter(struct UI_LIST *lst)
 	}
 
 	ui_lst_set_selected_index(lst, lst->selectedindex);
-	ensure_topoffset_in_range(lst);
+	ui_lst_ensure_topoffset_in_range(lst);
 }
