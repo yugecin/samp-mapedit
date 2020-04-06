@@ -25,6 +25,7 @@ int *script_PLAYER_ACTOR = (int*) 0xA4996C; /* $3=PLAYER_ACTOR */
 struct CPed *player;
 void *gameHwnd = (void*) 0xC97C1C;
 void *_opcode0815ret = (void*) 0x473BEE;
+unsigned char *logBuffer = (char*) 0xBAB278;
 
 void unprotect_stuff()
 {

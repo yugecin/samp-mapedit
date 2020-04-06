@@ -7,6 +7,7 @@
 #include "objbase.h"
 #include "objects.h"
 #include "objbrowser.h"
+#include "persistence.h"
 #include "project.h"
 #include "racecp.h"
 #include "sockets.h"
@@ -207,6 +208,10 @@ void client_init()
 	nc.params.asint[8] = -1;
 	nc.params.asint[9] = 0;
 	sockets_send(&nc, sizeof(nc));
+
+	persistence_init();
+	prj_open_persistent_state();
+	objects_open_persistent_state();
 
 	hOldProc = (WNDPROC) GetWindowLong(ghwnd, GWL_WNDPROC);
 	SetWindowLong(ghwnd, GWL_WNDPROC, (LONG) NewWndProc);

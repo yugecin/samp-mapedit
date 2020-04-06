@@ -222,6 +222,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\persistence.c"
+				>
+			</File>
+			<File
+				RelativePath="..\persistence.h"
+				>
+			</File>
+			<File
 				RelativePath="..\player.c"
 				>
 			</File>

@@ -6,6 +6,7 @@
 #include "msgbox.h"
 #include "objbase.h"
 #include "objects.h"
+#include "persistence.h"
 #include "player.h"
 #include "project.h"
 #include "racecp.h"
@@ -100,6 +101,7 @@ void prj_postload()
 	timeweather_prj_postload();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;
+	persistence_set_project_to_load(open_project_name);
 }
 
 /**
@@ -296,4 +298,15 @@ int prj_on_background_element_just_clicked(colpoint, entity)
 		btn_context_tphere->enabled = 0;
 	}
 	return 1;
+}
+
+void prj_open_persistent_state()
+{
+	char *project_name;
+
+	project_name = persistence_get_project_to_load();
+	if (project_name != NULL) {
+		prj_open_by_name(project_name);
+		ui_hide_window();
+	}
 }

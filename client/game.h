@@ -303,6 +303,10 @@ extern int *script_PLAYER_CHAR;
 extern int *script_PLAYER_ACTOR;
 extern struct CPed *player;
 extern void *gameHwnd;
+/**
+There are two 50 char log buffers, only pointing to the first one.
+*/
+extern unsigned char *logBuffer;
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();

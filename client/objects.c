@@ -8,6 +8,7 @@
 #include "objbase.h"
 #include "objects.h"
 #include "objbrowser.h"
+#include "persistence.h"
 #include "player.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
@@ -83,6 +84,7 @@ void layer_activate(int idx)
 		ui_lbl_recalc_size(lbl_layer);
 		ui_in_set_text(in_layername, active_layer->name);
 		ui_lst_set_selected_index(lst_layers, activelayeridx);
+		persistence_set_object_layerid(activelayeridx);
 	}
 }
 
@@ -562,4 +564,9 @@ int objects_handle_esc()
 		return 1;
 	}
 	return 0;
+}
+
+void objects_open_persistent_state()
+{
+	layer_activate(persistence_get_object_layerid());
 }
