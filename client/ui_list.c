@@ -385,15 +385,16 @@ void ui_lst_recalculate_filter(struct UI_LIST *lst)
 {
 	int i;
 
+	/*temp change selected index from filtered to absolute, see below*/
+	lst->selectedindex = ui_lst_get_selected_index(lst);
+
 	if (lst->filter == NULL || lst->filter[0] == 0) {
 		lst->items = lst->allItems;
 		lst->numitems = lst->numAllitems;
 		ui_lst_ensure_topoffset_in_range(lst);
-		return;
+		goto ret;
 	}
 
-	/*temp change selected index from filtered to absolute, see below*/
-	lst->selectedindex = ui_lst_get_selected_index(lst);
 
 	lst->items = lst->filteredItems;
 	lst->numitems = 0;
@@ -405,6 +406,7 @@ void ui_lst_recalculate_filter(struct UI_LIST *lst)
 		}
 	}
 
+ret:
 	ui_lst_set_selected_index(lst, lst->selectedindex);
 	ui_lst_ensure_topoffset_in_range(lst);
 }
