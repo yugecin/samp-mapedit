@@ -208,7 +208,7 @@ int objbrowser_object_created(struct OBJECT *object)
 }
 
 static
-int objbrowser_is_model_pickable(int model)
+int list_valid_index_for_model(int model)
 {
 	int list_index;
 
@@ -239,7 +239,7 @@ void cb_btn_prev_next_model(struct UI_BUTTON *btn)
 		if (picking_object.model >= MAX_MODELS) {
 			picking_object.model = 1;
 		}
-		list_index = lst_model_to_index_mapping[picking_object.model];
+		list_index = list_valid_index_for_model(picking_object.model);
 	} while (list_index == -1);
 	recreate_object();
 	ui_lst_set_selected_index(lst_browser, list_index);

@@ -19,10 +19,11 @@ int ui_lst_is_index_visible(struct UI_LIST *lst, int idx)
 static
 void ui_lst_ensure_topoffset_in_range(struct UI_LIST *lst)
 {
+	if (lst->topoffset > lst->numitems - lst->realpagesize) {
+		lst->topoffset = lst->numitems - lst->realpagesize;
+	}
 	if (lst->topoffset < 0) {
 		lst->topoffset = 0;
-	} else if (lst->topoffset > lst->numitems - lst->realpagesize) {
-		lst->topoffset = lst->numitems - lst->realpagesize;
 	}
 }
 
@@ -302,29 +303,6 @@ void ensure_topoffset_in_range(struct UI_LIST *lst)
 	}
 }
 
-void ui_lst_recalculate_filter(struct UI_LIST *lst)
-{
-	int i;
-
-	if (lst->filter == NULL || lst->filter[0] == 0) {
-		lst->items = lst->allItems;
-		lst->numitems = lst->numAllitems;
-		ensure_topoffset_in_range(lst);
-		return;
-	}
-
-	lst->items = lst->filteredItems;
-	lst->numitems = 0;
-	for (i = 0; i < lst->numAllitems; i++) {
-		if (strstr(lst->allItems[i], lst->filter) != NULL) {
-			lst->filteredItems[lst->numitems] = lst->allItems[i];
-			lst->filteredIndexMapping[lst->numitems] = i;
-			lst->numitems++;
-		}
-	}
-	ensure_topoffset_in_range(lst);
-}
-
 void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 {
 	char **table, *names, *currentname, c;
@@ -368,18 +346,19 @@ void ui_lst_set_data(struct UI_LIST *lst, char** items, int numitems)
 }
 
 /**
-Adjusts index for filter (maps non-filtered to filtered index).
+@return index of the item in the filtered list (if filtered), -1 when invalid
 */
 static
-int ui_lst_absolute_index_for_filtered_index(struct UI_LIST *lst, int idx)
+int ui_lst_filtered_index_for_absolute_index(struct UI_LIST *lst, int idx)
 {
 	int i;
-
-	if (lst->items == lst->allItems) {
-		return idx; /*no filter*/
+	if (idx < 0 || lst->numAllitems <= idx) {
+		return -1;
 	}
-
-	/*change this to binary search at some point? probably not needed*/
+	if (lst->items == lst->allItems) {
+		/*no filter*/
+		return idx;
+	}
 	for (i = 0; i < lst->numitems; i++) {
 		if (lst->filteredIndexMapping[i] == idx) {
 			return i;
@@ -390,15 +369,12 @@ int ui_lst_absolute_index_for_filtered_index(struct UI_LIST *lst, int idx)
 
 void ui_lst_set_selected_index(struct UI_LIST *lst, int idx)
 {
-	idx = ui_lst_absolute_index_for_filtered_index(lst, idx);
-
-	if (idx < 0 || lst->numitems <= idx) {
-		lst->selectedindex = -1;
-		return;
-	}
+	idx = ui_lst_filtered_index_for_absolute_index(lst, idx);
 
 	lst->selectedindex = idx;
-	lst->topoffset = idx - lst->realpagesize / 2;
+	if (idx != -1) {
+		lst->topoffset = idx - lst->realpagesize / 2;
+	}
 	ui_lst_ensure_topoffset_in_range(lst);
 }
 
@@ -407,10 +383,7 @@ int ui_lst_get_selected_index(struct UI_LIST *lst)
 	int idx;
 
 	idx = lst->selectedindex;
-	if (idx == -1) {
-		return -1;
-	}
-	if (lst->items == lst->filteredItems) {
+	if (idx != -1 && lst->items == lst->filteredItems) {
 		idx = lst->filteredIndexMapping[idx];
 	}
 	return idx;
@@ -418,10 +391,33 @@ int ui_lst_get_selected_index(struct UI_LIST *lst)
 
 int ui_lst_is_index_valid(struct UI_LIST *lst, int idx)
 {
-	idx = ui_lst_absolute_index_for_filtered_index(lst, idx);
+	return ui_lst_filtered_index_for_absolute_index(lst, idx) != -1;
+}
 
-	if (idx < 0 || lst->numitems <= idx) {
-		return -1;
+void ui_lst_recalculate_filter(struct UI_LIST *lst)
+{
+	int i;
+
+	if (lst->filter == NULL || lst->filter[0] == 0) {
+		lst->items = lst->allItems;
+		lst->numitems = lst->numAllitems;
+		ensure_topoffset_in_range(lst);
+		return;
 	}
-	return idx;
+
+	/*temp change selected index from filtered to absolute, see below*/
+	lst->selectedindex = ui_lst_get_selected_index(lst);
+
+	lst->items = lst->filteredItems;
+	lst->numitems = 0;
+	for (i = 0; i < lst->numAllitems; i++) {
+		if (strstr(lst->allItems[i], lst->filter) != NULL) {
+			lst->filteredItems[lst->numitems] = lst->allItems[i];
+			lst->filteredIndexMapping[lst->numitems] = i;
+			lst->numitems++;
+		}
+	}
+
+	ui_lst_set_selected_index(lst, lst->selectedindex);
+	ensure_topoffset_in_range(lst);
 }
