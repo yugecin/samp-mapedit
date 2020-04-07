@@ -399,7 +399,7 @@ void ui_lst_recalculate_filter(struct UI_LIST *lst)
 	lst->items = lst->filteredItems;
 	lst->numitems = 0;
 	for (i = 0; i < lst->numAllitems; i++) {
-		if (strstr(lst->allItems[i], lst->filter) != NULL) {
+		if (stristr(lst->allItems[i], lst->filter) != NULL) {
 			lst->filteredItems[lst->numitems] = lst->allItems[i];
 			lst->filteredIndexMapping[lst->numitems] = i;
 			lst->numitems++;

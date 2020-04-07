@@ -18,3 +18,28 @@ unsigned char hue(float t, int component)
 	}
 	return 0;
 }
+
+char *stristr(char *haystack, char *needle)
+{
+	char *h, *n;
+
+	if (!*needle) {
+		return NULL;
+	}
+
+	for (;;) {
+		h = haystack;
+		n = needle;
+		while ((*h | 0x20) == (*n | 0x20)) {
+			n++;
+			if (*n == 0) {
+				return haystack;
+			}
+			h++;
+		}
+		if (*h == 0) {
+			return NULL;
+		}
+		haystack++;
+	}
+}

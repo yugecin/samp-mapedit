@@ -20,3 +20,4 @@
 #define HUE_COMP_B -1
 
 unsigned char hue(float angle, int component);
+char *stristr(char *haystack, char *needle);
