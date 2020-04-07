@@ -20,7 +20,7 @@ void persistence_init()
 
 char *persistence_get_project_to_load()
 {
-	if (logBuffer[0] & MAGIC_PROJECT) {
+	if ((logBuffer[0] & MAGIC_PROJECT) == MAGIC_PROJECT) {
 		return logBuffer + PROJECT_NAME_OFFSET;
 	}
 	return NULL;
@@ -34,7 +34,7 @@ void persistence_set_project_to_load(char *project_name)
 
 int persistence_get_object_layerid()
 {
-	if (logBuffer[0] & MAGIC_OBJECT_LAYER) {
+	if ((logBuffer[0] & MAGIC_OBJECT_LAYER) == MAGIC_OBJECT_LAYER) {
 		return logBuffer[OBJECT_LAYER_OFFSET];
 	}
 	return -1;
