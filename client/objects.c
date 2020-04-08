@@ -10,6 +10,7 @@
 #include "objbrowser.h"
 #include "persistence.h"
 #include "player.h"
+#include "removebuildingeditor.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
@@ -41,6 +42,7 @@ static char txt_objlodentity[9];
 static char txt_objlodmodel[9];
 static char txt_objlodflags[9];
 
+static void *selected_entity;
 static struct OBJECT *selected_object;
 struct OBJECTLAYER *active_layer = NULL;
 static struct OBJECTLAYER layers[MAX_LAYERS];
@@ -218,6 +220,15 @@ void cb_btn_delete_layer()
 static
 void cb_btn_remove_building(struct UI_BUTTON *btn)
 {
+	struct RwV3D pos;
+	short modelid;
+
+	if (selected_entity) {
+		modelid = *((short*) selected_entity + 0x11);
+		game_ObjectGetPos(selected_entity, &pos);
+		ui_hide_window();
+		rbe_show(modelid, &pos, 1.25f);
+	}
 }
 
 static
@@ -429,6 +440,7 @@ void objects_select_entity(void *entity)
 	unsigned short modelid;
 
 	objbase_select_entity(entity);
+	selected_entity = entity;
 	if (entity != NULL) {
 		btn_objclone->enabled = 1;
 		lod = *((int**) ((char*) entity + 0x30));

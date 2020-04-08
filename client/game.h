@@ -486,4 +486,16 @@ sdk CMatrix::operator*
 */
 int game_TransformPoint(
 	struct RwV3D *out, struct CMatrix *mat, struct RwV3D *in);
+void game_WorldFindObjectsInRange(
+	struct RwV3D *origin,
+	float radius,
+	int only2d,
+	short *numObjects,
+	short maxObjects,
+	void **entities,
+	int buildings,
+	int vehicles,
+	int peds,
+	int objects,
+	int dummies);
 void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in);

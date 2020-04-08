@@ -254,7 +254,7 @@ void objbrowser_do_ui()
 	game_PedSetPos(player, &player_position);
 
 	ignore = ui_element_being_clicked != NULL;
-	ui_do_exclusive_mode_basics(wnd);
+	ui_do_exclusive_mode_basics(wnd, 0);
 	ignore |= ui_element_being_clicked != NULL;
 
 	if (!hasvalidobject) {
@@ -310,7 +310,6 @@ void restore_after_hide()
 	isactive = 0;
 	hasvalidobject = 0;
 	timeweather_resync();
-	ui_set_trapped_in_ui(0);
 	ui_exclusive_mode = NULL;
 	*cloud_render_opcode = cloud_render_original_opcode;
 }
@@ -359,7 +358,6 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	isactive = 1;
 	timeweather_set_time(desired_time);
 	timeweather_set_weather(17); /*DE extra sunny*/
-	ui_set_trapped_in_ui(1);
 	ui_exclusive_mode = objbrowser_do_ui;
 	cloud_render_original_opcode = *cloud_render_opcode;
 	*cloud_render_opcode = 0xC3; /*ret*/

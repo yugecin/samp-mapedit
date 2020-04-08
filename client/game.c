@@ -611,6 +611,25 @@ __declspec(naked) int game_TransformPoint(out, mat, in)
 	_asm jmp eax
 }
 
+__declspec(naked) void game_WorldFindObjectsInRange(
+	struct RwV3D *origin,
+	float radius,
+	int only2d,
+	short *numObjects,
+	short maxObjects,
+	void **entities,
+	int buildings,
+	int vehicles,
+	int peds,
+	int objects,
+	int dummies)
+{
+	_asm {
+		mov eax, 0x564A20
+		jmp eax
+	}
+}
+
 void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in)
 {
 	game_TransformPoint(out, &camera->cameraViewMatrix, in);

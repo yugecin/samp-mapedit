@@ -9,6 +9,7 @@
 #include "player.h"
 #include "project.h"
 #include "msgbox.h"
+#include "removebuildingeditor.h"
 #include "samp.h"
 #include "ui.h"
 #include "vk.h"
@@ -195,6 +196,13 @@ void ui_draw_cursor()
 	game_DrawRect(cursorx - ihr, cursory - iwr, ihd, iwd, 0xFFFFFFFF);
 }
 
+void ui_update_camera_after_manual_position()
+{
+	camera->cams[camera->activeCam].pos = camera->position;
+	camera->cams[camera->activeCam].lookVector = camera->lookVector;
+	ui_update_camera();
+}
+
 void ui_update_camera()
 {
 	camera->lookAt = camera->position;
@@ -204,7 +212,6 @@ void ui_update_camera()
 	game_CameraSetOnPoint(&camera->lookAt, CUT, 1);
 }
 
-static
 void ui_store_camera()
 {
 	struct CCam *ccam;
@@ -465,13 +472,23 @@ void background_element_just_clicked()
 	}
 }
 
-void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd)
+void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd, int allow_camera_move)
 {
 	if (ui_element_being_clicked && ui_mouse_is_just_up) {
 		wnd && ui_wnd_mouseup(wnd);
 		ui_element_being_clicked = NULL;
 	}
-	ui_do_cursor_movement();
+	if (activeMouseState->rmb && allow_camera_move) {
+		ui_do_mouse_movement();
+		ui_do_key_movement();
+		context_menu_active = 0;
+		if (need_camera_update) {
+			ui_update_camera();
+			need_camera_update = 0;
+		}
+	} else {
+		ui_do_cursor_movement();
+	}
 	ui_grablastkey();
 	ui_last_key_down != 0 &&
 		ui_active_element != NULL &&
@@ -511,7 +528,8 @@ void ui_place_camera_behind_player()
 int ui_handle_esc()
 {
 	return objbrowser_handle_esc() ||
-		objects_handle_esc();
+		objects_handle_esc() ||
+		rbe_handle_esc();
 }
 
 void ui_render()

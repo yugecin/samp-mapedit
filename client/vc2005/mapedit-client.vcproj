@@ -254,6 +254,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\removebuildingeditor.c"
+				>
+			</File>
+			<File
+				RelativePath="..\removebuildingeditor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\samp.c"
 				>
 			</File>

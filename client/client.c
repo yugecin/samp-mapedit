@@ -10,6 +10,7 @@
 #include "persistence.h"
 #include "project.h"
 #include "racecp.h"
+#include "removebuildingeditor.h"
 #include "sockets.h"
 #include "samp.h"
 #include "settings.h"
@@ -139,6 +140,7 @@ void client_finalize()
 	objbrowser_dispose();
 	objects_dispose();
 	objbase_dispose();
+	rbe_dispose();
 	settings_dispose();
 	sockets_dispose();
 
@@ -181,6 +183,7 @@ void client_init()
 	objbase_init();
 	objects_init();
 	objbrowser_init();
+	rbe_init();
 	racecp_init();
 
 	prj_do_show_window();
