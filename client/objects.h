@@ -18,6 +18,7 @@ void objects_ui_deactivated();
 void objects_frame_update();
 int objects_handle_esc();
 void objects_open_persistent_state();
+void objects_select_entity(void *entity);
 
 #define MAX_LAYERS 10
 

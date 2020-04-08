@@ -423,7 +423,6 @@ void objects_prj_postload()
 	objbase_create_dummy_entity();
 }
 
-static
 void objects_select_entity(void *entity)
 {
 	void *lod;

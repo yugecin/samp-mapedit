@@ -16,7 +16,6 @@
 struct ENTITYCOLORINFO {
 	void *entity;
 	int lit_flag_mask[2]; /*one for entity + one for LOD*/
-	int lod_lit_flag_mask;
 };
 
 static struct ENTITYCOLORINFO selected_entity, hovered_entity;
@@ -277,7 +276,7 @@ continuerender:
 
 /*https://github.com/DK22Pac/plugin-sdk/blob/
 8d4d2ff5502ffcb3a741cbcac238d49664689808/plugin_sa/game_sa/CEntity.h#L58*/
-#define CObject_flags_lit 0x10000000
+#define CENTITY_FLAGS_LIT 0x10000000
 
 #define __MaybeCBuilding_GetBoundingBox 0x534120
 #define __MaybeCObject_GetBoundingBox 0x5449B0
@@ -291,10 +290,10 @@ void objbase_color_entity(void *entity, int color, int *lit_flag_mask)
 	set_entity_color_agbr(entity, color);
 	flags = (int*) ((char*) entity + 0x1C);
 	if (color) {
-		*lit_flag_mask = *flags & CObject_flags_lit;
-		*flags |= CObject_flags_lit;
+		*lit_flag_mask = *flags & CENTITY_FLAGS_LIT;
+		*flags |= CENTITY_FLAGS_LIT;
 	} else {
-		*flags &= *lit_flag_mask | ~CObject_flags_lit;
+		*flags &= *lit_flag_mask | ~CENTITY_FLAGS_LIT;
 	}
 
 	lod = *((int**) ((char*) entity + 0x30));
@@ -356,6 +355,17 @@ void objbase_do_hover()
 			}
 		}
 		objbase_color_new_entity(&hovered_entity, entity, 0xFFFF00FF);
+	}
+}
+
+static
+void objbase_on_world_entity_removed(void *entity)
+{
+	if (entity == selected_entity.entity) {
+		objects_select_entity(NULL);
+	}
+	if (entity == hovered_entity.entity) {
+		objbase_color_new_entity(&hovered_entity, NULL, 0);
 	}
 }
 
@@ -525,6 +535,21 @@ void objbase_object_rotation_changed(int sa_handle)
 	}
 }
 
+static
+__declspec(naked) void cworld_remove_detour()
+{
+	_asm {
+		push [esp+0x8]
+		call objbase_on_world_entity_removed
+		add esp, 0x4
+		pop eax
+		push esi
+		mov esi, [esp+0x8]
+		push eax
+		ret
+	}
+}
+
 /**
 calls to _CScriptThread__setNumberParams at the near end of opcode 0107 handler
 get redirected here
@@ -601,6 +626,7 @@ static struct DETOUR detour_0453;
 static struct DETOUR detour_render_object;
 static struct DETOUR detour_render_centity;
 static struct DETOUR detour_render_water;
+static struct DETOUR detour_cworld_remove;
 
 void objbase_install_detour(struct DETOUR *detour)
 {
@@ -645,6 +671,8 @@ void objbase_init()
 	detour_render_centity.new_target = (int) render_centity_detour;
 	detour_render_water.target = (int*) 0x6EF658;
 	detour_render_water.new_target = (int) render_water_detour;
+	detour_cworld_remove.target = (int*) 0x563281;
+	detour_cworld_remove.new_target = (int) cworld_remove_detour;
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0108);
 	objbase_install_detour(&detour_0453);
@@ -653,6 +681,9 @@ void objbase_init()
 	VirtualProtect((void*) 0x534312, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x534312) = 0xE8;
 	objbase_install_detour(&detour_render_water);
+	objbase_install_detour(&detour_cworld_remove);
+	VirtualProtect((void*) 0x563280, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+	*((char*) 0x563280) = 0xE8;
 
 }
 
@@ -666,6 +697,8 @@ void objbase_dispose()
 	*((char*) 0x534312) = 0x51;
 	*((int*) 0x534313) = 0x8BF18B56;
 	objbase_uninstall_detour(&detour_render_water);
+	objbase_uninstall_detour(&detour_cworld_remove);
+	*((char*) 0x563280) = 0x56;
 
 	objbase_color_new_entity(&selected_entity, NULL, 0);
 	objbase_color_new_entity(&hovered_entity, NULL, 0);
