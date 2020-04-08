@@ -121,7 +121,7 @@ nextline:
 			while (buf[pos++] != ',');
 			while (buf[pos] == ' ') pos++;
 			modelNames[modelid] = nameptr;
-			sprintf(nameptr, "%05d: ", modelid);
+			sprintf(nameptr, "%05d:_", modelid);
 			nameptr += 7;
 nextchr:
 			*nameptr = buf[pos];
