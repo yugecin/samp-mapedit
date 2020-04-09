@@ -492,9 +492,10 @@ void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd, int allow_camera_move)
 		ui_do_cursor_movement();
 	}
 	ui_grablastkey();
+	/*
 	ui_last_key_down != 0 &&
 		ui_active_element != NULL &&
-		UIPROC(ui_active_element, proc_accept_key);
+		UIPROC(ui_active_element, proc_accept_key);*/
 	if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
 		ui_active_element = NULL;
 		wnd && ui_wnd_mousedown(wnd);
@@ -527,11 +528,21 @@ void ui_place_camera_behind_player()
 	camera->lookVector.z = -0.25f;
 }
 
-int ui_handle_esc()
+int ui_handle_keydown(int vk)
 {
-	return objbrowser_handle_esc() ||
-		objects_handle_esc() ||
-		rbe_handle_esc();
+	if (vk == VK_ESCAPE) {
+		return objbrowser_handle_esc() ||
+			objects_handle_esc() ||
+			rbe_handle_esc();
+	}
+	return ui_active_element != NULL &&
+		UIPROC(ui_active_element, proc_accept_keydown, (void*) vk);
+}
+
+int ui_handle_char(char c)
+{
+	return ui_active_element != NULL &&
+		UIPROC(ui_active_element, proc_accept_char, (void*) c);
 }
 
 void ui_render()
@@ -590,12 +601,8 @@ void ui_render()
 
 		ui_grablastkey();
 
-		if (ui_last_key_down != 0 &&
-			ui_active_element != NULL &&
-			UIPROC(ui_active_element, proc_accept_key))
-		{
-			;
-		} else if (activeKeyState->standards[VK_Y] &&
+		/*TODO: replace with WM_CHAR handling*/
+		if (activeKeyState->standards[VK_Y] &&
 			!currentKeyState->standards[VK_Y])
 		{
 			ui_place_camera_behind_player();

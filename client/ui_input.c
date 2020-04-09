@@ -107,11 +107,12 @@ checkagain:
 }
 
 static
-int ui_in_accept_key(struct UI_INPUT *in)
+int ui_in_accept_keydown(struct UI_INPUT *in, int vk)
 {
-	int i;
+	int i, valueChanged;
 
-	if (ui_last_key_down == VK_BACK) {
+	valueChanged = 0;
+	if (vk == VK_BACK) {
 		/*TODO: hold ctrl (doesn't work with CKeyState)*/
 		if (in->cursorpos > 0) {
 			for (i = in->cursorpos - 1; i < in->valuelen; i++) {
@@ -126,15 +127,17 @@ int ui_in_accept_key(struct UI_INPUT *in)
 				in->displayvaluestart--;
 				/*value will be checked on caret update*/
 			}
+			valueChanged = 1;
 		}
-	} else if (ui_last_key_down == VK_DELETE) {
+	} else if (vk == VK_DELETE) {
 		if (in->cursorpos < in->valuelen) {
 			for (i = in->cursorpos; i < in->valuelen; i++) {
 				in->value[i] = in->value[i + 1];
 			}
 			in->valuelen--;
+			valueChanged = 1;
 		}
-	} else if (ui_last_key_down == VK_LEFT) {
+	} else if (vk == VK_LEFT) {
 		if (in->cursorpos > 0) {
 			in->cursorpos--;
 			/*don't stick cursor to left border*/
@@ -145,24 +148,41 @@ int ui_in_accept_key(struct UI_INPUT *in)
 				/*value will be checked on caret update*/
 			}
 		}
-	} else if (ui_last_key_down == VK_RIGHT) {
+	} else if (vk == VK_RIGHT) {
 		if (in->cursorpos < in->valuelen) {
 			in->cursorpos++;
 		}
-	} else if (ui_last_char_down != 0 &&
-		in->cursorpos < INPUT_TEXTLEN &&
-		in->valuelen < INPUT_TEXTLEN)
-	{
-		in->valuelen++;
-		for (i = in->valuelen; i > in->cursorpos; i--) {
-			in->value[i] = in->value[i - 1];
-		}
-		in->value[in->cursorpos] = ui_last_char_down;
-		in->value[in->valuelen] = 0;
-		in->cursorpos++;
 	} else {
 		return 1;
 	}
+
+	in->caretanimbasetime = *timeInGame;
+	make_sure_caret_is_in_bounds(in);
+	if (valueChanged && in->cb != NULL) {
+		in->cb(in);
+	}
+	return 1;
+}
+
+static
+int ui_in_accept_char(struct UI_INPUT *in, char c)
+{
+	int i;
+
+	if (c < ' ' || 126 < c ||
+		in->cursorpos >= INPUT_TEXTLEN ||
+		in->valuelen >= INPUT_TEXTLEN)
+	{
+		return 1;
+	}
+
+	in->valuelen++;
+	for (i = in->valuelen; i > in->cursorpos; i--) {
+		in->value[i] = in->value[i - 1];
+	}
+	in->value[in->cursorpos] = c;
+	in->value[in->valuelen] = 0;
+	in->cursorpos++;
 
 	in->caretanimbasetime = *timeInGame;
 	make_sure_caret_is_in_bounds(in);
@@ -197,7 +217,8 @@ struct UI_INPUT *ui_in_make(inputcb *cb)
 	in->_parent.proc_mousedown = (ui_method*) ui_in_mousedown;
 	in->_parent.proc_mouseup = (ui_method*) ui_in_mouseup;
 	in->_parent.proc_recalc_size = (ui_method*) ui_in_recalc_size;
-	in->_parent.proc_accept_key = (ui_method*) ui_in_accept_key;
+	in->_parent.proc_accept_keydown = (ui_method1*) ui_in_accept_keydown;
+	in->_parent.proc_accept_char = (ui_method1*) ui_in_accept_char;
 	in->_parent.proc_post_layout = (ui_method*) ui_in_post_layout;
 	in->cb = cb;
 	in->value[0] = 0;

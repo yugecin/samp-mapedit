@@ -148,6 +148,8 @@ void rbe_init()
 	in_radius->_parent.userdata = (void*) &radius;
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
 	ui_wnd_add_child(wnd, in_model = ui_in_make(cb_in_model));
+	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, ui_lbl_make("use_-1_for_all"));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Affected_buildings:"));
 	lbl->_parent.span = 2;
 	lst_removelist = ui_lst_make(20, NULL);

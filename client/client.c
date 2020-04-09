@@ -122,7 +122,11 @@ LRESULT APIENTRY NewWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (uMsg == WM_MOUSEWHEEL) {
 		ui_on_mousewheel(GET_WHEEL_DELTA_WPARAM(wParam) / 120);
 	}
-	if (uMsg == WM_KEYDOWN && wParam == VK_ESCAPE && ui_handle_esc()) {
+	if (uMsg == WM_KEYDOWN && ui_handle_keydown((int) wParam)) {
+		return 0;
+	}
+	/*somewhere WM_KEYDOWN is already translated to WM_CHAR?*/
+	if (uMsg == WM_CHAR && ui_handle_char((char) wParam)) {
 		return 0;
 	}
 	return CallWindowProc(hOldProc, hWnd, uMsg, wParam, lParam);

@@ -71,5 +71,6 @@ void ui_set_trapped_in_ui(int flag);
 void ui_draw_debug_strings();
 void ui_draw_cursor();
 void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd, int allow_camera_move);
-int ui_handle_esc();
+int ui_handle_keydown(int vk);
+int ui_handle_char(char c);
 void ui_open_persistent_state();

@@ -56,12 +56,21 @@ struct UI_ELEMENT {
 	*/
 	ui_method *proc_post_layout;
 	/**
-	Called when the element is active and a key was pressed.
+	Called when the element is active and a WM_KEYDOWN msg was received.
 
-	Key character can be found in ui_last_key_down
+	Use proc_accept_char to receive translated characters instead of VKs.
+	Keyrepeat events also result in calls to this function.
 	Return 0 to let the event bubble through.
 	*/
-	ui_method *proc_accept_key;
+	ui_method1 *proc_accept_keydown;
+	/**
+	Called when the element is active and a WM_CHAR msg was received.
+
+	Keyrepeat events also result in calls to this function.
+	The translated character is passed as the first argument.
+	Return 0 to let the event bubble through.
+	*/
+	ui_method1 *proc_accept_char;
 	void *userdata;
 };
 
