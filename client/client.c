@@ -215,6 +215,7 @@ void client_init()
 	persistence_init();
 	prj_open_persistent_state();
 	objects_open_persistent_state();
+	ui_open_persistent_state();
 
 	hOldProc = (WNDPROC) GetWindowLong(ghwnd, GWL_WNDPROC);
 	SetWindowLong(ghwnd, GWL_WNDPROC, (LONG) NewWndProc);

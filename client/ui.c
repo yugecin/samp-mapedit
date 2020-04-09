@@ -6,6 +6,7 @@
 #include "objbrowser.h"
 #include "objbase.h"
 #include "objects.h"
+#include "persistence.h"
 #include "player.h"
 #include "project.h"
 #include "msgbox.h"
@@ -62,6 +63,7 @@ static
 void cb_btn_reload(struct UI_BUTTON *btn)
 {
 	reload_requested = 1;
+	persistence_set_cursorpos(cursorx, cursory);
 }
 
 static
@@ -772,4 +774,11 @@ int ui_is_cursor_hovering_any_window()
 void ui_set_trapped_in_ui(int flag)
 {
 	trapped_in_ui = flag;
+}
+
+void ui_open_persistent_state()
+{
+	if (persistence_get_cursorpos(&cursorx, &cursory)) {
+		ui_activate();
+	}
 }

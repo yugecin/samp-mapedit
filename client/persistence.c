@@ -32,7 +32,7 @@ void persistence_set_project_to_load(char *project_name)
 	strcpy(logBuffer + PROJECT_NAME_OFFSET, project_name);
 }
 
-int persistence_get_object_layerid()
+char persistence_get_object_layerid()
 {
 	if ((logBuffer[0] & MAGIC_OBJECT_LAYER) == MAGIC_OBJECT_LAYER) {
 		return logBuffer[OBJECT_LAYER_OFFSET];
@@ -44,4 +44,20 @@ void persistence_set_object_layerid(char layerid)
 {
 	logBuffer[0] |= MAGIC_OBJECT_LAYER;
 	logBuffer[OBJECT_LAYER_OFFSET] = layerid;
+}
+
+void persistence_set_cursorpos(float x, float y)
+{
+	*((float*) logBuffer + 1) = x;
+	*((float*) logBuffer + 2) = y;
+}
+
+int persistence_get_cursorpos(float *x, float *y)
+{
+	if (logBuffer[0] & MAGIC_ISSET) {
+		*x = *((float*) logBuffer + 1);
+		*y = *((float*) logBuffer + 2);
+		return 1;
+	}
+	return 0;
 }
