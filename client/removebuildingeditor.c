@@ -23,8 +23,7 @@ static char removeLOD;
 static struct RwV3D origin;
 static float radius;
 
-static char txt_modelid[10];
-static char txt_modelname[25];
+static char txt_model[25];
 
 static
 void rbe_hide()
@@ -143,9 +142,7 @@ void rbe_init()
 	ui_wnd_add_child(wnd, in_radius = ui_in_make(NULL));
 	in_radius->_parent.userdata = (void*) &radius;
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
-	ui_wnd_add_child(wnd, ui_lbl_make(txt_modelid));
-	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
-	ui_wnd_add_child(wnd, lbl = ui_lbl_make(txt_modelname));
+	ui_wnd_add_child(wnd, ui_lbl_make(txt_model));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Affected_buildings:"));
 	lbl->_parent.span = 2;
 	lst_removelist = ui_lst_make(20, NULL);
@@ -166,12 +163,10 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 	active = 1;
 	origin = *_origin;
 	radius = _radius;
-	sprintf(txt_modelid, "%hd", model);
 	if (modelNames[model]) {
-		sprintf(txt_modelname, "%s", modelNames[model] + 7);
+		sprintf(txt_model, "%s", modelNames[model]);
 	} else {
-		txt_modelname[0] = '?';
-		txt_modelname[1] = 0;
+		sprintf(txt_model, "%hd", model);
 	}
 	rbe_update_position_ui_text();
 }

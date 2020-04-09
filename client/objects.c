@@ -27,19 +27,19 @@ static struct UI_INPUT *in_layername;
 static struct UI_WINDOW *window_objinfo;
 static struct UI_LABEL *lbl_objentity;
 static struct UI_LABEL *lbl_objflags;
-static struct UI_LABEL *lbl_objmodelname;
+static struct UI_LABEL *lbl_objmodel;
+static struct UI_LABEL *lbl_objlodmodel;
 static struct UI_BUTTON *btn_remove_building;
 static struct UI_BUTTON *btn_objclone;
 static struct UI_BUTTON *btn_move_obj_samp;
 static struct UI_BUTTON *btn_move_obj_click;
 
 static char txt_objentity[9];
-static char txt_objmodel[9];
-static char txt_objmodelname[45];
+static char txt_objmodel[45];
 static char txt_objtype[9];
 static char txt_objflags[9];
 static char txt_objlodentity[9];
-static char txt_objlodmodel[9];
+static char txt_objlodmodel[45];
 static char txt_objlodflags[9];
 
 static void *selected_entity;
@@ -318,10 +318,8 @@ void objects_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Entity:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objentity));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Model:"));
-	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objmodel));
-	ui_wnd_add_child(window_objinfo, ui_lbl_make("Model:"));
-	lbl_objmodelname = ui_lbl_make(txt_objmodelname);
-	ui_wnd_add_child(window_objinfo, lbl_objmodelname);
+	lbl_objmodel = ui_lbl_make(txt_objmodel);
+	ui_wnd_add_child(window_objinfo, lbl_objmodel);
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Type:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objtype));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Flags:"));
@@ -329,7 +327,8 @@ void objects_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Entity:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodentity));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Model:"));
-	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodmodel));
+	lbl_objlodmodel = ui_lbl_make(txt_objlodmodel);
+	ui_wnd_add_child(window_objinfo, lbl_objlodmodel);
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("LOD_Flags:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodflags));
 	btn = ui_btn_make("Remove_Building", cb_btn_remove_building);
@@ -437,43 +436,12 @@ void objects_prj_postload()
 void objects_select_entity(void *entity)
 {
 	void *lod;
-	unsigned short modelid;
+	unsigned short modelid, lodmodel;
 
 	objbase_select_entity(entity);
 	selected_entity = entity;
-	if (entity != NULL) {
-		btn_objclone->enabled = 1;
-		lod = *((int**) ((char*) entity + 0x30));
-		modelid = *((unsigned short*) entity + 0x11);
-		sprintf(txt_objentity, "%p", entity);
-		sprintf(txt_objmodel, "%hd", modelid);
-		if (modelNames[modelid]) {
-			strcpy(txt_objmodelname, modelNames[modelid] + 7);
-		} else {
-			strcpy(txt_objmodelname, "?");
-		}
-		ui_lbl_recalc_size(lbl_objmodelname);
-		sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
-		sprintf(txt_objflags, "%p", *((int*) entity + 7));
-		if ((int) lod == -1 || lod == NULL) {
-			strcpy(txt_objlodentity, "00000000");
-			strcpy(txt_objlodflags, "00000000");
-		} else {
-			sprintf(txt_objlodentity, "%p", (int) lod);
-			sprintf(txt_objlodmodel, "%hd", *((short*) lod + 0x11));
-			sprintf(txt_objlodflags, "%p", *((int*) lod + 7));
-		}
-		selected_object = objects_find_by_sa_object(entity);
-		if (selected_object == NULL) {
-			btn_remove_building->enabled = 1;
-			btn_move_obj_samp->enabled = 0;
-			btn_move_obj_click->enabled = 0;
-		} else {
-			btn_remove_building->enabled = 0;
-			btn_move_obj_samp->enabled = 1;
-			btn_move_obj_click->enabled = 1;
-		}
-	} else {
+
+	if (entity == NULL) {
 		btn_objclone->enabled = 0;
 		selected_object = NULL;
 		btn_remove_building->enabled = 0;
@@ -481,12 +449,51 @@ void objects_select_entity(void *entity)
 		btn_move_obj_click->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objmodel, "0");
-		strcpy(txt_objmodelname, "?");
 		strcpy(txt_objtype, "00000000");
 		strcpy(txt_objflags, "00000000");
 		strcpy(txt_objlodentity, "00000000");
 		strcpy(txt_objlodmodel, "0");
 		strcpy(txt_objlodflags, "00000000");
+		return;
+	}
+
+	btn_objclone->enabled = 1;
+	lod = *((int**) ((char*) entity + 0x30));
+	modelid = *((unsigned short*) entity + 0x11);
+	sprintf(txt_objentity, "%p", entity);
+	sprintf(txt_objmodel, "%hd", modelid);
+	if (modelNames[modelid]) {
+		sprintf(txt_objmodel, "%s", modelNames[modelid]);
+	} else {
+		sprintf(txt_objmodel, "%hd", modelid);
+	}
+	sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
+	sprintf(txt_objflags, "%p", *((int*) entity + 7));
+	if ((int) lod == -1 || lod == NULL) {
+		strcpy(txt_objlodentity, "00000000");
+		strcpy(txt_objlodflags, "00000000");
+		strcpy(txt_objlodmodel, "0");
+	} else {
+		sprintf(txt_objlodentity, "%p", (int) lod);
+		lodmodel = *((short*) lod + 0x11);
+		if (modelNames[lodmodel]) {
+			sprintf(txt_objlodmodel, "%s", modelNames[lodmodel]);
+		} else {
+			sprintf(txt_objlodmodel, "%hd", lodmodel);
+		}
+		sprintf(txt_objlodflags, "%p", *((int*) lod + 7));
+	}
+	ui_lbl_recalc_size(lbl_objmodel);
+	ui_lbl_recalc_size(lbl_objlodmodel);
+	selected_object = objects_find_by_sa_object(entity);
+	if (selected_object == NULL) {
+		btn_remove_building->enabled = 1;
+		btn_move_obj_samp->enabled = 0;
+		btn_move_obj_click->enabled = 0;
+	} else {
+		btn_remove_building->enabled = 0;
+		btn_move_obj_samp->enabled = 1;
+		btn_move_obj_click->enabled = 1;
 	}
 }
 
