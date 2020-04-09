@@ -15,7 +15,41 @@ char value_to_display_char(char value)
 	return value;
 }
 
-/*static*/
+static
+void ui_in_position_caret_based_on_cursor_pos(struct UI_INPUT *in)
+{
+	int min, max, index;
+	float relativeCursorX;
+	char *txt;
+	char replacedCharacter;
+
+	min = 0;
+	max = in->valuelen - (in->displayvaluestart - in->displayvalue);
+	/*inc max so the cursor position can be *after* the last character*/
+	max++;
+	txt = in->displayvaluestart;
+	relativeCursorX = cursorx - in->_parent.x - fontpadx;
+
+	while (min + 1 < max) {
+		index = min + (max - min) / 2;
+		replacedCharacter = txt[index];
+		txt[index] = 0;
+		ui_push_debug_string();
+		if (game_TextGetSizeX(txt, 0, 0) > relativeCursorX) {
+			max = index;
+		} else {
+			min = index;
+		}
+		txt[index] = replacedCharacter;
+	}
+	replacedCharacter = txt[min];
+	txt[min] = 0;
+	in->caretoffsetx = game_TextGetSizeX(txt, 0, 0);
+	txt[min] = replacedCharacter;
+	in->cursorpos = min + (in->displayvaluestart - in->displayvalue);
+}
+
+static
 void make_sure_caret_is_in_bounds(struct UI_INPUT *in)
 {
 	int i, min, max, lasti;
@@ -240,6 +274,7 @@ int ui_in_mouseup(struct UI_INPUT *in)
 		if (ui_element_is_hovered(&in->_parent)) {
 			ui_active_element = in;
 			in->caretanimbasetime = *timeInGame;
+			ui_in_position_caret_based_on_cursor_pos(in);
 		}
 		return 1;
 	}
@@ -257,6 +292,6 @@ void ui_in_set_text(struct UI_INPUT *in, char *text)
 		in->displayvalue[i] = value_to_display_char(in->value[i]);
 	}
 	in->displayvalue[in->valuelen] = 0;
-	in->cursorpos = in->valuelen;
+	in->cursorpos = 0;
 	in->displayvaluestart = in->displayvalue;
 }
