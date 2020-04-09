@@ -56,6 +56,7 @@ void make_sure_caret_is_in_bounds(struct UI_INPUT *in)
 	float w, maxwidth, caretwidth;
 	char c;
 
+	ui_default_font();
 	if (in->displayvaluestart < in->displayvalue) {
 		in->displayvaluestart = in->displayvalue;
 	}
@@ -109,9 +110,8 @@ checkagain:
 static
 int ui_in_accept_keydown(struct UI_INPUT *in, int vk)
 {
-	int i, valueChanged;
+	int i;
 
-	valueChanged = 0;
 	if (vk == VK_BACK) {
 		/*TODO: hold ctrl (doesn't work with CKeyState)*/
 		if (in->cursorpos > 0) {
@@ -127,7 +127,6 @@ int ui_in_accept_keydown(struct UI_INPUT *in, int vk)
 				in->displayvaluestart--;
 				/*value will be checked on caret update*/
 			}
-			valueChanged = 1;
 		}
 	} else if (vk == VK_DELETE) {
 		if (in->cursorpos < in->valuelen) {
@@ -135,7 +134,6 @@ int ui_in_accept_keydown(struct UI_INPUT *in, int vk)
 				in->value[i] = in->value[i + 1];
 			}
 			in->valuelen--;
-			valueChanged = 1;
 		}
 	} else if (vk == VK_LEFT) {
 		if (in->cursorpos > 0) {
@@ -158,7 +156,7 @@ int ui_in_accept_keydown(struct UI_INPUT *in, int vk)
 
 	in->caretanimbasetime = *timeInGame;
 	make_sure_caret_is_in_bounds(in);
-	if (valueChanged && in->cb != NULL) {
+	if (in->cb != NULL) {
 		in->cb(in);
 	}
 	return 1;
