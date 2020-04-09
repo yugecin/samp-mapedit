@@ -15,11 +15,11 @@ static struct UI_INPUT *in_origin_x;
 static struct UI_INPUT *in_origin_y;
 static struct UI_INPUT *in_origin_z;
 static struct UI_INPUT *in_radius;
+static struct UI_INPUT *in_model;
 
 static char active;
 
 static short modelid;
-static char removeLOD;
 static struct RwV3D origin;
 static float radius;
 
@@ -88,13 +88,18 @@ void rbe_update_position_ui_text()
 }
 
 static
-void cb_input_origin_radius(struct UI_INPUT *in)
+void cb_in_origin_radius(struct UI_INPUT *in)
 {
 	float *value;
 
 	value = (float*) in->_parent.userdata;
 	*value = (float) atof(in->value);
 	rbe_update_removes();
+}
+
+static
+void cb_in_model(struct UI_INPUT *in)
+{
 }
 
 static
@@ -128,21 +133,21 @@ void rbe_init()
 	wnd->closeable = 0;
 
 	ui_wnd_add_child(wnd, ui_lbl_make("Origin:"));
-	ui_wnd_add_child(wnd, in_origin_x = ui_in_make(cb_input_origin_radius));
+	ui_wnd_add_child(wnd, in_origin_x = ui_in_make(cb_in_origin_radius));
 	in_origin_x->_parent.userdata = (void*) &origin.x;
 	ui_wnd_add_child(wnd, NULL);
-	ui_wnd_add_child(wnd, in_origin_y = ui_in_make(NULL));
+	ui_wnd_add_child(wnd, in_origin_y = ui_in_make(cb_in_origin_radius));
 	in_origin_y->_parent.userdata = (void*) &origin.y;
 	ui_wnd_add_child(wnd, NULL);
-	ui_wnd_add_child(wnd, in_origin_z = ui_in_make(NULL));
+	ui_wnd_add_child(wnd, in_origin_z = ui_in_make(cb_in_origin_radius));
 	in_origin_z->_parent.userdata = (void*) &origin.z;
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_btn_make("Center_Camera", cb_btn_center_cam));
 	ui_wnd_add_child(wnd, ui_lbl_make("Radius:"));
-	ui_wnd_add_child(wnd, in_radius = ui_in_make(NULL));
+	ui_wnd_add_child(wnd, in_radius = ui_in_make(cb_in_origin_radius));
 	in_radius->_parent.userdata = (void*) &radius;
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
-	ui_wnd_add_child(wnd, ui_lbl_make(txt_model));
+	ui_wnd_add_child(wnd, in_model = ui_in_make(cb_in_model));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Affected_buildings:"));
 	lbl->_parent.span = 2;
 	lst_removelist = ui_lst_make(20, NULL);
@@ -163,11 +168,13 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 	active = 1;
 	origin = *_origin;
 	radius = _radius;
+
+	sprintf(txt_model, "%hd", model);
+	ui_in_set_text(in_model, txt_model);
 	if (modelNames[model]) {
 		sprintf(txt_model, "%s", modelNames[model]);
-	} else {
-		sprintf(txt_model, "%hd", model);
 	}
+
 	rbe_update_position_ui_text();
 }
 
