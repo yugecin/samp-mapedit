@@ -7,6 +7,7 @@
 #include "player.h"
 #include "removebuildingeditor.h"
 #include "ui.h"
+#include "vk.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -209,12 +210,18 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 	rbe_update();
 }
 
-int rbe_handle_esc()
+int rbe_handle_keydown(int vk)
 {
-	TRACE("rbe_handle_esc");
+	TRACE("rbe_handle_keydown");
 	if (active) {
-		rbe_hide();
-		return 1;
+		if (vk == VK_ESCAPE) {
+			rbe_hide();
+			return 1;
+		}
+		if (vk == VK_Y) {
+			cb_btn_center_cam(NULL);
+			return 1;
+		}
 	}
 	return 0;
 }

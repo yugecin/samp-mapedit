@@ -558,10 +558,12 @@ void ui_place_camera_behind_player()
 
 int ui_handle_keydown(int vk)
 {
+	if (rbe_handle_keydown(vk)) {
+		return 1;
+	}
 	if (vk == VK_ESCAPE) {
 		return objbrowser_handle_esc() ||
-			objects_handle_esc() ||
-			rbe_handle_esc();
+			objects_handle_esc();
 	}
 	return ui_active_element != NULL &&
 		UIPROC(ui_active_element, proc_accept_keydown, (void*) vk);
