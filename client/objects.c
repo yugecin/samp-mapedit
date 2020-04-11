@@ -353,6 +353,7 @@ void objects_init()
 
 void objects_dispose()
 {
+	TRACE("objects_dispose");
 }
 
 void objects_prj_save(FILE *f, char *buf)

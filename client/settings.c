@@ -347,6 +347,7 @@ void settings_init()
 
 void settings_dispose()
 {
+	TRACE("settings_dispose");
 	ui_wnd_dispose(window_settings);
 	if (!samp_handle) {
 		toggle_foliage(1);

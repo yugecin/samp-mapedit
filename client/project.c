@@ -284,6 +284,7 @@ void prj_do_show_window()
 
 void prj_dispose()
 {
+	TRACE("prj_dispose");
 	ui_wnd_dispose(window_project);
 }
 

@@ -74,3 +74,4 @@ void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd, int allow_camera_move);
 int ui_handle_keydown(int vk);
 int ui_handle_char(char c);
 void ui_open_persistent_state();
+void ui_draw_default_help_text();

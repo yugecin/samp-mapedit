@@ -147,6 +147,7 @@ void racecp_init()
 
 void racecp_dispose()
 {
+	TRACE("racecp_dispose");
 	ui_wnd_dispose(window_cpsettings);
 }
 

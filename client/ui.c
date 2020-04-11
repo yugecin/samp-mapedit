@@ -173,6 +173,33 @@ void ui_do_cursor_movement()
 	}
 }
 
+void ui_draw_default_help_text()
+{
+	char buf[64];
+	int i;
+
+	game_TextSetAlign(CENTER);
+	game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
+		"~w~press ~r~Y ~w~to reset camera");
+	sprintf(buf, "Movement_speed_(scrollwheel):_-------");
+	for (i = 0; i < speedmod; i++) {
+		buf[30 + i] = '+';
+	}
+	game_TextPrintStringFromBottom(
+		fresx / 2.0f,
+		fresy - fontheight - 4.0f,
+		buf);
+	sprintf(buf,
+		"x%.2f y%.2f z%.2f",
+		camera->position.x,
+		camera->position.y,
+		camera->position.z);
+	game_TextPrintStringFromBottom(
+		fresx / 2.0f,
+		fresy - fontheight - fontheight - 6.0f,
+		buf);
+}
+
 void ui_draw_cursor()
 {
 	/*TODO because this is drawn with rects, it draws below textdraws...*/
@@ -549,8 +576,6 @@ int ui_handle_char(char c)
 void ui_render()
 {
 	int activate_key_pressed;
-	char buf[64];
-	int i;
 
 	ui_default_font();
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
@@ -675,26 +700,7 @@ void ui_render()
 			bgclicky = cursory;
 		}
 
-		game_TextSetAlign(CENTER);
-		game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
-			"~w~press ~r~Y ~w~to reset camera");
-		sprintf(buf, "Movement_speed_(scrollwheel):_-------");
-		for (i = 0; i < speedmod; i++) {
-			buf[30 + i] = '+';
-		}
-		game_TextPrintStringFromBottom(
-			fresx / 2.0f,
-			fresy - fontheight - 4.0f,
-			buf);
-		sprintf(buf,
-			"x%.2f y%.2f z%.2f",
-			camera->position.x,
-			camera->position.y,
-			camera->position.z);
-		game_TextPrintStringFromBottom(
-			fresx / 2.0f,
-			fresy - fontheight - fontheight - 6.0f,
-			buf);
+		ui_draw_default_help_text();
 	} else {
 justdeactivated:
 		originalHudScaleX = *hudScaleX;
@@ -712,6 +718,7 @@ justdeactivated:
 
 void ui_dispose()
 {
+	TRACE("ui_dispose");
 	ui_deactivate();
 	ui_cnt_dispose(background_element);
 	ui_wnd_dispose(main_menu);

@@ -1,5 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#include "common.h"
 #include "samp.h"
 #include <windows.h>
 
@@ -41,6 +42,7 @@ void samp_init()
 
 void samp_dispose()
 {
+	TRACE("samp_dispose");
 	samp_restore_chat_bar();
 	samp_restore_ui_f7();
 }

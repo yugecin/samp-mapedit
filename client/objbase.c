@@ -689,6 +689,7 @@ void objbase_init()
 
 void objbase_dispose()
 {
+	TRACE("objbase_dispose");
 	objbase_uninstall_detour(&detour_0107);
 	objbase_uninstall_detour(&detour_0108);
 	objbase_uninstall_detour(&detour_0453);

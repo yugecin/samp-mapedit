@@ -485,6 +485,7 @@ void objbrowser_init()
 
 void objbrowser_dispose()
 {
+	TRACE("objbrowser_dispose");
 	ui_wnd_dispose(wnd);
 }
 

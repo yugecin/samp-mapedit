@@ -121,6 +121,7 @@ void sockets_send(void *rpc, int len)
 
 void sockets_dispose()
 {
+	TRACE("sockets_dispose");
 	if (socketrecv != -1) {
 		closesocket(socketrecv);
 		closesocket(socketsend);

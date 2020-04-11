@@ -44,6 +44,7 @@ void rbe_do_ui()
 	ui_do_exclusive_mode_basics(wnd, 1);
 	im2d_sphere_project(sphere);
 	im2d_sphere_draw(sphere);
+	ui_draw_default_help_text();
 }
 
 static

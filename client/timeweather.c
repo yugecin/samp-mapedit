@@ -152,6 +152,7 @@ void timeweather_init()
 
 void timeweather_dispose()
 {
+	TRACE("timeweather_dispose");
 	ui_wnd_dispose(wnd);
 }
 

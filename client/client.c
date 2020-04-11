@@ -110,6 +110,7 @@ void detour()
 static
 void undetour()
 {
+	TRACE("undetour");
 	*((unsigned char*) DETOUR_OPCODE) = detour_opcode;
 	*((unsigned int*) DETOUR_PARAM) = detour_param;
 }
