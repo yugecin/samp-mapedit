@@ -1,0 +1,128 @@
+/* vim: set filetype=c ts=8 noexpandtab: */
+
+#include "common.h"
+#include "game.h"
+#include "im2d.h"
+#include <math.h>
+
+struct IM2DSPHERE *im2d_sphere_make(int colorARGB)
+{
+	struct IM2DSPHERE *sphere;
+	int size;
+
+	sphere = malloc(sizeof(struct IM2DSPHERE));
+
+	size = SPHERE_VERTS;
+	while (size--) {
+		sphere->verts[size].near = 0;
+		sphere->verts[size].far = 0x40555556;
+		sphere->verts[size].col = colorARGB;
+		sphere->verts[size].u = 1.0f;
+		sphere->verts[size].v = 0.0f;
+	}
+
+	return sphere;
+}
+
+void im2d_sphere_pos(struct IM2DSPHERE *sphere, struct RwV3D *pos, float rad)
+{
+	float angle_delta, angle_delta2;
+	float x, y, z, currentRowZ, nextRowZ, twoDeeAngle;
+	float twoDeeRadUpper, twoDeeRadLower;
+	int i, j;
+	struct RwV3D *p;
+
+	angle_delta2 = M_PI / SPHERE_SEGMENTS;
+	angle_delta = angle_delta2 * 2.0f;
+
+	twoDeeRadUpper = twoDeeRadLower = cosf(angle_delta);
+	/*top*/
+	sphere->pos[0].x = pos->x;
+	sphere->pos[0].y = pos->y;
+	sphere->pos[0].z = pos->z + rad;
+	z = pos->z + rad - rad * sinf(angle_delta2);
+	p = sphere->pos;
+	for (i = 0; i < SPHERE_SEGMENTS + 1; i++) {
+		p++;
+		p->x = pos->x + cosf(i * angle_delta) * twoDeeRadUpper;
+		p->y = pos->y + sinf(i * angle_delta) * twoDeeRadUpper;
+		p->z = z;
+	}
+	/*bottom*/
+	p++;
+	p->x = pos->x;
+	p->y = pos->y;
+	p->z = pos->z - rad;
+	z = pos->z - rad + rad * sinf(angle_delta2);
+	for (i = 0; i < SPHERE_SEGMENTS + 1; i++) {
+		p++;
+		p->x = pos->x + cosf(i * angle_delta) * twoDeeRadLower;
+		p->y = pos->y + sinf(i * angle_delta) * twoDeeRadLower;
+		p->z = z;
+	}
+	/*rest*/
+	for (i = 0; i < SPHERE_NUM_ROWS; i++) {
+		currentRowZ = angle_delta2 * (i + 1);
+		nextRowZ = currentRowZ + angle_delta2;
+		twoDeeRadUpper = sinf(currentRowZ) * rad;
+		twoDeeRadLower = sinf(nextRowZ) * rad;
+		currentRowZ = pos->z + cosf(currentRowZ) * rad;
+		nextRowZ = pos->z + cosf(nextRowZ) * rad;
+		twoDeeAngle = 0;
+		for (j = 0; j < SPHERE_SEGMENTS + 2; j++) {
+			x = cosf(twoDeeAngle);
+			y = sinf(twoDeeAngle);
+			p++;
+			p->x = pos->x + x * twoDeeRadUpper;
+			p->y = pos->y + y * twoDeeRadUpper;
+			p->z = currentRowZ;
+			p++;
+			p->x = pos->x + x * twoDeeRadLower;
+			p->y = pos->y + y * twoDeeRadLower;
+			p->z = nextRowZ;
+			twoDeeAngle += angle_delta;
+		}
+	}
+}
+
+void im2d_sphere_project(struct IM2DSPHERE *sphere)
+{
+	struct RwV3D *p;
+	struct IM2DVERTEX *v;
+	int i;
+
+	p = sphere->pos;
+	v = sphere->verts;
+	for (i = 0; i < SPHERE_VERTS; i++) {
+		game_WorldToScreen((struct RwV3D*) v, p);
+		if (v->near < 0) {
+
+		} else {
+		}
+		v->near = 0;
+		p++;
+		v++;
+	}
+}
+
+#include "ui.h"
+void im2d_sphere_draw(struct IM2DSPHERE *sphere)
+{
+	struct IM2DVERTEX *v;
+	int i = 0;
+
+	v = sphere->verts;
+	game_RwIm2DPrepareRender();
+	/*top*/
+	game_RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, v, SPHERE_NV_TOP_BOT);
+	/*bottom*/
+	v += SPHERE_NV_TOP_BOT;
+	game_RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, v, SPHERE_NV_TOP_BOT);
+	/*middle parts*/
+	v += SPHERE_NV_TOP_BOT;
+	for (i = 0; i < SPHERE_SEGMENTS - 3; i++) {
+		game_RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP,
+						v, SPHERE_NV_ROW);
+		v += SPHERE_NV_ROW;
+	}
+}

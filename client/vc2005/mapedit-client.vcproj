@@ -190,6 +190,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\im2d.c"
+				>
+			</File>
+			<File
+				RelativePath="..\im2d.h"
+				>
+			</File>
+			<File
 				RelativePath="..\msgbox.c"
 				>
 			</File>

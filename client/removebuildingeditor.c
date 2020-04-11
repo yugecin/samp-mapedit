@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "ide.h"
+#include "im2d.h"
 #include "player.h"
 #include "removebuildingeditor.h"
 #include "ui.h"
@@ -25,6 +26,8 @@ static float radius;
 
 static char txt_model[25];
 
+static struct IM2DSPHERE *sphere;
+
 static
 void rbe_hide()
 {
@@ -37,6 +40,8 @@ void rbe_do_ui()
 {
 	game_PedSetPos(player, &player_position);
 	ui_do_exclusive_mode_basics(wnd, 1);
+	im2d_sphere_project(sphere);
+	im2d_sphere_draw(sphere);
 }
 
 static
@@ -73,6 +78,13 @@ void rbe_update_removes()
 }
 
 static
+void rbe_update()
+{
+	rbe_update_removes();
+	im2d_sphere_pos(sphere, &origin, radius);
+}
+
+static
 void rbe_update_position_ui_text()
 {
 	char buf[20];
@@ -94,7 +106,7 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 
 	value = (float*) in->_parent.userdata;
 	*value = (float) atof(in->value);
-	rbe_update_removes();
+	rbe_update();
 }
 
 static
@@ -157,11 +169,14 @@ void rbe_init()
 	ui_wnd_add_child(wnd, lst_removelist);
 	ui_wnd_add_child(wnd, btn = ui_btn_make("Close", cb_btn_close));
 	btn->_parent.span = 2;
+
+	sphere = im2d_sphere_make(0x6622CC22);
 }
 
 void rbe_dispose()
 {
 	ui_wnd_dispose(wnd);
+	free(sphere);
 }
 
 void rbe_show(short model, struct RwV3D *_origin, float _radius)
@@ -178,6 +193,7 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 	}
 
 	rbe_update_position_ui_text();
+	rbe_update();
 }
 
 int rbe_handle_esc()
