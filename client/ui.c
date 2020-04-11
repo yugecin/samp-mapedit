@@ -481,6 +481,7 @@ void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd, int allow_camera_move)
 		ui_element_being_clicked = NULL;
 	}
 	if (activeMouseState->rmb && allow_camera_move) {
+		ui_active_element = NULL;
 		ui_do_mouse_movement();
 		ui_do_key_movement();
 		context_menu_active = 0;
@@ -595,6 +596,7 @@ void ui_render()
 			ui_do_mouse_movement();
 			ui_do_key_movement();
 			context_menu_active = 0;
+			ui_active_element = NULL;
 		} else {
 			ui_do_cursor_movement();
 		}
