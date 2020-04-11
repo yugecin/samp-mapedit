@@ -31,6 +31,7 @@ static struct IM2DSPHERE *sphere;
 static
 void rbe_hide()
 {
+	TRACE("rbe_hide");
 	active = 0;
 	ui_exclusive_mode = NULL;
 }
@@ -38,6 +39,7 @@ void rbe_hide()
 static
 void rbe_do_ui()
 {
+	TRACE("rbe_do_ui");
 	game_PedSetPos(player, &player_position);
 	ui_do_exclusive_mode_basics(wnd, 1);
 	im2d_sphere_project(sphere);
@@ -52,6 +54,7 @@ void rbe_update_removes()
 	struct RwV3D pos;
 	short i;
 
+	TRACE("rbe_update_removes");
 	game_WorldFindObjectsInRange(
 		&origin,
 		radius,
@@ -80,6 +83,7 @@ void rbe_update_removes()
 static
 void rbe_update()
 {
+	TRACE("rbe_update");
 	rbe_update_removes();
 	im2d_sphere_pos(sphere, &origin, radius);
 }
@@ -89,6 +93,7 @@ void rbe_update_position_ui_text()
 {
 	char buf[20];
 
+	TRACE("rbe_update_position_ui_text");
 	sprintf(buf, "%.3f", origin.x);
 	ui_in_set_text(in_origin_x, buf);
 	sprintf(buf, "%.3f", origin.y);
@@ -104,6 +109,7 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 {
 	float *value;
 
+	TRACE("cb_in_origin_radius");
 	value = (float*) in->_parent.userdata;
 	*value = (float) atof(in->value);
 	rbe_update();
@@ -112,11 +118,13 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 static
 void cb_in_model(struct UI_INPUT *in)
 {
+	TRACE("cb_in_model");
 }
 
 static
 void cb_btn_center_cam(struct UI_BUTTON *btn)
 {
+	TRACE("cb_btn_center_cam");
 	camera->lookVector.x = 45.0f;
 	camera->lookVector.y = 45.0f;
 	camera->lookVector.z = -25.0f;
@@ -130,6 +138,7 @@ void cb_btn_center_cam(struct UI_BUTTON *btn)
 static
 void cb_btn_close(struct UI_BUTTON *btn)
 {
+	TRACE("cb_btn_close");
 	rbe_hide();
 }
 
@@ -138,6 +147,7 @@ void rbe_init()
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
 
+	TRACE("rbe_init");
 	active = 0;
 
 	wnd = ui_wnd_make(10000.0f, 300.0f, "Remove_Building");
@@ -175,12 +185,14 @@ void rbe_init()
 
 void rbe_dispose()
 {
+	TRACE("rbe_dispose");
 	ui_wnd_dispose(wnd);
 	free(sphere);
 }
 
 void rbe_show(short model, struct RwV3D *_origin, float _radius)
 {
+	TRACE("rbe_show");
 	ui_exclusive_mode = rbe_do_ui;
 	active = 1;
 	origin = *_origin;
@@ -198,6 +210,7 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 
 int rbe_handle_esc()
 {
+	TRACE("rbe_handle_esc");
 	if (active) {
 		rbe_hide();
 		return 1;

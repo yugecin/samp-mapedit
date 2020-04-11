@@ -19,5 +19,11 @@
 #define HUE_COMP_G 0
 #define HUE_COMP_B -1
 
+#if 1
+#define TRACE(X) strcpy((char*)0xBAB278,X);
+#else
+#define TRACE(X)
+#endif
+
 unsigned char hue(float angle, int component);
 char *stristr(char *haystack, char *needle);

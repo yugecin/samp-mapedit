@@ -138,6 +138,7 @@ Called from the loader, do not call directly (use proc_unload)
 static
 void client_finalize()
 {
+	TRACE("client_finalize");
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
 	racecp_dispose();
@@ -168,6 +169,7 @@ void client_init()
 	struct MSG_NC nc;
 	HWND ghwnd = *((HWND*) gameHwnd);
 
+	TRACE("client_init");
 	CreateDirectoryA("samp-mapedit", NULL);
 
 	game_init();
