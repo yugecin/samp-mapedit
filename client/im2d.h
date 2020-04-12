@@ -1,7 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 /*this has to be (n + 3)*/
-#define SPHERE_SEGMENTS 5
+#define SPHERE_SEGMENTS 8
 /*tri fan at top and bottom, tri strip in the middle*/
 #define SPHERE_NV_TOP_BOT (SPHERE_SEGMENTS + 1 + 1)
 #define SPHERE_NV_ROW (SPHERE_SEGMENTS * 2 + 2)

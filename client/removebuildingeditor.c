@@ -42,9 +42,9 @@ void rbe_do_ui()
 {
 	TRACE("rbe_do_ui");
 	game_PedSetPos(player, &player_position);
-	ui_do_exclusive_mode_basics(wnd, 1);
 	im2d_sphere_project(sphere);
 	im2d_sphere_draw(sphere);
+	ui_do_exclusive_mode_basics(wnd, 1);
 	ui_draw_default_help_text();
 }
 

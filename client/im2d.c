@@ -26,26 +26,26 @@ struct IM2DSPHERE *im2d_sphere_make(int colorARGB)
 
 void im2d_sphere_pos(struct IM2DSPHERE *sphere, struct RwV3D *pos, float rad)
 {
-	float angle_delta, angle_delta2;
+	float angle_delta_v, angle_delta_h;
 	float x, y, z, currentRowZ, nextRowZ, twoDeeAngle;
 	float twoDeeRadUpper, twoDeeRadLower;
 	int i, j;
 	struct RwV3D *p;
 
-	angle_delta2 = M_PI / SPHERE_SEGMENTS;
-	angle_delta = angle_delta2 * 2.0f;
+	angle_delta_v = M_PI / (SPHERE_SEGMENTS - 1);
+	angle_delta_h = 2 * M_PI / SPHERE_SEGMENTS;
 
-	twoDeeRadUpper = twoDeeRadLower = cosf(angle_delta);
+	twoDeeRadUpper = twoDeeRadLower = cosf(M_PI2 - angle_delta_v) * rad;
 	/*top*/
 	sphere->pos[0].x = pos->x;
 	sphere->pos[0].y = pos->y;
 	sphere->pos[0].z = pos->z + rad;
-	z = pos->z + rad - rad * sinf(angle_delta2);
+	z = pos->z + rad * sinf(M_PI2 - angle_delta_v);
 	p = sphere->pos;
 	for (i = 0; i < SPHERE_SEGMENTS + 1; i++) {
 		p++;
-		p->x = pos->x + cosf(i * angle_delta) * twoDeeRadUpper;
-		p->y = pos->y + sinf(i * angle_delta) * twoDeeRadUpper;
+		p->x = pos->x + cosf(i * angle_delta_h) * twoDeeRadUpper;
+		p->y = pos->y + sinf(i * angle_delta_h) * twoDeeRadUpper;
 		p->z = z;
 	}
 	/*bottom*/
@@ -53,23 +53,23 @@ void im2d_sphere_pos(struct IM2DSPHERE *sphere, struct RwV3D *pos, float rad)
 	p->x = pos->x;
 	p->y = pos->y;
 	p->z = pos->z - rad;
-	z = pos->z - rad + rad * sinf(angle_delta2);
+	z = pos->z - rad * sinf(M_PI2 - angle_delta_v);
 	for (i = 0; i < SPHERE_SEGMENTS + 1; i++) {
 		p++;
-		p->x = pos->x + cosf(i * angle_delta) * twoDeeRadLower;
-		p->y = pos->y + sinf(i * angle_delta) * twoDeeRadLower;
+		p->x = pos->x + cosf(i * angle_delta_h) * twoDeeRadLower;
+		p->y = pos->y + sinf(i * angle_delta_h) * twoDeeRadLower;
 		p->z = z;
 	}
 	/*rest*/
 	for (i = 0; i < SPHERE_NUM_ROWS; i++) {
-		currentRowZ = angle_delta2 * (i + 1);
-		nextRowZ = currentRowZ + angle_delta2;
-		twoDeeRadUpper = sinf(currentRowZ) * rad;
-		twoDeeRadLower = sinf(nextRowZ) * rad;
-		currentRowZ = pos->z + cosf(currentRowZ) * rad;
-		nextRowZ = pos->z + cosf(nextRowZ) * rad;
+		currentRowZ = M_PI2 - angle_delta_v * (i + 1);
+		nextRowZ = currentRowZ - angle_delta_v;
+		twoDeeRadUpper = cosf(currentRowZ) * rad;
+		twoDeeRadLower = cosf(nextRowZ) * rad;
+		currentRowZ = pos->z + sinf(currentRowZ) * rad;
+		nextRowZ = pos->z + sinf(nextRowZ) * rad;
 		twoDeeAngle = 0;
-		for (j = 0; j < SPHERE_SEGMENTS + 2; j++) {
+		for (j = 0; j < SPHERE_SEGMENTS + 1; j++) {
 			x = cosf(twoDeeAngle);
 			y = sinf(twoDeeAngle);
 			p++;
@@ -80,7 +80,7 @@ void im2d_sphere_pos(struct IM2DSPHERE *sphere, struct RwV3D *pos, float rad)
 			p->x = pos->x + x * twoDeeRadLower;
 			p->y = pos->y + y * twoDeeRadLower;
 			p->z = nextRowZ;
-			twoDeeAngle += angle_delta;
+			twoDeeAngle += angle_delta_h;
 		}
 	}
 }
