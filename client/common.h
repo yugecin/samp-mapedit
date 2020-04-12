@@ -20,7 +20,7 @@
 #define HUE_COMP_B -1
 
 #if 1
-#define TRACE(X) strcpy((char*)0xBAB278,X);
+#define TRACE(X) strcpy((char*)0xBAB2C8,X);
 #else
 #define TRACE(X)
 #endif
