@@ -105,7 +105,6 @@ void im2d_sphere_project(struct IM2DSPHERE *sphere)
 	}
 }
 
-#include "ui.h"
 void im2d_sphere_draw(struct IM2DSPHERE *sphere)
 {
 	struct IM2DVERTEX *v;

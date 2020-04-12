@@ -796,7 +796,11 @@ void ui_set_trapped_in_ui(int flag)
 
 void ui_open_persistent_state()
 {
-	if (persistence_get_cursorpos(&cursorx, &cursory)) {
+	float cx, cy;
+
+	if (persistence_get_cursorpos(&cx, &cy)) {
+		cursorx = cx;
+		cursory = cy;
 		ui_activate();
 	}
 }
