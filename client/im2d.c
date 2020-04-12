@@ -90,14 +90,27 @@ void im2d_sphere_project(struct IM2DSPHERE *sphere)
 	struct RwV3D *p;
 	struct IM2DVERTEX *v;
 	int i;
+	int segmentidx;
 
 	p = sphere->pos;
 	v = sphere->verts;
 	for (i = 0; i < SPHERE_VERTS; i++) {
 		game_WorldToScreen((struct RwV3D*) v, p);
 		if (v->near < 0) {
-
-		} else {
+			if (i < SPHERE_NV_TOP_BOT) {
+				/*top segment*/
+				sphere->verts[0].near = -1;
+			} else if (i < SPHERE_NV_TOP_BOT * 2) {
+				/*bottom segment*/
+				sphere->verts[SPHERE_NV_TOP_BOT].near = -1;
+			} else {
+				/*a row*/
+				segmentidx = i - SPHERE_NV_TOP_BOT * 2;
+				segmentidx /= SPHERE_NV_ROW;
+				segmentidx *= SPHERE_NV_ROW;
+				segmentidx += SPHERE_NV_TOP_BOT * 2;
+				sphere->verts[segmentidx].near = -1;
+			}
 		}
 		v->near = 0;
 		p++;
@@ -113,15 +126,20 @@ void im2d_sphere_draw(struct IM2DSPHERE *sphere)
 	v = sphere->verts;
 	game_RwIm2DPrepareRender();
 	/*top*/
-	game_RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, v, SPHERE_NV_TOP_BOT);
+	if (v->near != -1) {
+		game_RwIm2DRenderPrimitive(5, v, SPHERE_NV_TOP_BOT);
+	}
 	/*bottom*/
 	v += SPHERE_NV_TOP_BOT;
-	game_RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, v, SPHERE_NV_TOP_BOT);
+	if (v->near != -1) {
+		game_RwIm2DRenderPrimitive(5, v, SPHERE_NV_TOP_BOT);
+	}
 	/*middle parts*/
 	v += SPHERE_NV_TOP_BOT;
 	for (i = 0; i < SPHERE_SEGMENTS - 3; i++) {
-		game_RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP,
-						v, SPHERE_NV_ROW);
+		if (v->near != -1) {
+			game_RwIm2DRenderPrimitive(4, v, SPHERE_NV_ROW);
+		}
 		v += SPHERE_NV_ROW;
 	}
 }
