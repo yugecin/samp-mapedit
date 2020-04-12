@@ -85,6 +85,22 @@ struct CPlaceable
 	void *__vmt;
 	struct CSimpleTransform placement;
 	struct CMatrix *matrix;
+};
+EXPECT_SIZE(struct CPlaceable, 0x18);
+
+struct CEntity
+{
+	struct CPlaceable _parent;
+	void *rwObject;
+	unsigned int flags;
+	short randomSeed;
+	short model;
+	void *references;
+	void *streamingLink;
+	short scanCode;
+	char iplIndex;
+	unsigned char interior;
+	struct CEntity *lod; /*-1 when none*/
 	/*incomplete*/
 };
 

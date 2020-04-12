@@ -29,6 +29,36 @@ static char txt_model[25];
 
 static struct IM2DSPHERE *sphere;
 
+#define MAX_PREVIEW_REMOVES 200
+#define VISIBLE_FLAG 0x00000080
+
+struct REMOVEDOBJECTPREVIEW {
+	struct CEntity *entity;
+	char was_visible;
+};
+
+static struct REMOVEDOBJECTPREVIEW previewremoves[MAX_PREVIEW_REMOVES];
+static int numpreviewremoves;
+
+static
+void rbe_animate_preview_removes()
+{
+	struct RwV3D p;
+	int i;
+	int doHide;
+
+	TRACE("rbe_animate_preview_removes");
+	doHide = *timeInGame % 1000 < 500;
+	for (i = 0; i < numpreviewremoves; i++) {
+		game_ObjectGetPos(previewremoves[i].entity, &p);
+		if (doHide) {
+			previewremoves[i].entity->flags &= ~VISIBLE_FLAG;
+		} else if (previewremoves[i].was_visible) {
+			previewremoves[i].entity->flags |= VISIBLE_FLAG;
+		}
+	}
+}
+
 static
 void rbe_hide()
 {
@@ -42,6 +72,7 @@ void rbe_do_ui()
 {
 	TRACE("rbe_do_ui");
 	game_PedSetPos(player, &player_position);
+	rbe_animate_preview_removes();
 	im2d_sphere_project(sphere);
 	im2d_sphere_draw(sphere);
 	ui_do_exclusive_mode_basics(wnd, 1);
@@ -49,14 +80,15 @@ void rbe_do_ui()
 }
 
 static
-void rbe_update_removes()
+void rbe_do_removes()
 {
-	void *entities[100];
+	struct REMOVEDOBJECTPREVIEW *preview;
+	struct CEntity *entity;
+	struct CEntity *entities[1000];
 	short numEntities;
-	struct RwV3D pos;
 	short i;
 
-	TRACE("rbe_update_removes");
+	TRACE("rbe_do_removes");
 	game_WorldFindObjectsInRange(
 		&origin,
 		radius,
@@ -71,23 +103,46 @@ void rbe_update_removes()
 		0
 	);
 
-	sprintf(debugstring, "I found %hd entities", numEntities);
-	ui_push_debug_string();
+	preview = previewremoves;
 	for (i = 0; i < numEntities; i++) {
-		game_ObjectGetPos(entities[i], &pos);
-		sprintf(debugstring, "entity %d %f %f %f",
-			*((short*) entities[i] + 0x11),
-			pos.x, pos.y, pos.z);
-		ui_push_debug_string();
+		entity = entities[i];
+		if (modelid == -1 || entity->model == modelid) {
+add_to_removes:
+			preview->entity = entity;
+			preview->was_visible = entity->flags & VISIBLE_FLAG;
+			preview++;
+			numpreviewremoves++;
+			if (numpreviewremoves == MAX_PREVIEW_REMOVES) {
+				break;
+			}
+			if (entity->lod > 0) {
+				entity = entity->lod;
+				goto add_to_removes;
+			}
+		}
 	}
 }
 
 static
-void rbe_update()
+void rbe_undo_removes()
 {
-	TRACE("rbe_update");
-	rbe_update_removes();
-	im2d_sphere_pos(sphere, &origin, radius);
+	int i;
+
+	TRACE("rbe_undo_removes");
+	for (i = 0; i < numpreviewremoves; i++) {
+		if (previewremoves[i].was_visible) {
+			previewremoves[i].entity->flags |= VISIBLE_FLAG;
+		}
+	}
+	numpreviewremoves = 0;
+}
+
+static
+void rbe_update_removes()
+{
+	TRACE("rbe_update_removes");
+	rbe_undo_removes();
+	rbe_do_removes();
 }
 
 static
@@ -114,13 +169,16 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 	TRACE("cb_in_origin_radius");
 	value = (float*) in->_parent.userdata;
 	*value = (float) atof(in->value);
-	rbe_update();
+	rbe_update_removes();
+	im2d_sphere_pos(sphere, &origin, radius);
 }
 
 static
 void cb_in_model(struct UI_INPUT *in)
 {
 	TRACE("cb_in_model");
+	modelid = atoi(in->value);
+	rbe_update_removes();
 }
 
 static
@@ -200,6 +258,7 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 	origin = *_origin;
 	radius = _radius;
 
+	modelid = model;
 	sprintf(txt_model, "%hd", model);
 	ui_in_set_text(in_model, txt_model);
 	if (modelNames[model]) {
@@ -207,7 +266,8 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 	}
 
 	rbe_update_position_ui_text();
-	rbe_update();
+	im2d_sphere_pos(sphere, &origin, radius);
+	rbe_update_removes();
 }
 
 int rbe_handle_keydown(int vk)
