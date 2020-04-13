@@ -102,10 +102,11 @@ void rbe_update_list_items()
 @return 0 if there are now no more slots for removing entities
 */
 static
-int rbe_do_remove_check_entity(struct CEntity *entity)
+int rbe_do_remove_check_entity_check_dups(struct CEntity *entity)
 {
 	struct RwV3D pos;
 	float dx, dy, dz;
+	int i;
 
 	if (modelid == -1 || entity->model == modelid) {
 		game_ObjectGetPos(entity, &pos);
@@ -117,6 +118,13 @@ int rbe_do_remove_check_entity(struct CEntity *entity)
 		dz = origin.z - pos.z;
 		if (dx * dx + dy * dy + dz * dz > radiussq) {
 			return 1;
+		}
+		/*the same entity might be in multiple sectors,
+		so check for duplicates here before adding the entity*/
+		for (i = 0; i < numpreviewremoves; i++) {
+			if (previewremoves[i].entity == entity) {
+				return 1;
+			}
 		}
 repeatforlod:
 		previewremoves[numpreviewremoves].entity = entity;
@@ -140,6 +148,7 @@ void rbe_do_removes()
 	struct CSector *sector;
 	struct CDoubleLinkListNode *node;
 	int sectorindex;
+	int n;
 
 	/*TODO: figure out sector coordinates so whole sectors can be culled
 	if they're not within reach*/
@@ -154,14 +163,17 @@ void rbe_do_removes()
 	while (--sectorindex >= 0) {
 		node = sector->buildings;
 		while (node != NULL) {
-			if (!rbe_do_remove_check_entity(node->item)) {
+			n = numpreviewremoves;
+			if (!rbe_do_remove_check_entity_check_dups(node->item))
+			{
 				goto limitreached;
 			}
 			node = node->next;
 		}
 		node = sector->dummies;
 		while (node != NULL) {
-			if (!rbe_do_remove_check_entity(node->item)) {
+			if (!rbe_do_remove_check_entity_check_dups(node->item))
+			{
 				goto limitreached;
 			}
 			node = node->next;
