@@ -123,6 +123,26 @@ struct CEntity
 #define ENTITY_IS_TYPE(ENTITY,TYPE) \
 	((ENTITY->type_status&7)==TYPE)
 
+struct CDoubleLinkListNode {
+	void *item;
+	struct CDoubleLinkListNode *next;
+	struct CDoubleLinkListNode *prev;
+};
+EXPECT_SIZE(struct CDoubleLinkListNode, 0xC);
+
+struct CSector {
+	struct CDoubleLinkListNode *buildings;
+	struct CDoubleLinkListNode *dummies;
+};
+EXPECT_SIZE(struct CSector, 0x8);
+
+struct CRepeatSector {
+	struct CDoubleLinkListNode *peds;
+	struct CDoubleLinkListNode *vehicles;
+	struct CDoubleLinkListNode *objects;
+};
+EXPECT_SIZE(struct CRepeatSector, 0xC);
+
 struct CCam {
 	char __pad0[0x190];
 	struct RwV3D lookVector; /*+190*/
@@ -315,8 +335,14 @@ EXPECT_SIZE(struct CRope, 0x328);
 #pragma pack(pop)
 
 #define MAX_ROPES 8
+#define MAX_SECTORS_X 120
+#define MAX_SECTORS_Y 120
+#define MAX_SECTORS 14400
+#define MAX_REPEATSECTORS 256
 
 extern struct CRope *ropes;
+extern struct CSector *worldSectors;
+extern struct CRepeatSector *worldRepeatSectors;
 extern unsigned int *fontColorABGR;
 extern unsigned char *enableHudByOpcode;
 extern struct CMouseState *activeMouseState;

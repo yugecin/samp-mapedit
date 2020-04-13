@@ -24,6 +24,7 @@ static char active;
 static short modelid;
 static struct RwV3D origin;
 static float radius;
+static float radiussq;
 
 static char txt_model[25];
 
@@ -71,48 +72,79 @@ void rbe_do_ui()
 	ui_draw_default_help_text();
 }
 
+/**
+@return 0 if there are now no more slots for removing entities
+*/
+static
+int rbe_do_remove_check_entity(struct CEntity *entity)
+{
+	struct RwV3D pos;
+	float dx, dy, dz;
+
+	if (modelid == -1 || entity->model == modelid) {
+		game_ObjectGetPos(entity, &pos);
+		dx = origin.x - pos.x;
+		dy = origin.y - pos.y;
+		if (dx * dx + dy * dy > radiussq) {
+			return 1;
+		}
+		dz = origin.z - pos.z;
+		if (dx * dx + dy * dy + dz * dz > radiussq) {
+			return 1;
+		}
+repeatforlod:
+		previewremoves[numpreviewremoves].entity = entity;
+		previewremoves[numpreviewremoves].was_visible =
+			entity->flags & VISIBLE_FLAG;
+		numpreviewremoves++;
+		if (numpreviewremoves == MAX_PREVIEW_REMOVES) {
+			return 0;
+		}
+		if (entity->lod > 0) {
+			entity = entity->lod;
+			goto repeatforlod;
+		}
+	}
+	return 1;
+}
+
 static
 void rbe_do_removes()
 {
-	struct REMOVEDOBJECTPREVIEW *preview;
-	struct CEntity *entity;
-	struct CEntity *entities[1000];
-	short numEntities;
-	short i;
+	struct CSector *sector;
+	struct CDoubleLinkListNode *node;
+	int sectorindex;
+
+	/*TODO: figure out sector coordinates so whole sectors can be culled
+	if they're not within reach*/
 
 	TRACE("rbe_do_removes");
-	game_WorldFindObjectsInRange(
-		&origin,
-		radius,
-		0,
-		&numEntities,
-		(short) (sizeof(entities)/sizeof(entities[0])),
-		entities,
-		1,
-		0,
-		0,
-		0,
-		0
-	);
 
-	preview = previewremoves;
-	for (i = 0; i < numEntities; i++) {
-		entity = entities[i];
-		if (modelid == -1 || entity->model == modelid) {
-add_to_removes:
-			preview->entity = entity;
-			preview->was_visible = entity->flags & VISIBLE_FLAG;
-			preview++;
-			numpreviewremoves++;
-			if (numpreviewremoves == MAX_PREVIEW_REMOVES) {
-				break;
+	radiussq = radius * radius;
+	sector = worldSectors;
+	sectorindex = MAX_SECTORS;
+	while (--sectorindex >= 0) {
+		node = sector->buildings;
+		while (node != NULL) {
+			if (!rbe_do_remove_check_entity(node->item)) {
+				goto limitreached;
 			}
-			if (entity->lod > 0) {
-				entity = entity->lod;
-				goto add_to_removes;
-			}
+			node = node->next;
 		}
+		node = sector->dummies;
+		while (node != NULL) {
+			if (!rbe_do_remove_check_entity(node->item)) {
+				goto limitreached;
+			}
+			node = node->next;
+		}
+		sector++;
 	}
+
+	return;
+limitreached:
+	sprintf(debugstring, "reached limit of preview removes");
+	ui_push_debug_string();
 }
 
 static

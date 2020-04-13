@@ -6,6 +6,8 @@
 #include <windows.h>
 
 struct CRope *ropes = (struct CRope*) 0xB768B8;
+struct CSector *worldSectors;
+struct CRepeatSector *worldRepeatSectors;
 unsigned int *fontColorABGR = (unsigned int*) 0xC71A97;
 unsigned char *enableHudByOpcode = (unsigned char*) 0xA444A0;
 struct CMouseState *activeMouseState = (struct CMouseState*) 0xB73404;
@@ -46,6 +48,15 @@ __declspec(naked) void game_init()
 		mov eax, 0x404910 /*CPed *CPool_CPed::getStructByHandle*/
 		call eax /*__thiscall*/
 		mov player, eax
+
+		mov eax, 0x408259
+		mov eax, [eax]
+		mov worldSectors, eax
+
+		mov eax, 0x5634AD
+		mov eax, [eax]
+		mov worldRepeatSectors, eax
+
 		ret
 	}
 }
