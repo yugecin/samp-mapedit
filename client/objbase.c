@@ -552,6 +552,21 @@ __declspec(naked) void cworld_remove_detour()
 	}
 }
 
+static
+__declspec(naked) void cworld_add_detour()
+{
+	_asm {
+		push [esp+0x8]
+		call rbe_on_world_entity_added
+		add esp, 0x4
+		pop eax
+		push esi
+		mov esi, [esp+0x8]
+		push eax
+		ret
+	}
+}
+
 /**
 calls to _CScriptThread__setNumberParams at the near end of opcode 0107 handler
 get redirected here
@@ -629,6 +644,7 @@ static struct DETOUR detour_render_object;
 static struct DETOUR detour_render_centity;
 static struct DETOUR detour_render_water;
 static struct DETOUR detour_cworld_remove;
+static struct DETOUR detour_cworld_add;
 
 void objbase_install_detour(struct DETOUR *detour)
 {
@@ -675,6 +691,8 @@ void objbase_init()
 	detour_render_water.new_target = (int) render_water_detour;
 	detour_cworld_remove.target = (int*) 0x563281;
 	detour_cworld_remove.new_target = (int) cworld_remove_detour;
+	detour_cworld_add.target = (int*) 0x563221;
+	detour_cworld_add.new_target = (int) cworld_add_detour;
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0108);
 	objbase_install_detour(&detour_0453);
@@ -686,6 +704,9 @@ void objbase_init()
 	objbase_install_detour(&detour_cworld_remove);
 	VirtualProtect((void*) 0x563280, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x563280) = 0xE8;
+	objbase_install_detour(&detour_cworld_add);
+	VirtualProtect((void*) 0x563220, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+	*((char*) 0x563220) = 0xE8;
 
 }
 
@@ -702,6 +723,8 @@ void objbase_dispose()
 	objbase_uninstall_detour(&detour_render_water);
 	objbase_uninstall_detour(&detour_cworld_remove);
 	*((char*) 0x563280) = 0x56;
+	objbase_uninstall_detour(&detour_cworld_add);
+	*((char*) 0x563220) = 0x56;
 
 	objbase_color_new_entity(&selected_entity, NULL, 0);
 	objbase_color_new_entity(&hovered_entity, NULL, 0);
