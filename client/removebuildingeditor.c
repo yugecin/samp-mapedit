@@ -49,6 +49,29 @@ struct REMOVEDOBJECTPREVIEW {
 static struct REMOVEDOBJECTPREVIEW previewremoves[MAX_PREVIEW_REMOVES];
 static int numpreviewremoves;
 
+static
+void rbe_update_list_items()
+{
+	char unkname[2];
+	char *names[MAX_PREVIEW_REMOVES];
+	int i;
+	short model;
+
+	unkname[0] = '?';
+	unkname[1] = 0;
+	for (i = 0; i < numpreviewremoves; i++) {
+		model = previewremoves[i].entity->model;
+		if (modelNames[model]) {
+			names[i] = modelNames[model];
+		} else {
+			/*unkname should contain model id,
+			but this shouldn't happen anyways*/
+			names[i] = unkname;
+		}
+	}
+	ui_lst_set_data(lst_removelist, names, numpreviewremoves);
+}
+
 /**
 @return 0 if there are now no more slots for removing entities
 */
@@ -120,10 +143,12 @@ void rbe_do_removes()
 		sector++;
 	}
 
-	return;
+	goto ret;
 limitreached:
 	sprintf(debugstring, "reached limit of preview removes");
 	ui_push_debug_string();
+ret:
+	rbe_update_list_items();
 }
 
 static
