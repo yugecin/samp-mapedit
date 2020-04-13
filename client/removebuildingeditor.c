@@ -60,14 +60,6 @@ void rbe_animate_preview_removes()
 }
 
 static
-void rbe_hide()
-{
-	TRACE("rbe_hide");
-	active = 0;
-	ui_exclusive_mode = NULL;
-}
-
-static
 void rbe_do_ui()
 {
 	TRACE("rbe_do_ui");
@@ -159,6 +151,15 @@ void rbe_update_position_ui_text()
 	ui_in_set_text(in_origin_z, buf);
 	sprintf(buf, "%.3f", radius);
 	ui_in_set_text(in_radius, buf);
+}
+
+static
+void rbe_hide()
+{
+	TRACE("rbe_hide");
+	rbe_undo_removes();
+	active = 0;
+	ui_exclusive_mode = NULL;
 }
 
 static
