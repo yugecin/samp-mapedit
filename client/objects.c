@@ -42,7 +42,7 @@ static char txt_objlodentity[9];
 static char txt_objlodmodel[45];
 static char txt_objlodflags[9];
 
-static void *selected_entity;
+static struct CEntity *selected_entity;
 static struct OBJECT *selected_object;
 struct OBJECTLAYER *active_layer = NULL;
 static struct OBJECTLAYER layers[MAX_LAYERS];
@@ -224,7 +224,7 @@ void cb_btn_remove_building(struct UI_BUTTON *btn)
 	short modelid;
 
 	if (selected_entity) {
-		modelid = *((short*) selected_entity + 0x11);
+		modelid = selected_entity->model;
 		game_ObjectGetPos(selected_entity, &pos);
 		ui_hide_window();
 		rbe_show(modelid, &pos, 1.25f);

@@ -88,6 +88,19 @@ struct CPlaceable
 };
 EXPECT_SIZE(struct CPlaceable, 0x18);
 
+/* https://code.google.com/p/
+mtasa-blue/source/browse/trunk/MTA10/sdk/game/CEntity.h */
+enum eEntityType
+{
+	ENTITY_TYPE_NOTHING,
+	ENTITY_TYPE_BUILDING,
+	ENTITY_TYPE_VEHICLE,
+	ENTITY_TYPE_PED,
+	ENTITY_TYPE_OBJECT,
+	ENTITY_TYPE_DUMMY,
+	ENTITY_TYPE_NOTINPOOLS
+};
+
 struct CEntity
 {
 	struct CPlaceable _parent;
@@ -101,8 +114,14 @@ struct CEntity
 	char iplIndex;
 	unsigned char interior;
 	struct CEntity *lod; /*-1 when none*/
+	unsigned char numLodChildren;
+	unsigned char numLodChildrenRedered;
+	unsigned char type_status; /*3 bits type (lo), 5 bits status (hi)*/
 	/*incomplete*/
 };
+
+#define ENTITY_IS_TYPE(ENTITY,TYPE) \
+	((ENTITY->type_status&7)==TYPE)
 
 struct CCam {
 	char __pad0[0x190];
