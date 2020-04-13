@@ -53,7 +53,7 @@ static struct RwV3D player_pos_before_selecting;
 static int is_selecting_object = 0;
 
 static
-void cb_msg_mkobject_needlayer(int choice)
+void cb_msg_openlayers(int choice)
 {
 	ui_show_window(window_layers);
 }
@@ -65,7 +65,7 @@ void cb_btn_mkobject(struct UI_BUTTON *btn)
 		msg_message = "Create_and_select_an_object_layer_first!";
 		msg_title = "Objects";
 		msg_btn1text = "Ok";
-		msg_show(cb_msg_mkobject_needlayer);
+		msg_show(cb_msg_openlayers);
 	} else if (active_layer->numobjects == MAX_OBJECTS) {
 		msg_message = "Layer_object_limit_reached.";
 		msg_title = "Objects";
@@ -148,9 +148,22 @@ void cb_show_layers_window()
 }
 
 static
-void cb_show_objinfo_window()
+void cb_msg_show_objinfo_window(int choice)
 {
 	ui_show_window(window_objinfo);
+}
+
+static
+void cb_show_objinfo_window()
+{
+	if (active_layer == NULL) {
+		msg_message = "Create_and_select_an_object_layer_first!";
+		msg_title = "Objects";
+		msg_btn1text = "Ok";
+		msg_show(cb_msg_openlayers);
+	} else {
+		ui_show_window(window_objinfo);
+	}
 }
 
 static
