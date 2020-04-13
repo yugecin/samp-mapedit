@@ -118,8 +118,10 @@ void rbe_do_removes()
 	/*TODO: figure out sector coordinates so whole sectors can be culled
 	if they're not within reach*/
 
-	TRACE("rbe_do_removes");
+	/*TODO: this does not contain dynamic objects such as: hay,
+	lampposts, building lights, fences, ..*/
 
+	TRACE("rbe_do_removes");
 	radiussq = radius * radius;
 	sector = worldSectors;
 	sectorindex = MAX_SECTORS;
