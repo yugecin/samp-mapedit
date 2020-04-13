@@ -21,18 +21,19 @@ struct ENTITYCOLORINFO {
 
 static struct ENTITYCOLORINFO selected_entity, hovered_entity;
 
-static struct OBJECT exclusiveExtraObject;
-static void *exclusiveExtraEntity = NULL;
 static void *exclusiveEntity = NULL;
+
+struct OBJECT manipulateObject;
+struct CEntity *manipulateEntity = NULL;
 
 void objbase_set_entity_to_render_exclusively(void *entity)
 {
 	struct RwV3D pos;
 
 	exclusiveEntity = entity;
-	if (entity != NULL && exclusiveExtraEntity != NULL) {
+	if (entity != NULL && manipulateEntity != NULL) {
 		game_ObjectGetPos(entity, &pos);
-		game_ObjectSetPos(exclusiveExtraEntity, &pos);
+		game_ObjectSetPos(manipulateEntity, &pos);
 	}
 }
 
@@ -98,9 +99,9 @@ void objbase_object_creation_confirmed(struct OBJECT *object)
 {
 	objbase_set_position_after_creation(object);
 
-	if (object == &exclusiveExtraObject) {
-		exclusiveExtraEntity = object->sa_object;
-		*(float*)((char*) object->sa_object + 0x15C) = 0.1f; /*scale*/
+	if (object == &manipulateObject) {
+		manipulateEntity = object->sa_object;
+		*(float*)((char*) object->sa_object + 0x15C) = 0.01f; /*scale*/
 	} else {
 		objbrowser_object_created(object);
 	}
@@ -242,7 +243,7 @@ __declspec(naked) void render_centity_detour()
 		jz continuerender
 		cmp ecx, exclusiveEntity
 		je continuerender
-		cmp ecx, exclusiveExtraEntity
+		cmp ecx, manipulateEntity
 		je continuerender
 		add esp, 0x4
 		pop esi
@@ -521,8 +522,8 @@ void objbase_object_rotation_changed(int sa_handle)
 
 	object = objects_find_by_sa_handle(sa_handle);
 	if (object == NULL) {
-		if (exclusiveExtraObject.sa_handle == sa_handle) {
-			object = &exclusiveExtraObject;
+		if (manipulateObject.sa_handle == sa_handle) {
+			object = &manipulateObject;
 		} else {
 			return;
 		}
@@ -667,8 +668,8 @@ void objbase_create_dummy_entity()
 	pos.x = 0.0f;
 	pos.y = 0.0f;
 	pos.z = -10000.0f;
-	exclusiveExtraObject.model = 1212;
-	objbase_mkobject(&exclusiveExtraObject, &pos);
+	manipulateObject.model = 1214;
+	objbase_mkobject(&manipulateObject, &pos);
 }
 
 void objbase_init()

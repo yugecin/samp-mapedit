@@ -12,6 +12,9 @@ struct OBJECT {
 	char justcreated;
 };
 
+struct OBJECT manipulateObject;
+struct CEntity *manipulateEntity;
+
 void objbase_init();
 void objbase_dispose();
 struct OBJECT *objects_find_by_sa_handle(int sa_handle);
