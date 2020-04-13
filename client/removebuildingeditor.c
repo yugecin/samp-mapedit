@@ -50,6 +50,32 @@ static struct REMOVEDOBJECTPREVIEW previewremoves[MAX_PREVIEW_REMOVES];
 static int numpreviewremoves;
 
 static
+void rbe_center_cam_on(struct RwV3D *pos)
+{
+	camera->lookVector.x = 45.0f;
+	camera->lookVector.y = 45.0f;
+	camera->lookVector.z = -25.0f;
+	camera->position.x = pos->x - camera->lookVector.x;
+	camera->position.y = pos->y - camera->lookVector.y;
+	camera->position.z = pos->z - camera->lookVector.z;
+	ui_update_camera_after_manual_position();
+	ui_store_camera();
+}
+
+static
+void cb_removelist_click(struct UI_LIST *lst)
+{
+	struct RwV3D pos;
+	int idx;
+
+	idx = lst->selectedindex;
+	if (0 <= idx && idx < numpreviewremoves) {
+		game_ObjectGetPos(previewremoves[idx].entity, &pos);
+		rbe_center_cam_on(&pos);
+	}
+}
+
+static
 void rbe_update_list_items()
 {
 	char unkname[2];
@@ -304,14 +330,7 @@ static
 void cb_btn_center_cam(struct UI_BUTTON *btn)
 {
 	TRACE("cb_btn_center_cam");
-	camera->lookVector.x = 45.0f;
-	camera->lookVector.y = 45.0f;
-	camera->lookVector.z = -25.0f;
-	camera->position.x = origin.x - camera->lookVector.x;
-	camera->position.y = origin.y - camera->lookVector.y;
-	camera->position.z = origin.z - camera->lookVector.z;
-	ui_update_camera_after_manual_position();
-	ui_store_camera();
+	rbe_center_cam_on(&origin);
 }
 
 static
@@ -400,9 +419,10 @@ void rbe_init()
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_model));
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_lbl_make("use_-1_for_all"));
-	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Affected_buildings:"));
+	lbl = ui_lbl_make("Affected_buildings:_(click_to_focus)");
+	ui_wnd_add_child(wnd, lbl);
 	lbl->_parent.span = 2;
-	lst_removelist = ui_lst_make(20, NULL);
+	lst_removelist = ui_lst_make(20, cb_removelist_click);
 	lst_removelist->_parent.span = 2;
 	ui_wnd_add_child(wnd, lst_removelist);
 	ui_wnd_add_child(wnd, btn = ui_btn_make("Close", cb_btn_close));
