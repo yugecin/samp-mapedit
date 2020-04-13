@@ -26,7 +26,7 @@ static struct RwV3D origin;
 static float radius;
 static float radiussq;
 
-static char txt_model[25];
+static char txt_model[45];
 
 static struct IM2DSPHERE *sphere;
 
@@ -209,10 +209,25 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 }
 
 static
+void rbe_update_model_name()
+{
+	if (modelid > 0 && modelNames[modelid]) {
+		sprintf(txt_model, "%s", modelNames[modelid]);
+	} else {
+		txt_model[0] = '?';
+		txt_model[1] = 0;
+	}
+}
+
+static
 void cb_in_model(struct UI_INPUT *in)
 {
 	TRACE("cb_in_model");
 	modelid = atoi(in->value);
+	if (modelid >= MAX_MODELS) {
+		modelid = MAX_MODELS - 1;
+	}
+	rbe_update_model_name();
 	rbe_update_removes();
 }
 
@@ -266,6 +281,8 @@ void rbe_init()
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
 	ui_wnd_add_child(wnd, in_model = ui_in_make(cb_in_model));
 	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, ui_lbl_make(txt_model));
+	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_lbl_make("use_-1_for_all"));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Affected_buildings:"));
 	lbl->_parent.span = 2;
@@ -296,9 +313,7 @@ void rbe_show(short model, struct RwV3D *_origin, float _radius)
 	modelid = model;
 	sprintf(txt_model, "%hd", model);
 	ui_in_set_text(in_model, txt_model);
-	if (modelNames[model]) {
-		sprintf(txt_model, "%s", modelNames[model]);
-	}
+	rbe_update_model_name();
 
 	rbe_update_position_ui_text();
 	im2d_sphere_pos(sphere, &origin, radius);
