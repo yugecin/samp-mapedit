@@ -285,3 +285,27 @@ int rbe_handle_keydown(int vk)
 	}
 	return 0;
 }
+
+void rbe_on_world_entity_removed(struct CEntity *entity)
+{
+	int i;
+
+	if (numpreviewremoves == 0 ||
+		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_BUILDING) &&
+		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_DUMMY) &&
+		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_OBJECT))
+	{
+		return;
+	}
+
+	for (i = 0; i < numpreviewremoves; i++) {
+removed:
+		if (previewremoves[i].entity == entity) {
+			numpreviewremoves--;
+			memcpy(previewremoves + i,
+				previewremoves + numpreviewremoves,
+				sizeof(struct REMOVEDOBJECTPREVIEW));
+			goto removed;
+		}
+	}
+}

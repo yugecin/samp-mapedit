@@ -6,6 +6,7 @@
 #include "objects.h"
 #include "objbrowser.h"
 #include "player.h"
+#include "removebuildingeditor.h"
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
@@ -541,6 +542,7 @@ __declspec(naked) void cworld_remove_detour()
 	_asm {
 		push [esp+0x8]
 		call objbase_on_world_entity_removed
+		call rbe_on_world_entity_removed
 		add esp, 0x4
 		pop eax
 		push esi
