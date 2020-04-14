@@ -46,6 +46,13 @@ struct REMOVEDOBJECTPREVIEW {
 	char was_visible;
 };
 
+static struct IM2DVERTEX boxverts[] = {
+	{0, 0, 0, 0xFF555556, 0x556666DD, 1.0f, 0.0f},
+	{0, 0, 0, 0xFF555556, 0x556666DD, 1.0f, 0.0f},
+	{0, 0, 0, 0xFF555556, 0x556666DD, 1.0f, 0.0f},
+	{0, 0, 0, 0xFF555556, 0x556666DD, 1.0f, 0.0f},
+};
+
 static struct REMOVEDOBJECTPREVIEW previewremoves[MAX_PREVIEW_REMOVES];
 static int numpreviewremoves;
 
@@ -214,14 +221,27 @@ void rbe_update_removes()
 static
 void rbe_animate_preview_removes()
 {
-	struct RwV3D p;
+	struct RwV3D p, screenPos;
 	int i;
 	int doHide;
 
 	TRACE("rbe_animate_preview_removes");
 	doHide = *timeInGame % 1000 < 500;
+	game_RwIm2DPrepareRender();
 	for (i = 0; i < numpreviewremoves; i++) {
 		game_ObjectGetPos(previewremoves[i].entity, &p);
+		game_WorldToScreen(&screenPos, &p);
+		if (screenPos.z > 0) {
+			boxverts[0].x = screenPos.x - 5.0f;
+			boxverts[0].y = screenPos.y - 5.0f;
+			boxverts[1].x = screenPos.x + 5.0f;
+			boxverts[1].y = screenPos.y - 5.0f;
+			boxverts[2].x = screenPos.x + 5.0f;
+			boxverts[2].y = screenPos.y + 5.0f;
+			boxverts[3].x = screenPos.x - 5.0f;
+			boxverts[3].y = screenPos.y + 5.0f;
+			game_RwIm2DRenderPrimitive(5, boxverts, 4);
+		}
 		if (doHide) {
 			previewremoves[i].entity->flags &= ~VISIBLE_FLAG;
 		} else if (previewremoves[i].was_visible) {
@@ -440,7 +460,7 @@ void rbe_init()
 	ui_wnd_add_child(wnd, btn = ui_btn_make("Close", cb_btn_close));
 	btn->_parent.span = 2;
 
-	sphere = im2d_sphere_make(0x3322CC22);
+	sphere = im2d_sphere_make(0x1F22CC22);
 }
 
 void rbe_dispose()
