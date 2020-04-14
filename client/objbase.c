@@ -543,7 +543,6 @@ __declspec(naked) void cworld_remove_detour()
 	_asm {
 		push [esp+0x8]
 		call objbase_on_world_entity_removed
-		call rbe_on_world_entity_removed
 		add esp, 0x4
 		pop eax
 		push esi
@@ -557,9 +556,6 @@ static
 __declspec(naked) void cworld_add_detour()
 {
 	_asm {
-		push [esp+0x8]
-		call rbe_on_world_entity_added
-		add esp, 0x4
 		pop eax
 		push esi
 		mov esi, [esp+0x8]

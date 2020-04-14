@@ -419,7 +419,6 @@ void rbe_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
-
 	TRACE("rbe_init");
 	active = 0;
 
@@ -503,59 +502,4 @@ int rbe_handle_keydown(int vk)
 		}
 	}
 	return 0;
-}
-
-void rbe_on_world_entity_added(struct CEntity *entity)
-{
-	TRACE("rbe_on_world_entity_added");
-	if (!active ||
-		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_BUILDING) &&
-		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_DUMMY) &&
-		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_OBJECT))
-	{
-		return;
-	}
-
-	if (modelid != -1 && entity->model != modelid) {
-		return;
-	}
-
-add_to_removes:
-	if (numpreviewremoves == MAX_PREVIEW_REMOVES) {
-		return;
-	}
-
-	previewremoves[numpreviewremoves].entity = entity;
-	previewremoves[numpreviewremoves].was_visible =
-		entity->flags & VISIBLE_FLAG;
-	numpreviewremoves++;
-	if (entity->lod > 0) {
-		entity = entity->lod;
-		goto add_to_removes;
-	}
-}
-
-void rbe_on_world_entity_removed(struct CEntity *entity)
-{
-	int i;
-
-	TRACE("rbe_on_world_entity_removed");
-	if (!active ||
-		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_BUILDING) &&
-		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_DUMMY) &&
-		!ENTITY_IS_TYPE(entity, ENTITY_TYPE_OBJECT))
-	{
-		return;
-	}
-
-	for (i = 0; i < numpreviewremoves; i++) {
-removed:
-		if (previewremoves[i].entity == entity) {
-			numpreviewremoves--;
-			memcpy(previewremoves + i,
-				previewremoves + numpreviewremoves,
-				sizeof(struct REMOVEDOBJECTPREVIEW));
-			goto removed;
-		}
-	}
 }
