@@ -27,6 +27,8 @@ struct OBJECTLAYER {
 	int color;
 	struct OBJECT objects[MAX_OBJECTS];
 	int numobjects;
+	struct REMOVEDBUILDING removes[MAX_REMOVES];
+	int numremoves;
 };
 
 extern struct OBJECTLAYER *active_layer;

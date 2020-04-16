@@ -29,10 +29,9 @@ static struct UI_INPUT *in_model;
 static char active;
 static char move_mode;
 
-static short modelid;
-static struct RwV3D origin;
-static float radius;
+static struct REMOVEDBUILDING current_remove;
 static float radiussq;
+static rbe_cb *cb;
 
 static char txt_model[45];
 
@@ -115,14 +114,16 @@ int rbe_do_remove_check_entity_check_dups(struct CEntity *entity)
 	float dx, dy, dz;
 	int i;
 
-	if (modelid == -1 || entity->model == modelid) {
+	if (current_remove.model == -1 ||
+		entity->model == current_remove.model)
+	{
 		game_ObjectGetPos(entity, &pos);
-		dx = origin.x - pos.x;
-		dy = origin.y - pos.y;
+		dx = current_remove.origin.x - pos.x;
+		dy = current_remove.origin.y - pos.y;
 		if (dx * dx + dy * dy > radiussq) {
 			return 1;
 		}
-		dz = origin.z - pos.z;
+		dz = current_remove.origin.z - pos.z;
 		if (dx * dx + dy * dy + dz * dz > radiussq) {
 			return 1;
 		}
@@ -164,7 +165,7 @@ void rbe_do_removes()
 	lampposts, building lights, fences, ..*/
 
 	TRACE("rbe_do_removes");
-	radiussq = radius * radius;
+	radiussq = current_remove.radius * current_remove.radius;
 	sector = worldSectors;
 	sectorindex = MAX_SECTORS;
 	while (--sectorindex >= 0) {
@@ -254,35 +255,35 @@ static
 void rbe_update_position_from_manipulate_object()
 {
 	struct RwV3D pos;
-	float dx, dy, dz, distsq;
+	float dx, dy, dz, distsq, dist;
 
 	if (move_mode == MOVE_MODE_NONE) {
 		return;
 	}
 
 	game_ObjectGetPos(manipulateEntity, &pos);
-	dx = pos.x - origin.x;
-	dy = pos.y - origin.y;
-	dz = pos.z - origin.z;
+	dx = pos.x - current_remove.origin.x;
+	dy = pos.y - current_remove.origin.y;
+	dz = pos.z - current_remove.origin.z;
 	distsq = dx * dx + dy * dy + dz * dz;
 	switch (move_mode) {
 	case MOVE_MODE_ORIGIN:
 		if (distsq < 0.2f) {
 			return;
 		}
-		origin = pos;
+		current_remove.origin = pos;
 		break;
 	case MOVE_MODE_RADIUS:
-		distsq = (float) sqrt(distsq);
-		if (fabs(distsq - radius) < 0.2f) {
+		dist = (float) sqrt(distsq);
+		if (fabs(dist - current_remove.radius) < 0.2f) {
 			return;
 		}
-		radius = distsq;
+		current_remove.radius = dist;
 		break;
 	}
 
 	rbe_update_removes();
-	im2d_sphere_pos(sphere, &origin, radius);
+	im2d_sphere_pos(sphere, &current_remove.origin, current_remove.radius);
 }
 
 static
@@ -304,13 +305,13 @@ void rbe_update_position_ui_text()
 	char buf[20];
 
 	TRACE("rbe_update_position_ui_text");
-	sprintf(buf, "%.3f", origin.x);
+	sprintf(buf, "%.3f", current_remove.origin.x);
 	ui_in_set_text(in_origin_x, buf);
-	sprintf(buf, "%.3f", origin.y);
+	sprintf(buf, "%.3f", current_remove.origin.y);
 	ui_in_set_text(in_origin_y, buf);
-	sprintf(buf, "%.3f", origin.z);
+	sprintf(buf, "%.3f", current_remove.origin.z);
 	ui_in_set_text(in_origin_z, buf);
-	sprintf(buf, "%.3f", radius);
+	sprintf(buf, "%.3f", current_remove.radius);
 	ui_in_set_text(in_radius, buf);
 }
 
@@ -332,14 +333,14 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 	value = (float*) in->_parent.userdata;
 	*value = (float) atof(in->value);
 	rbe_update_removes();
-	im2d_sphere_pos(sphere, &origin, radius);
+	im2d_sphere_pos(sphere, &current_remove.origin, current_remove.radius);
 }
 
 static
 void rbe_update_model_name()
 {
-	if (modelid > 0 && modelNames[modelid]) {
-		sprintf(txt_model, "%s", modelNames[modelid]);
+	if (current_remove.model > 0 && modelNames[current_remove.model]) {
+		sprintf(txt_model, "%s", modelNames[current_remove.model]);
 	} else {
 		txt_model[0] = '?';
 		txt_model[1] = 0;
@@ -350,9 +351,9 @@ static
 void cb_in_model(struct UI_INPUT *in)
 {
 	TRACE("cb_in_model");
-	modelid = atoi(in->value);
-	if (modelid >= MAX_MODELS) {
-		modelid = MAX_MODELS - 1;
+	current_remove.model = atoi(in->value);
+	if (current_remove.model >= MAX_MODELS) {
+		current_remove.model = MAX_MODELS - 1;
 	}
 	rbe_update_model_name();
 	rbe_update_removes();
@@ -362,7 +363,7 @@ static
 void cb_btn_center_cam(struct UI_BUTTON *btn)
 {
 	TRACE("cb_btn_center_cam");
-	rbe_center_cam_on(&origin);
+	rbe_center_cam_on(&current_remove.origin);
 }
 
 static
@@ -374,7 +375,7 @@ void cb_btn_move_origin(struct UI_BUTTON *btn)
 	if (manipulateEntity != NULL) {
 		rot[0] = rot[1] = rot[2] = 0;
 		game_ObjectSetRotRad(manipulateEntity, (struct RwV3D*) &rot);
-		game_ObjectSetPos(manipulateEntity, &origin);
+		game_ObjectSetPos(manipulateEntity, &current_remove.origin);
 		move_mode = MOVE_MODE_ORIGIN;
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 		nc._parent.data = 0;
@@ -395,8 +396,8 @@ void cb_btn_move_radius(struct UI_BUTTON *btn)
 	if (manipulateEntity != NULL) {
 		rot[0] = rot[1] = rot[2] = 0;
 		game_ObjectSetRotRad(manipulateEntity, (struct RwV3D*) &rot);
-		pos = origin;
-		pos.x += radius;
+		pos = current_remove.origin;
+		pos.x += current_remove.radius;
 		game_ObjectSetPos(manipulateEntity, &pos);
 		move_mode = MOVE_MODE_RADIUS;
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
@@ -409,9 +410,17 @@ void cb_btn_move_radius(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_close(struct UI_BUTTON *btn)
+void cb_btn_save(struct UI_BUTTON *btn)
 {
-	TRACE("cb_btn_close");
+	TRACE("cb_btn_save");
+	cb(&current_remove);
+	rbe_hide();
+}
+
+static
+void cb_btn_cancel(struct UI_BUTTON *btn)
+{
+	TRACE("cb_btn_cancel");
 	rbe_hide();
 }
 
@@ -428,20 +437,20 @@ void rbe_init()
 
 	ui_wnd_add_child(wnd, ui_lbl_make("Origin:"));
 	ui_wnd_add_child(wnd, in_origin_x = ui_in_make(cb_in_origin_radius));
-	in_origin_x->_parent.userdata = (void*) &origin.x;
+	in_origin_x->_parent.userdata = (void*) &current_remove.origin.x;
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, in_origin_y = ui_in_make(cb_in_origin_radius));
-	in_origin_y->_parent.userdata = (void*) &origin.y;
+	in_origin_y->_parent.userdata = (void*) &current_remove.origin.y;
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, in_origin_z = ui_in_make(cb_in_origin_radius));
-	in_origin_z->_parent.userdata = (void*) &origin.z;
+	in_origin_z->_parent.userdata = (void*) &current_remove.origin.z;
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_btn_make("Move", cb_btn_move_origin));
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_btn_make("Center_Camera", cb_btn_center_cam));
 	ui_wnd_add_child(wnd, ui_lbl_make("Radius:"));
 	ui_wnd_add_child(wnd, in_radius = ui_in_make(cb_in_origin_radius));
-	in_radius->_parent.userdata = (void*) &radius;
+	in_radius->_parent.userdata = (void*) &current_remove.radius;
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_btn_make("Move", cb_btn_move_radius));
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
@@ -456,7 +465,9 @@ void rbe_init()
 	lst_removelist = ui_lst_make(20, cb_removelist_click);
 	lst_removelist->_parent.span = 2;
 	ui_wnd_add_child(wnd, lst_removelist);
-	ui_wnd_add_child(wnd, btn = ui_btn_make("Close", cb_btn_close));
+	ui_wnd_add_child(wnd, btn = ui_btn_make("Save", cb_btn_save));
+	btn->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn = ui_btn_make("Cancel", cb_btn_cancel));
 	btn->_parent.span = 2;
 
 	sphere = im2d_sphere_make(0x1F22CC22);
@@ -469,22 +480,23 @@ void rbe_dispose()
 	free(sphere);
 }
 
-void rbe_show(short model, struct RwV3D *_origin, float _radius)
+void rbe_show(short model, struct RwV3D *origin, float radius, rbe_cb *_cb)
 {
 	TRACE("rbe_show");
 	ui_exclusive_mode = rbe_do_ui;
 	active = 1;
-	origin = *_origin;
-	radius = _radius;
+	current_remove.origin = *origin;
+	current_remove.radius = radius;
+	cb = _cb;
 	move_mode = MOVE_MODE_NONE;
 
-	modelid = model;
+	current_remove.model = model;
 	sprintf(txt_model, "%hd", model);
 	ui_in_set_text(in_model, txt_model);
 	rbe_update_model_name();
 
 	rbe_update_position_ui_text();
-	im2d_sphere_pos(sphere, &origin, radius);
+	im2d_sphere_pos(sphere, &current_remove.origin, current_remove.radius);
 	rbe_update_removes();
 }
 

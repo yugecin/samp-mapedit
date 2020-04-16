@@ -1,6 +1,8 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #define MAX_OBJECTS 1000
+/*500 because every remove can have a LOD (and nobody should remove that much)*/
+#define MAX_REMOVES 500
 #define rpCLUMP 2
 
 struct OBJECT {
@@ -10,6 +12,15 @@ struct OBJECT {
 	int model;
 	float temp_x; /*only used during creation*/
 	char justcreated;
+};
+
+struct REMOVEDBUILDING {
+	struct RwV3D origin;
+	float radius;
+	short model;
+	/*0 when none*/
+	short lodmodel;
+	char *description;
 };
 
 struct OBJECT manipulateObject;
