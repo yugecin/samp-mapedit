@@ -34,6 +34,7 @@ static float radiussq;
 static rbe_cb *cb;
 
 static char txt_model[45];
+static char txt_warn_two_removes[27];
 
 static struct IM2DSPHERE *sphere;
 
@@ -144,6 +145,10 @@ repeatforlod:
 		}
 		if (entity->lod > 0) {
 			entity = entity->lod;
+			if (current_remove.model != -1) {
+				current_remove.lodmodel = entity->model;
+				txt_warn_two_removes[0] = '~';
+			}
 			goto repeatforlod;
 		}
 	}
@@ -165,6 +170,8 @@ void rbe_do_removes()
 	lampposts, building lights, fences, ..*/
 
 	TRACE("rbe_do_removes");
+	txt_warn_two_removes[0] = 0;
+	current_remove.lodmodel = 0;
 	radiussq = current_remove.radius * current_remove.radius;
 	sector = worldSectors;
 	sectorindex = MAX_SECTORS;
@@ -459,6 +466,8 @@ void rbe_init()
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_model));
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_lbl_make("use_-1_for_all"));
+	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, ui_lbl_make(txt_warn_two_removes));
 	lbl = ui_lbl_make("Affected_buildings:_(click_to_focus)");
 	ui_wnd_add_child(wnd, lbl);
 	lbl->_parent.span = 2;
@@ -471,6 +480,7 @@ void rbe_init()
 	btn->_parent.span = 2;
 
 	sphere = im2d_sphere_make(0x1F22CC22);
+	strcpy(txt_warn_two_removes, "~r~takes_two_remove_slots");
 }
 
 void rbe_dispose()
@@ -489,6 +499,7 @@ void rbe_show(short model, struct RwV3D *origin, float radius, rbe_cb *_cb)
 	current_remove.radius = radius;
 	cb = _cb;
 	move_mode = MOVE_MODE_NONE;
+	txt_warn_two_removes[0] = 0;
 
 	current_remove.model = model;
 	sprintf(txt_model, "%hd", model);
