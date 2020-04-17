@@ -8,6 +8,7 @@
 #include "objects.h"
 #include "objbrowser.h"
 #include "persistence.h"
+#include "player.h"
 #include "project.h"
 #include "racecp.h"
 #include "removedbuildings.h"
@@ -184,6 +185,7 @@ void client_init()
 
 	/*order of init affects layout of main menu and context menu*/
 	settings_init();
+	player_init();
 	prj_init();
 	timeweather_init();
 	msg_init();

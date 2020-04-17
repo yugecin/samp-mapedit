@@ -7,6 +7,8 @@
 
 struct RwV3D player_position;
 
+static struct RwV3D tphere_position;
+
 void player_prj_save(FILE *f, char *buf)
 {
 	union {
@@ -51,4 +53,30 @@ int player_prj_load_line(char *buf)
 		return 1;
 	}
 	return 0;
+}
+
+static
+void cb_btn_tphere(struct UI_BUTTON *btn)
+{
+	player_position = tphere_position;
+}
+
+void player_init()
+{
+	struct UI_BUTTON *btn;
+
+	btn = ui_btn_make("Teleport_here", cb_btn_tphere);
+	ui_wnd_add_child(context_menu, btn);
+}
+
+int player_on_background_element_just_clicked(colpoint, entity)
+	struct CColPoint *colpoint;
+	void *entity;
+{
+	if (entity) {
+		tphere_position = colpoint->pos;
+	} else {
+		game_ScreenToWorld(&tphere_position, cursorx, cursory, 30.0f);
+	}
+	return 1;
 }

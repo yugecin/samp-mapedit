@@ -492,7 +492,7 @@ void background_element_just_clicked()
 	ui_get_entity_pointed_at(&entity, &cp);
 
 	if (objects_on_background_element_just_clicked(&cp, entity) &&
-		prj_on_background_element_just_clicked(&cp, entity))
+		player_on_background_element_just_clicked(&cp, entity))
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;

@@ -19,7 +19,6 @@
 #define NAME_LEN 50
 #define FILE_LEN NAME_LEN + 15
 
-static struct UI_BUTTON *btn_context_tphere;
 static struct UI_WINDOW *window_project;
 static struct UI_INPUT *in_newprojectname;
 static struct UI_LIST *lst_projects;
@@ -28,7 +27,6 @@ static struct UI_LABEL *lbl_current;
 static char open_project_name[INPUT_TEXTLEN + 1];
 static char tmp_files[MAX_FILES][NAME_LEN];
 static int numfiles;
-static struct RwV3D tphere_position;
 
 static
 void cb_show_project_window(int btn)
@@ -222,19 +220,10 @@ void cb_btn_save(struct UI_BUTTON *btn)
 	prj_save();
 }
 
-static
-void cb_btn_tphere(struct UI_BUTTON *btn)
-{
-	player_position = tphere_position;
-}
-
 void prj_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
-
-	btn_context_tphere = ui_btn_make("Teleport_here", cb_btn_tphere);
-	ui_wnd_add_child(context_menu, btn_context_tphere);
 
 	lbl = ui_lbl_make("=_Project_=");
 	lbl->_parent.span = 2;
@@ -286,19 +275,6 @@ void prj_dispose()
 {
 	TRACE("prj_dispose");
 	ui_wnd_dispose(window_project);
-}
-
-int prj_on_background_element_just_clicked(colpoint, entity)
-	struct CColPoint *colpoint;
-	void *entity;
-{
-	if (entity) {
-		btn_context_tphere->enabled = 1;
-		tphere_position = colpoint->pos;
-	} else {
-		btn_context_tphere->enabled = 0;
-	}
-	return 1;
 }
 
 void prj_open_persistent_state()
