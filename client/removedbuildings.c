@@ -25,7 +25,7 @@ static int numallremoves;
 @return 0 when all remove slots are taken
 */
 static
-int rb_process_entity(struct CEntity *entity)
+int rb_process_entity_for_removal(struct CEntity *entity)
 {
 	struct REMOVEDBUILDING *remove;
 	struct RwV3D pos;
@@ -100,14 +100,14 @@ void rb_do_all()
 	while (--sectorindex >= 0) {
 		node = sector->buildings;
 		while (node != NULL) {
-			if (!rb_process_entity(node->item)) {
+			if (!rb_process_entity_for_removal(node->item)) {
 				return;
 			}
 			node = node->next;
 		}
 		node = sector->dummies;
 		while (node != NULL) {
-			if (!rb_process_entity(node->item)) {
+			if (!rb_process_entity_for_removal(node->item)) {
 				return;
 			}
 			node = node->next;
@@ -122,5 +122,31 @@ void rb_undo_all()
 		numallremoves--;
 		removedata.entities[numallremoves]->flags |=
 			(VISIBLE_FLAG | removedata.hadcollision[numallremoves]);
+	}
+}
+
+void rb_on_entity_added_to_world(struct CEntity *entity)
+{
+	if ((ENTITY_IS_TYPE(entity, ENTITY_TYPE_OBJECT) ||
+		ENTITY_IS_TYPE(entity, ENTITY_TYPE_DUMMY)) &&
+		numallremoves < MAX_ALL_REMOVES)
+	{
+		rb_process_entity_for_removal(entity);
+	}
+}
+
+void rb_on_entity_removed_from_world(struct CEntity *entity)
+{
+	int i;
+
+	for (i = 0; i < numallremoves; i++) {
+		if (removedata.entities[i] == entity) {
+			numallremoves--;
+			removedata.entities[i] =
+				removedata.entities[numallremoves];
+			removedata.hadcollision[i] =
+				removedata.hadcollision[numallremoves];
+			return; /*assume no duplicates*/
+		}
 	}
 }

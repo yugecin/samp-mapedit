@@ -6,6 +6,7 @@
 #include "objects.h"
 #include "objbrowser.h"
 #include "player.h"
+#include "removedbuildings.h"
 #include "removebuildingeditor.h"
 #include "sockets.h"
 #include "ui.h"
@@ -543,6 +544,7 @@ __declspec(naked) void cworld_remove_detour()
 	_asm {
 		push [esp+0x8]
 		call objbase_on_world_entity_removed
+		call rb_on_entity_removed_from_world
 		add esp, 0x4
 		pop eax
 		push esi
@@ -556,6 +558,9 @@ static
 __declspec(naked) void cworld_add_detour()
 {
 	_asm {
+		push [esp+0x8]
+		call rb_on_entity_added_to_world
+		add esp, 0x4
 		pop eax
 		push esi
 		mov esi, [esp+0x8]
