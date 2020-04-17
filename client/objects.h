@@ -31,4 +31,6 @@ struct OBJECTLAYER {
 	int numremoves;
 };
 
+extern struct OBJECTLAYER layers[MAX_LAYERS];
+extern int numlayers;
 extern struct OBJECTLAYER *active_layer;

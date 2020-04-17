@@ -10,6 +10,7 @@
 #include "objbrowser.h"
 #include "persistence.h"
 #include "player.h"
+#include "removedbuildings.h"
 #include "removebuildingeditor.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
@@ -44,13 +45,14 @@ static char txt_objlodflags[9];
 
 static struct CEntity *selected_entity;
 static struct OBJECT *selected_object;
-struct OBJECTLAYER *active_layer = NULL;
-static struct OBJECTLAYER layers[MAX_LAYERS];
 static int activelayeridx = 0;
-static int numlayers = 0;
 static struct RwV3D nextObjectPosition;
 static struct RwV3D player_pos_before_selecting;
 static int is_selecting_object = 0;
+
+struct OBJECTLAYER layers[MAX_LAYERS];
+struct OBJECTLAYER *active_layer = NULL;
+int numlayers = 0;
 
 static
 void cb_msg_openlayers(int choice)
@@ -233,8 +235,6 @@ void cb_btn_delete_layer()
 static
 void cb_rbe_save(struct REMOVEDBUILDING *remove)
 {
-	sprintf(debugstring, "saved idx %d", active_layer->numremoves);
-	ui_push_debug_string();
 	active_layer->removes[active_layer->numremoves++] = *remove;
 }
 

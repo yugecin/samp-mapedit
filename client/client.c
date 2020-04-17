@@ -10,6 +10,7 @@
 #include "persistence.h"
 #include "project.h"
 #include "racecp.h"
+#include "removedbuildings.h"
 #include "removebuildingeditor.h"
 #include "sockets.h"
 #include "samp.h"
@@ -154,6 +155,7 @@ void client_finalize()
 	timeweather_dispose();
 	prj_dispose();
 	msg_dispose();
+	rb_undo_all();
 
 	undetour();
 	samp_dispose();

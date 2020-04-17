@@ -270,6 +270,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\removedbuildings.c"
+				>
+			</File>
+			<File
+				RelativePath="..\removedbuildings.h"
+				>
+			</File>
+			<File
 				RelativePath="..\samp.c"
 				>
 			</File>

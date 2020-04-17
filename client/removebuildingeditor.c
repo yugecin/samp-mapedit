@@ -6,6 +6,7 @@
 #include "im2d.h"
 #include "objbase.h"
 #include "player.h"
+#include "removedbuildings.h"
 #include "removebuildingeditor.h"
 #include "sockets.h"
 #include "ui.h"
@@ -324,6 +325,7 @@ void rbe_hide()
 {
 	TRACE("rbe_hide");
 	rbe_undo_removes();
+	rb_do_all();
 	active = 0;
 	ui_exclusive_mode = NULL;
 }
@@ -491,6 +493,7 @@ void rbe_dispose()
 void rbe_show(short model, struct RwV3D *origin, float _radius, rbe_cb *_cb)
 {
 	TRACE("rbe_show");
+	rb_undo_all();
 	ui_exclusive_mode = rbe_do_ui;
 	active = 1;
 	current_remove.origin = *origin;
