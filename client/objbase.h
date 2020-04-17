@@ -16,7 +16,7 @@ struct OBJECT {
 
 struct REMOVEDBUILDING {
 	struct RwV3D origin;
-	float radius;
+	float radiussq;
 	short model;
 	/*0 when none*/
 	short lodmodel;

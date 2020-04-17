@@ -30,7 +30,7 @@ static char active;
 static char move_mode;
 
 static struct REMOVEDBUILDING current_remove;
-static float radiussq;
+static float radius;
 static rbe_cb *cb;
 
 static char txt_model[45];
@@ -121,11 +121,11 @@ int rbe_do_remove_check_entity_check_dups(struct CEntity *entity)
 		game_ObjectGetPos(entity, &pos);
 		dx = current_remove.origin.x - pos.x;
 		dy = current_remove.origin.y - pos.y;
-		if (dx * dx + dy * dy > radiussq) {
+		if (dx * dx + dy * dy > current_remove.radiussq) {
 			return 1;
 		}
 		dz = current_remove.origin.z - pos.z;
-		if (dx * dx + dy * dy + dz * dz > radiussq) {
+		if (dx * dx + dy * dy + dz * dz > current_remove.radiussq) {
 			return 1;
 		}
 		/*the same entity might be in multiple sectors,
@@ -161,7 +161,6 @@ void rbe_do_removes()
 	struct CSector *sector;
 	struct CDoubleLinkListNode *node;
 	int sectorindex;
-	int n;
 
 	/*TODO: figure out sector coordinates so whole sectors can be culled
 	if they're not within reach*/
@@ -172,13 +171,11 @@ void rbe_do_removes()
 	TRACE("rbe_do_removes");
 	txt_warn_two_removes[0] = 0;
 	current_remove.lodmodel = 0;
-	radiussq = current_remove.radius * current_remove.radius;
 	sector = worldSectors;
 	sectorindex = MAX_SECTORS;
 	while (--sectorindex >= 0) {
 		node = sector->buildings;
 		while (node != NULL) {
-			n = numpreviewremoves;
 			if (!rbe_do_remove_check_entity_check_dups(node->item))
 			{
 				goto limitreached;
@@ -262,7 +259,7 @@ static
 void rbe_update_position_from_manipulate_object()
 {
 	struct RwV3D pos;
-	float dx, dy, dz, distsq, dist;
+	float dx, dy, dz, distsq;
 
 	if (move_mode == MOVE_MODE_NONE) {
 		return;
@@ -281,16 +278,16 @@ void rbe_update_position_from_manipulate_object()
 		current_remove.origin = pos;
 		break;
 	case MOVE_MODE_RADIUS:
-		dist = (float) sqrt(distsq);
-		if (fabs(dist - current_remove.radius) < 0.2f) {
+		if (fabs(distsq - current_remove.radiussq) < 0.2f) {
 			return;
 		}
-		current_remove.radius = dist;
+		current_remove.radiussq = distsq;
+		radius = (float) sqrt(distsq);
 		break;
 	}
 
 	rbe_update_removes();
-	im2d_sphere_pos(sphere, &current_remove.origin, current_remove.radius);
+	im2d_sphere_pos(sphere, &current_remove.origin, radius);
 }
 
 static
@@ -318,7 +315,7 @@ void rbe_update_position_ui_text()
 	ui_in_set_text(in_origin_y, buf);
 	sprintf(buf, "%.3f", current_remove.origin.z);
 	ui_in_set_text(in_origin_z, buf);
-	sprintf(buf, "%.3f", current_remove.radius);
+	sprintf(buf, "%.3f", radius);
 	ui_in_set_text(in_radius, buf);
 }
 
@@ -339,8 +336,9 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 	TRACE("cb_in_origin_radius");
 	value = (float*) in->_parent.userdata;
 	*value = (float) atof(in->value);
+	current_remove.radiussq = radius * radius;
 	rbe_update_removes();
-	im2d_sphere_pos(sphere, &current_remove.origin, current_remove.radius);
+	im2d_sphere_pos(sphere, &current_remove.origin, radius);
 }
 
 static
@@ -404,7 +402,7 @@ void cb_btn_move_radius(struct UI_BUTTON *btn)
 		rot[0] = rot[1] = rot[2] = 0;
 		game_ObjectSetRotRad(manipulateEntity, (struct RwV3D*) &rot);
 		pos = current_remove.origin;
-		pos.x += current_remove.radius;
+		pos.x += radius;
 		game_ObjectSetPos(manipulateEntity, &pos);
 		move_mode = MOVE_MODE_RADIUS;
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
@@ -457,7 +455,7 @@ void rbe_init()
 	ui_wnd_add_child(wnd, ui_btn_make("Center_Camera", cb_btn_center_cam));
 	ui_wnd_add_child(wnd, ui_lbl_make("Radius:"));
 	ui_wnd_add_child(wnd, in_radius = ui_in_make(cb_in_origin_radius));
-	in_radius->_parent.userdata = (void*) &current_remove.radius;
+	in_radius->_parent.userdata = (void*) &radius;
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_btn_make("Move", cb_btn_move_radius));
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
@@ -490,13 +488,14 @@ void rbe_dispose()
 	free(sphere);
 }
 
-void rbe_show(short model, struct RwV3D *origin, float radius, rbe_cb *_cb)
+void rbe_show(short model, struct RwV3D *origin, float _radius, rbe_cb *_cb)
 {
 	TRACE("rbe_show");
 	ui_exclusive_mode = rbe_do_ui;
 	active = 1;
 	current_remove.origin = *origin;
-	current_remove.radius = radius;
+	current_remove.radiussq = _radius * _radius;
+	radius = _radius;
 	cb = _cb;
 	move_mode = MOVE_MODE_NONE;
 	txt_warn_two_removes[0] = 0;
@@ -507,7 +506,7 @@ void rbe_show(short model, struct RwV3D *origin, float radius, rbe_cb *_cb)
 	rbe_update_model_name();
 
 	rbe_update_position_ui_text();
-	im2d_sphere_pos(sphere, &current_remove.origin, current_remove.radius);
+	im2d_sphere_pos(sphere, &current_remove.origin, radius);
 	rbe_update_removes();
 }
 
