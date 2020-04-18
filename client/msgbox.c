@@ -53,7 +53,7 @@ void msg_init()
 void msg_dispose()
 {
 	TRACE("msg_dispose");
-	free(msg_wnd);
+	ui_wnd_dispose(msg_wnd);
 }
 
 void msg_show(msgboxcb *cb)
