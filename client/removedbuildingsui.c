@@ -73,17 +73,17 @@ void cb_msg_deleteconfirm(int opt)
 	if (active_layer->numremoves > 0) {
 		active_layer->removes[idx] =
 			active_layer->removes[active_layer->numremoves];
-		rbui_refresh_list();
 	}
+	rbui_refresh_list();
 	rb_do_all();
 }
 
 static
 void cb_btn_delete(struct UI_BUTTON *btn)
 {
+	msg_title = "Remove";
 	msg_message = "Delete_remove?";
 	msg_message2 = "This_cannot_be_undone!";
-	msg_title = "Remove";
 	msg_btn1text = "Yes";
 	msg_btn2text = "No";
 	msg_show(cb_msg_deleteconfirm);
@@ -113,10 +113,9 @@ void rbui_init()
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 
+	wnd = ui_wnd_make(9000.0f, 300.0f, "Removes");
+
 	strcpy(txt_currentlayer, "Current_layer:_");
-
-	wnd = ui_wnd_make(600.0f, 300.0f, "Removes");
-
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_currentlayer));
 	lst = ui_lst_make(15, cb_list_item_selected);
 	lst->_parent.pref_width = 700.0f;

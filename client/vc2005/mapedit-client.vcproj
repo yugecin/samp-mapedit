@@ -222,6 +222,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\objectlistui.c"
+				>
+			</File>
+			<File
+				RelativePath="..\objectlistui.h"
+				>
+			</File>
+			<File
 				RelativePath="..\objects.c"
 				>
 			</File>

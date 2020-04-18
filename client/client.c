@@ -7,6 +7,7 @@
 #include "objbase.h"
 #include "objects.h"
 #include "objbrowser.h"
+#include "objectlistui.h"
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
@@ -149,6 +150,7 @@ void client_finalize()
 	objbrowser_dispose();
 	objects_dispose();
 	objbase_dispose();
+	objlistui_dispose();
 	rbui_dispose();
 	rbe_dispose();
 	settings_dispose();
@@ -196,6 +198,7 @@ void client_init()
 	objbase_init();
 	objects_init();
 	objbrowser_init();
+	objlistui_init();
 	rbe_init();
 	rbui_init();
 	racecp_init();

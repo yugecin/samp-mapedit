@@ -8,6 +8,7 @@
 #include "objbase.h"
 #include "objects.h"
 #include "objbrowser.h"
+#include "objectlistui.h"
 #include "persistence.h"
 #include "player.h"
 #include "removedbuildings.h"
@@ -91,6 +92,7 @@ void layer_activate(int idx)
 		ui_lst_set_selected_index(lst_layers, activelayeridx);
 		persistence_set_object_layerid(activelayeridx);
 		rbui_refresh_list();
+		objlistui_refresh_list();
 	}
 }
 

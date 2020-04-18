@@ -6,6 +6,7 @@
 #include "msgbox.h"
 #include "objbase.h"
 #include "objects.h"
+#include "objectlistui.h"
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
@@ -102,6 +103,7 @@ void prj_postload()
 	timeweather_prj_postload();
 	rb_do_all();
 	rbui_refresh_list();
+	objlistui_refresh_list();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;
 	persistence_set_project_to_load(open_project_name);

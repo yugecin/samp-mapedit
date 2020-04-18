@@ -8,6 +8,7 @@
 #include "objbrowser.h"
 #include "objbase.h"
 #include "objects.h"
+#include "objectlistui.h"
 #include "player.h"
 #include "sockets.h"
 #include "samp.h"
@@ -322,6 +323,7 @@ void cb_btn_create(struct UI_BUTTON *btn)
 	object = active_layer->objects + active_layer->numobjects++;
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
 	objbase_mkobject(object, positionToCommit);
+	objlistui_refresh_list();
 	restore_after_hide();
 }
 
