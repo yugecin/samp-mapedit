@@ -241,8 +241,7 @@ void cb_rbe_save(struct REMOVEDBUILDING *remove)
 static
 void cb_btn_remove_building(struct UI_BUTTON *btn)
 {
-	struct RwV3D pos;
-	short modelid;
+	struct REMOVEDBUILDING remove;
 
 	if (active_layer->numremoves >= MAX_REMOVES) {
 		msg_message = "Max_removes_reached_for_this_layer!";
@@ -253,10 +252,13 @@ void cb_btn_remove_building(struct UI_BUTTON *btn)
 	}
 
 	if (selected_entity) {
-		modelid = selected_entity->model;
-		game_ObjectGetPos(selected_entity, &pos);
-		ui_hide_window();
-		rbe_show(modelid, &pos, 1.25f, cb_rbe_save);
+		remove.model = selected_entity->model;
+		remove.radiussq = 1.25f * 1.25f;
+		remove.description = NULL;
+		remove.lodmodel = 0;
+		game_ObjectGetPos(selected_entity, &remove.origin);
+		ui_hide_window(); /*clears selected_entity*/
+		rbe_show(&remove, cb_rbe_save);
 	}
 }
 
@@ -383,6 +385,8 @@ void objects_init()
 void objects_dispose()
 {
 	TRACE("objects_dispose");
+
+	objects_clearlayers();
 }
 
 void objects_prj_save(FILE *f, char *buf)
@@ -446,9 +450,7 @@ void objects_prj_preload()
 	msg.id = MAPEDIT_MSG_RESETOBJECTS;
 	sockets_send(&msg, sizeof(msg));
 
-	numlayers = 0;
-	active_layer = NULL;
-	activelayeridx = 0;
+	objects_clearlayers();
 	lbl_layer->text = "<none>";
 	ui_lbl_recalc_size(lbl_layer);
 	ui_in_set_text(in_layername, "");
@@ -617,4 +619,22 @@ int objects_handle_esc()
 void objects_open_persistent_state()
 {
 	layer_activate(persistence_get_object_layerid());
+}
+
+void objects_clearlayers()
+{
+	char *description;
+	int i;
+
+	while (numlayers > 0) {
+		numlayers--;
+		for (i = 0; i < layers[numlayers].numremoves; i++) {
+			description = layers[numlayers].removes[i].description;
+			if (description != NULL) {
+				free(description);
+			}
+		}
+	}
+	active_layer = NULL;
+	activelayeridx = 0;
 }

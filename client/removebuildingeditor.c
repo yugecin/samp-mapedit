@@ -26,6 +26,7 @@ static struct UI_INPUT *in_origin_y;
 static struct UI_INPUT *in_origin_z;
 static struct UI_INPUT *in_radius;
 static struct UI_INPUT *in_model;
+static struct UI_INPUT *in_description;
 
 static char active;
 static char move_mode;
@@ -420,6 +421,17 @@ static
 void cb_btn_save(struct UI_BUTTON *btn)
 {
 	TRACE("cb_btn_save");
+	if (in_description->valuelen == 0) {
+		if (current_remove.description != NULL) {
+			free(current_remove.description);
+			current_remove.description = NULL;
+		}
+	} else {
+		if (current_remove.description == NULL) {
+			current_remove.description = malloc(INPUT_TEXTLEN + 1);
+		}
+		strcpy(current_remove.description, in_description->value);
+	}
 	cb(&current_remove);
 	rbe_hide();
 }
@@ -468,6 +480,8 @@ void rbe_init()
 	ui_wnd_add_child(wnd, ui_lbl_make("use_-1_for_all"));
 	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_warn_two_removes));
+	ui_wnd_add_child(wnd, ui_lbl_make("Description:"));
+	ui_wnd_add_child(wnd, in_description = ui_in_make(NULL));
 	lbl = ui_lbl_make("Affected_buildings:_(click_to_focus)");
 	ui_wnd_add_child(wnd, lbl);
 	lbl->_parent.span = 2;
@@ -490,21 +504,25 @@ void rbe_dispose()
 	free(sphere);
 }
 
-void rbe_show(short model, struct RwV3D *origin, float _radius, rbe_cb *_cb)
+void rbe_show(struct REMOVEDBUILDING *remove, rbe_cb *_cb)
 {
 	TRACE("rbe_show");
 	rb_undo_all();
 	ui_exclusive_mode = rbe_do_ui;
 	active = 1;
-	current_remove.origin = *origin;
-	current_remove.radiussq = _radius * _radius;
-	radius = _radius;
+	current_remove = *remove;
+	current_remove.lodmodel = 0;
+	if (remove->description != NULL) {
+		ui_in_set_text(in_description, remove->description);
+	} else {
+		ui_in_set_text(in_description, "");
+	}
+	radius = (float) sqrt(current_remove.radiussq);
 	cb = _cb;
 	move_mode = MOVE_MODE_NONE;
 	txt_warn_two_removes[0] = 0;
 
-	current_remove.model = model;
-	sprintf(txt_model, "%hd", model);
+	sprintf(txt_model, "%hd", current_remove.model);
 	ui_in_set_text(in_model, txt_model);
 	rbe_update_model_name();
 
