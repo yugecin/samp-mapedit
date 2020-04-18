@@ -12,6 +12,7 @@
 #include "player.h"
 #include "removedbuildings.h"
 #include "removebuildingeditor.h"
+#include "removedbuildingsui.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
@@ -89,6 +90,7 @@ void layer_activate(int idx)
 		ui_in_set_text(in_layername, active_layer->name);
 		ui_lst_set_selected_index(lst_layers, activelayeridx);
 		persistence_set_object_layerid(activelayeridx);
+		rbui_refresh_list();
 	}
 }
 
@@ -159,10 +161,7 @@ static
 void cb_show_objinfo_window()
 {
 	if (active_layer == NULL) {
-		msg_message = "Create_and_select_an_object_layer_first!";
-		msg_title = "Objects";
-		msg_btn1text = "Ok";
-		msg_show(cb_msg_openlayers);
+		objects_show_select_layer_first_msg();
 	} else {
 		ui_show_window(window_objinfo);
 	}
@@ -235,7 +234,10 @@ void cb_btn_delete_layer()
 static
 void cb_rbe_save(struct REMOVEDBUILDING *remove)
 {
-	active_layer->removes[active_layer->numremoves++] = *remove;
+	if (remove != NULL) {
+		active_layer->removes[active_layer->numremoves++] = *remove;
+		rbui_refresh_list();
+	}
 }
 
 static
@@ -637,4 +639,12 @@ void objects_clearlayers()
 	}
 	active_layer = NULL;
 	activelayeridx = 0;
+}
+
+void objects_show_select_layer_first_msg()
+{
+	msg_message = "Create_and_select_an_object_layer_first!";
+	msg_title = "Objects";
+	msg_btn1text = "Ok";
+	msg_show(cb_msg_openlayers);
 }

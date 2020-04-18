@@ -20,6 +20,7 @@ int objects_handle_esc();
 void objects_open_persistent_state();
 void objects_select_entity(void *entity);
 void objects_clearlayers();
+void objects_show_select_layer_first_msg();
 
 #define MAX_LAYERS 10
 

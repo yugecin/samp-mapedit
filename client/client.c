@@ -13,6 +13,7 @@
 #include "racecp.h"
 #include "removedbuildings.h"
 #include "removebuildingeditor.h"
+#include "removedbuildingsui.h"
 #include "sockets.h"
 #include "samp.h"
 #include "settings.h"
@@ -148,6 +149,7 @@ void client_finalize()
 	objbrowser_dispose();
 	objects_dispose();
 	objbase_dispose();
+	rbui_dispose();
 	rbe_dispose();
 	settings_dispose();
 	sockets_dispose();
@@ -195,6 +197,7 @@ void client_init()
 	objects_init();
 	objbrowser_init();
 	rbe_init();
+	rbui_init();
 	racecp_init();
 
 	prj_do_show_window();

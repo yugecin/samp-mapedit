@@ -278,6 +278,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\removedbuildingsui.c"
+				>
+			</File>
+			<File
+				RelativePath="..\removedbuildingsui.h"
+				>
+			</File>
+			<File
 				RelativePath="..\samp.c"
 				>
 			</File>

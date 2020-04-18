@@ -440,6 +440,7 @@ static
 void cb_btn_cancel(struct UI_BUTTON *btn)
 {
 	TRACE("cb_btn_cancel");
+	cb(NULL);
 	rbe_hide();
 }
 

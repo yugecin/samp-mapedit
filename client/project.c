@@ -10,6 +10,8 @@
 #include "player.h"
 #include "project.h"
 #include "racecp.h"
+#include "removedbuildings.h"
+#include "removedbuildingsui.h"
 #include "timeweather.h"
 #include <stdio.h>
 #include <string.h>
@@ -88,6 +90,7 @@ void prj_preload()
 	objects_prj_preload();
 	player_prj_preload();
 	timeweather_prj_preload();
+	rb_undo_all();
 }
 
 static
@@ -97,6 +100,8 @@ void prj_postload()
 	objects_prj_postload();
 	racecp_prj_postload();
 	timeweather_prj_postload();
+	rb_do_all();
+	rbui_refresh_list();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;
 	persistence_set_project_to_load(open_project_name);

@@ -1,7 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #define MAX_OBJECTS 1000
-/*500 because every remove can have a LOD (and nobody should remove that much)*/
+/*250 and every remove can have a LOD (and nobody should remove that much)*/
 #define MAX_REMOVES 500
 #define rpCLUMP 2
 
