@@ -16,6 +16,8 @@
 #include <stdio.h>
 
 static struct UI_WINDOW *wnd;
+static struct UI_CHECKBOX *chk_snap_camera;
+static struct UI_CHECKBOX *chk_isolate_element;
 static struct UI_LIST *lst;
 static struct UI_BUTTON *btn_edit;
 static struct UI_BUTTON *btn_delete;
@@ -114,6 +116,10 @@ void objlistui_init()
 
 	strcpy(txt_currentlayer, "Current_layer:_");
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_currentlayer));
+	chk_snap_camera = ui_chk_make("Snap_camera", 1, NULL);
+	ui_wnd_add_child(wnd, chk_snap_camera);
+	chk_isolate_element = ui_chk_make("Isolate_object", 1, NULL);
+	ui_wnd_add_child(wnd, chk_isolate_element);
 	lst = ui_lst_make(35, cb_list_item_selected);
 	ui_wnd_add_child(wnd, lst);
 	btn_edit = ui_btn_make("Edit", cb_btn_edit);
@@ -124,6 +130,7 @@ void objlistui_init()
 
 void objlistui_dispose()
 {
+	ui_wnd_dispose(wnd);
 }
 
 void objlistui_refresh_list()
@@ -157,20 +164,29 @@ void objlistui_refresh_list()
 
 void objlistui_frame_update()
 {
+	struct CEntity *exclusiveEntity;
 	struct CEntity *entity;
 	int idx, col;
 
-	if (isactive) {
-		idx = lst->hoveredindex;
-		if (idx < 0) {
-			idx = lst->selectedindex;
-		}
-		if (0 <= idx && idx < active_layer->numobjects) {
-			entity = active_layer->objects[idx].sa_object;
-			col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;
-			objbase_draw_entity_bound_rect(entity, col);
-		}
+	if (!isactive) {
+		return;
 	}
+
+	exclusiveEntity = NULL;
+	idx = lst->hoveredindex;
+	if (idx < 0) {
+		idx = lst->selectedindex;
+	} else if (idx < active_layer->numobjects &&
+		chk_isolate_element->checked)
+	{
+		exclusiveEntity = active_layer->objects[idx].sa_object;
+	}
+	if (0 <= idx && idx < active_layer->numobjects) {
+		entity = active_layer->objects[idx].sa_object;
+		col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;
+		objbase_draw_entity_bound_rect(entity, col);
+	}
+	objbase_set_entity_to_render_exclusively(exclusiveEntity);
 }
 
 void objlistui_on_active_window_changed(struct UI_WINDOW *new_wnd)
@@ -178,6 +194,7 @@ void objlistui_on_active_window_changed(struct UI_WINDOW *new_wnd)
 	if (new_wnd == wnd) {
 		isactive = 1;
 	} else if (isactive) {
+		objbase_set_entity_to_render_exclusively(NULL);
 		isactive = 0;
 	}
 }
