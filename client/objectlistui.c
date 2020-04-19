@@ -12,6 +12,7 @@
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
+#include <math.h>
 #include <stdio.h>
 
 static struct UI_WINDOW *wnd;
@@ -20,6 +21,7 @@ static struct UI_BUTTON *btn_edit;
 static struct UI_BUTTON *btn_delete;
 
 static char txt_currentlayer[100];
+static char isactive;
 
 static
 void cb_btn_mainmenu_objects(struct UI_BUTTON *btn)
@@ -151,4 +153,28 @@ void objlistui_refresh_list()
 		obj++;
 	}
 	ui_lst_set_data(lst, names, i);
+}
+
+void objlistui_frame_update()
+{
+	struct CEntity *entity;
+	int idx, col;
+
+	if (isactive) {
+		idx = lst->selectedindex;
+		if (0 <= idx && idx < active_layer->numobjects) {
+			entity = active_layer->objects[idx].sa_object;
+			col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;
+			objbase_draw_entity_bound_rect(entity, col);
+		}
+	}
+}
+
+void objlistui_on_active_window_changed(struct UI_WINDOW *new_wnd)
+{
+	if (new_wnd == wnd) {
+		isactive = 1;
+	} else if (isactive) {
+		isactive = 0;
+	}
 }

@@ -5,6 +5,9 @@
 #define MAX_REMOVES 500
 #define rpCLUMP 2
 
+#define BBOX_ALPHA_ANIM_VALUE \
+	(char) (55 * (1.0f - fabs(sinf(*timeInGame * 0.004f))))
+
 struct OBJECT {
 	void *sa_object;
 	int sa_handle;
@@ -36,3 +39,4 @@ void objbase_select_entity(void *entity);
 void objbase_frame_update();
 void objbase_set_entity_to_render_exclusively(void *entity);
 void objbase_create_dummy_entity();
+void objbase_draw_entity_bound_rect(struct CEntity *entity, int col);

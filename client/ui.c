@@ -6,6 +6,7 @@
 #include "objbrowser.h"
 #include "objbase.h"
 #include "objects.h"
+#include "objectlistui.h"
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
@@ -140,12 +141,14 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	wnd->_parent._parent.proc_recalc_size(wnd);
 	/*recalc_size queues layout update, so not needed here anymore*/
 	objects_on_active_window_changed(wnd);
+	objlistui_on_active_window_changed(wnd);
 }
 
 void ui_hide_window()
 {
 	active_window = NULL;
 	objects_on_active_window_changed(NULL);
+	objlistui_on_active_window_changed(NULL);
 }
 
 struct UI_WINDOW *ui_get_active_window()
@@ -676,6 +679,7 @@ void ui_render()
 
 		objects_frame_update();
 		objbase_frame_update();
+		objlistui_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;

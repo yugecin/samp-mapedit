@@ -372,8 +372,7 @@ void objbase_on_world_entity_removed(void *entity)
 	}
 }
 
-static
-void objbase_draw_entity_bound_rect(struct CPlaceable *entity, int col)
+void objbase_draw_entity_bound_rect(struct CEntity *entity, int col)
 {
 #define P(A,B,C,D) \
 	if(A.z>0.0f&&B.z>0.0f&&C.z>0.0f&&D.z>0.0f){\
@@ -397,8 +396,8 @@ void objbase_draw_entity_bound_rect(struct CPlaceable *entity, int col)
 	if (entity != NULL &&
 		(colmodel = game_EntityGetColModel(entity)) != NULL)
 	{
-		if (entity->matrix != NULL) {
-			mat = *entity->matrix;
+		if (entity->_parent.matrix != NULL) {
+			mat = *entity->_parent.matrix;
 		} else {
 			/*TODO*/
 			return;
@@ -482,7 +481,7 @@ void objbase_frame_update()
 	} color;
 
 	color.full = 0x00FF0000;
-	color.comps.a = (char) (55 * (1.0f - fabs(sinf(*timeInGame * 0.004f))));
+	color.comps.a = BBOX_ALPHA_ANIM_VALUE;
 	objbase_do_hover();
 	objbase_draw_entity_bound_rect(selected_entity.entity, color.full);
 	color.comps.b = 0xFF;
