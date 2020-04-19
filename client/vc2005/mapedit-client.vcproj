@@ -365,6 +365,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\ui_checkbox.c"
+					>
+				</File>
+				<File
+					RelativePath="..\ui_checkbox.h"
+					>
+				</File>
+				<File
 					RelativePath="..\ui_colorpicker.c"
 					>
 				</File>

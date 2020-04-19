@@ -108,7 +108,6 @@ struct UI_RADIOBUTTON *ui_rdb_make(
 	rdb = malloc(sizeof(struct UI_RADIOBUTTON));
 	ui_elem_init(rdb, UIE_RADIOBUTTON);
 	rdb->_parent._parent.proc_dispose = (ui_method*) ui_rdb_dispose;
-	rdb->_parent._parent.proc_update = (ui_method*) ui_rdb_update;
 	/*draw for radiobutton can be the button proc*/
 	rdb->_parent._parent.proc_draw = (ui_method*) ui_btn_draw;
 	/*mousedown for radiobutton can be the button proc*/
@@ -117,9 +116,9 @@ struct UI_RADIOBUTTON *ui_rdb_make(
 	/*recalcsize for radiobutton can be the button proc*/
 	rdb->_parent._parent.proc_recalc_size = (ui_method*) ui_btn_recalc_size;
 	rdb->_parent.text = malloc(sizeof(char) * textlenandzero);
-	rdb->_parent.text[0] = '[';
+	rdb->_parent.text[0] = '(';
 	/*1 is set below with the ui_rdbgroup_add call*/
-	rdb->_parent.text[2] = ']';
+	rdb->_parent.text[2] = ')';
 	memcpy(rdb->_parent.text + 3, text, textlenandzero - 3);
 	rdb->_parent.foregroundABGR = -1;
 	rdb->_parent.enabled = 1;
@@ -132,10 +131,6 @@ void ui_rdb_dispose(struct UI_RADIOBUTTON *rdb)
 {
 	ui_rdbgroup_remove(rdb->group, rdb);
 	ui_btn_dispose((struct UI_BUTTON*) rdb);
-}
-
-void ui_rdb_update(struct UI_RADIOBUTTON *rdb)
-{
 }
 
 int ui_rdb_mouseup(struct UI_RADIOBUTTON *rdb)
