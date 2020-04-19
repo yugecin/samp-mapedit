@@ -105,11 +105,22 @@ void cb_btn_mainmenu_removes(struct UI_BUTTON *btn)
 	}
 }
 
+static
+void cb_btn_mainmenu_refresh_removes(struct UI_BUTTON *btn)
+{
+	rb_undo_all();
+	rb_do_all();
+}
+
 void rbui_init()
 {
 	static struct UI_BUTTON *btn;
 
 	btn = ui_btn_make("Removes", cb_btn_mainmenu_removes);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
+	/*because it's not working properly yet*/
+	btn = ui_btn_make("Refresh_removes", cb_btn_mainmenu_refresh_removes);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 
