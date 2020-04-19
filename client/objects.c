@@ -47,6 +47,7 @@ static char txt_objlodflags[9];
 
 static struct CEntity *selected_entity;
 static struct OBJECT *selected_object;
+static struct OBJECT cloning_object;
 static int activelayeridx = 0;
 static struct RwV3D nextObjectPosition;
 static struct RwV3D player_pos_before_selecting;
@@ -269,6 +270,21 @@ void cb_btn_remove_building(struct UI_BUTTON *btn)
 static
 void cb_btn_objclone(struct UI_BUTTON *btn)
 {
+	struct RwV3D pos;
+
+	if (active_layer->numobjects >= MAX_OBJECTS) {
+		msg_title = "Clone";
+		msg_message = "Can't_clone,_object_limit_reached";
+		msg_btn1text = "Ok";
+		msg_show(NULL);
+		return;
+	}
+
+	if (selected_entity != NULL && cloning_object.model == 0) {
+		cloning_object.model = selected_entity->model;
+		game_ObjectGetPos(selected_entity, &pos);
+		objbase_mkobject(&cloning_object, &pos);
+	}
 }
 
 static
@@ -466,6 +482,7 @@ void objects_prj_postload()
 	btn_contextmenu_mkobject->enabled = 1;
 	btn_mainmenu_layers->enabled = 1;
 	btn_mainmenu_selectobject->enabled = 1;
+	cloning_object.model = 0;
 	objbase_create_dummy_entity();
 }
 
@@ -649,4 +666,86 @@ void objects_show_select_layer_first_msg()
 	msg_title = "Objects";
 	msg_btn1text = "Ok";
 	msg_show(cb_msg_openlayers);
+}
+
+int objects_object_created(struct OBJECT *object)
+{
+	struct MSG_NC nc;
+
+	if (object != &cloning_object) {
+		return 0;
+	}
+
+	if (cloning_object.model == 0) {
+		return 1;
+	}
+
+	if (active_layer->numobjects >= MAX_OBJECTS) {
+		msg_message = "Max_objects_reached!";
+		msg_title = "Clone";
+		msg_btn1text = "Ok";
+		msg_show(NULL);
+		return 1;
+	}
+
+	active_layer->objects[active_layer->numobjects] = cloning_object;
+	active_layer->numobjects++;
+	objlistui_refresh_list();
+
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.data = 0;
+	nc.nc = NC_EditObject;
+	nc.params.asint[1] = 0;
+	nc.params.asint[2] = cloning_object.samp_objectid;
+	sockets_send(&nc, sizeof(nc));
+
+	cloning_object.model = 0;
+	return 1;
+}
+
+/**
+TODO: optimize this
+*/
+struct OBJECT *objects_find_by_sa_handle(int sa_handle)
+{
+	int i;
+	struct OBJECT *objects;
+
+	objects = objbrowser_object_by_handle(sa_handle);
+	if (objects != NULL) {
+		return objects;
+	}
+
+	if (cloning_object.sa_handle == sa_handle) {
+		return &cloning_object;
+	}
+
+	if (active_layer != NULL) {
+		objects = active_layer->objects;
+		for (i = active_layer->numobjects - 1; i >= 0; i--) {
+			if (objects[i].sa_handle == sa_handle) {
+				return objects + i;
+			}
+		}
+	}
+	return NULL;
+}
+
+/**
+TODO: optimize this
+*/
+struct OBJECT *objects_find_by_sa_object(void *sa_object)
+{
+	int i;
+	struct OBJECT *objects;
+
+	if (active_layer != NULL) {
+		objects = active_layer->objects;
+		for (i = active_layer->numobjects - 1; i >= 0; i--) {
+			if (objects[i].sa_object == sa_object) {
+				return objects + i;
+			}
+		}
+	}
+	return NULL;
 }

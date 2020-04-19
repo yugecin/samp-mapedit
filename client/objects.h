@@ -21,6 +21,9 @@ void objects_open_persistent_state();
 void objects_select_entity(void *entity);
 void objects_clearlayers();
 void objects_show_select_layer_first_msg();
+int objects_object_created(struct OBJECT *object);
+struct OBJECT *objects_find_by_sa_handle(int sa_handle);
+struct OBJECT *objects_find_by_sa_object(void *sa_object);
 
 #define MAX_LAYERS 10
 

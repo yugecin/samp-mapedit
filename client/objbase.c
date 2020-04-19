@@ -39,49 +39,6 @@ void objbase_set_entity_to_render_exclusively(void *entity)
 }
 
 /**
-TODO: optimize this
-*/
-struct OBJECT *objects_find_by_sa_handle(int sa_handle)
-{
-	int i;
-	struct OBJECT *objects;
-
-	objects = objbrowser_object_by_handle(sa_handle);
-	if (objects != NULL) {
-		return objects;
-	}
-
-	if (active_layer != NULL) {
-		objects = active_layer->objects;
-		for (i = active_layer->numobjects - 1; i >= 0; i--) {
-			if (objects[i].sa_handle == sa_handle) {
-				return objects + i;
-			}
-		}
-	}
-	return NULL;
-}
-
-/**
-TODO: optimize this
-*/
-struct OBJECT *objects_find_by_sa_object(void *sa_object)
-{
-	int i;
-	struct OBJECT *objects;
-
-	if (active_layer != NULL) {
-		objects = active_layer->objects;
-		for (i = active_layer->numobjects - 1; i >= 0; i--) {
-			if (objects[i].sa_object == sa_object) {
-				return objects + i;
-			}
-		}
-	}
-	return NULL;
-}
-
-/**
 Since x-coord of creation is a pointer to the object handle, the position needs
 to be reset.
 */
@@ -104,7 +61,8 @@ void objbase_object_creation_confirmed(struct OBJECT *object)
 		manipulateEntity = object->sa_object;
 		*(float*)((char*) object->sa_object + 0x15C) = 0.01f; /*scale*/
 	} else {
-		objbrowser_object_created(object);
+		objbrowser_object_created(object) ||
+			objects_object_created(object);
 	}
 }
 
