@@ -122,9 +122,11 @@ void ui_lst_draw(struct UI_LIST *lst)
 		scrollbh,
 		0xFFFF0000);
 
+	lst->hoveredindex = -1;
 	if (ishovered && cursorx < scrollbx) {
 		i = calc_list_hovered_offset(lst);
 		if (i != -1) {
+			lst->hoveredindex = i + lst->topoffset;
 			game_DrawRect(
 				elem->x + 2.0f,
 				elem->y + 2.0f + fontheight * i,
@@ -286,6 +288,7 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->filteredIndexMapping = NULL;
 	lst->numitems = 0;
 	lst->selectedindex = -1;
+	lst->hoveredindex = -1;
 	ui_lst_recalc_size(lst);
 	return lst;
 }

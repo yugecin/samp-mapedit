@@ -161,7 +161,10 @@ void objlistui_frame_update()
 	int idx, col;
 
 	if (isactive) {
-		idx = lst->selectedindex;
+		idx = lst->hoveredindex;
+		if (idx < 0) {
+			idx = lst->selectedindex;
+		}
 		if (0 <= idx && idx < active_layer->numobjects) {
 			entity = active_layer->objects[idx].sa_object;
 			col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;

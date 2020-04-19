@@ -17,6 +17,7 @@ struct UI_LIST {
 	int topoffset;
 	int scrolling;
 	int selectedindex;
+	int hoveredindex;
 	listcb *cb;
 	char *filter;
 };
