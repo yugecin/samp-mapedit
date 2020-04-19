@@ -1,6 +1,8 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "game.h"
+#include "ui.h"
 
 unsigned char hue(float t, int component)
 {
@@ -42,4 +44,16 @@ char *stristr(char *haystack, char *needle)
 		}
 		haystack++;
 	}
+}
+
+void center_camera_on(struct RwV3D *pos)
+{
+	camera->lookVector.x = 45.0f;
+	camera->lookVector.y = 45.0f;
+	camera->lookVector.z = -25.0f;
+	camera->position.x = pos->x - camera->lookVector.x;
+	camera->position.y = pos->y - camera->lookVector.y;
+	camera->position.z = pos->z - camera->lookVector.z;
+	ui_update_camera_after_manual_position();
+	ui_store_camera();
 }

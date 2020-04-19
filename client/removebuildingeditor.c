@@ -59,19 +59,6 @@ static struct REMOVEDOBJECTPREVIEW previewremoves[MAX_PREVIEW_REMOVES];
 static int numpreviewremoves;
 
 static
-void rbe_center_cam_on(struct RwV3D *pos)
-{
-	camera->lookVector.x = 45.0f;
-	camera->lookVector.y = 45.0f;
-	camera->lookVector.z = -25.0f;
-	camera->position.x = pos->x - camera->lookVector.x;
-	camera->position.y = pos->y - camera->lookVector.y;
-	camera->position.z = pos->z - camera->lookVector.z;
-	ui_update_camera_after_manual_position();
-	ui_store_camera();
-}
-
-static
 void cb_removelist_click(struct UI_LIST *lst)
 {
 	struct RwV3D pos;
@@ -80,7 +67,7 @@ void cb_removelist_click(struct UI_LIST *lst)
 	idx = lst->selectedindex;
 	if (0 <= idx && idx < numpreviewremoves) {
 		game_ObjectGetPos(previewremoves[idx].entity, &pos);
-		rbe_center_cam_on(&pos);
+		center_camera_on(&pos);
 	}
 }
 
@@ -371,7 +358,7 @@ static
 void cb_btn_center_cam(struct UI_BUTTON *btn)
 {
 	TRACE("cb_btn_center_cam");
-	rbe_center_cam_on(&current_remove.origin);
+	center_camera_on(&current_remove.origin);
 }
 
 static

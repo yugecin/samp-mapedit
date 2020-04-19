@@ -24,6 +24,7 @@ static struct UI_BUTTON *btn_delete;
 
 static char txt_currentlayer[100];
 static char isactive;
+static struct CEntity *lastHoveredEntity;
 
 static
 void cb_btn_mainmenu_objects(struct UI_BUTTON *btn)
@@ -116,7 +117,7 @@ void objlistui_init()
 
 	strcpy(txt_currentlayer, "Current_layer:_");
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_currentlayer));
-	chk_snap_camera = ui_chk_make("Snap_camera", 1, NULL);
+	chk_snap_camera = ui_chk_make("Snap_camera", 0, NULL);
 	ui_wnd_add_child(wnd, chk_snap_camera);
 	chk_isolate_element = ui_chk_make("Isolate_object", 1, NULL);
 	ui_wnd_add_child(wnd, chk_isolate_element);
@@ -166,6 +167,7 @@ void objlistui_frame_update()
 {
 	struct CEntity *exclusiveEntity;
 	struct CEntity *entity;
+	struct RwV3D pos;
 	int idx, col;
 
 	if (!isactive) {
@@ -186,15 +188,25 @@ void objlistui_frame_update()
 		col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;
 		objbase_draw_entity_bound_rect(entity, col);
 	}
-	objbase_set_entity_to_render_exclusively(exclusiveEntity);
+	if (exclusiveEntity != lastHoveredEntity) {
+		lastHoveredEntity = exclusiveEntity;
+		objbase_set_entity_to_render_exclusively(exclusiveEntity);
+		if (exclusiveEntity != NULL && chk_snap_camera->checked) {
+			game_ObjectGetPos(exclusiveEntity, &pos);
+			center_camera_on(&pos);
+		}
+	}
 }
 
 void objlistui_on_active_window_changed(struct UI_WINDOW *new_wnd)
 {
 	if (new_wnd == wnd) {
 		isactive = 1;
+		lastHoveredEntity = NULL;
 	} else if (isactive) {
-		objbase_set_entity_to_render_exclusively(NULL);
+		if (lastHoveredEntity != NULL) {
+			objbase_set_entity_to_render_exclusively(NULL);
+		}
 		isactive = 0;
 	}
 }
