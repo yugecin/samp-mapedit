@@ -19,6 +19,7 @@ static struct UI_WINDOW *wnd;
 static struct UI_CHECKBOX *chk_snap_camera;
 static struct UI_CHECKBOX *chk_isolate_element;
 static struct UI_LIST *lst;
+static struct UI_BUTTON *btn_center;
 static struct UI_BUTTON *btn_edit;
 static struct UI_BUTTON *btn_delete;
 
@@ -89,6 +90,22 @@ ret:
 }
 
 static
+void cb_btn_center(struct UI_BUTTON *btn)
+{
+	struct RwV3D pos;
+	int idx;
+
+	idx = lst->selectedindex;
+	if (active_layer != NULL &&
+		0 <= idx &&
+		idx < active_layer->numobjects)
+	{
+		game_ObjectGetPos(active_layer->objects[idx].sa_object, &pos);
+		center_camera_on(&pos);
+	}
+}
+
+static
 void cb_btn_delete(struct UI_BUTTON *btn)
 {
 	msg_title = "Object";
@@ -102,7 +119,9 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 static
 void cb_list_item_selected(struct UI_LIST *lst)
 {
-	btn_edit->enabled = btn_delete->enabled = lst->selectedindex != -1;
+	btn_center->enabled =
+	btn_edit->enabled =
+	btn_delete->enabled = lst->selectedindex != -1;
 }
 
 void objlistui_init()
@@ -123,6 +142,8 @@ void objlistui_init()
 	ui_wnd_add_child(wnd, chk_isolate_element);
 	lst = ui_lst_make(35, cb_list_item_selected);
 	ui_wnd_add_child(wnd, lst);
+	btn_center = ui_btn_make("Center_on_screen", cb_btn_center);
+	ui_wnd_add_child(wnd, btn_center);
 	btn_edit = ui_btn_make("Edit", cb_btn_edit);
 	ui_wnd_add_child(wnd, btn_edit);
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
