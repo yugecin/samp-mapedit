@@ -6,6 +6,7 @@
 #define MAGIC_ISSET 0x80
 #define MAGIC_PROJECT (MAGIC_ISSET | 0x40)
 #define MAGIC_OBJECT_LAYER (MAGIC_ISSET | 0x20)
+#define MAGIC_CURSORPOS (MAGIC_ISSET | 0x10)
 
 #define PROJECT_NAME_OFFSET 20
 #define OBJECT_LAYER_OFFSET 1
@@ -48,13 +49,14 @@ void persistence_set_object_layerid(char layerid)
 
 void persistence_set_cursorpos(float x, float y)
 {
+	logBuffer[0] |= MAGIC_CURSORPOS;
 	*((float*) logBuffer + 1) = x;
 	*((float*) logBuffer + 2) = y;
 }
 
 int persistence_get_cursorpos(float *x, float *y)
 {
-	if (logBuffer[0] & MAGIC_ISSET) {
+	if ((logBuffer[0] & MAGIC_CURSORPOS) == MAGIC_CURSORPOS) {
 		*x = *((float*) logBuffer + 1);
 		*y = *((float*) logBuffer + 2);
 		return 1;
