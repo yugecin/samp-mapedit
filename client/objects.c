@@ -34,8 +34,7 @@ static struct UI_LABEL *lbl_objmodel;
 static struct UI_LABEL *lbl_objlodmodel;
 static struct UI_BUTTON *btn_remove_building;
 static struct UI_BUTTON *btn_objclone;
-static struct UI_BUTTON *btn_move_obj_samp;
-static struct UI_BUTTON *btn_move_obj_click;
+static struct UI_BUTTON *btn_move_obj;
 
 static char txt_objentity[9];
 static char txt_objmodel[45];
@@ -288,7 +287,7 @@ void cb_btn_objclone(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_move_obj_samp(struct UI_BUTTON *btn)
+void cb_btn_move_obj(struct UI_BUTTON *btn)
 {
 	struct MSG_NC nc;
 
@@ -300,11 +299,6 @@ void cb_btn_move_obj_samp(struct UI_BUTTON *btn)
 		nc.params.asint[2] = selected_object->samp_objectid;
 		sockets_send(&nc, sizeof(nc));
 	}
-}
-
-static
-void cb_btn_move_obj_click(struct UI_BUTTON *btn)
-{
 }
 
 void objects_init()
@@ -390,14 +384,10 @@ void objects_init()
 	btn->_parent.span = 2;
 	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_objclone = btn);
-	btn = ui_btn_make("Move_Object_(samp)", cb_btn_move_obj_samp);
+	btn = ui_btn_make("Move_Object", cb_btn_move_obj);
 	btn->_parent.span = 2;
 	btn->enabled = 0;
-	ui_wnd_add_child(window_objinfo, btn_move_obj_samp = btn);
-	btn = ui_btn_make("Move_Object_(click)", cb_btn_move_obj_click);
-	btn->_parent.span = 2;
-	btn->enabled = 0;
-	ui_wnd_add_child(window_objinfo, btn_move_obj_click = btn);
+	ui_wnd_add_child(window_objinfo, btn_move_obj = btn);
 
 	selected_object = NULL;
 }
@@ -498,8 +488,7 @@ void objects_select_entity(void *entity)
 		btn_objclone->enabled = 0;
 		selected_object = NULL;
 		btn_remove_building->enabled = 0;
-		btn_move_obj_samp->enabled = 0;
-		btn_move_obj_click->enabled = 0;
+		btn_move_obj->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objmodel, "0");
 		strcpy(txt_objtype, "00000000");
@@ -541,12 +530,10 @@ void objects_select_entity(void *entity)
 	selected_object = objects_find_by_sa_object(entity);
 	if (selected_object == NULL) {
 		btn_remove_building->enabled = 1;
-		btn_move_obj_samp->enabled = 0;
-		btn_move_obj_click->enabled = 0;
+		btn_move_obj->enabled = 0;
 	} else {
 		btn_remove_building->enabled = 0;
-		btn_move_obj_samp->enabled = 1;
-		btn_move_obj_click->enabled = 1;
+		btn_move_obj->enabled = 1;
 	}
 }
 
@@ -591,8 +578,7 @@ void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 		is_selecting_object = 1;
 		objects_prepare_selecting_object();
 		btn_remove_building->enabled = 0;
-		btn_move_obj_samp->enabled = 0;
-		btn_move_obj_click->enabled = 0;
+		btn_move_obj->enabled = 0;
 	} else if (is_selecting_object) {
 		is_selecting_object = 0;
 		objects_restore_selecting_object();

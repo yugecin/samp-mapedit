@@ -20,7 +20,7 @@ static struct UI_CHECKBOX *chk_snap_camera;
 static struct UI_CHECKBOX *chk_isolate_element;
 static struct UI_LIST *lst;
 static struct UI_BUTTON *btn_center;
-static struct UI_BUTTON *btn_edit;
+static struct UI_BUTTON *btn_move;
 static struct UI_BUTTON *btn_delete;
 
 static char txt_currentlayer[100];
@@ -38,7 +38,7 @@ void cb_btn_mainmenu_objects(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_edit(struct UI_BUTTON *btn)
+void cb_btn_move(struct UI_BUTTON *btn)
 {
 	struct OBJECT *obj;
 	struct MSG_NC nc;
@@ -120,7 +120,7 @@ static
 void cb_list_item_selected(struct UI_LIST *lst)
 {
 	btn_center->enabled =
-	btn_edit->enabled =
+	btn_move->enabled =
 	btn_delete->enabled = lst->selectedindex != -1;
 }
 
@@ -144,8 +144,8 @@ void objlistui_init()
 	ui_wnd_add_child(wnd, lst);
 	btn_center = ui_btn_make("Center_on_screen", cb_btn_center);
 	ui_wnd_add_child(wnd, btn_center);
-	btn_edit = ui_btn_make("Edit", cb_btn_edit);
-	ui_wnd_add_child(wnd, btn_edit);
+	btn_move = ui_btn_make("Move", cb_btn_move);
+	ui_wnd_add_child(wnd, btn_move);
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
 	ui_wnd_add_child(wnd, btn_delete);
 }
@@ -163,7 +163,7 @@ void objlistui_refresh_list()
 	struct OBJECT *obj;
 
 	btn_delete->enabled = 0;
-	btn_edit->enabled = 0;
+	btn_move->enabled = 0;
 
 	if (active_layer == NULL) {
 		strcpy(txt_currentlayer + 15, "<none>");
