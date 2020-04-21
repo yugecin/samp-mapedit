@@ -323,13 +323,17 @@ hasentity:
 		objbase_draw_entity_bound_rect(entity, col);
 	}
 
-	if (exclusiveEntity != lastHoveredEntity) {
-		lastHoveredEntity = exclusiveEntity;
+	if (exclusiveEntity == lastHoveredEntity) {
+		return;
+	}
+
+	lastHoveredEntity = exclusiveEntity;
+	if (exclusiveEntity == NULL || chk_isolate_element->checked) {
 		objbase_set_entity_to_render_exclusively(exclusiveEntity);
-		if (exclusiveEntity != NULL && chk_isolate_element->checked) {
-			game_ObjectGetPos(exclusiveEntity, &pos);
-			center_camera_on(&pos);
-		}
+	}
+	if (exclusiveEntity != NULL && chk_snap_camera->checked) {
+		game_ObjectGetPos(exclusiveEntity, &pos);
+		center_camera_on(&pos);
 	}
 }
 
