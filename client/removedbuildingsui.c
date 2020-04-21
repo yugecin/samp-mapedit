@@ -74,8 +74,10 @@ void cb_msg_deleteconfirm(int opt)
 		active_layer->removes[idx] =
 			active_layer->removes[active_layer->numremoves];
 	}
-	rbui_refresh_list();
 	rb_do_all();
+
+	rbui_refresh_list();
+	ui_show_window(wnd);
 }
 
 static
@@ -129,7 +131,6 @@ void rbui_init()
 	strcpy(txt_currentlayer, "Current_layer:_");
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_currentlayer));
 	lst = ui_lst_make(15, cb_list_item_selected);
-	lst->_parent.pref_width = 700.0f;
 	ui_wnd_add_child(wnd, lst);
 	btn_edit = ui_btn_make("Edit_selected", cb_btn_edit);
 	ui_wnd_add_child(wnd, btn_edit);
