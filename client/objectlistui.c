@@ -26,15 +26,111 @@ static struct UI_BUTTON *btn_delete;
 static char txt_currentlayer[100];
 static char isactive;
 static struct CEntity *lastHoveredEntity;
+static struct CEntity *nearbyEntities[MAX_OBJECTS];
+static short numNearbyEntities;
+static char fromLayers;
+
+static
+struct CEntity *objlistui_index_to_entity(int idx)
+{
+	if (idx < 0) {
+		return NULL;
+	}
+
+	if (fromLayers) {
+		if (idx < active_layer->numobjects) {
+			return active_layer->objects[idx].sa_object;
+		}
+	} else {
+		if (idx < numNearbyEntities) {
+			return nearbyEntities[idx];
+		}
+	}
+	return NULL;
+}
+
+static
+void objlistui_refresh_list_from_layer()
+{
+	char *unknown = "unknown";
+	char *names[MAX_OBJECTS];
+	int i;
+	struct OBJECT *obj;
+
+	btn_delete->enabled = 0;
+	btn_move->enabled = 0;
+
+	obj = active_layer->objects;
+	for (i = 0; i < active_layer->numobjects; i++) {
+		if (modelNames[obj->model]) {
+			names[i] = modelNames[obj->model];
+		} else {
+			names[i] = unknown;
+		}
+		obj++;
+	}
+	ui_lst_set_data(lst, names, i);
+}
+
+static
+void objlistui_refresh_list_from_nearby()
+{
+	char *unknown = "unknown";
+	char *names[MAX_OBJECTS];
+	int i;
+
+	btn_delete->enabled = 0;
+	btn_move->enabled = 0;
+
+	game_WorldFindObjectsInRange(
+		&camera->position,
+		100.0f,
+		0,
+		&numNearbyEntities,
+		MAX_OBJECTS,
+		nearbyEntities,
+		1,
+		0,
+		0,
+		1,
+		1);
+
+	for (i = 0; i < numNearbyEntities; i++) {
+		if (modelNames[nearbyEntities[i]->model]) {
+			names[i] = modelNames[nearbyEntities[i]->model];
+		} else {
+			names[i] = unknown;
+		}
+	}
+	ui_lst_set_data(lst, names, i);
+}
 
 static
 void cb_btn_mainmenu_objects(struct UI_BUTTON *btn)
 {
 	if (active_layer == NULL) {
 		objects_show_select_layer_first_msg();
-	} else {
-		ui_show_window(wnd);
+		return;
 	}
+
+	strcpy(txt_currentlayer + 15, active_layer->name);
+	fromLayers = 1;
+	objlistui_refresh_list_from_layer();
+	ui_show_window(wnd);
+}
+
+static
+void cb_btn_mainmenu_nearby(struct UI_BUTTON *btn)
+{
+	if (active_layer == NULL) {
+		objects_show_select_layer_first_msg();
+		return;
+	}
+
+	strcpy(txt_currentlayer + 15, active_layer->name);
+	fromLayers = 0;
+	objlistui_refresh_list_from_nearby();
+	ui_show_window(wnd);
 }
 
 static
@@ -83,7 +179,7 @@ void cb_msg_deleteconfirm(int opt)
 		active_layer->objects[idx] =
 			active_layer->objects[active_layer->numobjects];
 	}
-	objlistui_refresh_list();
+	objlistui_refresh_list_from_layer();
 
 ret:
 	ui_show_window(wnd);
@@ -108,20 +204,43 @@ void cb_btn_center(struct UI_BUTTON *btn)
 static
 void cb_btn_delete(struct UI_BUTTON *btn)
 {
-	msg_title = "Object";
-	msg_message = "Delete_object?";
-	msg_message2 = "This_cannot_be_undone!";
-	msg_btn1text = "Yes";
-	msg_btn2text = "No";
-	msg_show(cb_msg_deleteconfirm);
+	struct CEntity *entity;
+	struct OBJECT *obj;
+
+	entity = objlistui_index_to_entity(lst->selectedindex);
+	if (entity == NULL) {
+		return;
+	}
+
+	obj = objects_find_by_sa_object(entity);
+	if (obj != NULL) {
+		msg_title = "Object";
+		msg_message = "Delete_object?";
+		msg_message2 = "This_cannot_be_undone!";
+		msg_btn1text = "Yes";
+		msg_btn2text = "No";
+		msg_show(cb_msg_deleteconfirm);
+		return;
+	}
+
+	rbe_show_for_entity(entity, objects_cb_rb_save_new);
 }
 
 static
 void cb_list_item_selected(struct UI_LIST *lst)
 {
-	btn_center->enabled =
-	btn_move->enabled =
-	btn_delete->enabled = lst->selectedindex != -1;
+	struct CEntity *entity;
+
+	entity = objlistui_index_to_entity(lst->selectedindex);
+	if (entity == NULL) {
+		btn_center->enabled =
+			btn_move->enabled = btn_delete->enabled = 0;
+	} else {
+		btn_center->enabled = btn_delete->enabled = 1;
+		if (objects_find_by_sa_object(entity) != NULL) {
+			btn_move->enabled = 1;
+		}
+	}
 }
 
 void objlistui_init()
@@ -129,6 +248,9 @@ void objlistui_init()
 	struct UI_BUTTON *btn;
 
 	btn = ui_btn_make("Objects", cb_btn_mainmenu_objects);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
+	btn = ui_btn_make("Nearby", cb_btn_mainmenu_nearby);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 
@@ -155,35 +277,6 @@ void objlistui_dispose()
 	ui_wnd_dispose(wnd);
 }
 
-void objlistui_refresh_list()
-{
-	char *unknown = "unknown";
-	char *names[MAX_REMOVES];
-	int i;
-	struct OBJECT *obj;
-
-	btn_delete->enabled = 0;
-	btn_move->enabled = 0;
-
-	if (active_layer == NULL) {
-		strcpy(txt_currentlayer + 15, "<none>");
-		ui_lst_set_data(lst, NULL, 0);
-		return;
-	}
-
-	strcpy(txt_currentlayer + 15, active_layer->name);
-	obj = active_layer->objects;
-	for (i = 0; i < active_layer->numobjects; i++) {
-		if (modelNames[obj->model]) {
-			names[i] = modelNames[obj->model];
-		} else {
-			names[i] = unknown;
-		}
-		obj++;
-	}
-	ui_lst_set_data(lst, names, i);
-}
-
 void objlistui_frame_update()
 {
 	struct CEntity *exclusiveEntity;
@@ -199,16 +292,18 @@ void objlistui_frame_update()
 	idx = lst->hoveredindex;
 	if (idx < 0) {
 		idx = lst->selectedindex;
-	} else if (idx < active_layer->numobjects &&
-		chk_isolate_element->checked)
-	{
-		exclusiveEntity = active_layer->objects[idx].sa_object;
+	} else {
+		entity = objlistui_index_to_entity(idx);
+		exclusiveEntity = entity;
+		goto hasentity;
 	}
-	if (0 <= idx && idx < active_layer->numobjects) {
-		entity = active_layer->objects[idx].sa_object;
+	entity = objlistui_index_to_entity(idx);
+	if (entity != NULL) {
+hasentity:
 		col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;
 		objbase_draw_entity_bound_rect(entity, col);
 	}
+
 	if (exclusiveEntity != lastHoveredEntity) {
 		lastHoveredEntity = exclusiveEntity;
 		objbase_set_entity_to_render_exclusively(exclusiveEntity);

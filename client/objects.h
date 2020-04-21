@@ -24,6 +24,7 @@ void objects_show_select_layer_first_msg();
 int objects_object_created(struct OBJECT *object);
 struct OBJECT *objects_find_by_sa_handle(int sa_handle);
 struct OBJECT *objects_find_by_sa_object(void *sa_object);
+void objects_cb_rb_save_new(struct REMOVEDBUILDING *remove);
 
 #define MAX_LAYERS 10
 

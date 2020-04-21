@@ -47,7 +47,7 @@ void cb_btn_edit(struct UI_BUTTON *btn)
 		0 <= idx &&
 		idx < active_layer->numremoves)
 	{
-		rbe_show(&active_layer->removes[idx], cb_rbe_save);
+		rbe_show_for_remove(&active_layer->removes[idx], cb_rbe_save);
 	}
 }
 

@@ -8,7 +8,6 @@
 #include "objbase.h"
 #include "objects.h"
 #include "objbrowser.h"
-#include "objectlistui.h"
 #include "persistence.h"
 #include "player.h"
 #include "removedbuildings.h"
@@ -92,7 +91,6 @@ void layer_activate(int idx)
 		ui_lst_set_selected_index(lst_layers, activelayeridx);
 		persistence_set_object_layerid(activelayeridx);
 		rbui_refresh_list();
-		objlistui_refresh_list();
 	}
 }
 
@@ -234,35 +232,14 @@ void cb_btn_delete_layer()
 }
 
 static
-void cb_rbe_save(struct REMOVEDBUILDING *remove)
-{
-	if (remove != NULL) {
-		active_layer->removes[active_layer->numremoves++] = *remove;
-		rbui_refresh_list();
-	}
-}
-
-static
 void cb_btn_remove_building(struct UI_BUTTON *btn)
 {
-	struct REMOVEDBUILDING remove;
-
-	if (active_layer->numremoves >= MAX_REMOVES) {
-		msg_message = "Max_removes_reached_for_this_layer!";
-		msg_title = "Remove_building";
-		msg_btn1text = "Yes";
-		msg_show(NULL);
-		return;
-	}
+	struct CEntity *entity;
 
 	if (selected_entity) {
-		remove.model = selected_entity->model;
-		remove.radiussq = 1.25f * 1.25f;
-		remove.description = NULL;
-		remove.lodmodel = 0;
-		game_ObjectGetPos(selected_entity, &remove.origin);
+		entity = selected_entity;
 		ui_hide_window(); /*clears selected_entity*/
-		rbe_show(&remove, cb_rbe_save);
+		rbe_show_for_entity(entity, objects_cb_rb_save_new);
 	}
 }
 
@@ -676,7 +653,6 @@ int objects_object_created(struct OBJECT *object)
 
 	active_layer->objects[active_layer->numobjects] = cloning_object;
 	active_layer->numobjects++;
-	objlistui_refresh_list();
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0;
@@ -734,4 +710,12 @@ struct OBJECT *objects_find_by_sa_object(void *sa_object)
 		}
 	}
 	return NULL;
+}
+
+void objects_cb_rb_save_new(struct REMOVEDBUILDING *remove)
+{
+	if (remove != NULL) {
+		active_layer->removes[active_layer->numremoves++] = *remove;
+		rbui_refresh_list();
+	}
 }

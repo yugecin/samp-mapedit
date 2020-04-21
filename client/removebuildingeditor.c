@@ -4,7 +4,9 @@
 #include "game.h"
 #include "ide.h"
 #include "im2d.h"
+#include "msgbox.h"
 #include "objbase.h"
+#include "objects.h"
 #include "player.h"
 #include "removedbuildings.h"
 #include "removebuildingeditor.h"
@@ -492,9 +494,9 @@ void rbe_dispose()
 	free(sphere);
 }
 
-void rbe_show(struct REMOVEDBUILDING *remove, rbe_cb *_cb)
+void rbe_show_for_remove(struct REMOVEDBUILDING *remove, rbe_cb *_cb)
 {
-	TRACE("rbe_show");
+	TRACE("rbe_show_for_remove");
 	rb_undo_all();
 	ui_exclusive_mode = rbe_do_ui;
 	active = 1;
@@ -517,6 +519,29 @@ void rbe_show(struct REMOVEDBUILDING *remove, rbe_cb *_cb)
 	rbe_update_position_ui_text();
 	im2d_sphere_pos(sphere, &current_remove.origin, radius);
 	rbe_update_removes();
+}
+
+void rbe_show_for_entity(struct CEntity *entity, rbe_cb *cb)
+{
+	struct REMOVEDBUILDING remove;
+
+	TRACE("rbe_show_for_entity");
+	if (active_layer == NULL ||
+		active_layer->numremoves >= MAX_REMOVES)
+	{
+		msg_message = "Max_removes_reached_for_this_layer!";
+		msg_title = "Remove_building";
+		msg_btn1text = "Yes";
+		msg_show(NULL);
+		return;
+	}
+
+	remove.model = entity->model;
+	remove.radiussq = 1.25f * 1.25f;
+	remove.description = NULL;
+	remove.lodmodel = 0;
+	game_ObjectGetPos(entity, &remove.origin);
+	rbe_show_for_remove(&remove, cb);
 }
 
 int rbe_handle_keydown(int vk)
