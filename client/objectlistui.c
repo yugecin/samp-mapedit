@@ -307,7 +307,7 @@ hasentity:
 	if (exclusiveEntity != lastHoveredEntity) {
 		lastHoveredEntity = exclusiveEntity;
 		objbase_set_entity_to_render_exclusively(exclusiveEntity);
-		if (exclusiveEntity != NULL && chk_snap_camera->checked) {
+		if (exclusiveEntity != NULL && chk_isolate_element->checked) {
 			game_ObjectGetPos(exclusiveEntity, &pos);
 			center_camera_on(&pos);
 		}
