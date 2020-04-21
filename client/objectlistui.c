@@ -22,6 +22,7 @@ static struct UI_LIST *lst;
 static struct UI_BUTTON *btn_center;
 static struct UI_BUTTON *btn_move;
 static struct UI_BUTTON *btn_delete;
+static struct UI_BUTTON *btn_clone;
 
 static char txt_currentlayer[100];
 static char isactive;
@@ -156,23 +157,37 @@ void cb_btn_move(struct UI_BUTTON *btn)
 static
 void cb_msg_deleteconfirm(int opt)
 {
+	struct CEntity *entity;
+	struct OBJECT *obj;
 	struct MSG_NC nc;
 	int idx;
 
-	idx = lst->selectedindex;
-	if (opt != MSGBOX_RESULT_1 ||
-		active_layer == NULL ||
-		idx < 0 ||
-		active_layer->numobjects <= idx)
-	{
-		goto ret;
+	entity = objlistui_index_to_entity(lst->selectedindex);
+	if (entity == NULL) {
+		return;
+	}
+
+	obj = objects_find_by_sa_object(entity);
+	if (obj == NULL) {
+		return;
 	}
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0;
 	nc.nc = NC_DestroyObject;
-	nc.params.asint[1] = active_layer->objects[idx].samp_objectid;
+	nc.params.asint[1] = obj->samp_objectid;
 	sockets_send(&nc, sizeof(nc));
+
+	idx = 0;
+	for (;;) {
+		if (active_layer->objects + idx == obj) {
+			break;
+		}
+		idx++;
+		if (idx >= MAX_OBJECTS) {
+			return;
+		}
+	}
 
 	active_layer->numobjects--;
 	if (active_layer->numobjects > 0) {
@@ -180,23 +195,17 @@ void cb_msg_deleteconfirm(int opt)
 			active_layer->objects[active_layer->numobjects];
 	}
 	objlistui_refresh_list_from_layer();
-
-ret:
-	ui_show_window(wnd);
 }
 
 static
 void cb_btn_center(struct UI_BUTTON *btn)
 {
 	struct RwV3D pos;
-	int idx;
+	struct CEntity *entity;
 
-	idx = lst->selectedindex;
-	if (active_layer != NULL &&
-		0 <= idx &&
-		idx < active_layer->numobjects)
-	{
-		game_ObjectGetPos(active_layer->objects[idx].sa_object, &pos);
+	entity = objlistui_index_to_entity(lst->selectedindex);
+	if (entity != NULL) {
+		game_ObjectGetPos(entity, &pos);
 		center_camera_on(&pos);
 	}
 }
@@ -227,19 +236,27 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_clone(struct UI_BUTTON *btn)
+{
+}
+
+static
 void cb_list_item_selected(struct UI_LIST *lst)
 {
 	struct CEntity *entity;
+	struct OBJECT *obj;
 
 	entity = objlistui_index_to_entity(lst->selectedindex);
 	if (entity == NULL) {
 		btn_center->enabled =
-			btn_move->enabled = btn_delete->enabled = 0;
+			btn_move->enabled =
+			btn_delete->enabled =
+			btn_clone->enabled = 0;
 	} else {
 		btn_center->enabled = btn_delete->enabled = 1;
-		if (objects_find_by_sa_object(entity) != NULL) {
-			btn_move->enabled = 1;
-		}
+		obj = objects_find_by_sa_object(entity);
+		btn_move->enabled = obj != NULL;
+		btn_clone->enabled = obj == NULL;
 	}
 }
 
@@ -270,6 +287,8 @@ void objlistui_init()
 	ui_wnd_add_child(wnd, btn_move);
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
 	ui_wnd_add_child(wnd, btn_delete);
+	btn_clone = ui_btn_make("Clone", cb_btn_clone);
+	ui_wnd_add_child(wnd, btn_clone);
 }
 
 void objlistui_dispose()
