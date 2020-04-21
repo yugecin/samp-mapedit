@@ -211,6 +211,8 @@ void cb_delete_layer_confirm(int choice)
 			activelayeridx = 0;
 			lbl_layer->text = "<none>";
 		}
+		rb_undo_all();
+		rb_do_all();
 	}
 	ui_show_window(window_layers);
 }
