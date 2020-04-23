@@ -49,11 +49,18 @@ __declspec(naked) void game_init()
 		call eax /*__thiscall*/
 		mov player, eax
 
+		/*on laptop executable: 0x408259
+		on desktop executable: 0x408261*/
+		mov eax, 0x408258
+		cmp byte ptr [eax], 0xB9
 		mov eax, 0x408259
+		jz have_mov
+		mov eax, 0x408261
+have_mov:
 		mov eax, [eax]
 		mov worldSectors, eax
 
-		mov eax, 0x5634AD
+		mov eax, 0x5634A5
 		mov eax, [eax]
 		mov worldRepeatSectors, eax
 
