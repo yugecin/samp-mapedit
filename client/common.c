@@ -4,6 +4,21 @@
 #include "game.h"
 #include "ui.h"
 
+#define TRACEDATA_SIZE 8000
+
+static char *tracedata, *traceptr;
+
+void common_init()
+{
+	tracedata = malloc(TRACEDATA_SIZE);
+	traceptr = tracedata;
+}
+
+void common_dispose()
+{
+	free(tracedata);
+}
+
 unsigned char hue(float t, int component)
 {
 	t += 1.0f / 3.0f * component;
@@ -56,4 +71,17 @@ void center_camera_on(struct RwV3D *pos)
 	camera->position.z = pos->z - camera->lookVector.z;
 	ui_update_camera_after_manual_position();
 	ui_store_camera();
+}
+
+void common_trace(char *data)
+{
+	int len;
+
+	len = strlen(data);
+	if (traceptr + len >= tracedata + TRACEDATA_SIZE) {
+		traceptr = tracedata;
+	}
+	strcpy(traceptr, data);
+	traceptr += len + 1;
+	*((int*) 0xBAB2C8) = (int) traceptr;
 }

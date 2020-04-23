@@ -19,8 +19,8 @@
 #define HUE_COMP_G 0
 #define HUE_COMP_B -1
 
-#if 0
-#define TRACE(X) strcpy((char*)0xBAB2C8,X);
+#if 1
+#define TRACE(X) common_trace(X);
 #else
 #define TRACE(X)
 #endif
@@ -28,3 +28,6 @@
 unsigned char hue(float angle, int component);
 char *stristr(char *haystack, char *needle);
 void center_camera_on(struct RwV3D *pos);
+void common_trace(char *data);
+void common_init();
+void common_dispose();

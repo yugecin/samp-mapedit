@@ -164,6 +164,7 @@ void client_finalize()
 
 	undetour();
 	samp_dispose();
+	common_dispose();
 }
 
 /**
@@ -177,6 +178,7 @@ void client_init()
 	struct MSG_NC nc;
 	HWND ghwnd = *((HWND*) gameHwnd);
 
+	common_init();
 	TRACE("client_init");
 	CreateDirectoryA("samp-mapedit", NULL);
 

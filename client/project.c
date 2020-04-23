@@ -87,6 +87,7 @@ void prj_save()
 static
 void prj_preload()
 {
+	TRACE("prj_preload");
 	objects_prj_preload();
 	player_prj_preload();
 	timeweather_prj_preload();
@@ -96,6 +97,7 @@ void prj_preload()
 static
 void prj_postload()
 {
+	TRACE("prj_postload");
 	ui_prj_postload();
 	objects_prj_postload();
 	racecp_prj_postload();
@@ -116,6 +118,7 @@ void prj_open_by_file(FILE *file)
 	int pos, i;
 	char buf[512];
 
+	TRACE("prj_open_by_file");
 	prj_preload();
 
 	pos = 0;
