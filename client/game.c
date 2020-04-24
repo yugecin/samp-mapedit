@@ -292,6 +292,20 @@ __declspec(naked) void game_ObjectSetRotRad(void *object, struct RwV3D *rot)
 	}
 }
 
+__declspec(naked) void game_ObjectGetHeadingRad(entity, heading)
+	struct CEntity *entity;
+	float *heading;
+{
+	_asm {
+		mov ecx, [esp+0x4]
+		mov eax, 0x441DB0 /*__thiscall CPlaceable::getRotation*/
+		call eax
+		mov eax, [esp+0x8]
+		fstp [eax]
+		ret
+	}
+}
+
 /**
 opcode 00A0 @0x4677E2
 

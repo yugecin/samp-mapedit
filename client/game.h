@@ -411,6 +411,7 @@ int game_IntersectBuildingObject(
 	struct CColPoint *colpoint,
 	void **collidedEntity);
 void game_ObjectGetPos(void *object, struct RwV3D *pos);
+void game_ObjectGetHeadingRad(struct CEntity *object, float *heading);
 void game_ObjectSetPos(void *object, struct RwV3D *pos);
 void game_ObjectSetRotRad(void *object, struct RwV3D *rot);
 /**
