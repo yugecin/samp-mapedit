@@ -159,42 +159,29 @@ void cb_msg_deleteconfirm(int opt)
 {
 	struct CEntity *entity;
 	struct OBJECT *obj;
-	struct MSG_NC nc;
-	int idx;
+
+	if (opt != MSGBOX_RESULT_1) {
+		goto ret;
+	}
 
 	entity = objlistui_index_to_entity(lst->selectedindex);
 	if (entity == NULL) {
-		return;
+		goto ret;
 	}
 
 	obj = objects_find_by_sa_object(entity);
 	if (obj == NULL) {
-		return;
+		goto ret;
 	}
 
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
-	nc.nc = NC_DestroyObject;
-	nc.params.asint[1] = obj->samp_objectid;
-	sockets_send(&nc, sizeof(nc));
-
-	idx = 0;
-	for (;;) {
-		if (active_layer->objects + idx == obj) {
-			break;
-		}
-		idx++;
-		if (idx >= MAX_OBJECTS) {
-			return;
-		}
+	objects_delete_obj(obj);
+	if (fromLayers) {
+		objlistui_refresh_list_from_layer();
+	} else {
+		objlistui_refresh_list_from_nearby();
 	}
-
-	active_layer->numobjects--;
-	if (active_layer->numobjects > 0) {
-		active_layer->objects[idx] =
-			active_layer->objects[active_layer->numobjects];
-	}
-	objlistui_refresh_list_from_layer();
+ret:
+	ui_show_window(wnd);
 }
 
 static
@@ -223,12 +210,7 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 
 	obj = objects_find_by_sa_object(entity);
 	if (obj != NULL) {
-		msg_title = "Object";
-		msg_message = "Delete_object?";
-		msg_message2 = "This_cannot_be_undone!";
-		msg_btn1text = "Yes";
-		msg_btn2text = "No";
-		msg_show(cb_msg_deleteconfirm);
+		objects_show_delete_confirm_msg(cb_msg_deleteconfirm);
 		return;
 	}
 
@@ -349,6 +331,9 @@ void objlistui_on_active_window_changed(struct UI_WINDOW *new_wnd)
 	if (new_wnd == wnd) {
 		isactive = 1;
 		lastHoveredEntity = NULL;
+		/*updates buttons*/
+		lst->selectedindex = -1;
+		cb_list_item_selected(lst);
 	} else if (isactive) {
 		if (lastHoveredEntity != NULL) {
 			objbase_set_entity_to_render_exclusively(NULL);

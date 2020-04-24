@@ -34,6 +34,7 @@ static struct UI_LABEL *lbl_objlodmodel;
 static struct UI_BUTTON *btn_remove_building;
 static struct UI_BUTTON *btn_objclone;
 static struct UI_BUTTON *btn_move_obj;
+static struct UI_BUTTON *btn_delete_obj;
 
 static char txt_objentity[9];
 static char txt_objmodel[45];
@@ -277,6 +278,34 @@ void cb_btn_move_obj(struct UI_BUTTON *btn)
 	}
 }
 
+static struct OBJECT *object_to_delete_after_confirm;
+
+static
+void cb_confirm_delete(int choice)
+{
+	if (object_to_delete_after_confirm == NULL) {
+		ui_show_window(window_objinfo);
+	}
+
+	if (choice == MSGBOX_RESULT_1) {
+		objects_delete_obj(object_to_delete_after_confirm);
+		ui_show_window(window_objinfo);
+		return;
+	}
+
+	ui_show_window(window_objinfo);
+	objects_select_entity(object_to_delete_after_confirm->sa_object);
+}
+
+static
+void cb_btn_delete_obj(struct UI_BUTTON *btn)
+{
+	if (selected_object != NULL) {
+		object_to_delete_after_confirm = selected_object;
+		objects_show_delete_confirm_msg(cb_confirm_delete);
+	}
+}
+
 void objects_init()
 {
 	struct UI_BUTTON *btn;
@@ -364,6 +393,10 @@ void objects_init()
 	btn->_parent.span = 2;
 	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_move_obj = btn);
+	btn = ui_btn_make("Delete_Object", cb_btn_delete_obj);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(window_objinfo, btn_delete_obj = btn);
 
 	selected_object = NULL;
 }
@@ -465,6 +498,7 @@ void objects_select_entity(void *entity)
 		selected_object = NULL;
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 0;
+		btn_delete_obj->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objmodel, "0");
 		strcpy(txt_objtype, "00000000");
@@ -507,9 +541,11 @@ void objects_select_entity(void *entity)
 	if (selected_object == NULL) {
 		btn_remove_building->enabled = 1;
 		btn_move_obj->enabled = 0;
+		btn_delete_obj->enabled = 0;
 	} else {
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 1;
+		btn_delete_obj->enabled = 1;
 	}
 }
 
@@ -555,6 +591,7 @@ void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 		objects_prepare_selecting_object();
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 0;
+		btn_delete_obj->enabled = 0;
 	} else if (is_selecting_object) {
 		is_selecting_object = 0;
 		objects_restore_selecting_object();
@@ -737,5 +774,44 @@ void objects_clone_object(struct CEntity *entity)
 		game_ObjectGetPos(entity, &pos);
 		game_ObjectGetHeadingRad(entity, &cloning_object_heading);
 		objbase_mkobject(&cloning_object, &pos);
+	}
+}
+
+void objects_show_delete_confirm_msg(msgboxcb *cb)
+{
+	msg_title = "Object";
+	msg_message = "Delete_object?";
+	msg_message2 = "This_cannot_be_undone!";
+	msg_btn1text = "Yes";
+	msg_btn2text = "No";
+	msg_show(cb);
+}
+
+void objects_delete_obj(struct OBJECT *obj)
+{
+	struct MSG_NC nc;
+	int idx;
+
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.data = 0;
+	nc.nc = NC_DestroyObject;
+	nc.params.asint[1] = obj->samp_objectid;
+	sockets_send(&nc, sizeof(nc));
+
+	idx = 0;
+	for (;;) {
+		if (active_layer->objects + idx == obj) {
+			break;
+		}
+		idx++;
+		if (idx >= MAX_OBJECTS) {
+			return;
+		}
+	}
+
+	active_layer->numobjects--;
+	if (active_layer->numobjects > 0) {
+		active_layer->objects[idx] =
+			active_layer->objects[active_layer->numobjects];
 	}
 }
