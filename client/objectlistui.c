@@ -238,6 +238,12 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 static
 void cb_btn_clone(struct UI_BUTTON *btn)
 {
+	struct CEntity *entity;
+
+	entity = objlistui_index_to_entity(lst->selectedindex);
+	if (entity != NULL) {
+		objects_clone_object(entity);
+	}
 }
 
 static

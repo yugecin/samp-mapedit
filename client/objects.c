@@ -248,8 +248,6 @@ void cb_btn_remove_building(struct UI_BUTTON *btn)
 static
 void cb_btn_objclone(struct UI_BUTTON *btn)
 {
-	struct RwV3D pos;
-
 	if (active_layer->numobjects >= MAX_OBJECTS) {
 		msg_title = "Clone";
 		msg_message = "Can't_clone,_object_limit_reached";
@@ -258,10 +256,8 @@ void cb_btn_objclone(struct UI_BUTTON *btn)
 		return;
 	}
 
-	if (selected_entity != NULL && cloning_object.model == 0) {
-		cloning_object.model = selected_entity->model;
-		game_ObjectGetPos(selected_entity, &pos);
-		objbase_mkobject(&cloning_object, &pos);
+	if (selected_entity != NULL) {
+		objects_clone_object(selected_entity);
 	}
 }
 
@@ -719,5 +715,16 @@ void objects_cb_rb_save_new(struct REMOVEDBUILDING *remove)
 	if (remove != NULL) {
 		active_layer->removes[active_layer->numremoves++] = *remove;
 		rbui_refresh_list();
+	}
+}
+
+void objects_clone_object(struct CEntity *entity)
+{
+	struct RwV3D pos;
+
+	if (cloning_object.model == 0) {
+		cloning_object.model = entity->model;
+		game_ObjectGetPos(entity, &pos);
+		objbase_mkobject(&cloning_object, &pos);
 	}
 }

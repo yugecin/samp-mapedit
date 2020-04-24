@@ -25,6 +25,7 @@ int objects_object_created(struct OBJECT *object);
 struct OBJECT *objects_find_by_sa_handle(int sa_handle);
 struct OBJECT *objects_find_by_sa_object(void *sa_object);
 void objects_cb_rb_save_new(struct REMOVEDBUILDING *remove);
+void objects_clone_object(struct CEntity *entity);
 
 #define MAX_LAYERS 10
 
