@@ -259,10 +259,11 @@ void cb_list_item_selected(struct UI_LIST *lst)
 			btn_delete->enabled =
 			btn_clone->enabled = 0;
 	} else {
-		btn_center->enabled = btn_delete->enabled = 1;
+		btn_center->enabled =
+			btn_delete->enabled =
+			btn_clone->enabled = 1;
 		obj = objects_find_by_sa_object(entity);
 		btn_move->enabled = obj != NULL;
-		btn_clone->enabled = obj == NULL;
 	}
 }
 
