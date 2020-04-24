@@ -27,10 +27,15 @@ static void *exclusiveEntity = NULL;
 struct OBJECT manipulateObject;
 struct CEntity *manipulateEntity = NULL;
 
+/*RpGeometry *RpGeometryForAllMaterials
+	(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* pData);*/
+static int *RpGeometryForAllMaterials;
+
 void objbase_set_entity_to_render_exclusively(void *entity)
 {
 	struct RwV3D pos;
 
+	TRACE("objbase_set_entity_to_render_exclusively");
 	exclusiveEntity = entity;
 	if (entity != NULL && manipulateEntity != NULL) {
 		game_ObjectGetPos(entity, &pos);
@@ -47,6 +52,7 @@ void objbase_set_position_after_creation(struct OBJECT *object)
 {
 	struct RwV3D pos;
 
+	TRACE("objbase_set_position_after_creation");
 	game_ObjectGetPos(object->sa_object, &pos);
 	pos.x = object->temp_x;
 	game_ObjectSetPos(object->sa_object, &pos);
@@ -55,6 +61,7 @@ void objbase_set_position_after_creation(struct OBJECT *object)
 static
 void objbase_object_creation_confirmed(struct OBJECT *object)
 {
+	TRACE("objbase_object_creation_confirmed");
 	objbase_set_position_after_creation(object);
 
 	if (object == &manipulateObject) {
@@ -70,6 +77,7 @@ void objbase_mkobject(struct OBJECT *object, struct RwV3D *pos)
 {
 	struct MSG_NC nc;
 
+	TRACE("objbase_mkobject");
 	object->temp_x = pos->x;
 	object->justcreated = 1;
 	object->samp_objectid = -1;
@@ -93,6 +101,7 @@ void objbase_server_object_created(struct MSG_OBJECT_CREATED *msg)
 {
 	struct OBJECT *object;
 
+	TRACE("objbase_server_object_created");
 	object = msg->object;
 	object->samp_objectid = msg->samp_objectid;
 	if (!object->justcreated) {
@@ -104,9 +113,6 @@ void objbase_server_object_created(struct MSG_OBJECT_CREATED *msg)
 /*RpClump *RpClumpForAllAtomics
 	(RpClump* clump, RpAtomicCallBack callback, void* pData)*/
 #define RpClumpForAllAtomics 0x749B70
-/*RpGeometry *RpGeometryForAllMaterials
-	(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* pData);*/
-#define RpGeometryForAllMaterials 0x74C790
 #define rpGEOMETRYMODULATEMATERIALCOLOR 0x00000040
 
 static
@@ -248,6 +254,7 @@ void objbase_color_entity(void *entity, int color, int *lit_flag_mask)
 	void *lod;
 	int *flags;
 
+	TRACE("objbase_color_entity");
 	set_entity_color_agbr(entity, color);
 	flags = (int*) ((char*) entity + 0x1C);
 	if (color) {
@@ -272,6 +279,7 @@ int objbase_color_new_entity(info, entity, color)
 	void *entity;
 	int color;
 {
+	TRACE("objbase_color_new_entity");
 	if (entity == info->entity) {
 		return 0;
 	}
@@ -289,6 +297,7 @@ int objbase_color_new_entity(info, entity, color)
 
 void objbase_select_entity(void *entity)
 {
+	TRACE("objbase_select_entity");
 	/*remove hovered entity to revert its changes first*/
 	objbase_color_new_entity(&hovered_entity, NULL, 0);
 	objbase_color_new_entity(&selected_entity, entity, 0xFF0000FF);
@@ -300,6 +309,7 @@ void objbase_do_hover()
 	struct CColPoint cp;
 	void *entity;
 
+	TRACE("objbase_do_hover");
 	if (objects_is_currently_selecting_object()) {
 		if (ui_is_cursor_hovering_any_window()) {
 			entity = NULL;
@@ -322,6 +332,7 @@ void objbase_do_hover()
 static
 void objbase_on_world_entity_removed(void *entity)
 {
+	TRACE("objbase_on_world_entity_removed");
 	if (entity == selected_entity.entity) {
 		objects_select_entity(NULL);
 	}
@@ -351,6 +362,7 @@ void objbase_draw_entity_bound_rect(struct CEntity *entity, int col)
 		{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
 	};
 
+	TRACE("objbase_draw_entity_bound_rect");
 	if (entity != NULL &&
 		(colmodel = game_EntityGetColModel(entity)) != NULL)
 	{
@@ -456,6 +468,7 @@ void remove_rope_registered_on_object(void *object)
 {
 	int i;
 
+	TRACE("remove_rope_registered_on_object");
 	for (i = 0; i < MAX_ROPES; i++) {
 		if (ropes[i].ropeHolder == object) {
 			game_RopeRemove(ropes + i);
@@ -633,6 +646,11 @@ void objbase_create_dummy_entity()
 void objbase_init()
 {
 	DWORD oldvp;
+
+	RpGeometryForAllMaterials = (int*) 0x74C790; /*laptop exe*/
+	if (*RpGeometryForAllMaterials == 0x24448B10) {
+		RpGeometryForAllMaterials = (int*) 0x74C7E0; /*desktop exe*/
+	}
 
 	memset(&selected_entity, 0, sizeof(selected_entity));
 

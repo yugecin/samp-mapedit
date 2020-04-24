@@ -19,7 +19,7 @@
 #define HUE_COMP_G 0
 #define HUE_COMP_B -1
 
-#if 1
+#if 0
 #define TRACE(X) common_trace(X);
 #else
 #define TRACE(X)
