@@ -21,6 +21,7 @@ static struct UI_CHECKBOX *chk_isolate_element;
 static struct UI_LIST *lst;
 static struct UI_BUTTON *btn_center;
 static struct UI_BUTTON *btn_move;
+static struct UI_BUTTON *btn_tp_to_cam;
 static struct UI_BUTTON *btn_delete;
 static struct UI_BUTTON *btn_clone;
 
@@ -155,6 +156,29 @@ void cb_btn_move(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_tp_to_cam(struct UI_BUTTON *btn)
+{
+	struct CEntity *entity;
+	struct OBJECT *obj;
+	struct MSG_NC nc;
+
+	entity = objlistui_index_to_entity(lst->selectedindex);
+	if (entity != NULL) {
+		obj = objects_find_by_sa_object(entity);
+		if (obj != NULL) {
+			nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+			nc._parent.data = 0;
+			nc.nc = NC_SetObjectPos;
+			nc.params.asint[1] = obj->samp_objectid;
+			nc.params.asflt[2] = camera->position.x;
+			nc.params.asflt[3] = camera->position.y;
+			nc.params.asflt[4] = camera->position.z;
+			sockets_send(&nc, sizeof(nc));
+		}
+	}
+}
+
+static
 void cb_msg_deleteconfirm(int opt)
 {
 	struct CEntity *entity;
@@ -238,6 +262,7 @@ void cb_list_item_selected(struct UI_LIST *lst)
 	if (entity == NULL) {
 		btn_center->enabled =
 			btn_move->enabled =
+			btn_tp_to_cam->enabled =
 			btn_delete->enabled =
 			btn_clone->enabled = 0;
 	} else {
@@ -246,6 +271,7 @@ void cb_list_item_selected(struct UI_LIST *lst)
 			btn_clone->enabled = 1;
 		obj = objects_find_by_sa_object(entity);
 		btn_move->enabled = obj != NULL;
+		btn_tp_to_cam->enabled = obj != NULL;
 	}
 }
 
@@ -274,6 +300,8 @@ void objlistui_init()
 	ui_wnd_add_child(wnd, btn_center);
 	btn_move = ui_btn_make("Move", cb_btn_move);
 	ui_wnd_add_child(wnd, btn_move);
+	btn_tp_to_cam = ui_btn_make("TP_Object_to_camera", cb_btn_tp_to_cam);
+	ui_wnd_add_child(wnd, btn_tp_to_cam);
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
 	ui_wnd_add_child(wnd, btn_delete);
 	btn_clone = ui_btn_make("Clone", cb_btn_clone);

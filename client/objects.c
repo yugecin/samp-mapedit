@@ -34,6 +34,7 @@ static struct UI_LABEL *lbl_objlodmodel;
 static struct UI_BUTTON *btn_remove_building;
 static struct UI_BUTTON *btn_objclone;
 static struct UI_BUTTON *btn_move_obj;
+static struct UI_BUTTON *btn_tp_obj_to_cam;
 static struct UI_BUTTON *btn_delete_obj;
 
 static char txt_objentity[9];
@@ -278,6 +279,24 @@ void cb_btn_move_obj(struct UI_BUTTON *btn)
 	}
 }
 
+static
+void cb_btn_tp_obj_to_cam(struct UI_BUTTON *btn)
+{
+	struct MSG_NC nc;
+
+	if (selected_object != NULL) {
+		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+		nc._parent.data = 0;
+		nc.nc = NC_SetObjectPos;
+		nc.params.asint[1] = selected_object->samp_objectid;
+		nc.params.asflt[2] = camera->position.x;
+		nc.params.asflt[3] = camera->position.y;
+		nc.params.asflt[4] = camera->position.z;
+		sockets_send(&nc, sizeof(nc));
+		objects_select_entity(selected_object->sa_object);
+	}
+}
+
 static struct OBJECT *object_to_delete_after_confirm;
 
 static
@@ -393,6 +412,10 @@ void objects_init()
 	btn->_parent.span = 2;
 	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_move_obj = btn);
+	btn = ui_btn_make("TP_Object_to_camera", cb_btn_tp_obj_to_cam);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(window_objinfo, btn_tp_obj_to_cam = btn);
 	btn = ui_btn_make("Delete_Object", cb_btn_delete_obj);
 	btn->_parent.span = 2;
 	btn->enabled = 0;
@@ -498,6 +521,7 @@ void objects_select_entity(void *entity)
 		selected_object = NULL;
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 0;
+		btn_tp_obj_to_cam->enabled = 0;
 		btn_delete_obj->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objmodel, "0");
@@ -541,10 +565,12 @@ void objects_select_entity(void *entity)
 	if (selected_object == NULL) {
 		btn_remove_building->enabled = 1;
 		btn_move_obj->enabled = 0;
+		btn_tp_obj_to_cam->enabled = 0;
 		btn_delete_obj->enabled = 0;
 	} else {
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 1;
+		btn_tp_obj_to_cam->enabled = 1;
 		btn_delete_obj->enabled = 1;
 	}
 }
@@ -591,6 +617,7 @@ void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 		objects_prepare_selecting_object();
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 0;
+		btn_tp_obj_to_cam->enabled = 0;
 		btn_delete_obj->enabled = 0;
 	} else if (is_selecting_object) {
 		is_selecting_object = 0;
