@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "ui.h"
+#include <math.h>
 #include <windows.h>
 
 struct CRope *ropes = (struct CRope*) 0xB768B8;
@@ -186,6 +187,20 @@ int game_IntersectBuildingObject(
 		1, 0, 0, 1, 0, 0, 0, 0);
 }
 
+__declspec(naked) void game_ObjectGetHeadingRad(entity, heading)
+	struct CEntity *entity;
+	float *heading;
+{
+	_asm {
+		mov ecx, [esp+0x4]
+		mov eax, 0x441DB0 /*__thiscall CPlaceable::getRotation*/
+		call eax
+		mov eax, [esp+0x8]
+		fstp [eax]
+		ret
+	}
+}
+
 /**
 see opcode 01BB @0x47D567
 */
@@ -212,6 +227,27 @@ no_explicit_coords:
 		pop ecx
 		ret
 	}
+}
+
+void game_ObjectGetRot(struct CEntity *object, struct RwV3D *rot)
+{
+	struct CMatrix *mat;
+	float x, c;
+
+	mat = object->_parent.matrix;
+	if (mat == NULL) {
+		rot->x = rot->y = 0.0f;
+		rot->z = object->_parent.placement.heading * 180.0f / M_PI;
+		rot->z -= 90.0f;
+		return;
+	}
+
+	/*https://stackoverflow.com/a/56950130*/
+	x = (float) asin(mat->up.z);
+	c = (float) cos(x);
+	rot->x = x * 180.0f / M_PI;
+	rot->y = (float) atan2(-mat->right.z / c, mat->at.z / c) * 180.0f/M_PI;
+	rot->z = (float) atan2(-mat->up.x / c, mat->up.y / c) * 180.0f/M_PI;
 }
 
 /**
@@ -288,20 +324,6 @@ __declspec(naked) void game_ObjectSetRotRad(void *object, struct RwV3D *rot)
 		call eax
 		pop eax
 
-		ret
-	}
-}
-
-__declspec(naked) void game_ObjectGetHeadingRad(entity, heading)
-	struct CEntity *entity;
-	float *heading;
-{
-	_asm {
-		mov ecx, [esp+0x4]
-		mov eax, 0x441DB0 /*__thiscall CPlaceable::getRotation*/
-		call eax
-		mov eax, [esp+0x8]
-		fstp [eax]
 		ret
 	}
 }

@@ -48,7 +48,7 @@ static char txt_objlodflags[9];
 static struct CEntity *selected_entity;
 static struct OBJECT *selected_object;
 static struct OBJECT cloning_object;
-static float cloning_object_heading;
+static struct RwV3D cloning_object_rot;
 static int activelayeridx = 0;
 static struct RwV3D nextObjectPosition;
 static struct RwV3D player_pos_before_selecting;
@@ -721,9 +721,9 @@ int objects_object_created(struct OBJECT *object)
 	nc._parent.data = 0;
 	nc.nc = NC_SetObjectRot;
 	nc.params.asint[1] = cloning_object.samp_objectid;
-	nc.params.asflt[2] = 0.0f;
-	nc.params.asflt[3] = 0.0f;
-	nc.params.asflt[4] = cloning_object_heading * 180.0f / M_PI;
+	nc.params.asflt[2] = cloning_object_rot.x;
+	nc.params.asflt[3] = cloning_object_rot.y;
+	nc.params.asflt[4] = cloning_object_rot.z;
 	sockets_send(&nc, sizeof(nc));
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
@@ -799,7 +799,7 @@ void objects_clone_object(struct CEntity *entity)
 	if (cloning_object.model == 0) {
 		cloning_object.model = entity->model;
 		game_ObjectGetPos(entity, &pos);
-		game_ObjectGetHeadingRad(entity, &cloning_object_heading);
+		game_ObjectGetRot(entity, &cloning_object_rot);
 		objbase_mkobject(&cloning_object, &pos);
 	}
 }
