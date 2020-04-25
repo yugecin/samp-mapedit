@@ -32,6 +32,7 @@ void samp_init()
 		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x658B0);
 	} else {
 		isR2 = 0;
+		ui_mode = *((int**) (samp_handle + 0x21A0E4)) + 2;
 		pCmdWindow = samp_handle + 0x21A0E8;
 		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x657E0);
 	}
