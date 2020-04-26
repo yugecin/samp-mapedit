@@ -194,10 +194,26 @@ void cb_btn_add_layer(struct UI_BUTTON *btn)
 static
 void cb_delete_layer_confirm(int choice)
 {
+	struct MSG_NC nc;
+	struct OBJECTLAYER *layer;
+	int i;
 	int idx;
 
 	idx = lst_layers->selectedindex;
 	if (choice == MSGBOX_RESULT_1 && 0 <= idx && idx < numlayers) {
+		layer = layers + idx;
+		for (i = 0; i < layer->numremoves; i++) {
+			if (layer->removes[i].description) {
+				free(layer->removes[i].description);
+			}
+		}
+		for (i = 0; i < layer->numobjects; i++) {
+			nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+			nc._parent.data = 0;
+			nc.nc = NC_DestroyObject;
+			nc.params.asint[1] = layer->objects[i].samp_objectid;
+			sockets_send(&nc, sizeof(nc));
+		}
 		if (idx < numlayers - 1) {
 			memcpy(layers + idx,
 				layers + idx + 1,
