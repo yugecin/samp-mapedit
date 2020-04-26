@@ -62,6 +62,27 @@ struct OBJECTLAYER *active_layer = NULL;
 int numlayers = 0;
 
 static
+void ensure_layer_name_unique(struct OBJECTLAYER *layer)
+{
+	char newname[INPUT_TEXTLEN + 1];
+	int i, try;
+
+	try = 0;
+	strcpy(newname, layer->name);
+	for (i = 0; i < numlayers; i++) {
+		if (layers + i != layer) {
+			if (!strcmp(newname, layers[i].name)) {
+				try++;
+				sprintf(newname, "%s%d", layer->name, try);
+			}
+		}
+	}
+	if (try != 0) {
+		strcpy(layer->name, newname);
+	}
+}
+
+static
 void cb_msg_openlayers(int choice)
 {
 	ui_show_window(window_layers);
@@ -142,6 +163,7 @@ void cb_in_layername(struct UI_INPUT *in)
 			break;
 		}
 	}
+	ensure_layer_name_unique(active_layer);
 	update_layer_list();
 	ui_lbl_recalc_size(lbl_layer);
 }
@@ -186,6 +208,7 @@ void cb_btn_add_layer(struct UI_BUTTON *btn)
 		layers[numlayers].numobjects = 0;
 		layers[numlayers].numremoves = 0;
 		strcpy(layers[numlayers].name, "new_layer");
+		ensure_layer_name_unique(layers + numlayers);
 		numlayers++;
 		update_layer_list();
 		layer_activate(numlayers - 1);
