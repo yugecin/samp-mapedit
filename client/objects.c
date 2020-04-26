@@ -785,6 +785,8 @@ int objects_object_created(struct OBJECT *object)
 	nc.params.asint[2] = cloning_object.samp_objectid;
 	sockets_send(&nc, sizeof(nc));
 
+	objects_select_entity(NULL);
+
 	cloning_object.model = 0;
 	return 1;
 }
