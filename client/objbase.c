@@ -57,7 +57,14 @@ void objbase_set_position_rotation_after_creation(struct OBJECT *object)
 
 	game_ObjectGetPos(object->sa_object, &pos);
 	pos.x = object->temp_x;
-	game_ObjectSetPos(object->sa_object, &pos);
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc._parent.data = 0;
+	nc.nc = NC_SetObjectPos;
+	nc.params.asint[1] = object->samp_objectid;
+	nc.params.asflt[2] = pos.x;
+	nc.params.asflt[3] = pos.y;
+	nc.params.asflt[4] = pos.z;
+	sockets_send(&nc, sizeof(nc));
 
 	if (object->rot != NULL) {
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
