@@ -7,3 +7,4 @@ void prj_open_by_name(char *name);
 void prj_close();
 void prj_save();
 void prj_open_persistent_state();
+char *prj_get_name();

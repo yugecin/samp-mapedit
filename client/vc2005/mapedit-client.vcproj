@@ -339,6 +339,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\objectstorage.c"
+			>
+		</File>
+		<File
+			RelativePath="..\objectstorage.h"
+			>
+		</File>
+		<File
 			RelativePath="..\persistence.c"
 			>
 		</File>

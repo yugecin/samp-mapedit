@@ -295,3 +295,8 @@ void prj_open_persistent_state()
 		ui_hide_window();
 	}
 }
+
+char *prj_get_name()
+{
+	return open_project_name;
+}

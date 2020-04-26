@@ -48,21 +48,36 @@ Since x-coord of creation is a pointer to the object handle, the position needs
 to be reset.
 */
 static
-void objbase_set_position_after_creation(struct OBJECT *object)
+void objbase_set_position_rotation_after_creation(struct OBJECT *object)
 {
 	struct RwV3D pos;
+	struct MSG_NC nc;
 
-	TRACE("objbase_set_position_after_creation");
+	TRACE("objbase_set_position_rotation_after_creation");
+
 	game_ObjectGetPos(object->sa_object, &pos);
 	pos.x = object->temp_x;
 	game_ObjectSetPos(object->sa_object, &pos);
+
+	if (object->rot != NULL) {
+		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+		nc._parent.data = 0;
+		nc.nc = NC_SetObjectRot;
+		nc.params.asint[1] = object->samp_objectid;
+		nc.params.asflt[2] = object->rot->x;
+		nc.params.asflt[3] = object->rot->y;
+		nc.params.asflt[4] = object->rot->z;
+		sockets_send(&nc, sizeof(nc));
+		free(object->rot);
+		object->rot = NULL;
+	}
 }
 
 static
 void objbase_object_creation_confirmed(struct OBJECT *object)
 {
 	TRACE("objbase_object_creation_confirmed");
-	objbase_set_position_after_creation(object);
+	objbase_set_position_rotation_after_creation(object);
 
 	if (object == &manipulateObject) {
 		manipulateEntity = object->sa_object;
@@ -79,6 +94,7 @@ void objbase_mkobject(struct OBJECT *object, struct RwV3D *pos)
 
 	TRACE("objbase_mkobject");
 	object->temp_x = pos->x;
+	object->rot = NULL;
 	object->justcreated = 1;
 	object->samp_objectid = -1;
 	object->sa_object = NULL;

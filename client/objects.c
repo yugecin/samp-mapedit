@@ -8,14 +8,17 @@
 #include "objbase.h"
 #include "objects.h"
 #include "objbrowser.h"
+#include "objectstorage.h"
 #include "persistence.h"
 #include "player.h"
+#include "project.h"
 #include "removedbuildings.h"
 #include "removebuildingeditor.h"
 #include "removedbuildingsui.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
+#include <stdio.h>
 #include <windows.h>
 
 static struct UI_WINDOW *window_layers;
@@ -450,6 +453,8 @@ void objects_prj_save(FILE *f, char *buf)
 		_asm mov [esp+0x4], eax
 		_asm call fwrite
 		_asm add esp, 0x10
+
+		objectstorage_save_layer(layers + i);
 	}
 }
 
@@ -500,11 +505,16 @@ void objects_prj_preload()
 
 void objects_prj_postload()
 {
+	int layeridx;
+
 	update_layer_list();
 	btn_contextmenu_mkobject->enabled = 1;
 	btn_mainmenu_layers->enabled = 1;
 	btn_mainmenu_selectobject->enabled = 1;
 	cloning_object.model = 0;
+	for (layeridx = 0; layeridx < numlayers; layeridx++) {
+		objectstorage_load_layer(layers + layeridx);
+	}
 	objbase_create_dummy_entity();
 }
 
@@ -742,8 +752,9 @@ TODO: optimize this
 */
 struct OBJECT *objects_find_by_sa_handle(int sa_handle)
 {
-	int i;
+	struct OBJECTLAYER *layer;
 	struct OBJECT *objects;
+	int i, layersleft;
 
 	objects = objbrowser_object_by_handle(sa_handle);
 	if (objects != NULL) {
@@ -754,13 +765,16 @@ struct OBJECT *objects_find_by_sa_handle(int sa_handle)
 		return &cloning_object;
 	}
 
-	if (active_layer != NULL) {
-		objects = active_layer->objects;
-		for (i = active_layer->numobjects - 1; i >= 0; i--) {
+	layer = layers;
+	layersleft = numlayers;
+	while (layersleft--) {
+		objects = layer->objects;
+		for (i = layer->numobjects - 1; i >= 0; i--) {
 			if (objects[i].sa_handle == sa_handle) {
 				return objects + i;
 			}
 		}
+		layer++;
 	}
 	return NULL;
 }

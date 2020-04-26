@@ -14,6 +14,7 @@ struct OBJECT {
 	int samp_objectid;
 	int model;
 	float temp_x; /*only used during creation*/
+	struct RwV3D *rot; /*only used during project load*/
 	char justcreated;
 };
 
