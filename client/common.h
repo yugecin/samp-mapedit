@@ -25,6 +25,8 @@
 #define TRACE(X)
 #endif
 
+#define INPUT_TEXTLEN 50
+
 unsigned char hue(float angle, int component);
 char *stristr(char *haystack, char *needle);
 void center_camera_on(struct RwV3D *pos);

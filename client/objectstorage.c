@@ -13,6 +13,8 @@
 #pragma pack(push,1)
 union MAPDATA {
 	char buf[200];
+	char c;
+	short s;
 	int i;
 	struct {
 		int model;
@@ -27,19 +29,33 @@ union MAPDATA {
 };
 #pragma pack(pop)
 
+/**
+<projectname>_layer_<layername>.map follows basdon's .map file format
+<projectname>_layer_<layername>.met contains metadata for removes:
+  every remove has an entry, in the same order as in the .map file:
+    haslod BYTE
+    descriptionlen BYTE
+    description (variable)
+*/
+
+enum fopen_mode {
+	MODE_READ,
+	MODE_READ_META,
+	MODE_WRITE,
+};
+
 static
-FILE *layer_fopen(struct OBJECTLAYER *layer, char *mode)
+FILE *layer_fopen(struct OBJECTLAYER *layer, char *ext, enum fopen_mode mode)
 {
 	FILE *file;
-	char fname[100];
-	char *prj_name;
+	char fname[100], *prj;
 
-	prj_name = prj_get_name();
-	sprintf(fname, "samp-mapedit\\%s_layer_%s.map", prj_name, layer->name);
-	file = fopen(fname, mode);
+	prj = prj_get_name();
+	sprintf(fname, "samp-mapedit\\%s_layer_%s.%s", prj, layer->name, ext);
+	file = fopen(fname, (mode == MODE_WRITE) ? "wb" : "rb");
 
-	if (!file) {
-		sprintf(debugstring, "failed to write file %s", fname);
+	if (!file && mode != MODE_READ_META) {
+		sprintf(debugstring, "failed to read/write file %s", fname);
 		ui_push_debug_string();
 	}
 
@@ -51,12 +67,14 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 {
 	struct OBJECT *object;
 	struct REMOVEDBUILDING *remove;
-	FILE *f;
+	FILE *f, *meta;
 	union MAPDATA data;
 	int i;
 	int totalremoves;
 
-	if (!(f = layer_fopen(layer, "wb"))) {
+	if (!(f = layer_fopen(layer, "map", MODE_WRITE)) ||
+		!(meta = layer_fopen(layer, "met", MODE_WRITE)))
+	{
 		return;
 	}
 
@@ -85,6 +103,17 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 			data.remove.model = -remove->lodmodel;
 			write(sizeof(data.remove));
 		}
+
+		data.c = remove->lodmodel != 0;
+		fwrite(data.buf, sizeof(char), 1, meta);
+		if (remove->description == NULL) {
+			data.i = 0;
+			fwrite(data.buf, sizeof(char), 1, meta);
+		} else {
+			data.i = strlen(remove->description);
+			fwrite(data.buf, sizeof(char), 1, meta);
+			fwrite(remove->description, data.i, 1, meta);
+		}
 	}
 	for (i = 0; i < layer->numobjects; i++) {
 		object = layer->objects + i;
@@ -96,6 +125,9 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	}
 
 	fclose(f);
+	if (meta) {
+		fclose(meta);
+	}
 }
 #undef write
 
@@ -104,14 +136,15 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 {
 	struct OBJECT *object;
 	struct REMOVEDBUILDING *remove;
-	FILE *f;
+	FILE *f, *meta;
 	union MAPDATA data;
 	int entriestoread;
 	float rad;
 
-	if (!(f = layer_fopen(layer, "rb"))) {
+	if (!(f = layer_fopen(layer, "map", MODE_READ))) {
 		return;
 	}
+	meta = layer_fopen(layer, "met", MODE_READ_META);
 
 	read(sizeof(int));
 	if (data.i != 1) { /*spec version*/
@@ -135,6 +168,27 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 			remove->model = -data.remove.model;
 			remove->origin = data.remove.pos;
 			remove->radiussq = rad * rad;
+			if (!meta) {
+				remove->description = NULL;
+				remove++;
+				continue;
+			}
+
+			fread(data.buf, sizeof(char), 1, meta);
+			if (data.c) { /*lod model*/
+				read(sizeof(data.remove));
+				remove->lodmodel = -data.remove.model;
+				layer->numremoves--;
+				entriestoread--;
+			}
+			fread(data.buf, sizeof(char), 1, meta);
+			if (data.c) {
+				remove->description = malloc(INPUT_TEXTLEN + 1);
+				fread(remove->description, data.c, 1, meta);
+				remove->description[data.c] = 0;
+			} else {
+				remove->description = NULL;
+			}
 			remove++;
 		} else {
 			read(sizeof(data.object));
@@ -147,5 +201,8 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 	}
 
 	fclose(f);
+	if (meta) {
+		fclose(meta);
+	}
 }
 #undef read

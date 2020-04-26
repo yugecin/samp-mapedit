@@ -2,8 +2,6 @@
 
 typedef void (inputcb)(struct UI_INPUT *in);
 
-#define INPUT_TEXTLEN 50
-
 struct UI_INPUT {
 	struct UI_ELEMENT _parent;
 	char value[INPUT_TEXTLEN + 1];
