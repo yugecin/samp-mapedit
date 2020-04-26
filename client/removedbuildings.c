@@ -55,6 +55,9 @@ int rb_process_entity_for_removal(struct CEntity *entity)
 				if (dx + dz * dz > remove->radiussq) {
 					continue;
 				}
+				if (objects_find_by_sa_object(entity)) {
+					continue;
+				}
 				removedata.entities[numallremoves] = entity;
 				removedata.hadcollision[numallremoves] =
 					(entity->flags & 1);
