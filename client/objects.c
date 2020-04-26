@@ -184,6 +184,7 @@ void cb_btn_add_layer(struct UI_BUTTON *btn)
 	} else {
 		layers[numlayers].color = 0xFF000000;
 		layers[numlayers].numobjects = 0;
+		layers[numlayers].numremoves = 0;
 		strcpy(layers[numlayers].name, "new_layer");
 		numlayers++;
 		update_layer_list();
