@@ -537,7 +537,7 @@ void rbe_show_for_entity(struct CEntity *entity, rbe_cb *cb)
 	}
 
 	remove.model = entity->model;
-	remove.radiussq = 1.25f * 1.25f;
+	remove.radiussq = 0.25f * 0.25f;
 	remove.description = NULL;
 	remove.lodmodel = 0;
 	game_ObjectGetPos(entity, &remove.origin);
