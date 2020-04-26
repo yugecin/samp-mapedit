@@ -202,6 +202,7 @@ void cb_delete_layer_confirm(int choice)
 	idx = lst_layers->selectedindex;
 	if (choice == MSGBOX_RESULT_1 && 0 <= idx && idx < numlayers) {
 		layer = layers + idx;
+		objectstorage_mark_layerfile_for_deletion(layer);
 		for (i = 0; i < layer->numremoves; i++) {
 			if (layer->removes[i].description) {
 				free(layer->removes[i].description);
@@ -472,6 +473,7 @@ void objects_prj_save(FILE *f, char *buf)
 
 		objectstorage_save_layer(layers + i);
 	}
+	objectstorage_delete_layerfiles_marked_for_deletion();
 }
 
 int objects_prj_load_line(char *buf)

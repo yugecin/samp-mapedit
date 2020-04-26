@@ -29,6 +29,13 @@ union MAPDATA {
 };
 #pragma pack(pop)
 
+struct LAYERTODELETE {
+	char name[INPUT_TEXTLEN + 1];
+	struct LAYERTODELETE *next;
+};
+
+static struct LAYERTODELETE *layer_to_delete;
+
 /**
 <projectname>_layer_<layername>.map follows basdon's .map file format
 <projectname>_layer_<layername>.met contains metadata for removes:
@@ -45,13 +52,21 @@ enum fopen_mode {
 };
 
 static
+void layer_filename(char *buf, char *layername, char *ext)
+{
+	char *prjname;
+
+	prjname = prj_get_name();
+	sprintf(buf, "samp-mapedit\\%s_layer_%s.%s", prjname, layername, ext);
+}
+
+static
 FILE *layer_fopen(struct OBJECTLAYER *layer, char *ext, enum fopen_mode mode)
 {
 	FILE *file;
-	char fname[100], *prj;
+	char fname[100];
 
-	prj = prj_get_name();
-	sprintf(fname, "samp-mapedit\\%s_layer_%s.%s", prj, layer->name, ext);
+	layer_filename(fname, layer->name, ext);
 	file = fopen(fname, (mode == MODE_WRITE) ? "wb" : "rb");
 
 	if (!file && mode != MODE_READ_META) {
@@ -206,3 +221,49 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 	}
 }
 #undef read
+
+void objectstorage_mark_layerfile_for_deletion(struct OBJECTLAYER *layer)
+{
+	struct LAYERTODELETE *deletion, *ptr;
+
+	deletion = malloc(sizeof(struct LAYERTODELETE));
+	strcpy(deletion->name, layer->name);
+	deletion->next = NULL;
+
+	if (layer_to_delete == NULL) {
+		layer_to_delete = deletion;
+		return;
+	}
+
+	ptr = layer_to_delete;
+	while (ptr->next != NULL) {
+		ptr = ptr->next;
+	}
+	ptr->next = deletion;
+}
+
+void objectstorage_delete_layerfiles_marked_for_deletion()
+{
+	struct LAYERTODELETE *deletion, *next;
+	int layeridx;
+	char buf[100];
+
+	deletion = layer_to_delete;
+	layer_to_delete = NULL;
+
+	while (deletion != NULL) {
+		for (layeridx = 0; layeridx < numlayers; layeridx++) {
+			if (!strcmp(layers[layeridx].name, deletion->name)) {
+				goto dontremove;
+			}
+		}
+		layer_filename(buf, deletion->name, "map");
+		remove(buf);
+		layer_filename(buf, deletion->name, "met");
+		remove(buf);
+dontremove:
+		next = deletion->next;
+		free(deletion);
+		deletion = next;
+	}
+}
