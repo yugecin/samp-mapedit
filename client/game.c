@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "objbase.h"
 #include "ui.h"
 #include <math.h>
 #include <windows.h>
@@ -29,6 +30,7 @@ struct CPed *player;
 void *gameHwnd = (void*) 0xC97C1C;
 void *_opcode0815ret = (void*) 0x473BEE;
 unsigned char *logBuffer = (char*) 0xBAB278;
+unsigned char pedPosBeingUpdated = 0;
 
 void unprotect_stuff()
 {
@@ -390,6 +392,7 @@ skipposition:
 __declspec(naked) void game_PedSetPos(struct CPed *ped, struct RwV3D *pos)
 {
 	_asm {
+		mov pedPosBeingUpdated, 1
 		push ecx
 		push 1 /*?*/
 		push 1 /*?*/
@@ -403,6 +406,7 @@ __declspec(naked) void game_PedSetPos(struct CPed *ped, struct RwV3D *pos)
 		mov eax, 0x464DC0
 		call eax /*CPed__putAtCoords*/
 		pop ecx
+		mov pedPosBeingUpdated, 0
 		ret
 	}
 }
@@ -524,6 +528,17 @@ void game_ScreenToWorld(struct RwV3D *out, float x, float y, float dist)
 	invCVM.pad3 = 1.0f;
 	game_RwMatrixInvert(&invCVM, &camera->cameraViewMatrix);
 	game_TransformPoint(out, &invCVM, &in);
+}
+
+__declspec(naked)
+struct CEntity *game_SpawnVehicle(int model)
+{
+	_asm {
+		mov eax, 0x43A0B0
+		call eax
+		mov eax, lastCarSpawned
+		ret
+	}
 }
 
 __declspec(naked) float game_TextGetSizeX(char *text, char unk1, char unk2)
@@ -663,6 +678,24 @@ __declspec(naked) int game_TransformPoint(out, mat, in)
 {
 	_asm mov eax, 0x59C890
 	_asm jmp eax
+}
+
+void game_VehicleSetPos(void *vehicle, struct RwV3D *pos)
+{
+	_asm {
+		mov ecx, [esp+0x4]
+		mov eax, [esp+0x8]
+		push 1
+		push 0
+		push [eax+0x8]
+		push [eax+0x4]
+		push [eax]
+		push ecx
+		mov eax, 0x4342A0
+		call eax
+		add esp, 0x18
+		ret
+	}
 }
 
 __declspec(naked) void game_WorldFindObjectsInRange(

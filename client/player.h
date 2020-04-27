@@ -6,4 +6,4 @@ void player_prj_preload();
 void player_prj_save(/*FILE*/ void *f, char *buf);
 int player_prj_load_line(char *buf);
 void player_init();
-int player_on_background_element_just_clicked(colpoint, entity);
+int player_on_background_element_just_clicked();

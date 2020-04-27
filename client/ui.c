@@ -14,6 +14,7 @@
 #include "removebuildingeditor.h"
 #include "samp.h"
 #include "ui.h"
+#include "vehicles.h"
 #include "vk.h"
 #include "windows.h"
 #include <math.h>
@@ -40,6 +41,9 @@ static int context_menu_active = 0;
 static int trapped_in_ui;
 static int speedmod = 3;
 static float speeds[] = { 0.1f, 0.2f, 0.5f, 1.0f, 3.0f, 8.0f, 12.0f, 16.0f };
+
+struct CEntity *clicked_entity;
+struct CColPoint clicked_colpoint;
 
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
@@ -122,7 +126,7 @@ void ui_init()
 	context_menu->columns = 1;
 	context_menu->closeable = 0;
 
-	main_menu = ui_wnd_make(10.0f, 500.0f, "Main_Menu");
+	main_menu = ui_wnd_make(10.0f, 380.0f, "Main_Menu");
 	main_menu->columns = 2;
 	main_menu->closeable = 0;
 
@@ -489,13 +493,10 @@ void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint)
 static
 void background_element_just_clicked()
 {
-	struct CColPoint cp;
-	void *entity;
+	ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
 
-	ui_get_entity_pointed_at(&entity, &cp);
-
-	if (objects_on_background_element_just_clicked(&cp, entity) &&
-		player_on_background_element_just_clicked(&cp, entity))
+	if (objects_on_background_element_just_clicked() &&
+		player_on_background_element_just_clicked())
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;
@@ -680,6 +681,7 @@ void ui_render()
 		objects_frame_update();
 		objbase_frame_update();
 		objlistui_frame_update();
+		vehicles_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;

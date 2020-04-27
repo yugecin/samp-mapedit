@@ -13,6 +13,7 @@
 #include "removedbuildings.h"
 #include "removedbuildingsui.h"
 #include "timeweather.h"
+#include "vehiclesui.h"
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
@@ -100,6 +101,7 @@ void prj_postload()
 	TRACE("prj_postload");
 	ui_prj_postload();
 	objects_prj_postload();
+	vehiclesui_prj_postload();
 	racecp_prj_postload();
 	timeweather_prj_postload();
 	rb_do_all();

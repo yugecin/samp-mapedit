@@ -443,6 +443,22 @@
 			>
 		</File>
 		<File
+			RelativePath="..\vehicles.c"
+			>
+		</File>
+		<File
+			RelativePath="..\vehicles.h"
+			>
+		</File>
+		<File
+			RelativePath="..\vehiclesui.c"
+			>
+		</File>
+		<File
+			RelativePath="..\vehiclesui.h"
+			>
+		</File>
+		<File
 			RelativePath="..\vk.h"
 			>
 		</File>

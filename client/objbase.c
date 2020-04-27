@@ -26,6 +26,7 @@ static void *exclusiveEntity = NULL;
 
 struct OBJECT manipulateObject;
 struct CEntity *manipulateEntity = NULL;
+struct CEntity *lastCarSpawned;
 
 /*RpGeometry *RpGeometryForAllMaterials
 	(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* pData);*/
@@ -648,6 +649,16 @@ __declspec(naked) void opcode_0453_detour()
 	}
 }
 
+static
+__declspec(naked) void spawn_car_detour()
+{
+	_asm {
+		mov lastCarSpawned, esi
+		mov eax, 0x56E210 /*_getPlayerPed*/
+		jmp eax
+	}
+}
+
 struct DETOUR {
 	int *target;
 	int old_target;
@@ -665,6 +676,7 @@ static struct DETOUR detour_render_centity;
 static struct DETOUR detour_render_water;
 static struct DETOUR detour_cworld_remove;
 static struct DETOUR detour_cworld_add;
+static struct DETOUR detour_spawn_car;
 
 void objbase_install_detour(struct DETOUR *detour)
 {
@@ -718,6 +730,8 @@ void objbase_init()
 	detour_cworld_remove.new_target = (int) cworld_remove_detour;
 	detour_cworld_add.target = (int*) 0x563221;
 	detour_cworld_add.new_target = (int) cworld_add_detour;
+	detour_spawn_car.target = (int*) 0x43A359;
+	detour_spawn_car.new_target = (int) spawn_car_detour;
 	objbase_install_detour(&detour_0107);
 	objbase_install_detour(&detour_0108);
 	objbase_install_detour(&detour_0453);
@@ -732,7 +746,7 @@ void objbase_init()
 	objbase_install_detour(&detour_cworld_add);
 	VirtualProtect((void*) 0x563220, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x563220) = 0xE8;
-
+	objbase_install_detour(&detour_spawn_car);
 }
 
 void objbase_dispose()
@@ -750,6 +764,7 @@ void objbase_dispose()
 	*((char*) 0x563280) = 0x56;
 	objbase_uninstall_detour(&detour_cworld_add);
 	*((char*) 0x563220) = 0x56;
+	objbase_uninstall_detour(&detour_spawn_car);
 
 	objbase_color_new_entity(&selected_entity, NULL, 0);
 	objbase_color_new_entity(&hovered_entity, NULL, 0);

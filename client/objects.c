@@ -627,17 +627,15 @@ void objects_select_entity(void *entity)
 	}
 }
 
-int objects_on_background_element_just_clicked(colpoint, entity)
-	struct CColPoint *colpoint;
-	void *entity;
+int objects_on_background_element_just_clicked()
 {
 	if (objects_is_currently_selecting_object()) {
-		objects_select_entity(entity);
+		objects_select_entity(clicked_entity);
 		return 0;
 	}
 
-	if (entity) {
-		nextObjectPosition = colpoint->pos;
+	if (clicked_entity) {
+		nextObjectPosition = clicked_colpoint.pos;
 	} else {
 		game_ScreenToWorld(
 			&nextObjectPosition, bgclickx, bgclicky, 60.0f);

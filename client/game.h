@@ -368,6 +368,7 @@ extern void *gameHwnd;
 There are two 50 char log buffers, only pointing to the first one.
 */
 extern unsigned char *logBuffer;
+extern unsigned char pedPosBeingUpdated;
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();
@@ -427,6 +428,7 @@ int game_RwIm2DPrepareRender();
 int game_RwIm2DRenderPrimitive(int type, void *verts, int numverts);
 void game_RwMatrixInvert(struct CMatrix *out, struct CMatrix *in);
 void game_ScreenToWorld(struct RwV3D *out, float x, float y, float dist);
+struct CEntity *game_SpawnVehicle(int model);
 /**
 sdk CFont::GetStringWidth
 */
@@ -549,6 +551,7 @@ sdk CMatrix::operator*
 */
 int game_TransformPoint(
 	struct RwV3D *out, struct CMatrix *mat, struct RwV3D *in);
+void game_VehicleSetPos(void *vehicle, struct RwV3D *pos);
 void game_WorldFindObjectsInRange(
 	struct RwV3D *origin,
 	float radius,

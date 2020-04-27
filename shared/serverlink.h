@@ -21,9 +21,10 @@
 #define MAPEDIT_MSG_NATIVECALL 1
 #define MAPEDIT_MSG_OBJECT_CREATED 2
 
+#pragma pack(push,1)
 struct MSG {
 	int id;
-	int data;
+	void *data;
 };
 
 struct MSG_NC {
@@ -40,3 +41,4 @@ struct MSG_OBJECT_CREATED {
 	int samp_objectid;
 	struct OBJECT *object;
 };
+#pragma pack(pop)

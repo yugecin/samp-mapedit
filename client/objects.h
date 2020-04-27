@@ -9,8 +9,7 @@ void objects_prj_postload();
 /**
 @return 0 when context menu should be suppressed
 */
-int objects_on_background_element_just_clicked(
-	struct CColPoint* colpoint, void *entity);
+int objects_on_background_element_just_clicked();
 void objects_on_active_window_changed(struct UI_WINDOW *wnd);
 int objects_is_currently_selecting_object();
 void objects_ui_activated();

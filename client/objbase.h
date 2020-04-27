@@ -27,8 +27,9 @@ struct REMOVEDBUILDING {
 	char *description;
 };
 
-struct OBJECT manipulateObject;
-struct CEntity *manipulateEntity;
+extern struct OBJECT manipulateObject;
+extern struct CEntity *manipulateEntity;
+extern struct CEntity *lastCarSpawned;
 
 void objbase_init();
 void objbase_dispose();

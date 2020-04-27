@@ -20,6 +20,7 @@
 #include "settings.h"
 #include "timeweather.h"
 #include "ui.h"
+#include "vehiclesui.h"
 #include "../shared/serverlink.h"
 #include "../shared/clientlink.h"
 #include <windows.h>
@@ -147,6 +148,7 @@ void client_finalize()
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
 	racecp_dispose();
+	vehiclesui_dispose();
 	objbrowser_dispose();
 	objects_dispose();
 	objbase_dispose();
@@ -203,6 +205,7 @@ void client_init()
 	objlistui_init();
 	rbe_init();
 	rbui_init();
+	vehiclesui_init();
 	racecp_init();
 
 	prj_do_show_window();
@@ -216,19 +219,6 @@ void client_init()
 	nc._parent.data = 0;
 	nc.nc = NC_SetWorldTime;
 	nc.params.asint[1] = 13;
-	sockets_send(&nc, sizeof(nc));
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
-	nc.nc = NC_CreateVehicle;
-	nc.params.asint[1] = 411;
-	nc.params.asflt[2] = 10.0f;
-	nc.params.asflt[3] = 0.0f;
-	nc.params.asflt[4] = 5.0f;
-	nc.params.asflt[5] = 0.0f;
-	nc.params.asint[6] = 3;
-	nc.params.asint[7] = 1;
-	nc.params.asint[8] = -1;
-	nc.params.asint[9] = 0;
 	sockets_send(&nc, sizeof(nc));
 
 	persistence_init();

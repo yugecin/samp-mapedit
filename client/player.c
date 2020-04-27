@@ -69,12 +69,10 @@ void player_init()
 	ui_wnd_add_child(context_menu, btn);
 }
 
-int player_on_background_element_just_clicked(colpoint, entity)
-	struct CColPoint *colpoint;
-	void *entity;
+int player_on_background_element_just_clicked()
 {
-	if (entity) {
-		tphere_position = colpoint->pos;
+	if (clicked_entity) {
+		tphere_position = clicked_colpoint.pos;
 	} else {
 		game_ScreenToWorld(&tphere_position, cursorx, cursory, 30.0f);
 	}
