@@ -86,8 +86,8 @@ int settings_are_changed()
 			(int) ui_rdbgroup_selected_data(rdbgroup_keys)) ||
 		(saved_dirmov ^
 			(int) ui_rdbgroup_selected_data(rdbgroup_movement)) ||
-		fontsize != UI_DEFAULT_FONT_SIZE ||
-		fontratio != UI_DEFAULT_FONT_RATIO;
+		saved_fontsize != fontsize ||
+		saved_fontratio != fontratio;
 }
 
 static
