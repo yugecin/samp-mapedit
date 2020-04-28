@@ -89,6 +89,7 @@ void objbase_object_creation_confirmed(struct OBJECT *object)
 
 	if (object == &manipulateObject) {
 		manipulateEntity = object->sa_object;
+		manipulateEntity->flags &= ~1; /*collision flag*/
 		*(float*)((char*) object->sa_object + 0x15C) = 0.01f; /*scale*/
 	} else {
 		objbrowser_object_created(object) ||

@@ -187,10 +187,11 @@ int objbrowser_object_created(struct OBJECT *object)
 		btn_next->enabled = btn_prev->enabled = 1;
 		entity = object->sa_object;
 		objbase_set_entity_to_render_exclusively(entity);
+		game_ObjectSetPos(manipulateEntity, &positionToPreview);
 		colmodel = game_EntityGetColModel(entity);
 		if (colmodel != NULL) {
 			pos = positionToPreview;
-			pos.z -= (colmodel->max.z + colmodel->min.z) / 2.0f;
+			pos.z += (colmodel->max.z + colmodel->min.z) / 2.0f;
 			game_ObjectSetPos(entity, &pos);
 		}
 		rotationStartTime = *timeInGame;
