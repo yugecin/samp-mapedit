@@ -1,5 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#include "carcols.h"
 #include "common.h"
 #include "game.h"
 #include "objbase.h"
@@ -28,8 +29,9 @@ void vehicles_frame_update()
 		if (entity) {
 			*((float*) entity + 0x130) = 1000.0f; /*health*/
 			process_vehicle_deletions = 0;
-			/*TODO: vehicle gets deleted when player is in the
-			way*/
+	/*TODO: if the vehicle is teleported *in* the player, it gets
+	destroyed, but our flag is set so it's not being processed, so
+	we have a pointer to a disposed vehicle..*/
 			game_VehicleSetPos(entity, &veh->pos);
 			game_ObjectSetHeading(entity, veh->heading);
 			process_vehicle_deletions = 1;
@@ -59,14 +61,24 @@ void vehicles_on_entity_removed_from_world(struct CEntity *entity)
 void vehicles_create(short model, struct RwV3D *pos)
 {
 	struct VEHICLE *veh;
+	char *colors;
 
+	/*TODO: pick a random color combination*/
+	colors = carcols + carcoldata[model].position;
 	veh = vehicles + numvehicles++;
 	veh->model = model;
 	veh->pos = *pos;
 	veh->heading = 0.0f;
-	veh->sa_vehicle = game_SpawnVehicle(411);
+	veh->col1 = *colors;
+	veh->col2 = *(colors + 1);
+	veh->sa_vehicle = game_SpawnVehicle(model);
+	*((char*) veh->sa_vehicle + 0x434) = veh->col1;
+	*((char*) veh->sa_vehicle + 0x435) = veh->col2;
 
 	process_vehicle_deletions = 0;
+	/*TODO: if the vehicle is teleported *in* the player, it gets
+	destroyed, but our flag is set so it's not being processed, so
+	we have a pointer to a disposed vehicle..*/
 	game_VehicleSetPos(veh->sa_vehicle, pos);
 	process_vehicle_deletions = 1;
 }

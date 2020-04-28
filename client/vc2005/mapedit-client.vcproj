@@ -259,6 +259,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\carcols.c"
+			>
+		</File>
+		<File
+			RelativePath="..\carcols.h"
+			>
+		</File>
+		<File
 			RelativePath="..\client.c"
 			>
 		</File>
