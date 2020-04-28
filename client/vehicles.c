@@ -28,6 +28,8 @@ void vehicles_frame_update()
 		if (entity) {
 			*((float*) entity + 0x130) = 1000.0f; /*health*/
 			process_vehicle_deletions = 0;
+			/*TODO: vehicle gets deleted when player is in the
+			way*/
 			game_VehicleSetPos(entity, &veh->pos);
 			game_ObjectSetHeading(entity, veh->heading);
 			process_vehicle_deletions = 1;
@@ -45,6 +47,8 @@ void vehicles_on_entity_removed_from_world(struct CEntity *entity)
 		for (i = 0; i < numvehicles; i++) {
 			if (vehicles[i].sa_vehicle == entity) {
 				/*TODO: make them again when close*/
+				/*TODO: this leaves orphan vehicles when
+				it's not deleted by us*/
 				vehicles[i].sa_vehicle = NULL;
 				return;
 			}
@@ -67,3 +71,16 @@ void vehicles_create(short model, struct RwV3D *pos)
 	process_vehicle_deletions = 1;
 }
 
+void vehicles_destroy()
+{
+	struct CEntity *entity;
+
+	process_vehicle_deletions = 0;
+	while (numvehicles--) {
+		entity = vehicles[numvehicles].sa_vehicle;
+		if (entity) {
+			game_DestroyVehicle(entity);
+		}
+	}
+	process_vehicle_deletions = 1;
+}

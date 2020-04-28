@@ -20,6 +20,7 @@
 #include "settings.h"
 #include "timeweather.h"
 #include "ui.h"
+#include "vehicles.h"
 #include "vehiclesui.h"
 #include "../shared/serverlink.h"
 #include "../shared/clientlink.h"
@@ -167,6 +168,7 @@ void client_finalize()
 	undetour();
 	samp_dispose();
 	common_dispose();
+	vehicles_destroy();
 }
 
 /**

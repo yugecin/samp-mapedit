@@ -98,6 +98,27 @@ __declspec(naked) void __stdcall game_CameraSetOnPoint(point, cutmode, unk)
 	_asm jmp eax
 }
 
+/**
+see opcode 00A6 @0x467B1A
+*/
+__declspec(naked) void game_DestroyVehicle(struct CEntity *vehicle)
+{
+	_asm {
+		push [esp+0x4]
+		mov eax, 0x563280
+		call eax /*CWorld__remove*/
+		mov eax, 0x565510
+		call eax /*CWorld__removeReferencesToDeletedObject*/
+		pop ecx
+		push edi
+		mov edi, [ecx]
+		push 1
+		call [edi] /*destructor perhaps, but why would it have an arg*/
+		pop edi
+		ret
+	}
+}
+
 void game_DrawRect(float x, float y, float w, float h, int argb)
 {
 	struct IM2DVERTEX verts[] = {

@@ -374,6 +374,7 @@ void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();
 void __stdcall game_CameraSetOnPoint(
 	struct RwV3D *point, enum eCameraCutMode cutmode, int unk);
+void game_DestroyVehicle(struct CEntity *vehicle);
 void game_DrawRect(float x, float y, float w, float h, int argb);
 struct CColModel *game_EntityGetColModel(void *entity);
 float game_EntityGetDistanceFromCentreOfMassToBaseOfModel(void *entity);

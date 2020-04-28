@@ -13,6 +13,7 @@
 #include "removedbuildings.h"
 #include "removedbuildingsui.h"
 #include "timeweather.h"
+#include "vehicles.h"
 #include "vehiclesui.h"
 #include <stdio.h>
 #include <string.h>
@@ -93,6 +94,7 @@ void prj_preload()
 	player_prj_preload();
 	timeweather_prj_preload();
 	rb_undo_all();
+	vehicles_destroy();
 }
 
 static
