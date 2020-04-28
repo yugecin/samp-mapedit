@@ -435,6 +435,15 @@ void cb_in_filter_updated(struct UI_INPUT *in)
 	ui_lst_recalculate_filter(lst_browser);
 }
 
+static ui_method *proc_lst_browser_recalc_size;
+
+static
+void lst_browser_recalc_size(struct UI_LIST *lst)
+{
+	proc_lst_browser_recalc_size(lst);
+	lst->_parent.pref_width = 650.0f * font_size_x;
+}
+
 void objbrowser_init()
 {
 	struct UI_INPUT *filter;
@@ -474,7 +483,8 @@ void objbrowser_init()
 	filter = ui_in_make(cb_in_filter_updated);
 	ui_wnd_add_child(wnd, filter);
 	lst_browser = ui_lst_make(35, cb_lst_object_selected);
-	lst_browser->_parent.pref_width = 400.0f;
+	proc_lst_browser_recalc_size = lst_browser->_parent.proc_recalc_size;
+	lst_browser->_parent.proc_recalc_size = (void*) lst_browser_recalc_size;
 	proc_orig_lst_post_layout = lst_browser->_parent.proc_post_layout;
 	lst_browser->_parent.proc_post_layout = objbrowser_lst_post_layout;
 	ui_wnd_add_child(wnd, lst_browser);
