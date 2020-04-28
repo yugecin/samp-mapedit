@@ -142,6 +142,7 @@ void ui_init()
 void ui_show_window(struct UI_WINDOW *wnd)
 {
 	active_window = wnd;
+	ui_active_element = NULL;
 	wnd->_parent._parent.proc_recalc_size(wnd);
 	/*recalc_size queues layout update, so not needed here anymore*/
 	objects_on_active_window_changed(wnd);
@@ -151,6 +152,7 @@ void ui_show_window(struct UI_WINDOW *wnd)
 void ui_hide_window()
 {
 	active_window = NULL;
+	ui_active_element = NULL;
 	objects_on_active_window_changed(NULL);
 	objlistui_on_active_window_changed(NULL);
 }
