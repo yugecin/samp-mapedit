@@ -273,24 +273,19 @@ continuerender:
 #define __MaybeCObject_GetBoundingBox 0x5449B0
 
 static
-void objbase_color_entity(void *entity, int color, int *lit_flag_mask)
+void objbase_color_entity(struct CEntity *entity, int color, int *lit_flag_mask)
 {
-	void *lod;
-	int *flags;
-
 	TRACE("objbase_color_entity");
 	set_entity_color_agbr(entity, color);
-	flags = (int*) ((char*) entity + 0x1C);
 	if (color) {
-		*lit_flag_mask = *flags & CENTITY_FLAGS_LIT;
-		*flags |= CENTITY_FLAGS_LIT;
+		*lit_flag_mask = entity->flags & CENTITY_FLAGS_LIT;
+		entity->flags |= CENTITY_FLAGS_LIT;
 	} else {
-		*flags &= *lit_flag_mask | ~CENTITY_FLAGS_LIT;
+		entity->flags &= *lit_flag_mask | ~CENTITY_FLAGS_LIT;
 	}
 
-	lod = *((int**) ((char*) entity + 0x30));
-	if (lod != NULL) {
-		objbase_color_entity(lod, color, lit_flag_mask + 1);
+	if (entity->lod != NULL) {
+		objbase_color_entity(entity->lod, color, lit_flag_mask + 1);
 	}
 }
 
