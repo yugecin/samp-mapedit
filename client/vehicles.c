@@ -11,38 +11,10 @@
 struct VEHICLE vehicles[MAX_VEHICLES];
 int numvehicles;
 
-/*
-Vehicles.
+static char process_vehicle_deletions = 1;
 
-Are created by calling samp's CreateVehicle.
-Server returns a message with the associated vehicleid.
-
-When a vehicle is streamed in, a message is sent to the server asking what
-vehicleid the vehicle at the streamed in position belongs to.
-The server returns a message with the associated vehicleid.
-*/
-
-/*
-static
-void vehicles_move(struct VEHICLE *veh)
-{
-	struct RwV3D rot;
-	struct MSG_NC nc;
-
-	if (manipulateEntity != NULL) {
-		rot.x = rot.y = 0.0f;
-		rot.z = veh->heading;
-		game_ObjectSetRotRad(manipulateEntity, &rot);
-		game_ObjectSetPos(manipulateEntity, &veh->pos);
-		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
-		nc.nc = NC_EditObject;
-		nc.params.asint[1] = 0;
-		nc.params.asint[2] = manipulateObject.samp_objectid;
-		sockets_send(&nc, sizeof(nc));
-	}
-}
-*/
+/*TODO: When deactivating UI, spawn actual vehicles using samp so they
+can be driven, and despawn them all again when activating the UI.*/
 
 void vehicles_frame_update()
 {
@@ -51,22 +23,47 @@ void vehicles_frame_update()
 	int i;
 
 	for (i = 0; i < numvehicles; i++) {
-		veh = vehicles + numvehicles;
+		veh = vehicles + i;
 		entity = veh->sa_vehicle;
 		if (entity) {
 			*((float*) entity + 0x130) = 1000.0f; /*health*/
+			process_vehicle_deletions = 0;
 			game_VehicleSetPos(entity, &veh->pos);
+			game_ObjectSetHeading(entity, veh->heading);
+			process_vehicle_deletions = 1;
+		}
+	}
+}
+
+void vehicles_on_entity_removed_from_world(struct CEntity *entity)
+{
+	int i;
+
+	if (ENTITY_IS_TYPE(entity, ENTITY_TYPE_VEHICLE) &&
+		process_vehicle_deletions)
+	{
+		for (i = 0; i < numvehicles; i++) {
+			if (vehicles[i].sa_vehicle == entity) {
+				/*TODO: make them again when close*/
+				vehicles[i].sa_vehicle = NULL;
+				return;
+			}
 		}
 	}
 }
 
 void vehicles_create(short model, struct RwV3D *pos)
 {
-	vehicles[numvehicles].model = model;
-	vehicles[numvehicles].pos = *pos;
-	vehicles[numvehicles].heading = 0.0f;
-	vehicles[numvehicles].sa_vehicle = game_SpawnVehicle(411);
-	sprintf(debugstring, "hi %p", vehicles[numvehicles].sa_vehicle);
-	ui_push_debug_string();
+	struct VEHICLE *veh;
+
+	veh = vehicles + numvehicles++;
+	veh->model = model;
+	veh->pos = *pos;
+	veh->heading = 0.0f;
+	veh->sa_vehicle = game_SpawnVehicle(411);
+
+	process_vehicle_deletions = 0;
+	game_VehicleSetPos(veh->sa_vehicle, pos);
+	process_vehicle_deletions = 1;
 }
 

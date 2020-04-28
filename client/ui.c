@@ -605,6 +605,8 @@ void ui_render()
 		ui_mouse_is_just_up =
 			prevMouseState->lmb && !activeMouseState->lmb;
 
+		vehicles_frame_update();
+
 		if (ui_exclusive_mode != NULL) {
 			ui_exclusive_mode();
 			return;
@@ -684,7 +686,6 @@ void ui_render()
 		objects_frame_update();
 		objbase_frame_update();
 		objlistui_frame_update();
-		vehicles_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;

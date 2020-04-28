@@ -14,5 +14,6 @@ extern struct VEHICLE vehicles[MAX_VEHICLES];
 extern int numvehicles;
 
 void vehicles_frame_update();
+void vehicles_on_entity_removed_from_world(struct CEntity *entity);
 void vehicles_create(short model, struct RwV3D *pos);
 

@@ -252,6 +252,19 @@ void game_ObjectGetRot(struct CEntity *object, struct RwV3D *rot)
 	rot->z = (float) atan2(-mat->up.x / c, mat->up.y / c) * 180.0f/M_PI;
 }
 
+__declspec(naked) void game_ObjectSetHeading(void *object, float headingRad)
+{
+	_asm {
+		mov ecx, [esp+0x4]
+		push [esp+0x8]
+		mov eax, 0x43E0C0 /*__thiscall CPlaceable__SetHeading*/
+		call eax
+		mov ecx, [esp+0x4]
+		mov eax, 0x446F90 /*CMatrix__UpdateRW*/
+		jmp eax
+	}
+}
+
 /**
 using opcode 0815 @0x473A01
 */
@@ -534,8 +547,10 @@ __declspec(naked)
 struct CEntity *game_SpawnVehicle(int model)
 {
 	_asm {
+		push [esp+0x4]
 		mov eax, 0x43A0B0
 		call eax
+		add esp, 0x4
 		mov eax, lastCarSpawned
 		ret
 	}
