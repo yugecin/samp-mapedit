@@ -701,6 +701,8 @@ void objbase_create_dummy_entity()
 	objbase_mkobject(&manipulateObject, &pos);
 }
 
+static char CTheScripts__ClearSpaceForMissionEntity_op;
+
 void objbase_init()
 {
 	DWORD oldvp;
@@ -745,6 +747,9 @@ void objbase_init()
 	VirtualProtect((void*) 0x563220, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x563220) = 0xE8;
 	objbase_install_detour(&detour_spawn_car);
+	VirtualProtect((void*) 0x486B00, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+	CTheScripts__ClearSpaceForMissionEntity_op = *((char*) 0x486B00);
+	*((char*) 0x486B00) = 0xC3;
 }
 
 void objbase_dispose()
@@ -763,6 +768,7 @@ void objbase_dispose()
 	objbase_uninstall_detour(&detour_cworld_add);
 	*((char*) 0x563220) = 0x56;
 	objbase_uninstall_detour(&detour_spawn_car);
+	*((char*) 0x486B00) = CTheScripts__ClearSpaceForMissionEntity_op;
 
 	objbase_color_new_entity(&selected_entity, NULL, 0);
 	objbase_color_new_entity(&hovered_entity, NULL, 0);

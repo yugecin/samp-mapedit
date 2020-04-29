@@ -16,10 +16,6 @@ static char process_vehicle_deletions = 1;
 /*TODO: When deactivating UI, spawn actual vehicles using samp so they
 can be driven, and despawn them all again when activating the UI.*/
 
-/*Using game_VehicleSetPos does a lot and can delete the vehicle when it's
-teleported inside the player. Somehow with game_ObjectSetPos it also gets
-deleted, but in a different way, not crashing the game.*/
-
 /**
 @return ptr to primary color, secondary color is ptr+1
 */
