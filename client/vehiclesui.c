@@ -5,30 +5,40 @@
 #include "sockets.h"
 #include "ui.h"
 #include "vehicles.h"
+#include "vehicleselector.h"
 #include "vehiclesui.h"
 #include "../shared/serverlink.h"
 
 static struct UI_BUTTON *btn_contextmenu_mkvehicle;
 static struct UI_BUTTON *btn_mainmenu_vehicles;
 
+static struct RwV3D posToCreate;
+
 static
 void cb_btn_contextmenu_mkvehicle(struct UI_BUTTON *btn)
 {
-	struct RwV3D pos;
+	float x, y;
 
 	if (clicked_entity) {
-		pos = clicked_colpoint.pos;
-		pos.z += 1.0f;
+		posToCreate = clicked_colpoint.pos;
+		posToCreate.z += 1.0f;
 	} else {
-		game_ScreenToWorld(&pos, fresx / 2.0f, fresy / 2.0f, 40.0f);
+		x = fresx / 2.0f;
+		y = fresy / 2.0f;
+		game_ScreenToWorld(&posToCreate, x, y, 40.0f);
 	}
 
-	vehicles_create(411, &pos);
+	vehsel_show();
 }
 
 static
 void cb_btn_mainmenu_vehiclelist(struct UI_BUTTON *btn)
 {
+}
+
+void vehiclesui_create(short model)
+{
+	vehicles_create(model, &posToCreate);
 }
 
 void vehiclesui_init()

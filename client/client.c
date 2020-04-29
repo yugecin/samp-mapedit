@@ -21,6 +21,7 @@
 #include "timeweather.h"
 #include "ui.h"
 #include "vehicles.h"
+#include "vehicleselector.h"
 #include "vehiclesui.h"
 #include "../shared/serverlink.h"
 #include "../shared/clientlink.h"
@@ -158,6 +159,7 @@ void client_finalize()
 	rbe_dispose();
 	settings_dispose();
 	sockets_dispose();
+	vehsel_dispose();
 
 	ui_dispose();
 	timeweather_dispose();
@@ -200,6 +202,7 @@ void client_init()
 	timeweather_init();
 	msg_init();
 
+	vehsel_init();
 	sockets_init();
 	objbase_init();
 	objects_init();

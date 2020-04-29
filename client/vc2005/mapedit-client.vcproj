@@ -459,11 +459,27 @@
 			>
 		</File>
 		<File
+			RelativePath="..\vehicleselector.c"
+			>
+		</File>
+		<File
+			RelativePath="..\vehicleselector.h"
+			>
+		</File>
+		<File
 			RelativePath="..\vehiclesui.c"
 			>
 		</File>
 		<File
 			RelativePath="..\vehiclesui.h"
+			>
+		</File>
+		<File
+			RelativePath="..\vehnames.c"
+			>
+		</File>
+		<File
+			RelativePath="..\vehnames.h"
 			>
 		</File>
 		<File

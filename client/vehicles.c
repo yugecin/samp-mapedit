@@ -3,10 +3,9 @@
 #include "carcols.h"
 #include "common.h"
 #include "game.h"
-#include "objbase.h"
-#include "sockets.h"
 #include "ui.h"
 #include "vehicles.h"
+#include "vehicleselector.h"
 #include "../shared/serverlink.h"
 
 struct VEHICLE vehicles[MAX_VEHICLES];
