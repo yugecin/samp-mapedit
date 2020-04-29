@@ -17,6 +17,10 @@ static char process_vehicle_deletions = 1;
 /*TODO: When deactivating UI, spawn actual vehicles using samp so they
 can be driven, and despawn them all again when activating the UI.*/
 
+/*Using game_VehicleSetPos does a lot and can delete the vehicle when it's
+teleported inside the player. Somehow with game_ObjectSetPos it also gets
+deleted, but in a different way, not crashing the game.*/
+
 void vehicles_frame_update()
 {
 	struct VEHICLE *veh;
@@ -29,10 +33,7 @@ void vehicles_frame_update()
 		if (entity) {
 			*((float*) entity + 0x130) = 1000.0f; /*health*/
 			process_vehicle_deletions = 0;
-	/*TODO: if the vehicle is teleported *in* the player, it gets
-	destroyed, but our flag is set so it's not being processed, so
-	we have a pointer to a disposed vehicle..*/
-			game_VehicleSetPos(entity, &veh->pos);
+			game_ObjectSetPos(entity, &veh->pos);
 			game_ObjectSetHeading(entity, veh->heading);
 			process_vehicle_deletions = 1;
 		}
@@ -76,10 +77,7 @@ void vehicles_create(short model, struct RwV3D *pos)
 	*((char*) veh->sa_vehicle + 0x435) = veh->col2;
 
 	process_vehicle_deletions = 0;
-	/*TODO: if the vehicle is teleported *in* the player, it gets
-	destroyed, but our flag is set so it's not being processed, so
-	we have a pointer to a disposed vehicle..*/
-	game_VehicleSetPos(veh->sa_vehicle, pos);
+	game_ObjectSetPos(veh->sa_vehicle, pos);
 	process_vehicle_deletions = 1;
 }
 
@@ -88,7 +86,8 @@ void vehicles_destroy()
 	struct CEntity *entity;
 
 	process_vehicle_deletions = 0;
-	while (numvehicles--) {
+	while (numvehicles) {
+		numvehicles--;
 		entity = vehicles[numvehicles].sa_vehicle;
 		if (entity) {
 			game_DestroyVehicle(entity);
