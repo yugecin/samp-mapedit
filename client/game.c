@@ -31,6 +31,7 @@ void *gameHwnd = (void*) 0xC97C1C;
 void *_opcode0815ret = (void*) 0x473BEE;
 unsigned char *logBuffer = (char*) 0xBAB278;
 unsigned char pedPosBeingUpdated = 0;
+int (*randMax65535)();
 
 void unprotect_stuff()
 {
@@ -42,6 +43,11 @@ void unprotect_stuff()
 __declspec(naked) void game_init()
 {
 	_asm {
+		mov eax, 0x467534
+		mov eax, [eax]
+		add eax, 0x467538
+		mov randMax65535, eax
+
 		call unprotect_stuff
 		mov eax, script_PLAYER_ACTOR
 		mov eax, [eax]

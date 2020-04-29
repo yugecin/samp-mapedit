@@ -369,6 +369,7 @@ There are two 50 char log buffers, only pointing to the first one.
 */
 extern unsigned char *logBuffer;
 extern unsigned char pedPosBeingUpdated;
+extern int (*randMax65535)();
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();

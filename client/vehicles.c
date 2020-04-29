@@ -21,6 +21,19 @@ can be driven, and despawn them all again when activating the UI.*/
 teleported inside the player. Somehow with game_ObjectSetPos it also gets
 deleted, but in a different way, not crashing the game.*/
 
+/**
+@return ptr to primary color, secondary color is ptr+1
+*/
+static
+char *vehicles_get_rand_color(int model)
+{
+	char *colors;
+
+	colors = carcols + carcoldata[model].position;
+	colors += (randMax65535() % carcoldata[model].amount) * 2;
+	return colors;
+}
+
 void vehicles_frame_update()
 {
 	struct VEHICLE *veh;
@@ -64,8 +77,7 @@ void vehicles_create(short model, struct RwV3D *pos)
 	struct VEHICLE *veh;
 	char *colors;
 
-	/*TODO: pick a random color combination*/
-	colors = carcols + carcoldata[model].position;
+	colors = vehicles_get_rand_color(model);
 	veh = vehicles + numvehicles++;
 	veh->model = model;
 	veh->pos = *pos;
