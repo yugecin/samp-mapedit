@@ -6,7 +6,6 @@
 #include "ui.h"
 #include "vehicles.h"
 #include "vehicleselector.h"
-#include "../shared/serverlink.h"
 
 struct VEHICLE vehicles[MAX_VEHICLES];
 int numvehicles;
@@ -34,8 +33,7 @@ static
 void vehicles_spawn(struct VEHICLE *veh)
 {
 	veh->sa_vehicle = game_SpawnVehicle(veh->model);
-	*((char*) veh->sa_vehicle + 0x434) = veh->col1;
-	*((char*) veh->sa_vehicle + 0x435) = veh->col2;
+	vehicles_update_color(veh);
 }
 
 void vehicles_frame_update()
@@ -85,7 +83,7 @@ void vehicles_on_entity_removed_from_world(struct CEntity *entity)
 	}
 }
 
-void vehicles_create(short model, struct RwV3D *pos)
+struct VEHICLE *vehicles_create(short model, struct RwV3D *pos)
 {
 	struct VEHICLE *veh;
 	char *colors;
@@ -95,9 +93,28 @@ void vehicles_create(short model, struct RwV3D *pos)
 	veh->model = model;
 	veh->pos = *pos;
 	veh->heading = 0.0f;
-	veh->col1 = *colors;
-	veh->col2 = *(colors + 1);
+	veh->col[0] = *colors;
+	veh->col[1] = *(colors + 1);
 	vehicles_spawn(veh);
+
+	return veh;
+}
+
+void vehicles_delete(struct VEHICLE *veh)
+{
+	if (veh->sa_vehicle) {
+		game_DestroyVehicle(veh->sa_vehicle);
+	}
+	numvehicles--;
+	if (!numvehicles) {
+		memcpy(veh, vehicles + numvehicles, sizeof(struct VEHICLE));
+	}
+}
+
+void vehicles_update_color(struct VEHICLE *veh)
+{
+	*((char*) veh->sa_vehicle + 0x434) = veh->col[0];
+	*((char*) veh->sa_vehicle + 0x435) = veh->col[1];
 }
 
 void vehicles_destroy()

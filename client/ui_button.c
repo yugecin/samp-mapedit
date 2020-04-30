@@ -10,7 +10,6 @@ struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 	struct UI_BUTTON *btn;
 	int textlenandzero;
 
-	textlenandzero = strlen(text) + 1;
 	btn = malloc(sizeof(struct UI_BUTTON));
 	ui_elem_init(btn, UIE_BUTTON);
 	btn->_parent.proc_dispose = (ui_method*) ui_btn_dispose;
@@ -18,13 +17,18 @@ struct UI_BUTTON *ui_btn_make(char *text, btncb *cb)
 	btn->_parent.proc_mousedown = (ui_method*) ui_btn_mousedown;
 	btn->_parent.proc_mouseup = (ui_method*) ui_btn_mouseup;
 	btn->_parent.proc_recalc_size = (ui_method*) ui_btn_recalc_size;
-	btn->text = malloc(sizeof(char) * textlenandzero);
 	btn->cb = cb;
 	btn->alignment = CENTER;
 	btn->foregroundABGR = -1;
 	btn->enabled = 1;
 	/*add to stuff to ui_radiobutton too*/
-	memcpy(btn->text, text, textlenandzero);
+	if (text != NULL) {
+		textlenandzero = strlen(text) + 1;
+		btn->text = malloc(sizeof(char) * textlenandzero);
+		memcpy(btn->text, text, textlenandzero);
+	} else {
+		btn->text = NULL;
+	}
 	ui_btn_recalc_size(btn);
 	return btn;
 }

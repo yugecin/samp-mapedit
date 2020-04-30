@@ -459,6 +459,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\vehicleseditor.c"
+			>
+		</File>
+		<File
+			RelativePath="..\vehicleseditor.h"
+			>
+		</File>
+		<File
 			RelativePath="..\vehicleselector.c"
 			>
 		</File>

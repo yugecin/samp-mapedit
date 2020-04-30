@@ -9,3 +9,4 @@ struct CARCOLDATA {
 
 extern struct CARCOLDATA carcoldata[VEHICLE_MODEL_TOTAL];
 extern char carcols[1912];
+extern int actualcarcols[128];

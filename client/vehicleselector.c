@@ -32,7 +32,6 @@ void cb_btn_create(struct UI_BUTTON *btn)
 
 	idx = ui_lst_get_selected_index(lst_vehicles);
 	vehiclesui_create(400 + idx);
-	ui_hide_window();
 }
 
 void vehsel_show()

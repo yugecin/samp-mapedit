@@ -15,6 +15,7 @@
 #include "samp.h"
 #include "ui.h"
 #include "vehicles.h"
+#include "vehicleseditor.h"
 #include "vk.h"
 #include "windows.h"
 #include <math.h>
@@ -606,6 +607,7 @@ void ui_render()
 			prevMouseState->lmb && !activeMouseState->lmb;
 
 		vehicles_frame_update();
+		vehedit_frame_update();
 
 		if (ui_exclusive_mode != NULL) {
 			ui_exclusive_mode();

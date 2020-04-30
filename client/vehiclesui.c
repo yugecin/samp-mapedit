@@ -5,6 +5,7 @@
 #include "sockets.h"
 #include "ui.h"
 #include "vehicles.h"
+#include "vehicleseditor.h"
 #include "vehicleselector.h"
 #include "vehiclesui.h"
 #include "../shared/serverlink.h"
@@ -38,7 +39,7 @@ void cb_btn_mainmenu_vehiclelist(struct UI_BUTTON *btn)
 
 void vehiclesui_create(short model)
 {
-	vehicles_create(model, &posToCreate);
+	vehedit_show(vehicles_create(model, &posToCreate));
 }
 
 void vehiclesui_init()
