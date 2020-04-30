@@ -25,8 +25,8 @@ char *vehicles_get_rand_color(int model)
 {
 	char *colors;
 
-	colors = carcols + carcoldata[model].position;
-	colors += (randMax65535() % carcoldata[model].amount) * 2;
+	colors = carcols + carcoldata[model - 400].position;
+	colors += (randMax65535() % carcoldata[model - 400].amount) * 2;
 	return colors;
 }
 
