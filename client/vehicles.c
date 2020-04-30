@@ -12,6 +12,7 @@ struct VEHICLE vehicles[MAX_VEHICLES];
 int numvehicles;
 
 static char process_vehicle_deletions = 1;
+static int lastRespawnTime;
 
 /*TODO: When deactivating UI, spawn actual vehicles using samp so they
 can be driven, and despawn them all again when activating the UI.*/
@@ -29,11 +30,28 @@ char *vehicles_get_rand_color(int model)
 	return colors;
 }
 
+static
+void vehicles_spawn(struct VEHICLE *veh)
+{
+	veh->sa_vehicle = game_SpawnVehicle(veh->model);
+	*((char*) veh->sa_vehicle + 0x434) = veh->col1;
+	*((char*) veh->sa_vehicle + 0x435) = veh->col2;
+}
+
 void vehicles_frame_update()
 {
 	struct VEHICLE *veh;
 	struct CEntity *entity;
 	int i;
+
+	if (*timeInGame - lastRespawnTime > 3000) {
+		lastRespawnTime = *timeInGame;
+		for (i = 0; i < numvehicles; i++) {
+			if (vehicles[i].sa_vehicle == NULL) {
+				vehicles_spawn(vehicles + i);
+			}
+		}
+	}
 
 	for (i = 0; i < numvehicles; i++) {
 		veh = vehicles + i;
@@ -79,13 +97,7 @@ void vehicles_create(short model, struct RwV3D *pos)
 	veh->heading = 0.0f;
 	veh->col1 = *colors;
 	veh->col2 = *(colors + 1);
-	veh->sa_vehicle = game_SpawnVehicle(model);
-	*((char*) veh->sa_vehicle + 0x434) = veh->col1;
-	*((char*) veh->sa_vehicle + 0x435) = veh->col2;
-
-	process_vehicle_deletions = 0;
-	game_ObjectSetPos(veh->sa_vehicle, pos);
-	process_vehicle_deletions = 1;
+	vehicles_spawn(veh);
 }
 
 void vehicles_destroy()
