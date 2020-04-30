@@ -196,15 +196,17 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 	{
 		x = cursorx - wnd->grabx;
 		y = cursory - wnd->graby;
+		if (x + wnd->_parent._parent.width > fresx) {
+			x = fresx - wnd->_parent._parent.width;
+		}
 		if (x < 0.0f) {
 			x = 0.0f;
-		} else if (x + wnd->_parent._parent.width > fresx) {
-			x = fresx - wnd->_parent._parent.width;
+		}
+		if (y + wnd->_parent._parent.height > fresy) {
+			y = fresy - wnd->_parent._parent.height;
 		}
 		if (y < buttonheight) {
 			y = buttonheight;
-		} else if (y + wnd->_parent._parent.height > fresy) {
-			y = fresy - wnd->_parent._parent.height;
 		}
 		dx = x - wnd->_parent._parent.x;
 		dy = y - wnd->_parent._parent.y;
@@ -233,6 +235,14 @@ void ui_wnd_update(struct UI_WINDOW *wnd)
 		if (child->y + child->height > fresy) {
 			y = fresy - child->height;
 			dy = y - child->y;
+		}
+		if (x < 0) {
+			dx -= x;
+			x = 0;
+		}
+		if (y < buttonheight) {
+			dy -= y - buttonheight;
+			y = buttonheight;
 		}
 		if (dx != 0 || dy != 0) {
 			child->x = x;
