@@ -22,7 +22,17 @@ void cb_in_filter_updated(struct UI_INPUT *in)
 static
 void cb_lst_vehicles_selected(struct UI_LIST *lst)
 {
-	btn_create->enabled = lst->selectedindex != -1;
+	int idx;
+
+	idx = ui_lst_get_selected_index(lst_vehicles);
+	btn_create->enabled =
+		idx != -1 &&
+		idx != 449-400 /*tram*/ &&
+		idx != 537-400 /*freight*/ &&
+		idx != 538-400 /*brown streak*/ &&
+		idx != 569-400 /*freight flat*/ &&
+		idx != 570-400 /*brown streak carriage*/ &&
+		idx != 590-400 /*freight box*/;
 }
 
 static
