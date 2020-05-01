@@ -249,6 +249,7 @@ void cb_btn_clone(struct UI_BUTTON *btn)
 
 	entity = objlistui_index_to_entity(lst->selectedindex);
 	if (entity != NULL) {
+		lst->selectedindex = -1;
 		objects_clone(entity);
 	}
 }
