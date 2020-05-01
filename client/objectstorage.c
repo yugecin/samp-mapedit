@@ -2,7 +2,6 @@
 
 #include "common.h"
 #include "game.h"
-#include "objbase.h"
 #include "objects.h"
 #include "objectstorage.h"
 #include "project.h"
@@ -208,7 +207,7 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 		} else {
 			read(sizeof(data.object));
 			object->model = data.object.model;
-			objbase_mkobject(object, &data.object.pos);
+			objects_mkobject(object, &data.object.pos);
 			object->rot = malloc(sizeof(struct RwV3D));
 			*object->rot = data.object.rot;
 			object++;

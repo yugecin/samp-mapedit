@@ -2,7 +2,6 @@
 
 #include "common.h"
 #include "game.h"
-#include "objbase.h"
 #include "objects.h"
 #include "removedbuildings.h"
 

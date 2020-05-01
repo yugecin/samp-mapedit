@@ -2,8 +2,10 @@
 
 #include "common.h"
 #include "detours.h"
+#include "entity.h"
 #include "game.h"
-#include "objbase.h"
+#include "objects.h"
+#include "objectsui.h"
 #include "objbrowser.h"
 #include "removedbuildings.h"
 #include "removebuildingeditor.h"
@@ -63,7 +65,7 @@ __declspec(naked) void cworld_remove_detour()
 {
 	_asm {
 		push [esp+0x8]
-		call objbase_on_world_entity_removed
+		call objui_on_world_entity_removed
 		call rb_on_entity_removed_from_world
 		call vehicles_on_entity_removed_from_world
 		add esp, 0x4
@@ -103,7 +105,7 @@ __declspec(naked) void opcode_0107_detour()
 		push edi /*sa_object*/
 		mov eax, _opcodeParameters+0x4 /*x (object)*/
 		push [eax]
-		call objbase_object_created
+		call objects_client_object_created
 		add esp, 0xC
 		popad
 		mov eax, _CScriptThread__setNumberParams
@@ -157,7 +159,7 @@ __declspec(naked) void opcode_0453_detour()
 		pushad
 		mov eax, _opcodeParameters
 		push [eax] /*handle*/
-		call objbase_object_rotation_changed
+		call objects_object_rotation_changed
 		add esp, 0x4
 		popad
 		mov eax, _CScriptThread__getNumberParams
@@ -194,7 +196,7 @@ static struct DETOUR detour_cworld_remove;
 static struct DETOUR detour_cworld_add;
 static struct DETOUR detour_spawn_car;
 
-void objbase_install_detour(struct DETOUR *detour)
+void install_detour(struct DETOUR *detour)
 {
 	DWORD oldvp;
 
@@ -203,14 +205,14 @@ void objbase_install_detour(struct DETOUR *detour)
 	*detour->target = (int) detour->new_target - ((int) detour->target + 4);
 }
 
-void objbase_uninstall_detour(struct DETOUR *detour)
+void uninstall_detour(struct DETOUR *detour)
 {
 	*detour->target = detour->old_target;
 }
 
 static char CTheScripts__ClearSpaceForMissionEntity_op;
 
-void detours_apply()
+void detours_install()
 {
 	DWORD oldvp;
 
@@ -232,40 +234,40 @@ void detours_apply()
 	detour_cworld_add.new_target = (int) cworld_add_detour;
 	detour_spawn_car.target = (int*) 0x43A359;
 	detour_spawn_car.new_target = (int) spawn_car_detour;
-	objbase_install_detour(&detour_0107);
-	objbase_install_detour(&detour_0108);
-	objbase_install_detour(&detour_0453);
-	//objbase_install_detour(&detour_render_object);
-	objbase_install_detour(&detour_render_centity);
+	install_detour(&detour_0107);
+	install_detour(&detour_0108);
+	install_detour(&detour_0453);
+	//install_detour(&detour_render_object);
+	install_detour(&detour_render_centity);
 	VirtualProtect((void*) 0x534312, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x534312) = 0xE8;
-	objbase_install_detour(&detour_render_water);
-	objbase_install_detour(&detour_cworld_remove);
+	install_detour(&detour_render_water);
+	install_detour(&detour_cworld_remove);
 	VirtualProtect((void*) 0x563280, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x563280) = 0xE8;
-	objbase_install_detour(&detour_cworld_add);
+	install_detour(&detour_cworld_add);
 	VirtualProtect((void*) 0x563220, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x563220) = 0xE8;
-	objbase_install_detour(&detour_spawn_car);
+	install_detour(&detour_spawn_car);
 	VirtualProtect((void*) 0x486B00, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	CTheScripts__ClearSpaceForMissionEntity_op = *((char*) 0x486B00);
 	*((char*) 0x486B00) = 0xC3;
 }
 
-void detours_undo()
+void detours_uninstall()
 {
-	objbase_uninstall_detour(&detour_0107);
-	objbase_uninstall_detour(&detour_0108);
-	objbase_uninstall_detour(&detour_0453);
-	//objbase_uninstall_detour(&detour_render_object);
-	objbase_uninstall_detour(&detour_render_centity);
+	uninstall_detour(&detour_0107);
+	uninstall_detour(&detour_0108);
+	uninstall_detour(&detour_0453);
+	//uninstall_detour(&detour_render_object);
+	uninstall_detour(&detour_render_centity);
 	*((char*) 0x534312) = 0x51;
 	*((int*) 0x534313) = 0x8BF18B56;
-	objbase_uninstall_detour(&detour_render_water);
-	objbase_uninstall_detour(&detour_cworld_remove);
+	uninstall_detour(&detour_render_water);
+	uninstall_detour(&detour_cworld_remove);
 	*((char*) 0x563280) = 0x56;
-	objbase_uninstall_detour(&detour_cworld_add);
+	uninstall_detour(&detour_cworld_add);
 	*((char*) 0x563220) = 0x56;
-	objbase_uninstall_detour(&detour_spawn_car);
+	uninstall_detour(&detour_spawn_car);
 	*((char*) 0x486B00) = CTheScripts__ClearSpaceForMissionEntity_op;
 }

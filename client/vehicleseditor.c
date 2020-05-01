@@ -4,7 +4,7 @@
 #include "common.h"
 #include "game.h"
 #include "msgbox.h"
-#include "objbase.h"
+#include "objects.h"
 #include "ui.h"
 #include "sockets.h"
 #include "vehicles.h"

@@ -1,4 +1,4 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-void detours_apply();
-void detours_undo();
+void detours_install();
+void detours_uninstall();

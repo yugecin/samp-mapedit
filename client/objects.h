@@ -1,34 +1,28 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-void objects_init();
-void objects_dispose();
-void objects_prj_save(/*FILE*/ void *f, char *buf);
-int objects_prj_load_line(char *buf);
-void objects_prj_preload();
-void objects_prj_postload();
-/**
-@return 0 when context menu should be suppressed
-*/
-int objects_on_background_element_just_clicked();
-void objects_on_active_window_changed(struct UI_WINDOW *wnd);
-int objects_is_currently_selecting_object();
-void objects_ui_activated();
-void objects_ui_deactivated();
-void objects_frame_update();
-int objects_handle_esc();
-void objects_open_persistent_state();
-void objects_select_entity(void *entity);
-void objects_clearlayers();
-void objects_show_select_layer_first_msg();
-int objects_object_created(struct OBJECT *object);
-struct OBJECT *objects_find_by_sa_handle(int sa_handle);
-struct OBJECT *objects_find_by_sa_object(void *sa_object);
-void objects_cb_rb_save_new(struct REMOVEDBUILDING *remove);
-void objects_clone_object(struct CEntity *entity);
-void objects_show_delete_confirm_msg(void *cb);
-void objects_delete_obj(struct OBJECT *obj);
-
 #define MAX_LAYERS 10
+#define MAX_OBJECTS 1000
+/*250 and every remove can have a LOD (and nobody should remove that much)*/
+#define MAX_REMOVES 500
+
+struct OBJECT {
+	void *sa_object;
+	int sa_handle;
+	int samp_objectid;
+	int model;
+	float temp_x; /*only used during creation*/
+	struct RwV3D *rot; /*only used during project load*/
+	char justcreated;
+};
+
+struct REMOVEDBUILDING {
+	struct RwV3D origin;
+	float radiussq;
+	short model;
+	/*0 when none*/
+	short lodmodel;
+	char *description;
+};
 
 struct OBJECTLAYER {
 	char name[50 + 1];
@@ -39,6 +33,28 @@ struct OBJECTLAYER {
 	int numremoves;
 };
 
+void objects_mkobject(struct OBJECT *object, struct RwV3D *pos);
+void objects_server_object_created(struct MSG_OBJECT_CREATED *msg);
+void objects_client_object_created(object, sa_object, sa_handle);
+void objects_object_rotation_changed(int sa_handle);
+void objects_create_dummy_entity();
+void objects_activate_layer(int idx);
+void objects_init();
+void objects_dispose();
+void objects_prj_save(FILE *f, char *buf);
+int objects_prj_load_line(char *buf);
+void objects_delete_layer(struct OBJECTLAYER *layer);
+void objects_prj_preload();
+void objects_prj_postload();
+void objects_open_persistent_state();
+void objects_clearlayers();
+struct OBJECT *objects_find_by_sa_handle(int sa_handle);
+struct OBJECT *objects_find_by_sa_object(void *sa_object);
+void objects_clone(struct CEntity *entity);
+void objects_delete_obj(struct OBJECT *obj);
+
 extern struct OBJECTLAYER layers[MAX_LAYERS];
-extern int numlayers;
 extern struct OBJECTLAYER *active_layer;
+extern int numlayers;
+extern struct OBJECT manipulateObject;
+extern struct CEntity *manipulateEntity;

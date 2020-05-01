@@ -1,8 +1,8 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "entity.h"
 #include "game.h"
-#include "objbase.h"
 #include "ui.h"
 #include <math.h>
 #include <windows.h>

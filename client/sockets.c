@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include "game.h"
-#include "objbase.h"
+#include "objects.h"
 #include "sockets.h"
 #include "ui.h"
 #include "../shared/serverlink.h"
@@ -100,7 +100,7 @@ void sockets_recv()
 			msgid = ((struct MSG*) buf)->id;
 			switch (msgid) {
 			case MAPEDIT_MSG_OBJECT_CREATED:
-				objbase_server_object_created((void*) buf);
+				objects_server_object_created((void*) buf);
 				break;
 			default:
 				sprintf(debugstring, "unknown MSG: %d", msgid);

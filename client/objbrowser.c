@@ -1,12 +1,12 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "entity.h"
 #include "game.h"
 #include "ide.h"
 #include "msgbox.h"
 #include "ui.h"
 #include "objbrowser.h"
-#include "objbase.h"
 #include "objects.h"
 #include "player.h"
 #include "sockets.h"
@@ -119,7 +119,7 @@ void create_object()
 	}
 	btn_create->enabled = 0;
 	btn_prev->enabled = btn_next->enabled = 0;
-	objbase_mkobject(&picking_object, &positionToPreview);
+	objects_mkobject(&picking_object, &positionToPreview);
 }
 
 static void destroy_object()
@@ -186,7 +186,7 @@ int objbrowser_object_created(struct OBJECT *object)
 		btn_create->enabled = 1;
 		btn_next->enabled = btn_prev->enabled = 1;
 		entity = object->sa_object;
-		objbase_set_entity_to_render_exclusively(entity);
+		entity_render_exclusively(entity);
 		game_ObjectSetPos(manipulateEntity, &positionToPreview);
 		colmodel = game_EntityGetColModel(entity);
 		if (colmodel != NULL) {
@@ -305,7 +305,7 @@ void restore_after_hide()
 	camera->position = originalCameraPos;
 	camera->lookVector = originalCameraRot;
 	ui_update_camera();
-	objbase_set_entity_to_render_exclusively(NULL);
+	entity_render_exclusively(NULL);
 	ui_hide_window();
 	samp_restore_ui_f7();
 	isactive = 0;
@@ -322,7 +322,7 @@ void cb_btn_create(struct UI_BUTTON *btn)
 
 	object = active_layer->objects + active_layer->numobjects++;
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
-	objbase_mkobject(object, positionToCommit);
+	objects_mkobject(object, positionToCommit);
 	restore_after_hide();
 }
 

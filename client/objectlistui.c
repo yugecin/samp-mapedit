@@ -4,8 +4,8 @@
 #include "entity.h"
 #include "game.h"
 #include "ide.h"
-#include "objbase.h"
 #include "objects.h"
+#include "objectsui.h"
 #include "objectlistui.h"
 #include "msgbox.h"
 #include "removebuildingeditor.h"
@@ -112,7 +112,7 @@ static
 void cb_btn_mainmenu_objects(struct UI_BUTTON *btn)
 {
 	if (active_layer == NULL) {
-		objects_show_select_layer_first_msg();
+		objui_show_select_layer_first_msg();
 		return;
 	}
 
@@ -126,7 +126,7 @@ static
 void cb_btn_mainmenu_nearby(struct UI_BUTTON *btn)
 {
 	if (active_layer == NULL) {
-		objects_show_select_layer_first_msg();
+		objui_show_select_layer_first_msg();
 		return;
 	}
 
@@ -235,11 +235,11 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 
 	obj = objects_find_by_sa_object(entity);
 	if (obj != NULL) {
-		objects_show_delete_confirm_msg(cb_msg_deleteconfirm);
+		objui_show_delete_confirm_msg(cb_msg_deleteconfirm);
 		return;
 	}
 
-	rbe_show_for_entity(entity, objects_cb_rb_save_new);
+	rbe_show_for_entity(entity, objui_cb_rb_save_new);
 }
 
 static
@@ -249,7 +249,7 @@ void cb_btn_clone(struct UI_BUTTON *btn)
 
 	entity = objlistui_index_to_entity(lst->selectedindex);
 	if (entity != NULL) {
-		objects_clone_object(entity);
+		objects_clone(entity);
 	}
 }
 
@@ -347,7 +347,7 @@ hasentity:
 
 	lastHoveredEntity = exclusiveEntity;
 	if (exclusiveEntity == NULL || chk_isolate_element->checked) {
-		objbase_set_entity_to_render_exclusively(exclusiveEntity);
+		entity_render_exclusively(exclusiveEntity);
 	}
 	if (exclusiveEntity != NULL && chk_snap_camera->checked) {
 		game_ObjectGetPos(exclusiveEntity, &pos);
@@ -365,7 +365,7 @@ void objlistui_on_active_window_changed(struct UI_WINDOW *new_wnd)
 		cb_list_item_selected(lst);
 	} else if (isactive) {
 		if (lastHoveredEntity != NULL) {
-			objbase_set_entity_to_render_exclusively(NULL);
+			entity_render_exclusively(NULL);
 		}
 		isactive = 0;
 	}

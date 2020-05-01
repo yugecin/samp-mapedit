@@ -6,8 +6,8 @@
 #include "game.h"
 #include "ide.h"
 #include "msgbox.h"
-#include "objbase.h"
 #include "objects.h"
+#include "objectsui.h"
 #include "objbrowser.h"
 #include "objectlistui.h"
 #include "persistence.h"
@@ -155,9 +155,9 @@ void client_finalize()
 	racecp_dispose();
 	vehiclesui_dispose();
 	objbrowser_dispose();
-	objects_dispose();
-	objbase_dispose();
 	objlistui_dispose();
+	objui_dispose();
+	objects_dispose();
 	rbui_dispose();
 	rbe_dispose();
 	settings_dispose();
@@ -175,7 +175,7 @@ void client_finalize()
 
 	undetour();
 	samp_dispose();
-	detours_undo();
+	detours_uninstall();
 	common_dispose();
 }
 
@@ -197,7 +197,7 @@ void client_init()
 	game_init();
 	samp_init();
 	entity_init();
-	detours_apply();
+	detours_install();
 	detour();
 
 	ui_init();
@@ -213,10 +213,10 @@ void client_init()
 	vehedit_init();
 	vehsel_init();
 	sockets_init();
-	objbase_init();
 	objects_init();
-	objbrowser_init();
+	objui_init();
 	objlistui_init();
+	objbrowser_init();
 	rbe_init();
 	rbui_init();
 	vehiclesui_init();

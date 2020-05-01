@@ -5,7 +5,6 @@
 #include "ide.h"
 #include "im2d.h"
 #include "msgbox.h"
-#include "objbase.h"
 #include "objects.h"
 #include "player.h"
 #include "removedbuildings.h"

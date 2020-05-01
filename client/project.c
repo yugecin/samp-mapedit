@@ -4,8 +4,8 @@
 #include "game.h"
 #include "ui.h"
 #include "msgbox.h"
-#include "objbase.h"
 #include "objects.h"
+#include "objectsui.h"
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
@@ -91,6 +91,7 @@ void prj_preload()
 {
 	TRACE("prj_preload");
 	objects_prj_preload();
+	objui_prj_preload();
 	player_prj_preload();
 	timeweather_prj_preload();
 	rb_undo_all();
@@ -103,6 +104,7 @@ void prj_postload()
 	TRACE("prj_postload");
 	ui_prj_postload();
 	objects_prj_postload();
+	objui_prj_postload();
 	vehiclesui_prj_postload();
 	racecp_prj_postload();
 	timeweather_prj_postload();

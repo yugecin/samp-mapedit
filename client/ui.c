@@ -4,8 +4,8 @@
 #include "client.h"
 #include "game.h"
 #include "objbrowser.h"
-#include "objbase.h"
 #include "objects.h"
+#include "objectsui.h"
 #include "objectlistui.h"
 #include "persistence.h"
 #include "player.h"
@@ -287,7 +287,7 @@ void ui_activate()
 		*hudScaleY = 0.0014f;
 		ui_element_being_clicked = NULL;
 		samp_break_chat_bar();
-		objects_ui_activated();
+		objui_ui_activated();
 	}
 }
 
@@ -302,7 +302,7 @@ void ui_deactivate()
 		*hudScaleX = originalHudScaleX;
 		*hudScaleY = originalHudScaleY;
 		samp_restore_chat_bar();
-		objects_ui_deactivated();
+		objui_ui_deactivated();
 	}
 }
 
@@ -500,7 +500,7 @@ void background_element_just_clicked()
 {
 	ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
 
-	if (objects_on_background_element_just_clicked() &&
+	if (objui_on_background_element_just_clicked() &&
 		player_on_background_element_just_clicked() &&
 		vehiclesui_on_background_element_just_clicked())
 	{
@@ -572,8 +572,7 @@ int ui_handle_keydown(int vk)
 		return 1;
 	}
 	if (vk == VK_ESCAPE) {
-		return objbrowser_handle_esc() ||
-			objects_handle_esc();
+		return objbrowser_handle_esc() || objui_handle_esc();
 	}
 	return ui_active_element != NULL &&
 		UIPROC(ui_active_element, proc_accept_keydown, (void*) vk);
@@ -687,8 +686,7 @@ void ui_render()
 		ui_wnd_update(main_menu);
 		ui_cnt_update(background_element);
 
-		objects_frame_update();
-		objbase_frame_update();
+		objui_frame_update();
 		objlistui_frame_update();
 
 		if (racecheckpoints[0].free > 2) {

@@ -331,14 +331,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\objbase.c"
-			>
-		</File>
-		<File
-			RelativePath="..\objbase.h"
-			>
-		</File>
-		<File
 			RelativePath="..\objbrowser.c"
 			>
 		</File>
@@ -368,6 +360,14 @@
 		</File>
 		<File
 			RelativePath="..\objectstorage.h"
+			>
+		</File>
+		<File
+			RelativePath="..\objectsui.c"
+			>
+		</File>
+		<File
+			RelativePath="..\objectsui.h"
 			>
 		</File>
 		<File

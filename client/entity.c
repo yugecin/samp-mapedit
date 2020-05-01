@@ -3,6 +3,10 @@
 #include "common.h"
 #include "game.h"
 #include "entity.h"
+#include "objects.h"
+
+struct CEntity *exclusiveEntity = NULL;
+struct CEntity *lastCarSpawned;
 
 /*RpClump *RpClumpForAllAtomics
 	(RpClump* clump, RpAtomicCallBack callback, void* pData)*/
@@ -256,6 +260,18 @@ void entity_draw_bound_rect(struct CEntity *entity, int col)
 	P(c, d, h, g);
 	P(d, a, e, h);
 #undef P
+}
+
+void entity_render_exclusively(void *entity)
+{
+	struct RwV3D pos;
+
+	TRACE("entity_render_exclusively");
+	exclusiveEntity = entity;
+	if (entity != NULL && manipulateEntity != NULL) {
+		game_ObjectGetPos(entity, &pos);
+		game_ObjectSetPos(manipulateEntity, &pos);
+	}
 }
 
 void entity_init()

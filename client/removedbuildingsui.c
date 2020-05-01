@@ -2,8 +2,8 @@
 
 #include "common.h"
 #include "game.h"
-#include "objbase.h"
 #include "objects.h"
+#include "objectsui.h"
 #include "msgbox.h"
 #include "removebuildingeditor.h"
 #include "removedbuildings.h"
@@ -101,7 +101,7 @@ static
 void cb_btn_mainmenu_removes(struct UI_BUTTON *btn)
 {
 	if (active_layer == NULL) {
-		objects_show_select_layer_first_msg();
+		objui_show_select_layer_first_msg();
 	} else {
 		ui_show_window(wnd);
 	}
