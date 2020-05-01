@@ -96,6 +96,18 @@ struct VEHICLE *vehicles_create(short model, struct RwV3D *pos)
 	return veh;
 }
 
+struct VEHICLE *vehicles_from_entity(struct CEntity *entity)
+{
+	int i;
+
+	for (i = 0; i < numvehicles; i++) {
+		if (vehicles[i].sa_vehicle == entity) {
+			return vehicles + i;
+		}
+	}
+	return NULL;
+}
+
 void vehicles_delete(struct VEHICLE *veh)
 {
 	if (veh->sa_vehicle) {

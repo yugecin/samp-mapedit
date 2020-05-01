@@ -187,35 +187,6 @@ __declspec(naked) int __stdcall game_InputWasKeyPressed(short keycode)
 	_asm jmp eax
 }
 
-__declspec(naked) int game_Intersect(
-	struct RwV3D *origin,
-	struct RwV3D *direction,
-	struct CColPoint *collidedColpoint,
-	void **collidedEntity,
-	int buildings,
-	int vehicles,
-	int peds,
-	int objects,
-	int dummies,
-	int doSeeThroughCheck,
-	int doCameraIgnoreCheck,
-	int doShootThroughCheck)
-{
-	_asm mov eax, 0x56BA00
-	_asm jmp eax
-}
-
-int game_IntersectBuildingObject(
-	struct RwV3D *origin,
-	struct RwV3D *direction,
-	struct CColPoint *colpoint,
-	void **collidedEntity)
-{
-	return game_Intersect(
-		origin, direction, colpoint, collidedEntity,
-		1, 0, 0, 1, 0, 0, 0, 0);
-}
-
 __declspec(naked) void game_ObjectGetHeadingRad(entity, heading)
 	struct CEntity *entity;
 	float *heading;
@@ -757,6 +728,46 @@ __declspec(naked) void game_WorldFindObjectsInRange(
 		mov eax, 0x564A20
 		jmp eax
 	}
+}
+
+__declspec(naked) int game_WorldIntersect(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint *collidedColpoint,
+	void **collidedEntity,
+	int buildings,
+	int vehicles,
+	int peds,
+	int objects,
+	int dummies,
+	int doSeeThroughCheck,
+	int doCameraIgnoreCheck,
+	int doShootThroughCheck)
+{
+	_asm mov eax, 0x56BA00
+	_asm jmp eax
+}
+
+int game_WorldIntersectBuildingObject(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint *colpoint,
+	void **collidedEntity)
+{
+	return game_WorldIntersect(
+		origin, direction, colpoint, collidedEntity,
+		1, 0, 0, 1, 1, 0, 0, 0);
+}
+
+int game_WorldIntersectEntity(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint *colpoint,
+	void **collidedEntity)
+{
+	return game_WorldIntersect(
+		origin, direction, colpoint, collidedEntity,
+		1, 1, 1, 1, 1, 0, 0, 0);
 }
 
 void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in)

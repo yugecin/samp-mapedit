@@ -11,6 +11,7 @@
 #include "../shared/serverlink.h"
 
 static struct UI_BUTTON *btn_contextmenu_mkvehicle;
+static struct UI_BUTTON *btn_contextmenu_editvehicle;
 static struct UI_BUTTON *btn_mainmenu_vehicles;
 
 static struct RwV3D posToCreate;
@@ -33,6 +34,12 @@ void cb_btn_contextmenu_mkvehicle(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_contextmenu_editvehicle(struct UI_BUTTON *btn)
+{
+	vehedit_show(vehicles_from_entity(clicked_entity));
+}
+
+static
 void cb_btn_mainmenu_vehiclelist(struct UI_BUTTON *btn)
 {
 }
@@ -40,6 +47,15 @@ void cb_btn_mainmenu_vehiclelist(struct UI_BUTTON *btn)
 void vehiclesui_create(short model)
 {
 	vehedit_show(vehicles_create(model, &posToCreate));
+}
+
+int vehiclesui_on_background_element_just_clicked()
+{
+	btn_contextmenu_editvehicle->enabled =
+		clicked_entity != NULL &&
+		vehicles_from_entity(clicked_entity) != NULL;
+
+	return 1;
 }
 
 void vehiclesui_init()
@@ -52,6 +68,10 @@ void vehiclesui_init()
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
 	btn_contextmenu_mkvehicle = btn;
+	btn = ui_btn_make("Edit_vehicle", cb_btn_contextmenu_editvehicle);
+	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_editvehicle = btn;
 
 	/*main menu entry*/
 	lbl = ui_lbl_make("=_Vehicles_=");

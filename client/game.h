@@ -389,30 +389,6 @@ idb CInputEvents__isKeyJustPressed
 sdk CControllerConfigManager::GetIsKeyboardKeyJustDown
 */
 int __stdcall game_InputWasKeyPressed(short keycode);
-/**
-@return 1 on collision
-*/
-int game_Intersect(
-	struct RwV3D *origin,
-	struct RwV3D *direction,
-	struct CColPoint *collidedColpoint,
-	void **collidedEntity,
-	int buildings,
-	int vehicles,
-	int peds,
-	int objects,
-	int dummies,
-	int doSeeThroughCheck,
-	int doCameraIgnoreCheck,
-	int doShootThroughCheck);
-/**
-@return 1 on collision
-*/
-int game_IntersectBuildingObject(
-	struct RwV3D *origin,
-	struct RwV3D *direction,
-	struct CColPoint *colpoint,
-	void **collidedEntity);
 void game_ObjectGetHeadingRad(struct CEntity *object, float *heading);
 void game_ObjectGetPos(void *object, struct RwV3D *pos);
 void game_ObjectGetRot(struct CEntity *object, struct RwV3D *rot);
@@ -567,4 +543,36 @@ void game_WorldFindObjectsInRange(
 	int peds,
 	int objects,
 	int dummies);
+/**
+@return 1 on collision
+*/
+int game_WorldIntersect(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint *collidedColpoint,
+	void **collidedEntity,
+	int buildings,
+	int vehicles,
+	int peds,
+	int objects,
+	int dummies,
+	int doSeeThroughCheck,
+	int doCameraIgnoreCheck,
+	int doShootThroughCheck);
+/**
+@return 1 on collision
+*/
+int game_WorldIntersectBuildingObject(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint *colpoint,
+	void **collidedEntity);
+/**
+@return 1 on collision
+*/
+int game_WorldIntersectEntity(
+	struct RwV3D *origin,
+	struct RwV3D *direction,
+	struct CColPoint *colpoint,
+	void **collidedEntity);
 void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in);

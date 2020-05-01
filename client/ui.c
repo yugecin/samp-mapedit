@@ -15,6 +15,7 @@
 #include "samp.h"
 #include "ui.h"
 #include "vehicles.h"
+#include "vehiclesui.h"
 #include "vehicleseditor.h"
 #include "vk.h"
 #include "windows.h"
@@ -489,7 +490,7 @@ void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint)
 
 	from = camera->position;
 	game_ScreenToWorld(&target, cursorx, cursory, 300.0f);
-	if (!game_IntersectBuildingObject(&from, &target, colpoint, entity)) {
+	if (!game_WorldIntersectEntity(&from, &target, colpoint, entity)) {
 		*entity = NULL;
 	}
 }
@@ -500,7 +501,8 @@ void background_element_just_clicked()
 	ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
 
 	if (objects_on_background_element_just_clicked() &&
-		player_on_background_element_just_clicked())
+		player_on_background_element_just_clicked() &&
+		vehiclesui_on_background_element_just_clicked())
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;
