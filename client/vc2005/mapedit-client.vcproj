@@ -283,6 +283,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\detours.c"
+			>
+		</File>
+		<File
+			RelativePath="..\detours.h"
+			>
+		</File>
+		<File
 			RelativePath="..\game.c"
 			>
 		</File>

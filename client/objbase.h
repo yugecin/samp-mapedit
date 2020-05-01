@@ -27,6 +27,7 @@ struct REMOVEDBUILDING {
 	char *description;
 };
 
+extern struct CEntity *exclusiveEntity;
 extern struct OBJECT manipulateObject;
 extern struct CEntity *manipulateEntity;
 extern struct CEntity *lastCarSpawned;
@@ -40,3 +41,6 @@ void objbase_frame_update();
 void objbase_set_entity_to_render_exclusively(void *entity);
 void objbase_create_dummy_entity();
 void objbase_draw_entity_bound_rect(struct CEntity *entity, int col);
+void objbase_on_world_entity_removed(void *entity);
+void objbase_object_created(struct OBJECT*, struct CEntity*, int);
+void objbase_object_rotation_changed(int sa_handle);

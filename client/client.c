@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "detours.h"
 #include "game.h"
 #include "ide.h"
 #include "msgbox.h"
@@ -169,10 +170,12 @@ void client_finalize()
 	msg_dispose();
 	rb_undo_all();
 
+	vehicles_destroy();
+
 	undetour();
 	samp_dispose();
+	detours_undo();
 	common_dispose();
-	vehicles_destroy();
 }
 
 /**
@@ -192,6 +195,7 @@ void client_init()
 
 	game_init();
 	samp_init();
+	detours_apply();
 	detour();
 
 	ui_init();
