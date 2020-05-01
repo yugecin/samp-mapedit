@@ -320,7 +320,7 @@ void objlistui_frame_update()
 	struct CEntity *exclusiveEntity;
 	struct CEntity *entity;
 	struct RwV3D pos;
-	int idx, col;
+	int idx;
 
 	if (!isactive) {
 		return;
@@ -338,8 +338,7 @@ void objlistui_frame_update()
 	entity = objlistui_index_to_entity(idx);
 	if (entity != NULL) {
 hasentity:
-		col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;
-		entity_draw_bound_rect(entity, col);
+		entity_draw_bound_rect(entity, 0xFF);
 	}
 
 	if (exclusiveEntity == lastHoveredEntity) {

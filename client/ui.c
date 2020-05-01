@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "client.h"
+#include "entity.h"
 #include "game.h"
 #include "objbrowser.h"
 #include "objects.h"
@@ -46,6 +47,10 @@ static float speeds[] = { 0.1f, 0.2f, 0.5f, 1.0f, 3.0f, 8.0f, 12.0f, 16.0f };
 
 struct CEntity *clicked_entity;
 struct CColPoint clicked_colpoint;
+/**
+Follows clicked_entity, but set to NULL as soon the context menu is closed.
+*/
+struct CEntity *highlighted_entity;
 
 struct UI_CONTAINER *background_element = NULL;
 struct UI_WINDOW *active_window = NULL;
@@ -499,6 +504,7 @@ static
 void background_element_just_clicked()
 {
 	ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
+	highlighted_entity = clicked_entity;
 
 	if (objui_on_background_element_just_clicked() &&
 		player_on_background_element_just_clicked() &&
@@ -587,6 +593,7 @@ int ui_handle_char(char c)
 void ui_render()
 {
 	int activate_key_pressed;
+	int col;
 
 	ui_default_font();
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
@@ -610,6 +617,10 @@ void ui_render()
 		vehicles_frame_update();
 		vehedit_frame_update();
 
+		if (highlighted_entity) {
+			entity_draw_bound_rect(highlighted_entity, 0xFF);
+		}
+
 		if (ui_exclusive_mode != NULL) {
 			ui_exclusive_mode();
 			return;
@@ -625,6 +636,7 @@ void ui_render()
 				ui_wnd_mouseup(main_menu) ||
 				ui_cnt_mouseup(background_element));
 			context_menu_active = 0;
+			highlighted_entity = NULL;
 			if (ui_element_being_clicked == background_element) {
 				background_element_just_clicked();
 			}
@@ -636,6 +648,7 @@ void ui_render()
 			ui_do_key_movement();
 			context_menu_active = 0;
 			ui_active_element = NULL;
+			highlighted_entity = NULL;
 		} else {
 			ui_do_cursor_movement();
 		}
@@ -674,6 +687,7 @@ void ui_render()
 				;
 			} else {
 				context_menu_active = 0;
+				highlighted_entity = NULL;
 			}
 		}
 

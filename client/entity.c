@@ -4,6 +4,7 @@
 #include "game.h"
 #include "entity.h"
 #include "objects.h"
+#include <math.h>
 
 struct CEntity *exclusiveEntity = NULL;
 struct CEntity *lastCarSpawned;
@@ -162,11 +163,15 @@ void entity_draw_bound_rect(struct CEntity *entity, int col)
 		{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
 		{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
 	};
+	char alpha;
 
 	TRACE("entity_draw_bound_rect");
 	if (entity == NULL) {
 		return;
 	}
+
+	alpha = (char) (55 * (1.0f - fabs(sinf(*timeInGame * 0.004f))));
+	col = (alpha << 24) | (col & 0xFFFFFF);
 
 	colmodel = game_EntityGetColModel(entity);
 	if (colmodel == NULL) {

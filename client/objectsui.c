@@ -18,7 +18,6 @@
 #include "removedbuildingsui.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
-#include "math.h"
 #include <string.h>
 #include <stdio.h>
 #include <windows.h>
@@ -483,27 +482,15 @@ void objui_layer_changed()
 
 void objui_frame_update()
 {
-	union {
-		int full;
-		struct {
-			char b, g, r, a;
-		} comps;
-	} color;
+	if (is_selecting_object) {
+		objui_do_hover();
+		entity_draw_bound_rect(selected_colored.entity, 0xFF0000);
+		entity_draw_bound_rect(hovered_colored.entity, 0xFF00FF);
 
-	if (!is_selecting_object) {
-		return;
+		game_TextSetAlign(CENTER);
+		game_TextPrintString(fresx / 2.0f, 50.0f,
+			"~w~Hover over an object and ~r~click~w~ to select it");
 	}
-
-	color.full = 0x00FF0000;
-	color.comps.a = BBOX_ALPHA_ANIM_VALUE;
-	objui_do_hover();
-	entity_draw_bound_rect(selected_colored.entity, color.full);
-	color.comps.b = 0xFF;
-	entity_draw_bound_rect(hovered_colored.entity, color.full);
-
-	game_TextSetAlign(CENTER);
-	game_TextPrintString(fresx / 2.0f, 50.0f,
-		"~w~Hover over an object and ~r~click~w~ to select it");
 }
 
 void objui_select_entity(void *entity)
