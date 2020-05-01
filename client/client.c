@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "detours.h"
+#include "entity.h"
 #include "game.h"
 #include "ide.h"
 #include "msgbox.h"
@@ -195,6 +196,7 @@ void client_init()
 
 	game_init();
 	samp_init();
+	entity_init();
 	detours_apply();
 	detour();
 

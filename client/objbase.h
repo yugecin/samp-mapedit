@@ -3,10 +3,6 @@
 #define MAX_OBJECTS 1000
 /*250 and every remove can have a LOD (and nobody should remove that much)*/
 #define MAX_REMOVES 500
-#define rpCLUMP 2
-
-#define BBOX_ALPHA_ANIM_VALUE \
-	(char) (55 * (1.0f - fabs(sinf(*timeInGame * 0.004f))))
 
 struct OBJECT {
 	void *sa_object;

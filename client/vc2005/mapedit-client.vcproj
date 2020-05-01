@@ -291,6 +291,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\entity.c"
+			>
+		</File>
+		<File
+			RelativePath="..\entity.h"
+			>
+		</File>
+		<File
 			RelativePath="..\game.c"
 			>
 		</File>

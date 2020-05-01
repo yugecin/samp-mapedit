@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "entity.h"
 #include "game.h"
 #include "ide.h"
 #include "objbase.h"
@@ -337,7 +338,7 @@ void objlistui_frame_update()
 	if (entity != NULL) {
 hasentity:
 		col = (BBOX_ALPHA_ANIM_VALUE << 24) | 0xFF;
-		objbase_draw_entity_bound_rect(entity, col);
+		entity_draw_bound_rect(entity, col);
 	}
 
 	if (exclusiveEntity == lastHoveredEntity) {
