@@ -17,6 +17,25 @@ static struct VEHICLE *editingVehicle;
 static char *editingColor;
 
 static
+void cb_btn_random_default_color(struct UI_BUTTON *btn)
+{
+	char *cols;
+
+	cols = vehicles_get_rand_color(editingVehicle->model);
+	editingVehicle->col[0] = *cols;
+	editingVehicle->col[1] = *(cols + 1);
+	vehicles_update_color(editingVehicle);
+}
+
+static
+void cb_btn_random_color(struct UI_BUTTON *btn)
+{
+	editingVehicle->col[0] = randMax65535() % 127;
+	editingVehicle->col[1] = randMax65535() % 127;
+	vehicles_update_color(editingVehicle);
+}
+
+static
 void cb_btn_move(struct UI_BUTTON *btn)
 {
 	struct MSG_NC nc;
@@ -156,6 +175,12 @@ void vehedit_init()
 	btn = ui_btn_make(NULL, cb_btn_editcol);
 	btn->_parent.proc_draw = (ui_method*) proc_draw_livecolor;
 	btn->_parent.userdata = (void*) 1;
+	ui_wnd_add_child(wnd, btn);
+	btn = ui_btn_make("Random_default_color", cb_btn_random_default_color);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(wnd, btn);
+	btn = ui_btn_make("Random_color", cb_btn_random_color);
+	btn->_parent.span = 3;
 	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Move", cb_btn_move);
 	btn->_parent.span = 3;

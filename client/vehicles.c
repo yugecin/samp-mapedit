@@ -16,10 +16,6 @@ static int lastRespawnTime;
 /*TODO: When deactivating UI, spawn actual vehicles using samp so they
 can be driven, and despawn them all again when activating the UI.*/
 
-/**
-@return ptr to primary color, secondary color is ptr+1
-*/
-static
 char *vehicles_get_rand_color(int model)
 {
 	char *colors;
