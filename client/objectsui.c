@@ -52,7 +52,6 @@ static char txt_objlodflags[9];
 
 static struct CEntity *selected_entity;
 static struct OBJECT *selected_object;
-static int activelayeridx = 0;
 static struct RwV3D nextObjectPosition;
 static struct RwV3D player_pos_before_selecting;
 static int is_selecting_object = 0;
@@ -479,7 +478,7 @@ void objui_layer_changed()
 	lbl_layer->text = active_layer->name;
 	ui_lbl_recalc_size(lbl_layer);
 	ui_in_set_text(in_layername, active_layer->name);
-	ui_lst_set_selected_index(lst_layers, activelayeridx);
+	ui_lst_set_selected_index(lst_layers, active_layer - layers);
 }
 
 void objui_frame_update()
