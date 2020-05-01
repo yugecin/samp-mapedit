@@ -279,7 +279,7 @@ void game_ObjectGetRot(struct CEntity *object, struct RwV3D *rot)
 	rot->z = (float) atan2(-mat->up.x / c, mat->up.y / c) * 180.0f/M_PI;
 }
 
-__declspec(naked) void game_ObjectSetHeading(void *object, float headingRad)
+__declspec(naked) void game_ObjectSetHeadingRad(void *object, float heading)
 {
 	_asm {
 		mov ecx, [esp+0x4]

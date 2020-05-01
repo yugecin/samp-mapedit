@@ -90,7 +90,7 @@ void vehedit_show(struct VEHICLE *veh)
 {
 	editingVehicle = veh;
 	game_ObjectSetPos(manipulateEntity, &veh->pos);
-	game_ObjectSetHeading(manipulateEntity, veh->heading);
+	game_ObjectSetHeadingRad(manipulateEntity, veh->heading);
 	ui_show_window(wnd);
 }
 
@@ -133,7 +133,7 @@ void cb_btn_colpick_col(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_colpick_cancel(struct UI_BUTTON *btn)
+void cb_btn_colpick_close(struct UI_BUTTON *btn)
 {
 	ui_show_window(wnd);
 }
@@ -183,7 +183,7 @@ void vehedit_init()
 		btn->_parent.proc_draw = (ui_method*) proc_draw_color;
 		ui_wnd_add_child(wnd_colpick, btn);
 	}
-	btn = ui_btn_make("Close", cb_btn_colpick_cancel);
+	btn = ui_btn_make("Close", cb_btn_colpick_close);
 	btn->_parent.span = 8;
 	ui_wnd_add_child(wnd_colpick, btn);
 }

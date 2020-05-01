@@ -58,7 +58,7 @@ void vehicles_frame_update()
 			*((float*) entity + 0x130) = 1000.0f; /*health*/
 			process_vehicle_deletions = 0;
 			game_ObjectSetPos(entity, &veh->pos);
-			game_ObjectSetHeading(entity, veh->heading);
+			game_ObjectSetHeadingRad(entity, veh->heading);
 			process_vehicle_deletions = 1;
 		}
 	}

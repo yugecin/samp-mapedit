@@ -416,7 +416,7 @@ int game_IntersectBuildingObject(
 void game_ObjectGetHeadingRad(struct CEntity *object, float *heading);
 void game_ObjectGetPos(void *object, struct RwV3D *pos);
 void game_ObjectGetRot(struct CEntity *object, struct RwV3D *rot);
-void game_ObjectSetHeading(void *object, float headingRad);
+void game_ObjectSetHeadingRad(void *object, float heading);
 void game_ObjectSetPos(void *object, struct RwV3D *pos);
 void game_ObjectSetRotRad(void *object, struct RwV3D *rot);
 /**
