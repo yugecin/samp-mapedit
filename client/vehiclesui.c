@@ -17,6 +17,12 @@ static struct UI_BUTTON *btn_mainmenu_vehicles;
 static struct RwV3D posToCreate;
 
 static
+void cb_vehsel_create(short model)
+{
+	vehedit_show(vehicles_create(model, &posToCreate));
+}
+
+static
 void cb_btn_contextmenu_mkvehicle(struct UI_BUTTON *btn)
 {
 	float x, y;
@@ -30,7 +36,7 @@ void cb_btn_contextmenu_mkvehicle(struct UI_BUTTON *btn)
 		game_ScreenToWorld(&posToCreate, x, y, 40.0f);
 	}
 
-	vehsel_show();
+	vehsel_show(cb_vehsel_create);
 }
 
 static
@@ -42,11 +48,6 @@ void cb_btn_contextmenu_editvehicle(struct UI_BUTTON *btn)
 static
 void cb_btn_mainmenu_vehiclelist(struct UI_BUTTON *btn)
 {
-}
-
-void vehiclesui_create(short model)
-{
-	vehedit_show(vehicles_create(model, &posToCreate));
 }
 
 int vehiclesui_on_background_element_just_clicked()

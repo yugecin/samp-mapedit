@@ -12,6 +12,7 @@
 static struct UI_WINDOW *wnd;
 static struct UI_LIST *lst_vehicles;
 static struct UI_BUTTON *btn_create;
+static void (*callback)(short);
 
 static
 void cb_in_filter_updated(struct UI_INPUT *in)
@@ -38,14 +39,13 @@ void cb_lst_vehicles_selected(struct UI_LIST *lst)
 static
 void cb_btn_create(struct UI_BUTTON *btn)
 {
-	int idx;
-
-	idx = ui_lst_get_selected_index(lst_vehicles);
-	vehiclesui_create(400 + idx);
+	ui_hide_window();
+	callback(400 + ui_lst_get_selected_index(lst_vehicles));
 }
 
-void vehsel_show()
+void vehsel_show(void (*cb)(short))
 {
+	callback = cb;
 	ui_show_window(wnd);
 }
 
