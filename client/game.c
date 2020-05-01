@@ -238,7 +238,6 @@ void game_ObjectGetRot(struct CEntity *object, struct RwV3D *rot)
 	if (mat == NULL) {
 		rot->x = rot->y = 0.0f;
 		rot->z = object->_parent.placement.heading * 180.0f / M_PI;
-		rot->z -= 90.0f;
 		return;
 	}
 
