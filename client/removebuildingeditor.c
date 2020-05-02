@@ -283,6 +283,8 @@ void rbe_update_position_from_manipulate_object()
 static
 void rbe_do_ui()
 {
+	char buf[20];
+
 	TRACE("rbe_do_ui");
 	game_PedSetPos(player, &player_position);
 	rbe_animate_preview_removes();
@@ -291,14 +293,6 @@ void rbe_do_ui()
 	ui_do_exclusive_mode_basics(wnd, 1);
 	ui_draw_default_help_text();
 	rbe_update_position_from_manipulate_object();
-}
-
-static
-void rbe_update_position_ui_text()
-{
-	char buf[20];
-
-	TRACE("rbe_update_position_ui_text");
 	sprintf(buf, "%.3f", current_remove.origin.x);
 	ui_in_set_text(in_origin_x, buf);
 	sprintf(buf, "%.3f", current_remove.origin.y);
@@ -519,7 +513,6 @@ void rbe_show_for_remove(struct REMOVEDBUILDING *remove, rbe_cb *_cb)
 	ui_in_set_text(in_model, txt_model);
 	rbe_update_model_name();
 
-	rbe_update_position_ui_text();
 	im2d_sphere_pos(sphere, &current_remove.origin, radius);
 	rbe_update_removes();
 }
