@@ -491,6 +491,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\vehiclestorage.c"
+			>
+		</File>
+		<File
+			RelativePath="..\vehiclestorage.h"
+			>
+		</File>
+		<File
 			RelativePath="..\vehiclesui.c"
 			>
 		</File>

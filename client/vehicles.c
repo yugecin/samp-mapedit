@@ -25,7 +25,6 @@ char *vehicles_get_rand_color(int model)
 	return colors;
 }
 
-static
 void vehicles_spawn(struct VEHICLE *veh)
 {
 	veh->sa_vehicle = game_SpawnVehicle(veh->model);

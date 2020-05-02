@@ -14,6 +14,7 @@
 #include "removedbuildingsui.h"
 #include "timeweather.h"
 #include "vehicles.h"
+#include "vehiclestorage.h"
 #include "vehiclesui.h"
 #include <stdio.h>
 #include <string.h>
@@ -79,6 +80,7 @@ void prj_save()
 		objects_prj_save(f, buf);
 		player_prj_save(f, buf);
 		timeweather_prj_save(f, buf);
+		vehiclestorage_save();
 		fclose(f);
 	} else {
 		sprintf(debugstring, "failed to write file %s", buf);
@@ -105,6 +107,7 @@ void prj_postload()
 	ui_prj_postload();
 	objects_prj_postload();
 	objui_prj_postload();
+	vehiclestorage_load();
 	vehiclesui_prj_postload();
 	racecp_prj_postload();
 	timeweather_prj_postload();

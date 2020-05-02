@@ -6,13 +6,14 @@ struct VEHICLE {
 	short model;
 	struct RwV3D pos;
 	float heading;
-	unsigned char col[2];
+	char col[2];
 	struct CEntity *sa_vehicle;
 };
 
 extern struct VEHICLE vehicles[MAX_VEHICLES];
 extern int numvehicles;
 
+void vehicles_spawn(struct VEHICLE *veh);
 /**
 @return ptr to primary color, secondary color is ptr+1
 */
