@@ -16,8 +16,8 @@
 #define FOLIAGE_ON ((void*) 1)
 #define FOLIAGE_OFF ((void*) 0)
 
-#define MOVEMENT_DIR ((void*) 1)
-#define MOVEMENT_NONDIR ((void*) 0)
+#define MOVEMENT_DIR ((void*) 0)
+#define MOVEMENT_NONDIR ((void*) 1)
 
 static struct UI_WINDOW *window_settings;
 static struct UI_BUTTON *btn_save_null_when_unchanged;
