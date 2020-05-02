@@ -88,7 +88,9 @@ struct VEHICLE *vehicles_create(short model, struct RwV3D *pos)
 	veh = vehicles + numvehicles++;
 	veh->model = model;
 	veh->pos = *pos;
-	veh->heading = 0.0f;
+	veh->heading =
+		(float) atan2(camera->lookVector.y, camera->lookVector.x)
+		+ M_PI2;
 	veh->col[0] = *colors;
 	veh->col[1] = *(colors + 1);
 	vehicles_spawn(veh);
