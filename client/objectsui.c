@@ -439,17 +439,29 @@ void objui_prj_postload()
 }
 
 static
+void get_object_pointed_at(struct CEntity **entity, struct CColPoint *cp)
+{
+	struct RwV3D target, from;
+
+	from = camera->position;
+	game_ScreenToWorld(&target, cursorx, cursory, 300.0f);
+	if (!game_WorldIntersectBuildingObject(&from, &target, cp, entity)) {
+		*entity = NULL;
+	}
+}
+
+static
 void objui_do_hover()
 {
 	struct CColPoint cp;
-	void *entity;
+	struct CEntity *entity;
 
 	TRACE("objui_do_hover");
 	if (is_selecting_object) {
 		if (ui_is_cursor_hovering_any_window()) {
 			entity = NULL;
 		} else {
-			ui_get_entity_pointed_at(&entity, &cp);
+			get_object_pointed_at(&entity, &cp);
 			if (entity != NULL) {
 				player_position = cp.pos;
 			} else {
