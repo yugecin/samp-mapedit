@@ -330,6 +330,10 @@ void cb_in_origin_radius(struct UI_INPUT *in)
 	current_remove.radiussq = radius * radius;
 	rbe_update_removes();
 	im2d_sphere_pos(sphere, &current_remove.origin, radius);
+	if (move_mode == MOVE_MODE_RADIUS) {
+		move_mode = MOVE_MODE_ORIGIN;
+	}
+	game_ObjectSetPos(manipulateEntity, &current_remove.origin);
 }
 
 static
