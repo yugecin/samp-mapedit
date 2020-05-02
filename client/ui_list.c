@@ -87,7 +87,7 @@ void ui_lst_draw(struct UI_LIST *lst)
 {
 	struct UI_ELEMENT *elem;
 	int col;
-	int i, itemend, j, ishovered;
+	int i, itemend, j, ishovered, lasthoveridx;
 	float scrollby, scrollbh, scrollbx;
 
 	elem = (struct UI_ELEMENT*) lst;
@@ -122,6 +122,7 @@ void ui_lst_draw(struct UI_LIST *lst)
 		scrollbh,
 		0xFFFF0000);
 
+	lasthoveridx = lst->hoveredindex;
 	lst->hoveredindex = -1;
 	if (ishovered && cursorx < scrollbx) {
 		i = calc_list_hovered_offset(lst);
@@ -134,6 +135,9 @@ void ui_lst_draw(struct UI_LIST *lst)
 				fontheight,
 				0xFF000077);
 		}
+	}
+	if (lst->hoveredindex != lasthoveridx && lst->hovercb != NULL) {
+		lst->hovercb(lst);
 	}
 
 	if (lst->topoffset <= lst->selectedindex &&
@@ -279,6 +283,7 @@ struct UI_LIST *ui_lst_make(int pagesize, listcb *cb)
 	lst->_parent.proc_recalc_size = (ui_method*) ui_lst_recalc_size;
 	lst->_parent.proc_post_layout = (ui_method*) ui_lst_post_layout;
 	lst->cb = cb;
+	lst->hovercb = NULL;
 	lst->prefpagesize = pagesize;
 	lst->numitems = 0;
 	lst->numAllitems = 0;

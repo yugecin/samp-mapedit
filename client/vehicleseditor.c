@@ -15,6 +15,7 @@ static struct UI_WINDOW *wnd;
 static struct UI_WINDOW *wnd_colpick;
 static struct VEHICLE *editingVehicle;
 static char *editingColor;
+static void (*callback)();
 
 static
 void cb_btn_random_default_color(struct UI_BUTTON *btn)
@@ -78,13 +79,17 @@ void cb_btn_clone(struct UI_BUTTON *btn)
 	newveh->col[0] = editingVehicle->col[0];
 	newveh->col[1] = editingVehicle->col[1];
 	vehicles_update_color(newveh);
-	vehedit_show(newveh);
+	vehedit_show(newveh, callback);
 }
 
 static
 void cb_btn_close(struct UI_BUTTON *btn)
 {
-	ui_hide_window();
+	if (callback != NULL) {
+		callback();
+	} else {
+		ui_hide_window();
+	}
 }
 
 static
@@ -105,12 +110,13 @@ void vehedit_frame_update()
 	game_ObjectGetHeadingRad(manipulateEntity, &editingVehicle->heading);
 }
 
-void vehedit_show(struct VEHICLE *veh)
+void vehedit_show(struct VEHICLE *veh, void (*cb)())
 {
 	editingVehicle = veh;
 	game_ObjectSetPos(manipulateEntity, &veh->pos);
 	game_ObjectSetHeadingRad(manipulateEntity, veh->heading);
 	ui_show_window(wnd);
+	callback = cb;
 }
 
 static
@@ -165,6 +171,7 @@ void vehedit_init()
 
 	wnd = ui_wnd_make(5000.0f, 300.0f, "Vehicle");
 	wnd->columns = 3;
+	wnd->closeable = 0;
 
 	lbl = ui_lbl_make("Colors:");
 	ui_wnd_add_child(wnd, lbl);

@@ -154,6 +154,7 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	/*recalc_size queues layout update, so not needed here anymore*/
 	objects_on_active_window_changed(wnd);
 	objlistui_on_active_window_changed(wnd);
+	vehiclesui_on_active_window_changed(wnd);
 }
 
 void ui_hide_window()
@@ -593,7 +594,6 @@ int ui_handle_char(char c)
 void ui_render()
 {
 	int activate_key_pressed;
-	int col;
 
 	ui_default_font();
 	if (fresx != GAME_RESOLUTION_X || fresy != GAME_RESOLUTION_Y) {
@@ -702,6 +702,7 @@ void ui_render()
 
 		objui_frame_update();
 		objlistui_frame_update();
+		vehiclesui_frame_update();
 
 		if (racecheckpoints[0].free > 2) {
 			racecheckpoints[0].free--;

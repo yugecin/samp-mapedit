@@ -19,6 +19,7 @@ struct UI_LIST {
 	int selectedindex;
 	int hoveredindex;
 	listcb *cb;
+	listcb *hovercb;
 	char *filter;
 };
 
