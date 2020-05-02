@@ -50,6 +50,12 @@ void cb_btn_move(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_tp_to_camera(struct UI_BUTTON *btn)
+{
+	game_ObjectSetPos(manipulateEntity, &camera->position);
+}
+
+static
 void cb_msg_delete_confirm(int opt)
 {
 	if (opt == MSGBOX_RESULT_1) {
@@ -190,6 +196,9 @@ void vehedit_init()
 	btn->_parent.span = 3;
 	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Move", cb_btn_move);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(wnd, btn);
+	btn = ui_btn_make("Tp_to_camera", cb_btn_tp_to_camera);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Delete", cb_btn_delete);
