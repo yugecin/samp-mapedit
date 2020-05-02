@@ -115,7 +115,7 @@ void vehicles_delete(struct VEHICLE *veh)
 		game_DestroyVehicle(veh->sa_vehicle);
 	}
 	numvehicles--;
-	if (!numvehicles) {
+	if (numvehicles) {
 		memcpy(veh, vehicles + numvehicles, sizeof(struct VEHICLE));
 	}
 }
