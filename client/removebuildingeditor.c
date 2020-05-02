@@ -293,13 +293,13 @@ void rbe_do_ui()
 	ui_do_exclusive_mode_basics(wnd, 1);
 	ui_draw_default_help_text();
 	rbe_update_position_from_manipulate_object();
-	sprintf(buf, "%.3f", current_remove.origin.x);
+	sprintf(buf, "%.4f", current_remove.origin.x);
 	ui_in_set_text(in_origin_x, buf);
-	sprintf(buf, "%.3f", current_remove.origin.y);
+	sprintf(buf, "%.4f", current_remove.origin.y);
 	ui_in_set_text(in_origin_y, buf);
-	sprintf(buf, "%.3f", current_remove.origin.z);
+	sprintf(buf, "%.4f", current_remove.origin.z);
 	ui_in_set_text(in_origin_z, buf);
-	sprintf(buf, "%.3f", radius);
+	sprintf(buf, "%.4f", radius);
 	ui_in_set_text(in_radius, buf);
 }
 
@@ -316,11 +316,8 @@ void rbe_hide()
 static
 void cb_in_origin_radius(struct UI_INPUT *in)
 {
-	float *value;
-
 	TRACE("cb_in_origin_radius");
-	value = (float*) in->_parent.userdata;
-	*value = (float) atof(in->value);
+	*((float*) in->_parent.userdata) = (float) atof(in->value);
 	current_remove.radiussq = radius * radius;
 	rbe_update_removes();
 	im2d_sphere_pos(sphere, &current_remove.origin, radius);
