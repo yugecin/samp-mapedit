@@ -587,8 +587,12 @@ void objui_on_world_entity_removed(void *entity)
 
 int objui_on_background_element_just_clicked()
 {
+	struct CEntity *entity;
+	struct CColPoint cp;
+
 	if (is_selecting_object) {
-		objui_select_entity(clicked_entity);
+		get_object_pointed_at(&entity, &cp);
+		objui_select_entity(entity);
 		return 0;
 	}
 
