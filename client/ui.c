@@ -505,7 +505,6 @@ static
 void background_element_just_clicked()
 {
 	ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
-	highlighted_entity = clicked_entity;
 
 	if (objui_on_background_element_just_clicked() &&
 		player_on_background_element_just_clicked() &&
@@ -515,6 +514,7 @@ void background_element_just_clicked()
 		context_menu->_parent._parent.x = cursorx + 10.0f;
 		context_menu->_parent._parent.y = cursory + 25.0f;
 		context_menu->_parent.need_layout = 1;
+		highlighted_entity = clicked_entity;
 	}
 }
 
