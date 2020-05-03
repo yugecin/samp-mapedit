@@ -16,8 +16,8 @@
 #define FOLIAGE_ON ((void*) 1)
 #define FOLIAGE_OFF ((void*) 0)
 
-#define MOVEMENT_DIR ((void*) 0)
-#define MOVEMENT_NONDIR ((void*) 1)
+#define MOVEMENT_DIR ((void*) 1)
+#define MOVEMENT_NONDIR ((void*) 0)
 
 static struct UI_WINDOW *window_settings;
 static struct UI_BUTTON *btn_save_null_when_unchanged;
@@ -211,7 +211,7 @@ void cb_btn_reload_settings(struct UI_BUTTON *btn)
 	saved_fontsize = UI_DEFAULT_FONT_SIZE;
 	saved_fontratio = UI_DEFAULT_FONT_RATIO;
 	saved_foliage = (int) FOLIAGE_ON;
-	saved_dirmov = (int) MOVEMENT_DIR;
+	saved_dirmov = (int) MOVEMENT_NONDIR;
 	saved_zqsd = (int) KEYS_ZQSD;
 
 	ini = fopen("samp-mapedit\\settings.txt", "r");
