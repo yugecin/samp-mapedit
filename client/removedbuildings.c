@@ -19,7 +19,6 @@ static struct {
 } removedata;
 static int numallremoves;
 
-#include "ui.h"
 /**
 @return 0 when all remove slots are taken
 */
