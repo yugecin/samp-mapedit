@@ -27,6 +27,7 @@ static struct UI_BUTTON *btn_delete;
 static struct UI_BUTTON *btn_clone;
 
 static char txt_currentlayer[100];
+static char txt_numobjects[20];
 static char isactive;
 static struct CEntity *lastHoveredEntity;
 static struct CEntity *nearbyEntities[MAX_OBJECTS];
@@ -73,6 +74,7 @@ void objlistui_refresh_list_from_layer()
 		obj++;
 	}
 	ui_lst_set_data(lst, names, i);
+	sprintf(txt_numobjects, "%d_objects", active_layer->numobjects);
 }
 
 static
@@ -106,6 +108,7 @@ void objlistui_refresh_list_from_nearby()
 		}
 	}
 	ui_lst_set_data(lst, names, i);
+	sprintf(txt_numobjects, "%d_objects", numNearbyEntities);
 }
 
 static
@@ -292,6 +295,7 @@ void objlistui_init()
 
 	strcpy(txt_currentlayer, "Current_layer:_");
 	ui_wnd_add_child(wnd, ui_lbl_make(txt_currentlayer));
+	ui_wnd_add_child(wnd, ui_lbl_make(txt_numobjects));
 	chk_snap_camera = ui_chk_make("Snap_camera", 0, NULL);
 	ui_wnd_add_child(wnd, chk_snap_camera);
 	chk_isolate_element = ui_chk_make("Isolate_object", 1, NULL);
