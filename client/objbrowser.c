@@ -119,7 +119,8 @@ void create_object()
 	}
 	btn_create->enabled = 0;
 	btn_prev->enabled = btn_next->enabled = 0;
-	objects_mkobject(&picking_object, &positionToPreview);
+	picking_object.pos = positionToPreview;
+	objects_mkobject(&picking_object);
 }
 
 static void destroy_object()
@@ -322,7 +323,9 @@ void cb_btn_create(struct UI_BUTTON *btn)
 
 	object = active_layer->objects + active_layer->numobjects++;
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
-	objects_mkobject(object, positionToCommit);
+	object->rot = NULL;
+	object->pos = *positionToCommit;
+	objects_mkobject(object);
 	restore_after_hide();
 }
 
@@ -452,6 +455,7 @@ void objbrowser_init()
 	DWORD oldvp;
 
 	picking_object.model = 3279;
+	picking_object.rot = NULL;
 	desired_time = 12;
 
 	objbrowser_init_blacklist();

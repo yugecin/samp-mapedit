@@ -207,9 +207,10 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 		} else {
 			read(sizeof(data.object));
 			object->model = data.object.model;
-			objects_mkobject(object, &data.object.pos);
+			object->pos = data.object.pos;
 			object->rot = malloc(sizeof(struct RwV3D));
 			*object->rot = data.object.rot;
+			objects_mkobject(object);
 			object++;
 		}
 	}

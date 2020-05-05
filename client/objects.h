@@ -5,14 +5,18 @@
 /*250 and every remove can have a LOD (and nobody should remove that much)*/
 #define MAX_REMOVES 500
 
+#define OBJECT_STATUS_CREATED 0
+#define OBJECT_STATUS_CREATING 1
+#define OBJECT_STATUS_WAITING 2
+
 struct OBJECT {
 	void *sa_object;
 	int sa_handle;
 	int samp_objectid;
 	int model;
-	float temp_x; /*only used during creation*/
+	struct RwV3D pos; /*only used during creation*/
 	struct RwV3D *rot; /*only used during project load*/
-	char justcreated;
+	char status;
 };
 
 struct REMOVEDBUILDING {
@@ -33,7 +37,11 @@ struct OBJECTLAYER {
 	int numremoves;
 };
 
-void objects_mkobject(struct OBJECT *object, struct RwV3D *pos);
+void objects_update();
+/*
+pos and rot must be set (rot can be null)
+*/
+void objects_mkobject(struct OBJECT *object);
 void objects_server_object_created(struct MSG_OBJECT_CREATED *msg);
 void objects_client_object_created(object, sa_object, sa_handle);
 void objects_object_rotation_changed(int sa_handle);

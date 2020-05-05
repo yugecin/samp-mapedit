@@ -25,6 +25,9 @@
 static struct OBJECT cloning_object;
 static struct RwV3D cloning_object_rot;
 static int activelayeridx = 0;
+static int last_create_time = 0;
+static int need_create_objects = 0;
+static int objects_created_this_frame = 0;
 
 struct OBJECTLAYER layers[MAX_LAYERS];
 struct OBJECTLAYER *active_layer = NULL;
@@ -40,34 +43,18 @@ to be reset.
 static
 void objects_set_position_rotation_after_creation(struct OBJECT *object)
 {
-	struct RwV3D pos;
 	struct MSG_NC nc;
 
 	TRACE("objects_set_position_rotation_after_creation");
 
-	game_ObjectGetPos(object->sa_object, &pos);
-	pos.x = object->temp_x;
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0;
 	nc.nc = NC_SetObjectPos;
 	nc.params.asint[1] = object->samp_objectid;
-	nc.params.asflt[2] = pos.x;
-	nc.params.asflt[3] = pos.y;
-	nc.params.asflt[4] = pos.z;
+	nc.params.asflt[2] = object->pos.x;
+	nc.params.asflt[3] = object->pos.y;
+	nc.params.asflt[4] = object->pos.z;
 	sockets_send(&nc, sizeof(nc));
-
-	if (object->rot != NULL) {
-		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
-		nc.nc = NC_SetObjectRot;
-		nc.params.asint[1] = object->samp_objectid;
-		nc.params.asflt[2] = object->rot->x;
-		nc.params.asflt[3] = object->rot->y;
-		nc.params.asflt[4] = object->rot->z;
-		sockets_send(&nc, sizeof(nc));
-		free(object->rot);
-		object->rot = NULL;
-	}
 }
 
 static
@@ -132,29 +119,69 @@ void objects_object_creation_confirmed(struct OBJECT *object)
 	}
 }
 
-void objects_mkobject(struct OBJECT *object, struct RwV3D *pos)
+static
+void objects_do_create_object(struct OBJECT *object)
 {
 	struct MSG_NC nc;
 
-	TRACE("objects_mkobject");
-	object->temp_x = pos->x;
-	object->rot = NULL;
-	object->justcreated = 1;
-	object->samp_objectid = -1;
-	object->sa_object = NULL;
+	if (objects_created_this_frame > 50) {
+		object->status = OBJECT_STATUS_WAITING;
+		need_create_objects = 1;
+		last_create_time = *timeInGame;
+		return;
+	}
+	objects_created_this_frame++;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0; /*TODO*/
 	nc.nc = NC_CreateObject;
 	nc.params.asint[1] = object->model;
 	nc.params.asint[2] = (int) object;
-	nc.params.asflt[3] = pos->y;
-	nc.params.asflt[4] = pos->z;
-	nc.params.asflt[5] = 0.0f;
-	nc.params.asflt[6] = 0.0f;
-	nc.params.asflt[7] = 0.0f;
+	nc.params.asflt[3] = object->pos.y;
+	nc.params.asflt[4] = object->pos.z;
+	if (object->rot) {
+		nc.params.asflt[5] = object->rot->x;
+		nc.params.asflt[6] = object->rot->y;
+		nc.params.asflt[7] = object->rot->z;
+		free(object->rot);
+		object->rot = NULL;
+	} else {
+		nc.params.asflt[5] = 0.0f;
+		nc.params.asflt[6] = 0.0f;
+		nc.params.asflt[7] = 0.0f;
+	}
 	nc.params.asflt[8] = 500.0f;
 	sockets_send(&nc, sizeof(nc));
+}
+
+void objects_update()
+{
+	struct OBJECT *object;
+	int l, i;
+
+	objects_created_this_frame = 0;
+	if (need_create_objects && *timeInGame - last_create_time > 750) {
+		need_create_objects = 0;
+		last_create_time = *timeInGame;
+		for (l = 0; l < numlayers; l++) {
+			for (i = 0; i < layers[l].numobjects; i++) {
+				object = layers[l].objects + i;
+				if (object->status == OBJECT_STATUS_WAITING) {
+					objects_do_create_object(object);
+				}
+			}
+		}
+	}
+}
+
+void objects_mkobject(struct OBJECT *object)
+{
+	TRACE("objects_mkobject");
+	object->status = OBJECT_STATUS_CREATING;
+	object->samp_objectid = -1;
+	object->sa_object = NULL;
+
+	objects_do_create_object(object);
 }
 
 void objects_server_object_created(struct MSG_OBJECT_CREATED *msg)
@@ -164,7 +191,7 @@ void objects_server_object_created(struct MSG_OBJECT_CREATED *msg)
 	TRACE("objects_server_object_created");
 	object = msg->object;
 	object->samp_objectid = msg->samp_objectid;
-	if (!object->justcreated) {
+	if (object->status == OBJECT_STATUS_CREATED) {
 		/*race with objects_object_rotation_changed*/
 		objects_object_creation_confirmed(object);
 	}
@@ -191,8 +218,8 @@ void objects_object_rotation_changed(int sa_handle)
 			return;
 		}
 	}
-	if (object->justcreated) {
-		object->justcreated = 0;
+	if (object->status != OBJECT_STATUS_CREATED) {
+		object->status = OBJECT_STATUS_CREATED;
 		/*race with objects_server_object_created*/
 		if (object->samp_objectid != -1) {
 			objects_object_creation_confirmed(object);
@@ -202,13 +229,11 @@ void objects_object_rotation_changed(int sa_handle)
 
 void objects_create_dummy_entity()
 {
-	struct RwV3D pos;
-
-	pos.x = 0.0f;
-	pos.y = 0.0f;
-	pos.z = -10000.0f;
 	manipulateObject.model = 1214;
-	objects_mkobject(&manipulateObject, &pos);
+	manipulateObject.pos.x = 0.0f;
+	manipulateObject.pos.x = 0.0f;
+	manipulateObject.pos.z = -10000.0;
+	objects_mkobject(&manipulateObject);
 }
 
 void objects_activate_layer(int idx)
@@ -428,13 +453,11 @@ struct OBJECT *objects_find_by_sa_object(void *sa_object)
 
 void objects_clone(struct CEntity *entity)
 {
-	struct RwV3D pos;
-
 	if (cloning_object.model == 0) {
 		cloning_object.model = entity->model;
-		game_ObjectGetPos(entity, &pos);
+		game_ObjectGetPos(entity, &cloning_object.pos);
 		game_ObjectGetRot(entity, &cloning_object_rot);
-		objects_mkobject(&cloning_object, &pos);
+		objects_mkobject(&cloning_object);
 	}
 }
 

@@ -38,6 +38,7 @@ static
 __declspec(naked) void clientloop()
 {
 	sockets_recv();
+	objects_update();
 	ui_render();
 	_asm {
 		pop eax
