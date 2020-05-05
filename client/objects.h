@@ -66,3 +66,4 @@ extern struct OBJECTLAYER *active_layer;
 extern int numlayers;
 extern struct OBJECT manipulateObject;
 extern struct CEntity *manipulateEntity;
+void objects_show_creation_progress();

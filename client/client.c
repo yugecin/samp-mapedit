@@ -40,6 +40,7 @@ __declspec(naked) void clientloop()
 	sockets_recv();
 	objects_update();
 	ui_render();
+	objects_show_creation_progress();
 	_asm {
 		pop eax
 		push reload_requested

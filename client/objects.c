@@ -150,7 +150,7 @@ void objects_do_create_object(struct OBJECT *object)
 		nc.params.asflt[6] = 0.0f;
 		nc.params.asflt[7] = 0.0f;
 	}
-	nc.params.asflt[8] = 500.0f;
+	nc.params.asflt[8] = 1000.0f;
 	sockets_send(&nc, sizeof(nc));
 }
 
@@ -487,5 +487,29 @@ void objects_delete_obj(struct OBJECT *obj)
 	if (active_layer->numobjects > 0) {
 		active_layer->objects[idx] =
 			active_layer->objects[active_layer->numobjects];
+	}
+}
+
+void objects_show_creation_progress()
+{
+	int l, i;
+	int readyobjs, totalobjs;
+	char buf[100];
+
+	if (need_create_objects) {
+		readyobjs = totalobjs = 0;
+		for (l = 0; l < numlayers; l++) {
+			for (i = 0; i < layers[l].numobjects; i++) {
+				if (layers[l].objects[i].status !=
+					OBJECT_STATUS_WAITING)
+				{
+					readyobjs++;
+				}
+				totalobjs++;
+			}
+		}
+		sprintf(buf, "loading objects %d/%d", readyobjs, totalobjs);
+		game_TextSetAlign(CENTER);
+		game_TextPrintString(fresx / 2.0f, fresy / 2.0f, buf);
 	}
 }
