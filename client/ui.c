@@ -294,6 +294,7 @@ void ui_activate()
 		ui_element_being_clicked = NULL;
 		samp_break_chat_bar();
 		objui_ui_activated();
+		vehicles_ui_activated();
 	}
 }
 
@@ -309,6 +310,7 @@ void ui_deactivate()
 		*hudScaleY = originalHudScaleY;
 		samp_restore_chat_bar();
 		objui_ui_deactivated();
+		vehicles_ui_deactivated();
 	}
 }
 

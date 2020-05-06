@@ -14,6 +14,7 @@
 #include <string.h>
 
 #define MAX_OBJECTS 1000
+#define MAX_VEHICLES 2000
 
 typedef void (*cb_t)(void* data);
 typedef void (*logprintf_t)(char* format, ...);
@@ -68,6 +69,7 @@ struct NATIVE natives[] = {
 	{ "DestroyVehicle", 0 },
 	{ "SetWorldTime", 0 },
 	{ "SetWeather", 0 },
+	{ "DestroyVehicle", 0 },
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
 
@@ -414,6 +416,19 @@ void msg_resetobjects()
 }
 
 static
+void msg_resetvehicles()
+{
+	int idx;
+
+	for (idx = 0; idx < MAX_VEHICLES; idx++) {
+		if (objectidused[idx]) {
+			nc_params.asint[1] = idx;
+			natives[NC_DestroyVehicle].fp(amx, nc_params.asint);
+		}
+	}
+}
+
+static
 void msg_nativecall(struct MSG_NC *msg)
 {
 	struct MSG_OBJECT_CREATED createdmsg;
@@ -455,6 +470,9 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 			if (recvsize == sizeof(struct MSG_NC)) {
 				msg_nativecall((struct MSG_NC*) buf);
 			}
+			break;
+		case MAPEDIT_MSG_RESETVEHICLES:
+			msg_resetvehicles();
 			break;
 		default:
 			logprintf("unknown MSG: %d", msgid);

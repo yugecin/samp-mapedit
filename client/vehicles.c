@@ -3,9 +3,11 @@
 #include "carcols.h"
 #include "common.h"
 #include "game.h"
+#include "sockets.h"
 #include "ui.h"
 #include "vehicles.h"
 #include "vehicleselector.h"
+#include "../shared/serverlink.h"
 
 struct VEHICLE vehicles[MAX_VEHICLES];
 int numvehicles;
@@ -57,6 +59,49 @@ void vehicles_frame_update()
 			process_vehicle_deletions = 1;
 		}
 	}
+}
+
+void vehicles_ui_activated()
+{
+	struct MSG msg;
+
+	/*force spawning vehicles now*/
+	lastRespawnTime = 0;
+	vehicles_frame_update();
+	msg.id = MAPEDIT_MSG_RESETVEHICLES;
+	sockets_send(&msg, sizeof(msg));
+}
+
+void vehicles_ui_deactivated()
+{
+	struct VEHICLE *veh;
+	struct MSG_NC nc;
+	int i;
+
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc.nc = NC_CreateVehicle;
+	nc.params.asint[8] = -1;
+	nc.params.asint[9] = 0;
+
+	process_vehicle_deletions = 0;
+	i = numvehicles;
+	while (i) {
+		i--;
+		veh = vehicles + i;
+		nc.params.asint[1] = veh->model;
+		nc.params.asflt[2] = veh->pos.x;
+		nc.params.asflt[3] = veh->pos.y;
+		nc.params.asflt[4] = veh->pos.z;
+		nc.params.asflt[5] = veh->heading * 180.0f / M_PI;
+		nc.params.asint[6] = veh->col[0];
+		nc.params.asint[7] = veh->col[1];
+		sockets_send(&nc, sizeof(nc));
+		if (veh->sa_vehicle) {
+			game_DestroyVehicle(veh->sa_vehicle);
+			veh->sa_vehicle = NULL;
+		}
+	}
+	process_vehicle_deletions = 1;
 }
 
 void vehicles_on_entity_removed_from_world(struct CEntity *entity)

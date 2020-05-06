@@ -16,10 +16,12 @@
 #define NC_DestroyVehicle 9
 #define NC_SetWorldTime 10
 #define NC_SetWeather 11
+#define NC_DESTROYVEHICLE 12
 
 #define MAPEDIT_MSG_RESETOBJECTS 0
 #define MAPEDIT_MSG_NATIVECALL 1
 #define MAPEDIT_MSG_OBJECT_CREATED 2
+#define MAPEDIT_MSG_RESETVEHICLES 3
 
 #pragma pack(push,1)
 struct MSG {

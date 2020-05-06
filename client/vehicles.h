@@ -19,6 +19,8 @@ void vehicles_spawn(struct VEHICLE *veh);
 */
 char *vehicles_get_rand_color(int model);
 void vehicles_frame_update();
+void vehicles_ui_activated();
+void vehicles_ui_deactivated();
 void vehicles_on_entity_removed_from_world(struct CEntity *entity);
 struct VEHICLE *vehicles_create(short model, struct RwV3D *pos);
 struct VEHICLE *vehicles_from_entity(struct CEntity *entity);
