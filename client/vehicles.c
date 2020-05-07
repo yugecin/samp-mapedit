@@ -15,9 +15,6 @@ int numvehicles;
 static char process_vehicle_deletions = 1;
 static int lastRespawnTime;
 
-/*TODO: When deactivating UI, spawn actual vehicles using samp so they
-can be driven, and despawn them all again when activating the UI.*/
-
 char *vehicles_get_rand_color(int model)
 {
 	char *colors;
