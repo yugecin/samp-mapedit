@@ -12,6 +12,7 @@
 #include "player.h"
 #include "project.h"
 #include "msgbox.h"
+#include "racecp.h"
 #include "removebuildingeditor.h"
 #include "samp.h"
 #include "ui.h"
@@ -140,10 +141,6 @@ void ui_init()
 	btn = ui_btn_make("Reload_client", cb_btn_reload);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
-	
-	racecheckpoints[0].colABGR = 0xFFFF0000;
-	racecheckpoints[0].free = 0;
-	racecheckpoints[0].used = 1;
 }
 
 void ui_show_window(struct UI_WINDOW *wnd)
@@ -693,6 +690,9 @@ void ui_render()
 			}
 		}
 
+		/*this one should be _before_ update*/
+		racecp_frame_update();
+
 		if (active_window != NULL) {
 			ui_wnd_update(active_window);
 		}
@@ -705,13 +705,6 @@ void ui_render()
 		objui_frame_update();
 		objlistui_frame_update();
 		vehiclesui_frame_update();
-
-		if (racecheckpoints[0].free > 2) {
-			racecheckpoints[0].free--;
-		} else if (racecheckpoints[0].free == 2) {
-			racecheckpoints[0].free = 0;
-			racecheckpoints[0].used = 1;
-		}
 
 		ui_cnt_draw(background_element);
 		ui_wnd_draw(main_menu);

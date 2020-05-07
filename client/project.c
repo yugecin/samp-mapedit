@@ -10,6 +10,7 @@
 #include "player.h"
 #include "project.h"
 #include "racecp.h"
+#include "racecpui.h"
 #include "removedbuildings.h"
 #include "removedbuildingsui.h"
 #include "timeweather.h"
@@ -92,6 +93,7 @@ static
 void prj_preload()
 {
 	TRACE("prj_preload");
+	racecp_resetall();
 	objects_prj_preload();
 	objui_prj_preload();
 	player_prj_preload();
@@ -109,7 +111,7 @@ void prj_postload()
 	objui_prj_postload();
 	vehiclestorage_load();
 	vehiclesui_prj_postload();
-	racecp_prj_postload();
+	racecpui_prj_postload();
 	timeweather_prj_postload();
 	rb_do_all();
 	rbui_refresh_list();

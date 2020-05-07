@@ -291,7 +291,7 @@ struct CRaceCheckpoint
 	float verticaldisplacement; /*for types: air up down*/
 };
 EXPECT_SIZE(struct CRaceCheckpoint, 0x38);
-#define MAXRACECHECKPOINT 32
+#define MAX_RACECHECKPOINTS 32
 
 struct CPedFlags
 {
