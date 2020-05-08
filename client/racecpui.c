@@ -81,8 +81,9 @@ void cb_btn_mkracecp(struct UI_BUTTON *btn)
 
 	movemode = MODE_NONE;
 	editingCheckpoint = numcheckpoints;
-	racecheckpoints[editingCheckpoint].used = 1;
-	racecheckpoints[editingCheckpoint].free = 0;
+	racecheckpoints[editingCheckpoint].used = 0;
+	racecheckpoints[editingCheckpoint].free = 1;
+	racecheckpoints[editingCheckpoint].type = 0;
 	racecheckpoints[editingCheckpoint].pos = posToCreate;
 	racecheckpoints[editingCheckpoint].fRadius = 2.0f;
 	racecheckpoints[editingCheckpoint].arrowDirection.x = 1.0f;
@@ -173,7 +174,23 @@ void cb_btn_cplist(struct UI_BUTTON *btn)
 static
 void cb_rdbgroup_cptype(struct UI_RADIOBUTTON *rdb)
 {
-	racecheckpoints[editingCheckpoint].type = (char) rdb->_parent._parent.userdata;
+	char type;
+
+	type = (char) rdb->_parent._parent.userdata;
+	racecheckpoints[editingCheckpoint].type = type;
+	if (type < RACECP_TYPE_AIRROT) {
+		if (racecheckpoints[editingCheckpoint].rotationSpeed) {
+			racecheckpoints[editingCheckpoint].rotationSpeed = 0;
+			racecheckpoints[editingCheckpoint].used = 0;
+			racecheckpoints[editingCheckpoint].free = 1;
+		}
+	} else {
+		if (!racecheckpoints[editingCheckpoint].rotationSpeed) {
+			racecheckpoints[editingCheckpoint].rotationSpeed = 5;
+			racecheckpoints[editingCheckpoint].used = 0;
+			racecheckpoints[editingCheckpoint].free = 1;
+		}
+	}
 }
 
 static
@@ -188,18 +205,25 @@ static
 void cb_btn_cpreset(struct UI_BUTTON *btn)
 {
 	struct RwV3D pos;
+	char buf[10];
 
-	/*TODO: this does horrible things to the arrow etc*/
 	pos = racecheckpoints[editingCheckpoint].pos;
 	memset(racecheckpoints + editingCheckpoint, 0, sizeof(struct CRaceCheckpoint));
+	racecheckpoints[editingCheckpoint].used = 0;
+	racecheckpoints[editingCheckpoint].free = 1;
 	racecheckpoints[editingCheckpoint].pos = pos;
+	racecheckpoints[editingCheckpoint].type = 0;
+	racecheckpoints[editingCheckpoint].rotationSpeed = 0;
 	racecheckpoints[editingCheckpoint].arrowDirection.x = 0.0f;
 	racecheckpoints[editingCheckpoint].arrowDirection.y = 0.0f;
 	racecheckpoints[editingCheckpoint].arrowDirection.z = 0.0f;
-	racecheckpoints[editingCheckpoint].colABGR = 0xFFFF0000;
-	racecheckpoints[editingCheckpoint].used = 1;
-	racecheckpoints[editingCheckpoint].free = 0;
-	racecheckpoints[editingCheckpoint].fRadius = 10.0f;
+	racecheckpoints[editingCheckpoint].colABGR = 0xFF0000FF;
+	racecheckpoints[editingCheckpoint].fRadius = 1.0f;
+	cp_colpick->last_angle = 0.0f;
+	cp_colpick->last_dist = 0.0f;
+	cp_colpick->last_selected_colorABGR = 0xFF0000FF;
+	sprintf(buf, "%.4f", 1.0f);
+	ui_in_set_text(in_radius, buf);
 	ui_rdb_click_match_userdata(rdbgroup_cptype, (void*) 0);
 }
 
@@ -355,6 +379,7 @@ void racecpui_init()
 	ui_wnd_add_child(window_cpsettings, lbl);
 	cp_colpick = ui_colpick_make(100.0f, cb_cp_cpcol);
 	cp_colpick->_parent.span = 3;
+	cp_colpick->last_selected_colorABGR = 0xFF0000FF;
 	ui_wnd_add_child(window_cpsettings, cp_colpick);
 	btn = ui_btn_make("Reset", cb_btn_cpreset);
 	btn->_parent.span = 4;

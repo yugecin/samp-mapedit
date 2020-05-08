@@ -280,12 +280,19 @@ struct CRaceCheckpoint
 	char free;
 	char used;
 	char isgoingup; /*for types: air up down*/
-	char __pad4[4];
+	char __pad4[3]; /*always 0*/
+	char __pad8; /*always 0 or FF when inactive?*/
 	int colABGR;
-	char __padC[4];
+	char __padC; /*always 0?*/
+	char __padD; /*usually 4? seemingly no effect*/
+	char rotationSpeed; /*for air types, needs a frame of non rendering to apply*/
+	char __padF; /*always 0?*/
 	struct RwV3D pos;
 	struct RwV3D arrowDirection;
-	char __pad28[4];
+	char __pad28;
+	char __pad29;
+	char __pad2A; /*initially 80*/
+	char __pad2B; /*initially 3E*/
 	float fRadius;
 	char __pad30[4];
 	float verticaldisplacement; /*for types: air up down*/

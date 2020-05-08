@@ -627,6 +627,9 @@ void ui_render()
 
 		game_PedSetPos(player, &player_position);
 
+		/*this one should be _before_ update and input handling*/
+		racecp_frame_update();
+
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if ((context_menu_active &&
 				ui_wnd_mouseup(context_menu)) ||
@@ -689,9 +692,6 @@ void ui_render()
 				highlighted_entity = NULL;
 			}
 		}
-
-		/*this one should be _before_ update*/
-		racecp_frame_update();
 
 		if (active_window != NULL) {
 			ui_wnd_update(active_window);
