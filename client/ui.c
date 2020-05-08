@@ -500,6 +500,15 @@ void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint)
 	}
 }
 
+void ui_get_clicked_position(struct RwV3D *pos)
+{
+	if (clicked_entity) {
+		*pos = clicked_colpoint.pos;
+	} else {
+		game_ScreenToWorld(pos, bgclickx, bgclicky, 60.0f);
+	}
+}
+
 static
 void background_element_just_clicked()
 {

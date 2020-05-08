@@ -594,12 +594,7 @@ int objui_on_background_element_just_clicked()
 		return 0;
 	}
 
-	if (clicked_entity) {
-		nextObjectPosition = clicked_colpoint.pos;
-	} else {
-		game_ScreenToWorld(
-			&nextObjectPosition, bgclickx, bgclicky, 60.0f);
-	}
+	ui_get_clicked_position(&nextObjectPosition);
 	return 1;
 }
 

@@ -65,6 +65,7 @@ void ui_prj_save(/*FILE*/ void *f, char *buf);
 int ui_prj_load_line(char *buf);
 void ui_prj_postload();
 int ui_is_cursor_hovering_any_window();
+void ui_get_clicked_position(struct RwV3D *pos);
 void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint);
 struct UI_WINDOW *ui_get_active_window();
 void ui_update_camera();

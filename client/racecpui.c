@@ -62,7 +62,6 @@ static
 void cb_btn_mkracecp(struct UI_BUTTON *btn)
 {
 	struct RwV3D posToCreate;
-	float x, y;
 
 	if (numcheckpoints == MAX_RACECHECKPOINTS) {
 		msg_title = "Race_cp";
@@ -72,14 +71,7 @@ void cb_btn_mkracecp(struct UI_BUTTON *btn)
 		return;
 	}
 
-	if (clicked_entity) {
-		posToCreate = clicked_colpoint.pos;
-	} else {
-		x = fresx / 2.0f;
-		y = fresy / 2.0f;
-		game_ScreenToWorld(&posToCreate, x, y, 40.0f);
-	}
-
+	ui_get_clicked_position(&posToCreate);
 	movemode = MODE_NONE;
 	editingCheckpoint = numcheckpoints;
 	racecheckpoints[editingCheckpoint].used = 0;

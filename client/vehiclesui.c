@@ -34,17 +34,8 @@ void cb_vehsel_create(short model)
 static
 void cb_btn_contextmenu_mkvehicle(struct UI_BUTTON *btn)
 {
-	float x, y;
-
-	if (clicked_entity) {
-		posToCreate = clicked_colpoint.pos;
-		posToCreate.z += 1.0f;
-	} else {
-		x = fresx / 2.0f;
-		y = fresy / 2.0f;
-		game_ScreenToWorld(&posToCreate, x, y, 40.0f);
-	}
-
+	ui_get_clicked_position(&posToCreate);
+	posToCreate.z += 1.0f;
 	vehsel_show(cb_vehsel_create);
 }
 
