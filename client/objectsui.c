@@ -265,7 +265,6 @@ void cb_btn_move_obj(struct UI_BUTTON *btn)
 
 	if (selected_object != NULL) {
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
 		nc.nc = NC_EditObject;
 		nc.params.asint[1] = 0;
 		nc.params.asint[2] = selected_object->samp_objectid;
@@ -280,7 +279,6 @@ void cb_btn_tp_obj_to_cam(struct UI_BUTTON *btn)
 
 	if (selected_object != NULL) {
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
 		nc.nc = NC_SetObjectPos;
 		nc.params.asint[1] = selected_object->samp_objectid;
 		nc.params.asflt[2] = camera->position.x;

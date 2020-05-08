@@ -26,7 +26,6 @@
 #pragma pack(push,1)
 struct MSG {
 	int id;
-	void *data;
 };
 
 struct MSG_NC {

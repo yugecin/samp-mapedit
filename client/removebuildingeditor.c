@@ -369,7 +369,6 @@ void cb_btn_move_origin(struct UI_BUTTON *btn)
 		game_ObjectSetPos(manipulateEntity, &current_remove.origin);
 		move_mode = MOVE_MODE_ORIGIN;
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
 		nc.nc = NC_EditObject;
 		nc.params.asint[1] = 0;
 		nc.params.asint[2] = manipulateObject.samp_objectid;
@@ -392,7 +391,6 @@ void cb_btn_move_radius(struct UI_BUTTON *btn)
 		game_ObjectSetPos(manipulateEntity, &pos);
 		move_mode = MOVE_MODE_RADIUS;
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
 		nc.nc = NC_EditObject;
 		nc.params.asint[1] = 0;
 		nc.params.asint[2] = manipulateObject.samp_objectid;

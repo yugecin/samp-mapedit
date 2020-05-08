@@ -130,7 +130,6 @@ static void destroy_object()
 	if (hasvalidobject) {
 		hasvalidobject = 0;
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
 		nc.nc = NC_DestroyObject;
 		nc.params.asint[1] = picking_object.samp_objectid;
 		sockets_send(&nc, sizeof(nc));

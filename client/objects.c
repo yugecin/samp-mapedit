@@ -48,7 +48,6 @@ void objects_set_position_rotation_after_creation(struct OBJECT *object)
 	TRACE("objects_set_position_rotation_after_creation");
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_SetObjectPos;
 	nc.params.asint[1] = object->samp_objectid;
 	nc.params.asflt[2] = object->pos.x;
@@ -82,7 +81,6 @@ int objects_object_created(struct OBJECT *object)
 	active_layer->numobjects++;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_SetObjectRot;
 	nc.params.asint[1] = cloning_object.samp_objectid;
 	nc.params.asflt[2] = cloning_object_rot.x;
@@ -91,7 +89,6 @@ int objects_object_created(struct OBJECT *object)
 	sockets_send(&nc, sizeof(nc));
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_EditObject;
 	nc.params.asint[1] = 0;
 	nc.params.asint[2] = cloning_object.samp_objectid;
@@ -133,7 +130,6 @@ void objects_do_create_object(struct OBJECT *object)
 	objects_created_this_frame++;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0; /*TODO*/
 	nc.nc = NC_CreateObject;
 	nc.params.asint[1] = object->model;
 	nc.params.asint[2] = (int) object;
@@ -331,7 +327,6 @@ void objects_delete_layer(struct OBJECTLAYER *layer)
 	}
 	for (i = 0; i < layer->numobjects; i++) {
 		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc._parent.data = 0;
 		nc.nc = NC_DestroyObject;
 		nc.params.asint[1] = layer->objects[i].samp_objectid;
 		sockets_send(&nc, sizeof(nc));
@@ -467,7 +462,6 @@ void objects_delete_obj(struct OBJECT *obj)
 	int idx;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_DestroyObject;
 	nc.params.asint[1] = obj->samp_objectid;
 	sockets_send(&nc, sizeof(nc));

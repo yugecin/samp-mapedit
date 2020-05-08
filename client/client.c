@@ -229,12 +229,10 @@ void client_init()
 	prj_do_show_window();
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_DestroyVehicle;
 	nc.params.asint[1] = 1;
 	sockets_send(&nc, sizeof(nc));
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_SetWorldTime;
 	nc.params.asint[1] = 13;
 	sockets_send(&nc, sizeof(nc));

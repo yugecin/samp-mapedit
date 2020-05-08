@@ -107,7 +107,6 @@ void position_manipulateobject(struct RwV3D *pos)
 	game_ObjectSetPos(manipulateEntity, pos);
 	game_ObjectSetHeadingRad(manipulateEntity, 0.0f);
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_SetObjectRot;
 	nc.params.asint[1] = manipulateObject.samp_objectid;
 	nc.params.asflt[2] = 0.0f;
@@ -115,7 +114,6 @@ void position_manipulateobject(struct RwV3D *pos)
 	nc.params.asflt[4] = 0.0f;
 	sockets_send(&nc, sizeof(nc));
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
 	nc.nc = NC_EditObject;
 	nc.params.asint[1] = 0;
 	nc.params.asint[2] = manipulateObject.samp_objectid;
