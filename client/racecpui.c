@@ -27,6 +27,7 @@ static struct UI_BUTTON *btn_mainmenu_cplist;
 static struct UI_BUTTON *btn_contextmenu_mkracecp;
 static struct RADIOBUTTONGROUP *rdbgroup_cptype;
 static struct UI_COLORPICKER *cp_colpick;
+static struct UI_INPUT *in_description;
 static struct UI_INPUT *in_coord_x;
 static struct UI_INPUT *in_coord_y;
 static struct UI_INPUT *in_coord_z;
@@ -172,6 +173,12 @@ void cb_btn_cplist(struct UI_BUTTON *btn)
 }
 
 static
+void cb_in_description(struct UI_INPUT *in)
+{
+	memcpy(checkpointDescriptions[editingCheckpoint], in->value, strlen(in->value));
+}
+
+static
 void cb_rdbgroup_cptype(struct UI_RADIOBUTTON *rdb)
 {
 	char type;
@@ -299,6 +306,10 @@ void racecpui_init()
 	window_cpsettings->columns = 4;
 	proc_cpsettings_draw = window_cpsettings->_parent._parent.proc_draw;
 	window_cpsettings->_parent._parent.proc_draw = draw_window_cpsettings;
+	ui_wnd_add_child(window_cpsettings, ui_lbl_make("Description:"));
+	in_description = ui_in_make(cb_in_description);
+	in_description->_parent.span = 3;
+	ui_wnd_add_child(window_cpsettings, in_description);
 	ui_wnd_add_child(window_cpsettings, ui_lbl_make("Origin:"));
 	in_coord_x = ui_in_make(cb_in_origin);
 	in_coord_x->_parent.span = 3;

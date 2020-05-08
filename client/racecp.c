@@ -5,7 +5,7 @@
 #include "racecp.h"
 #include <stdio.h>
 
-struct RACECP racecpdata[MAX_RACECHECKPOINTS];
+char checkpointDescriptions[MAX_RACECHECKPOINTS][INPUT_TEXTLEN + 1];
 int numcheckpoints;
 
 void racecp_resetall()

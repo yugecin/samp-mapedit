@@ -1,10 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-struct RACECP {
-	char used;
-};
-
-extern struct RACECP racecpdata[MAX_RACECHECKPOINTS];
+extern char checkpointDescriptions[MAX_RACECHECKPOINTS][51];
 extern int numcheckpoints;
 
 void racecp_resetall();
