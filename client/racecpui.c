@@ -146,9 +146,9 @@ void cb_btn_move_direction(struct UI_BUTTON *btn)
 
 	movemode = MODE_DIRECTION;
 	pos = racecheckpoints[editingCheckpoint].pos;
-	pos.x += racecheckpoints[editingCheckpoint].arrowDirection.x;
-	pos.y += racecheckpoints[editingCheckpoint].arrowDirection.y;
-	pos.z += racecheckpoints[editingCheckpoint].arrowDirection.z;
+	pos.x += racecheckpoints[editingCheckpoint].arrowDirection.x * 10.0f;
+	pos.y += racecheckpoints[editingCheckpoint].arrowDirection.y * 10.0f;
+	pos.z += racecheckpoints[editingCheckpoint].arrowDirection.z * 10.0f;
 	position_manipulateobject(&pos);
 }
 
@@ -263,9 +263,10 @@ int draw_window_cpsettings(struct UI_ELEMENT *wnd)
 		dx = pos.x - racecheckpoints[editingCheckpoint].pos.x;
 		dy = pos.y - racecheckpoints[editingCheckpoint].pos.y;
 		dz = pos.z - racecheckpoints[editingCheckpoint].pos.z;
-		racecheckpoints[editingCheckpoint].arrowDirection.x = dx;
-		racecheckpoints[editingCheckpoint].arrowDirection.y = dy;
-		racecheckpoints[editingCheckpoint].arrowDirection.z = dz;
+		dist = (float) sqrt(dx * dx + dy * dy + dz * dz);
+		racecheckpoints[editingCheckpoint].arrowDirection.x = dx / dist;
+		racecheckpoints[editingCheckpoint].arrowDirection.y = dy / dist;
+		racecheckpoints[editingCheckpoint].arrowDirection.z = dz / dist;
 	}
 skip:
 	return proc_cpsettings_draw(wnd);
