@@ -85,7 +85,7 @@ void cb_btn_mkracecp(struct UI_BUTTON *btn)
 	racecheckpoints[editingCheckpoint].free = 0;
 	racecheckpoints[editingCheckpoint].pos = posToCreate;
 	racecheckpoints[editingCheckpoint].fRadius = 2.0f;
-	racecheckpoints[editingCheckpoint].arrowDirection.x = 10.0f;
+	racecheckpoints[editingCheckpoint].arrowDirection.x = 1.0f;
 	racecheckpoints[editingCheckpoint].arrowDirection.y = 0.0f;
 	racecheckpoints[editingCheckpoint].arrowDirection.z = 0.0f;
 	racecheckpoints[editingCheckpoint].colABGR = cp_colpick->last_selected_colorABGR;
@@ -98,12 +98,11 @@ void cb_btn_mkracecp(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_move(struct UI_BUTTON *btn)
+void position_manipulateobject(struct RwV3D *pos)
 {
 	struct MSG_NC nc;
 
-	movemode = MODE_ORIGIN;
-	game_ObjectSetPos(manipulateEntity, &racecheckpoints[editingCheckpoint].pos);
+	game_ObjectSetPos(manipulateEntity, pos);
 	game_ObjectSetHeadingRad(manipulateEntity, 0.0f);
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc._parent.data = 0;
@@ -122,30 +121,34 @@ void cb_btn_move(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_move_position(struct UI_BUTTON *btn)
+{
+	movemode = MODE_ORIGIN;
+	position_manipulateobject(&racecheckpoints[editingCheckpoint].pos);
+}
+
+static
 void cb_btn_move_radius(struct UI_BUTTON *btn)
 {
-	struct MSG_NC nc;
 	struct RwV3D pos;
 
 	movemode = MODE_RADIUS;
 	pos = racecheckpoints[editingCheckpoint].pos;
 	pos.x += racecheckpoints[editingCheckpoint].fRadius;
-	game_ObjectSetPos(manipulateEntity, &pos);
-	game_ObjectSetHeadingRad(manipulateEntity, 0.0f);
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
-	nc.nc = NC_SetObjectRot;
-	nc.params.asint[1] = manipulateObject.samp_objectid;
-	nc.params.asflt[2] = 0.0f;
-	nc.params.asflt[3] = 0.0f;
-	nc.params.asflt[4] = 0.0f;
-	sockets_send(&nc, sizeof(nc));
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc._parent.data = 0;
-	nc.nc = NC_EditObject;
-	nc.params.asint[1] = 0;
-	nc.params.asint[2] = manipulateObject.samp_objectid;
-	sockets_send(&nc, sizeof(nc));
+	position_manipulateobject(&pos);
+}
+
+static
+void cb_btn_move_direction(struct UI_BUTTON *btn)
+{
+	struct RwV3D pos;
+
+	movemode = MODE_DIRECTION;
+	pos = racecheckpoints[editingCheckpoint].pos;
+	pos.x += racecheckpoints[editingCheckpoint].arrowDirection.x;
+	pos.y += racecheckpoints[editingCheckpoint].arrowDirection.y;
+	pos.z += racecheckpoints[editingCheckpoint].arrowDirection.z;
+	position_manipulateobject(&pos);
 }
 
 static
@@ -204,7 +207,7 @@ static
 int draw_window_cpsettings(struct UI_ELEMENT *wnd)
 {
 	struct RwV3D pos;
-	float dx, dy, oldrad;
+	float dx, dy, dz, dist, oldrad;
 
 	if (movemode == MODE_ORIGIN) {
 		if (ui_active_element == in_coord_x ||
@@ -231,6 +234,14 @@ int draw_window_cpsettings(struct UI_ELEMENT *wnd)
 			racecheckpoints[editingCheckpoint].free = 1;
 		}
 		update_inputs_radius();
+	} else if (movemode == MODE_DIRECTION) {
+		game_ObjectGetPos(manipulateEntity, &pos);
+		dx = pos.x - racecheckpoints[editingCheckpoint].pos.x;
+		dy = pos.y - racecheckpoints[editingCheckpoint].pos.y;
+		dz = pos.z - racecheckpoints[editingCheckpoint].pos.z;
+		racecheckpoints[editingCheckpoint].arrowDirection.x = dx;
+		racecheckpoints[editingCheckpoint].arrowDirection.y = dy;
+		racecheckpoints[editingCheckpoint].arrowDirection.z = dz;
 	}
 skip:
 	return proc_cpsettings_draw(wnd);
@@ -279,7 +290,7 @@ void racecpui_init()
 	in_coord_z->_parent.userdata = (void*) 2;
 	ui_wnd_add_child(window_cpsettings, in_coord_z);
 	ui_wnd_add_child(window_cpsettings, NULL);
-	btn = ui_btn_make("Move", cb_btn_move);
+	btn = ui_btn_make("Move", cb_btn_move_position);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, ui_lbl_make("Radius:"));
@@ -288,6 +299,10 @@ void racecpui_init()
 	ui_wnd_add_child(window_cpsettings, in_radius);
 	ui_wnd_add_child(window_cpsettings, NULL);
 	btn = ui_btn_make("Move", cb_btn_move_radius);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(window_cpsettings, btn);
+	ui_wnd_add_child(window_cpsettings, ui_lbl_make("Direction:"));
+	btn = ui_btn_make("Move", cb_btn_move_direction);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(window_cpsettings, btn);
 	ui_wnd_add_child(window_cpsettings, ui_lbl_make("Type:"));
