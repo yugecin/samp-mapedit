@@ -59,6 +59,18 @@ void update_inputs_radius()
 }
 
 static
+void racecpui_edit_checkpoint(int atIndex)
+{
+	movemode = MODE_NONE;
+	ui_in_set_text(in_description, checkpointDescriptions[atIndex]);
+	editingCheckpoint = atIndex;
+	ui_rdb_click_match_userdata(rdbgroup_cptype, (void*) racecheckpoints[atIndex].type);
+	update_inputs_origin();
+	update_inputs_radius();
+	ui_show_window(window_cpsettings);
+}
+
+static
 void cb_btn_mkracecp(struct UI_BUTTON *btn)
 {
 	struct RwV3D posToCreate;
@@ -72,23 +84,18 @@ void cb_btn_mkracecp(struct UI_BUTTON *btn)
 	}
 
 	ui_get_clicked_position(&posToCreate);
-	movemode = MODE_NONE;
-	editingCheckpoint = numcheckpoints;
-	racecheckpoints[editingCheckpoint].used = 0;
-	racecheckpoints[editingCheckpoint].free = 1;
-	racecheckpoints[editingCheckpoint].type = 0;
-	racecheckpoints[editingCheckpoint].pos = posToCreate;
-	racecheckpoints[editingCheckpoint].fRadius = 2.0f;
-	racecheckpoints[editingCheckpoint].arrowDirection.x = 1.0f;
-	racecheckpoints[editingCheckpoint].arrowDirection.y = 0.0f;
-	racecheckpoints[editingCheckpoint].arrowDirection.z = 0.0f;
-	racecheckpoints[editingCheckpoint].colABGR = cp_colpick->last_selected_colorABGR;
-	ui_rdb_click_match_userdata(rdbgroup_cptype, (void*) 0);
+	checkpointDescriptions[numcheckpoints][0] = 0;
+	racecheckpoints[numcheckpoints].used = 0;
+	racecheckpoints[numcheckpoints].free = 1;
+	racecheckpoints[numcheckpoints].type = 0;
+	racecheckpoints[numcheckpoints].pos = posToCreate;
+	racecheckpoints[numcheckpoints].fRadius = 2.0f;
+	racecheckpoints[numcheckpoints].arrowDirection.x = 1.0f;
+	racecheckpoints[numcheckpoints].arrowDirection.y = 0.0f;
+	racecheckpoints[numcheckpoints].arrowDirection.z = 0.0f;
+	racecheckpoints[numcheckpoints].colABGR = cp_colpick->last_selected_colorABGR;
+	racecpui_edit_checkpoint(numcheckpoints);
 	numcheckpoints++;
-	update_inputs_origin();
-	update_inputs_radius();
-
-	ui_show_window(window_cpsettings);
 }
 
 static
@@ -211,11 +218,11 @@ void cb_btn_cpreset(struct UI_BUTTON *btn)
 	racecheckpoints[editingCheckpoint].pos = pos;
 	racecheckpoints[editingCheckpoint].type = 0;
 	racecheckpoints[editingCheckpoint].rotationSpeed = 0;
-	racecheckpoints[editingCheckpoint].arrowDirection.x = 0.0f;
+	racecheckpoints[editingCheckpoint].arrowDirection.x = 1.0f;
 	racecheckpoints[editingCheckpoint].arrowDirection.y = 0.0f;
 	racecheckpoints[editingCheckpoint].arrowDirection.z = 0.0f;
 	racecheckpoints[editingCheckpoint].colABGR = 0xFF0000FF;
-	racecheckpoints[editingCheckpoint].fRadius = 1.0f;
+	racecheckpoints[editingCheckpoint].fRadius = 2.0f;
 	cp_colpick->last_angle = 0.0f;
 	cp_colpick->last_dist = 0.0f;
 	cp_colpick->last_selected_colorABGR = 0xFF0000FF;
