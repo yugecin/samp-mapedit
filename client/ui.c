@@ -623,7 +623,6 @@ void ui_render()
 			prevMouseState->lmb && !activeMouseState->lmb;
 
 		vehicles_frame_update();
-		vehedit_frame_update();
 
 		if (highlighted_entity) {
 			entity_draw_bound_rect(highlighted_entity, 0xFF);

@@ -18,23 +18,24 @@ static struct UI_INPUT *in_coord_y;
 static struct UI_INPUT *in_coord_z;
 static struct UI_INPUT *in_heading;
 static struct VEHICLE *editingVehicle;
+static ui_method *proc_draw_window_vehedit;
+static char moveFromManipulateObject;
 static char *editingColor;
 static void (*callback)();
 
 static
-void update_manipulate_object()
+void update_inputs()
 {
-	struct MSG_NC nc;
+	char buf[20];
 
-	game_ObjectSetPos(manipulateEntity, &editingVehicle->pos);
-	game_ObjectSetHeadingRad(manipulateEntity, editingVehicle->heading);
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc.nc = NC_SetObjectRot;
-	nc.params.asint[1] = manipulateObject.samp_objectid;
-	nc.params.asflt[2] = 0.0f;
-	nc.params.asflt[3] = 0.0f;
-	nc.params.asflt[4] = editingVehicle->heading * 180.0f / M_PI;
-	sockets_send(&nc, sizeof(nc));
+	sprintf(buf, "%.4f", editingVehicle->pos.x);
+	ui_in_set_text(in_coord_x, buf);
+	sprintf(buf, "%.4f", editingVehicle->pos.y);
+	ui_in_set_text(in_coord_y, buf);
+	sprintf(buf, "%.4f", editingVehicle->pos.z);
+	ui_in_set_text(in_coord_z, buf);
+	sprintf(buf, "%.4f", editingVehicle->heading * 180.0f / M_PI);
+	ui_in_set_text(in_heading, buf);
 }
 
 static
@@ -66,7 +67,6 @@ void cb_in_coords_heading(struct UI_INPUT *in)
 		value /= 180.0f * M_PI;
 	}
 	*((float*) in->_parent.userdata) = value;
-	update_manipulate_object();
 }
 
 static
@@ -74,6 +74,16 @@ void cb_btn_move(struct UI_BUTTON *btn)
 {
 	struct MSG_NC nc;
 
+	moveFromManipulateObject = 1;
+	game_ObjectSetPos(manipulateEntity, &editingVehicle->pos);
+	game_ObjectSetHeadingRad(manipulateEntity, editingVehicle->heading);
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc.nc = NC_SetObjectRot;
+	nc.params.asint[1] = manipulateObject.samp_objectid;
+	nc.params.asflt[2] = 0.0f;
+	nc.params.asflt[3] = 0.0f;
+	nc.params.asflt[4] = editingVehicle->heading * 180.0f / M_PI;
+	sockets_send(&nc, sizeof(nc));
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc.nc = NC_EditObject;
 	nc.params.asint[1] = 0;
@@ -137,35 +147,15 @@ void cb_btn_editcol(struct UI_BUTTON *btn)
 	ui_show_window(wnd_colpick);
 }
 
-void vehedit_frame_update()
-{
-	char buf[20];
-
-	if (ui_get_active_window() != wnd &&
-		ui_get_active_window() != wnd_colpick)
-	{
-		return;
-	}
-	game_ObjectGetPos(manipulateEntity, &editingVehicle->pos);
-	game_ObjectGetHeadingRad(manipulateEntity, &editingVehicle->heading);
-	sprintf(buf, "%.4f", editingVehicle->pos.x);
-	ui_in_set_text(in_coord_x, buf);
-	sprintf(buf, "%.4f", editingVehicle->pos.y);
-	ui_in_set_text(in_coord_y, buf);
-	sprintf(buf, "%.4f", editingVehicle->pos.z);
-	ui_in_set_text(in_coord_z, buf);
-	sprintf(buf, "%.4f", editingVehicle->heading * 180.0f / M_PI);
-	ui_in_set_text(in_heading, buf);
-}
-
 void vehedit_show(struct VEHICLE *veh, void (*cb)())
 {
+	moveFromManipulateObject = 0;
 	editingVehicle = veh;
-	update_manipulate_object();
 	in_coord_x->_parent.userdata = &veh->pos.x;
 	in_coord_y->_parent.userdata = &veh->pos.y;
 	in_coord_z->_parent.userdata = &veh->pos.z;
 	in_heading->_parent.userdata = &veh->heading;
+	update_inputs();
 	ui_show_window(wnd);
 	callback = cb;
 }
@@ -214,6 +204,24 @@ void cb_btn_colpick_close(struct UI_BUTTON *btn)
 	ui_show_window(wnd);
 }
 
+static
+int draw_window_vehedit(struct UI_ELEMENT *wnd)
+{
+	if (moveFromManipulateObject) {
+		if (ui_active_element == in_coord_x ||
+			ui_active_element == in_coord_y ||
+			ui_active_element == in_coord_z)
+		{
+			moveFromManipulateObject = 0;
+		} else {
+			game_ObjectGetPos(manipulateEntity, &editingVehicle->pos);
+			game_ObjectGetHeadingRad(manipulateEntity, &editingVehicle->heading);
+			update_inputs();
+		}
+	}
+	return proc_draw_window_vehedit(wnd);
+}
+
 void vehedit_init()
 {
 	struct UI_LABEL *lbl;
@@ -223,6 +231,8 @@ void vehedit_init()
 	wnd = ui_wnd_make(5000.0f, 300.0f, "Vehicle");
 	wnd->columns = 3;
 	wnd->closeable = 0;
+	proc_draw_window_vehedit = wnd->_parent._parent.proc_draw;
+	wnd->_parent._parent.proc_draw = draw_window_vehedit;
 
 	lbl = ui_lbl_make("Colors:");
 	ui_wnd_add_child(wnd, lbl);
