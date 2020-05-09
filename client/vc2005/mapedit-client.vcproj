@@ -403,11 +403,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\racecpui.c"
+			RelativePath="..\racecpeditor.c"
 			>
 		</File>
 		<File
-			RelativePath="..\racecpui.h"
+			RelativePath="..\racecpeditor.h"
 			>
 		</File>
 		<File

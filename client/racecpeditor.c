@@ -6,7 +6,7 @@
 #include "objects.h"
 #include "msgbox.h"
 #include "racecp.h"
-#include "racecpui.h"
+#include "racecpeditor.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <stdio.h>
@@ -59,7 +59,7 @@ void update_inputs_radius()
 }
 
 static
-void racecpui_edit_checkpoint(int atIndex)
+void racecpeditor_edit_checkpoint(int atIndex)
 {
 	movemode = MODE_NONE;
 	ui_in_set_text(in_description, checkpointDescriptions[atIndex]);
@@ -94,7 +94,7 @@ void cb_btn_mkracecp(struct UI_BUTTON *btn)
 	racecheckpoints[numcheckpoints].arrowDirection.y = 0.0f;
 	racecheckpoints[numcheckpoints].arrowDirection.z = 0.0f;
 	racecheckpoints[numcheckpoints].colABGR = cp_colpick->last_selected_colorABGR;
-	racecpui_edit_checkpoint(numcheckpoints);
+	racecpeditor_edit_checkpoint(numcheckpoints);
 	numcheckpoints++;
 }
 
@@ -276,7 +276,7 @@ skip:
 	return proc_cpsettings_draw(wnd);
 }
 
-void racecpui_init()
+void racecpeditor_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
@@ -395,12 +395,12 @@ void racecpui_init()
 	ui_wnd_add_child(window_cpsettings, btn);
 }
 
-void racecpui_dispose()
+void racecpeditor_dispose()
 {
 	ui_wnd_dispose(window_cpsettings);
 }
 
-void racecpui_prj_postload()
+void racecpeditor_prj_postload()
 {
 	btn_mainmenu_cplist->enabled = 1;
 	btn_contextmenu_mkracecp->enabled = 1;

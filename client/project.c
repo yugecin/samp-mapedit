@@ -10,7 +10,7 @@
 #include "player.h"
 #include "project.h"
 #include "racecp.h"
-#include "racecpui.h"
+#include "racecpeditor.h"
 #include "removedbuildings.h"
 #include "removedbuildingsui.h"
 #include "timeweather.h"
@@ -111,7 +111,7 @@ void prj_postload()
 	objui_prj_postload();
 	vehiclestorage_load();
 	vehiclesui_prj_postload();
-	racecpui_prj_postload();
+	racecpeditor_prj_postload();
 	timeweather_prj_postload();
 	rb_do_all();
 	rbui_refresh_list();
