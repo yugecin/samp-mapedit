@@ -13,6 +13,7 @@
 #include "project.h"
 #include "msgbox.h"
 #include "racecp.h"
+#include "racecpui.h"
 #include "removebuildingeditor.h"
 #include "samp.h"
 #include "ui.h"
@@ -152,6 +153,7 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	objects_on_active_window_changed(wnd);
 	objlistui_on_active_window_changed(wnd);
 	vehiclesui_on_active_window_changed(wnd);
+	racecpui_on_active_window_changed(wnd);
 }
 
 void ui_hide_window()
