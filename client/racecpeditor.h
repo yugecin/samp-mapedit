@@ -2,4 +2,4 @@
 
 void racecpeditor_init();
 void racecpeditor_dispose();
-void racecpeditor_prj_postload();
+void racecpeditor_edit_checkpoint(int atIndex);

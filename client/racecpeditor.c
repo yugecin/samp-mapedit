@@ -4,7 +4,6 @@
 #include "game.h"
 #include "ui.h"
 #include "objects.h"
-#include "msgbox.h"
 #include "racecp.h"
 #include "racecpeditor.h"
 #include "sockets.h"
@@ -23,8 +22,6 @@ enum manipulateobject_mode movemode;
 
 static struct UI_WINDOW *window_cpsettings;
 
-static struct UI_BUTTON *btn_mainmenu_cplist;
-static struct UI_BUTTON *btn_contextmenu_mkracecp;
 static struct RADIOBUTTONGROUP *rdbgroup_cptype;
 static struct UI_COLORPICKER *cp_colpick;
 static struct UI_INPUT *in_description;
@@ -56,46 +53,6 @@ void update_inputs_radius()
 
 	sprintf(buf, "%.4f", racecheckpoints[editingCheckpoint].fRadius);
 	ui_in_set_text(in_radius, buf);
-}
-
-static
-void racecpeditor_edit_checkpoint(int atIndex)
-{
-	movemode = MODE_NONE;
-	ui_in_set_text(in_description, checkpointDescriptions[atIndex]);
-	editingCheckpoint = atIndex;
-	ui_rdb_click_match_userdata(rdbgroup_cptype, (void*) racecheckpoints[atIndex].type);
-	update_inputs_origin();
-	update_inputs_radius();
-	ui_show_window(window_cpsettings);
-}
-
-static
-void cb_btn_mkracecp(struct UI_BUTTON *btn)
-{
-	struct RwV3D posToCreate;
-
-	if (numcheckpoints == MAX_RACECHECKPOINTS) {
-		msg_title = "Race_cp";
-		msg_message = "Max_race_checkpoints_reached";
-		msg_btn1text = "Ok";
-		msg_show(NULL);
-		return;
-	}
-
-	ui_get_clicked_position(&posToCreate);
-	checkpointDescriptions[numcheckpoints][0] = 0;
-	racecheckpoints[numcheckpoints].used = 0;
-	racecheckpoints[numcheckpoints].free = 1;
-	racecheckpoints[numcheckpoints].type = 0;
-	racecheckpoints[numcheckpoints].pos = posToCreate;
-	racecheckpoints[numcheckpoints].fRadius = 2.0f;
-	racecheckpoints[numcheckpoints].arrowDirection.x = 1.0f;
-	racecheckpoints[numcheckpoints].arrowDirection.y = 0.0f;
-	racecheckpoints[numcheckpoints].arrowDirection.z = 0.0f;
-	racecheckpoints[numcheckpoints].colABGR = cp_colpick->last_selected_colorABGR;
-	racecpeditor_edit_checkpoint(numcheckpoints);
-	numcheckpoints++;
 }
 
 static
@@ -162,11 +119,6 @@ void cb_in_radius(struct UI_INPUT *in)
 	racecheckpoints[editingCheckpoint].fRadius = (float) atof(in->value);
 	racecheckpoints[editingCheckpoint].used = 0;
 	racecheckpoints[editingCheckpoint].free = 1;
-}
-
-static
-void cb_btn_cplist(struct UI_BUTTON *btn)
-{
 }
 
 static
@@ -276,27 +228,23 @@ skip:
 	return proc_cpsettings_draw(wnd);
 }
 
+void racecpeditor_edit_checkpoint(int atIndex)
+{
+	movemode = MODE_NONE;
+	ui_in_set_text(in_description, checkpointDescriptions[atIndex]);
+	editingCheckpoint = atIndex;
+	/*TODO: update colpick*/
+	ui_rdb_click_match_userdata(rdbgroup_cptype, (void*) racecheckpoints[atIndex].type);
+	update_inputs_origin();
+	update_inputs_radius();
+	ui_show_window(window_cpsettings);
+}
+
 void racecpeditor_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
 	struct UI_RADIOBUTTON *rdb;
-
-	/*context menu entry*/
-	btn = ui_btn_make("Make_race_CP", cb_btn_mkracecp);
-	ui_wnd_add_child(context_menu, btn);
-	btn->enabled = 0;
-	btn_contextmenu_mkracecp = btn;
-
-	/*main menu entry*/
-	lbl = ui_lbl_make("=_Race_CPs_=");
-	lbl->_parent.span = 2;
-	ui_wnd_add_child(main_menu, lbl);
-	btn = ui_btn_make("List", cb_btn_cplist);
-	btn->_parent.span = 2;
-	ui_wnd_add_child(main_menu, btn);
-	btn->enabled = 0;
-	btn_mainmenu_cplist = btn;
 
 	/*checkpoint settings window*/
 	window_cpsettings = ui_wnd_make(9000.0f, 500.0f, "Checkpoint");
@@ -398,10 +346,4 @@ void racecpeditor_init()
 void racecpeditor_dispose()
 {
 	ui_wnd_dispose(window_cpsettings);
-}
-
-void racecpeditor_prj_postload()
-{
-	btn_mainmenu_cplist->enabled = 1;
-	btn_contextmenu_mkracecp->enabled = 1;
 }

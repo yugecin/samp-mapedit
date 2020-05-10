@@ -411,6 +411,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\racecpui.c"
+			>
+		</File>
+		<File
+			RelativePath="..\racecpui.h"
+			>
+		</File>
+		<File
 			RelativePath="..\removebuildingeditor.c"
 			>
 		</File>

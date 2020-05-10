@@ -15,6 +15,7 @@
 #include "project.h"
 #include "racecp.h"
 #include "racecpeditor.h"
+#include "racecpui.h"
 #include "removedbuildings.h"
 #include "removebuildingeditor.h"
 #include "removedbuildingsui.h"
@@ -156,6 +157,7 @@ void client_finalize()
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
 	racecpeditor_dispose();
+	racecpui_dispose();
 	vehiclesui_dispose();
 	objbrowser_dispose();
 	objlistui_dispose();
@@ -224,6 +226,7 @@ void client_init()
 	rbe_init();
 	rbui_init();
 	vehiclesui_init();
+	racecpui_init();
 	racecpeditor_init();
 
 	prj_do_show_window();
