@@ -6,6 +6,7 @@
 #include "objects.h"
 #include "racecp.h"
 #include "racecpeditor.h"
+#include "racecpui.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <stdio.h>
@@ -158,29 +159,9 @@ void cb_cp_cpcol(struct UI_COLORPICKER *colpick)
 }
 
 static
-void cb_btn_cpreset(struct UI_BUTTON *btn)
+void cb_btn_back(struct UI_BUTTON *btn)
 {
-	struct RwV3D pos;
-	char buf[10];
-
-	pos = racecheckpoints[editingCheckpoint].pos;
-	memset(racecheckpoints + editingCheckpoint, 0, sizeof(struct CRaceCheckpoint));
-	racecheckpoints[editingCheckpoint].used = 0;
-	racecheckpoints[editingCheckpoint].free = 1;
-	racecheckpoints[editingCheckpoint].pos = pos;
-	racecheckpoints[editingCheckpoint].type = 0;
-	racecheckpoints[editingCheckpoint].rotationSpeed = 0;
-	racecheckpoints[editingCheckpoint].arrowDirection.x = 1.0f;
-	racecheckpoints[editingCheckpoint].arrowDirection.y = 0.0f;
-	racecheckpoints[editingCheckpoint].arrowDirection.z = 0.0f;
-	racecheckpoints[editingCheckpoint].colABGR = 0xFF0000FF;
-	racecheckpoints[editingCheckpoint].fRadius = 2.0f;
-	cp_colpick->last_angle = 0.0f;
-	cp_colpick->last_dist = 0.0f;
-	cp_colpick->last_selected_colorABGR = 0xFF0000FF;
-	sprintf(buf, "%.4f", 1.0f);
-	ui_in_set_text(in_radius, buf);
-	ui_rdb_click_match_userdata(rdbgroup_cptype, (void*) 0);
+	racecpui_show_window();
 }
 
 static
@@ -338,7 +319,7 @@ void racecpeditor_init()
 	cp_colpick->_parent.span = 3;
 	cp_colpick->last_selected_colorABGR = 0xFF0000FF;
 	ui_wnd_add_child(window_cpsettings, cp_colpick);
-	btn = ui_btn_make("Reset", cb_btn_cpreset);
+	btn = ui_btn_make("Back_to_list", cb_btn_back);
 	btn->_parent.span = 4;
 	ui_wnd_add_child(window_cpsettings, btn);
 }

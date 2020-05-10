@@ -14,6 +14,7 @@ static struct UI_WINDOW *wnd_cplist;
 static struct UI_LIST *lst_checkpoints;
 static struct UI_CHECKBOX *chk_snap_camera;
 static struct UI_BUTTON *btn_edit;
+static struct UI_BUTTON *btn_delete;
 static ui_method *proc_draw_window_cplist;
 
 static
@@ -53,7 +54,7 @@ void cb_btn_cplist(struct UI_BUTTON *btn)
 static
 void cb_list_item_selected(struct UI_LIST *lst)
 {
-	btn_edit->enabled = lst->selectedindex != -1;
+	btn_edit->enabled = btn_delete->enabled = lst->selectedindex != -1;
 }
 
 static
@@ -79,6 +80,39 @@ void cb_btn_edit(struct UI_BUTTON *btn)
 	if (idx != -1) {
 		racecpeditor_edit_checkpoint(idx);
 	}
+}
+
+static
+void cb_msg_confirm_delete(int choice)
+{
+	int idx, i;
+
+	if (choice == MSGBOX_RESULT_1) {
+		idx = ui_lst_get_selected_index(lst_checkpoints);
+		for (i = idx; i < numcheckpoints - 1; i++) {
+			memcpy(checkpointDescriptions + i,
+				checkpointDescriptions + i + 1,
+				sizeof(checkpointDescriptions[0]));
+			racecheckpoints[i] = racecheckpoints[i + 1];
+		}
+		for (i = idx; i < numcheckpoints; i++) {
+			racecheckpoints[i].free = 1;
+			racecheckpoints[i].used = 0;
+		}
+		numcheckpoints--;
+	}
+	ui_show_window(wnd_cplist);
+}
+
+static
+void cb_btn_delete(struct UI_BUTTON *btn)
+{
+	msg_title = "Checkpoints";
+	msg_message = "Delete_checkpoint?";
+	msg_message2 = "This_cannot_be_undone!";
+	msg_btn1text = "Yes";
+	msg_btn2text = "No";
+	msg_show(cb_msg_confirm_delete);
 }
 
 static
@@ -122,6 +156,11 @@ int draw_window_cplist(struct UI_ELEMENT *wnd)
 	return proc_draw_window_cplist(wnd);
 }
 
+void racecpui_show_window()
+{
+	ui_show_window(wnd_cplist);
+}
+
 void racecpui_on_active_window_changed(struct UI_WINDOW *wnd)
 {
 	if (wnd == wnd_cplist) {
@@ -162,6 +201,8 @@ void racecpui_init()
 	ui_wnd_add_child(wnd_cplist, lst_checkpoints);
 	btn_edit = ui_btn_make("Edit", cb_btn_edit);
 	ui_wnd_add_child(wnd_cplist, btn_edit);
+	btn_delete = ui_btn_make("Delete", cb_btn_delete);
+	ui_wnd_add_child(wnd_cplist, btn_delete);
 }
 
 void racecpui_dispose()

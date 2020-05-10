@@ -1,5 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+void racecpui_show_window();
 void racecpui_on_active_window_changed(struct UI_WINDOW *wnd);
 void racecpui_init();
 void racecpui_dispose();
