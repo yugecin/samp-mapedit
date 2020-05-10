@@ -14,6 +14,7 @@ static struct UI_WINDOW *wnd_cplist;
 static struct UI_LIST *lst_checkpoints;
 static struct UI_CHECKBOX *chk_snap_camera;
 static struct UI_BUTTON *btn_edit;
+static ui_method *proc_draw_window_cplist;
 
 static
 void cb_btn_mkracecp(struct UI_BUTTON *btn)
@@ -97,6 +98,30 @@ void racecpui_update_list_data()
 	ui_lst_set_data(lst_checkpoints, names, i);
 }
 
+static
+int draw_window_cplist(struct UI_ELEMENT *wnd)
+{
+	struct RwV3D in, out;
+	char *noname = "<noname>";
+	char *text;
+	int i;
+
+	for (i = 0; i < numcheckpoints; i++) {
+		in = racecheckpoints[i].pos;
+		in.z += 3.0f;
+		game_WorldToScreen(&out, &in);
+		if (out.z > 0.0f) {
+			text = checkpointDescriptions[i];
+			if (!text[0]) {
+				text = noname;
+			}
+			game_TextSetAlign(CENTER);
+			game_TextPrintString(out.x, out.y, text);
+		}
+	}
+	return proc_draw_window_cplist(wnd);
+}
+
 void racecpui_on_active_window_changed(struct UI_WINDOW *wnd)
 {
 	if (wnd == wnd_cplist) {
@@ -127,6 +152,8 @@ void racecpui_init()
 
 	/*vehicle list window*/
 	wnd_cplist = ui_wnd_make(9000.0f, 300.0f, "Checkpoints");
+	proc_draw_window_cplist = wnd_cplist->_parent._parent.proc_draw;
+	wnd_cplist->_parent._parent.proc_draw = draw_window_cplist;
 
 	chk_snap_camera = ui_chk_make("Snap_camera", 0, NULL);
 	ui_wnd_add_child(wnd_cplist, chk_snap_camera);
