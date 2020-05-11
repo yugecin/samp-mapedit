@@ -4,6 +4,7 @@
 #include "game.h"
 #include "racecp.h"
 #include <stdio.h>
+#include <string.h>
 
 char checkpointDescriptions[MAX_RACECHECKPOINTS][INPUT_TEXTLEN + 1];
 int numcheckpoints;
@@ -18,6 +19,11 @@ void racecp_resetall()
 	}
 }
 
+void racecp_prj_preload()
+{
+	numcheckpoints = 0;
+}
+
 void racecp_frame_update()
 {
 	int i;
@@ -30,9 +36,96 @@ void racecp_frame_update()
 
 void racecp_prj_save(FILE *f, char *buf)
 {
+	union {
+		float f;
+		int i;
+	} data;
+	int i;
+
+	for (i = 0; i < numcheckpoints; i++) {
+		fwrite(buf, sprintf(buf, "cp.%c.name %s\n", i + '0', checkpointDescriptions[i]), 1, f);
+		data.f = racecheckpoints[i].pos.x;
+		fwrite(buf, sprintf(buf, "cp.%c.type %d\n", i + '0', racecheckpoints[i].type), 1, f);
+		data.f = racecheckpoints[i].pos.x;
+		fwrite(buf, sprintf(buf, "cp.%c.p.x %d\n", i + '0', data.i), 1, f);
+		data.f = racecheckpoints[i].pos.y;
+		fwrite(buf, sprintf(buf, "cp.%c.p.y %d\n", i + '0', data.i), 1, f);
+		data.f = racecheckpoints[i].pos.z;
+		fwrite(buf, sprintf(buf, "cp.%c.p.z %d\n", i + '0', data.i), 1, f);
+		data.f = racecheckpoints[i].arrowDirection.x;
+		fwrite(buf, sprintf(buf, "cp.%c.a.x %d\n", i + '0', data.i), 1, f);
+		data.f = racecheckpoints[i].arrowDirection.y;
+		fwrite(buf, sprintf(buf, "cp.%c.a.y %d\n", i + '0', data.i), 1, f);
+		data.f = racecheckpoints[i].arrowDirection.z;
+		fwrite(buf, sprintf(buf, "cp.%c.a.z %d\n", i + '0', data.i), 1, f);
+		fwrite(buf, sprintf(buf, "cp.col %d\n", racecheckpoints[i].colABGR, data.i), 1, f);
+	}
+	fwrite(buf, sprintf(buf, "numcps %d\n", numcheckpoints), 1, f);
 }
 
 int racecp_prj_load_line(char *buf)
 {
-	return 0;
+	union {
+		float f;
+		int i;
+	} data;
+	int idx, i, j;
+
+	if (strncmp("numcps ", buf, 7) == 0) {
+		numcheckpoints = atoi(buf + 7);
+		return 1;
+	}
+
+	if (strncmp("cp.", buf, 3)) {
+		return 0;
+	}
+
+	idx = buf[3] - '0';
+	if (idx < 0 || MAX_RACECHECKPOINTS <= idx) {
+		return 1;
+	}
+
+	if (strncmp(".col ", buf + 4, 5) == 0) {
+		racecheckpoints[idx].colABGR = atoi(buf + 9);
+		return 1;
+	}
+
+	if (strncmp(".type ", buf + 4, 6) == 0) {
+		racecheckpoints[idx].type = atoi(buf + 10);
+		if (racecheckpoints[idx].type < RACECP_TYPE_AIRROT) {
+			racecheckpoints[idx].rotationSpeed = 0;
+		} else {
+			racecheckpoints[idx].rotationSpeed = 5;
+		}
+		return 1;
+	}
+
+	if (strncmp(".p.", buf + 4, 3) == 0) {
+		data.i = atoi(buf + 9);
+		*(&racecheckpoints[idx].pos.x + buf[7] - 'x') = data.f;
+		return 1;
+	}
+
+	if (strncmp(".a.", buf + 4, 3) == 0) {
+		data.i = atoi(buf + 9);
+		*(&racecheckpoints[idx].arrowDirection.x + buf[7] - 'x') = data.f;
+		return 1;
+	}
+
+	if (strncmp(".name ", buf + 4, 6) == 0) {
+		i = 10;
+		j = 0;
+		while (j < sizeof(checkpointDescriptions[idx])) {
+			if (buf[i] == 0 || buf[i] == '\n') {
+				j++;
+				break;
+			}
+			checkpointDescriptions[idx][j] = buf[i];
+			j++;
+			i++;
+		}
+		checkpointDescriptions[idx][j - 1] = 0;
+	}
+
+	return 1;
 }

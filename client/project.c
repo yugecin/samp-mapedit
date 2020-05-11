@@ -93,7 +93,7 @@ static
 void prj_preload()
 {
 	TRACE("prj_preload");
-	racecp_resetall();
+	racecp_prj_preload();
 	objects_prj_preload();
 	objui_prj_preload();
 	player_prj_preload();
@@ -106,6 +106,7 @@ static
 void prj_postload()
 {
 	TRACE("prj_postload");
+	racecp_resetall();
 	ui_prj_postload();
 	objects_prj_postload();
 	objui_prj_postload();
