@@ -58,7 +58,7 @@ void racecp_prj_save(FILE *f, char *buf)
 		fwrite(buf, sprintf(buf, "cp.%c.a.y %d\n", i + '0', data.i), 1, f);
 		data.f = racecheckpoints[i].arrowDirection.z;
 		fwrite(buf, sprintf(buf, "cp.%c.a.z %d\n", i + '0', data.i), 1, f);
-		fwrite(buf, sprintf(buf, "cp.col %d\n", racecheckpoints[i].colABGR, data.i), 1, f);
+		fwrite(buf, sprintf(buf, "cp.%c.col %d\n", i + '0', racecheckpoints[i].colABGR, data.i), 1, f);
 	}
 	fwrite(buf, sprintf(buf, "numcps %d\n", numcheckpoints), 1, f);
 }
