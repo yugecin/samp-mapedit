@@ -44,8 +44,9 @@ void racecp_prj_save(FILE *f, char *buf)
 
 	for (i = 0; i < numcheckpoints; i++) {
 		fwrite(buf, sprintf(buf, "cp.%c.name %s\n", i + '0', checkpointDescriptions[i]), 1, f);
-		data.f = racecheckpoints[i].pos.x;
 		fwrite(buf, sprintf(buf, "cp.%c.type %d\n", i + '0', racecheckpoints[i].type), 1, f);
+		data.f = racecheckpoints[i].fRadius;
+		fwrite(buf, sprintf(buf, "cp.%c.rad %d\n", i + '0', data.i), 1, f);
 		data.f = racecheckpoints[i].pos.x;
 		fwrite(buf, sprintf(buf, "cp.%c.p.x %d\n", i + '0', data.i), 1, f);
 		data.f = racecheckpoints[i].pos.y;
@@ -97,6 +98,12 @@ int racecp_prj_load_line(char *buf)
 		} else {
 			racecheckpoints[idx].rotationSpeed = 5;
 		}
+		return 1;
+	}
+
+	if (strncmp(".rad", buf + 4, 4) == 0) {
+		data.i = atoi(buf + 8);
+		racecheckpoints[idx].fRadius = data.f;
 		return 1;
 	}
 
