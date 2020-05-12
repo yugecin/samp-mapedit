@@ -135,21 +135,19 @@ void racecpui_update_list_data()
 static
 int draw_window_cplist(struct UI_ELEMENT *wnd)
 {
-	struct RwV3D in, out;
+	struct RwV3D out;
 	char *noname = "<noname>";
 	char *text;
 	int i;
 
+	game_TextSetAlign(CENTER);
 	for (i = 0; i < numcheckpoints; i++) {
-		in = racecheckpoints[i].pos;
-		in.z += 3.0f;
-		game_WorldToScreen(&out, &in);
+		game_WorldToScreen(&out, &racecheckpoints[i].pos);
 		if (out.z > 0.0f) {
 			text = checkpointDescriptions[i];
 			if (!text[0]) {
 				text = noname;
 			}
-			game_TextSetAlign(CENTER);
 			game_TextPrintString(out.x, out.y, text);
 		}
 	}
