@@ -358,6 +358,7 @@ void objects_prj_preload()
 	msg.id = MAPEDIT_MSG_RESETOBJECTS;
 	sockets_send(&msg, sizeof(msg));
 
+	objects_create_dummy_entity();
 	objects_clearlayers();
 }
 
@@ -369,7 +370,6 @@ void objects_prj_postload()
 	for (layeridx = 0; layeridx < numlayers; layeridx++) {
 		objectstorage_load_layer(layers + layeridx);
 	}
-	objects_create_dummy_entity();
 }
 
 void objects_open_persistent_state()
