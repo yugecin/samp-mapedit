@@ -61,6 +61,7 @@ void objlistui_refresh_list_from_layer()
 	int i;
 	struct OBJECT *obj;
 
+	fromLayers = 1;
 	btn_delete->enabled = 0;
 	btn_move->enabled = 0;
 
@@ -84,6 +85,7 @@ void objlistui_refresh_list_from_nearby()
 	char *names[MAX_OBJECTS];
 	int i;
 
+	fromLayers = 0;
 	btn_delete->enabled = 0;
 	btn_move->enabled = 0;
 
@@ -120,7 +122,6 @@ void cb_btn_mainmenu_objects(struct UI_BUTTON *btn)
 	}
 
 	strcpy(txt_currentlayer + 15, active_layer->name);
-	fromLayers = 1;
 	objlistui_refresh_list_from_layer();
 	ui_show_window(wnd);
 }
@@ -134,7 +135,6 @@ void cb_btn_mainmenu_nearby(struct UI_BUTTON *btn)
 	}
 
 	strcpy(txt_currentlayer + 15, active_layer->name);
-	fromLayers = 0;
 	objlistui_refresh_list_from_nearby();
 	ui_show_window(wnd);
 }
