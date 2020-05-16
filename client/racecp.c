@@ -2,7 +2,9 @@
 
 #include "common.h"
 #include "game.h"
+#include "project.h"
 #include "racecp.h"
+#include "ui.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -41,6 +43,16 @@ void racecp_prj_save(FILE *f, char *buf)
 		int i;
 	} data;
 	int i;
+	FILE *textfile;
+
+	if (numcheckpoints) {
+		sprintf(buf, "samp-mapedit\\%s_cps.txt", prj_get_name());
+		textfile = fopen(buf, "w");
+		if (!textfile) {
+			sprintf(debugstring, "failed to open file %s for writing", buf);
+			ui_push_debug_string();
+		}
+	}
 
 	for (i = 0; i < numcheckpoints; i++) {
 		fwrite(buf, sprintf(buf, "cp.%c.name %s\n", i + '0', checkpointDescriptions[i]), 1, f);
@@ -60,8 +72,24 @@ void racecp_prj_save(FILE *f, char *buf)
 		data.f = racecheckpoints[i].arrowDirection.z;
 		fwrite(buf, sprintf(buf, "cp.%c.a.z %d\n", i + '0', data.i), 1, f);
 		fwrite(buf, sprintf(buf, "cp.%c.col %d\n", i + '0', racecheckpoints[i].colABGR, data.i), 1, f);
+		fwrite(buf, sprintf(buf,
+			"type %d %.4f %.4f %.4f radius %.1f dir %.4f %.4f %.4f // %s\n",
+			racecheckpoints[i].type,
+			racecheckpoints[i].pos.x,
+			racecheckpoints[i].pos.y,
+			racecheckpoints[i].pos.z,
+			racecheckpoints[i].fRadius,
+			racecheckpoints[i].arrowDirection.x,
+			racecheckpoints[i].arrowDirection.y,
+			racecheckpoints[i].arrowDirection.z,
+			checkpointDescriptions[i]
+		), 1, textfile);
 	}
 	fwrite(buf, sprintf(buf, "numcps %d\n", numcheckpoints), 1, f);
+
+	if (textfile) {
+		fclose(textfile);
+	}
 }
 
 int racecp_prj_load_line(char *buf)
