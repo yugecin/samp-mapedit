@@ -86,10 +86,13 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	int i;
 	int totalremoves;
 
-	if (!(f = layer_fopen(layer, "map", MODE_WRITE)) ||
-		!(meta = layer_fopen(layer, "met", MODE_WRITE)))
-	{
+	if (!(f = layer_fopen(layer, "map", MODE_WRITE))) {
 		return;
+	}
+	if (layer->numremoves) {
+		meta = layer_fopen(layer, "met", MODE_WRITE);
+	} else {
+		meta = NULL;
 	}
 
 	totalremoves = 0;
