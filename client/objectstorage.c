@@ -112,7 +112,11 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	write(sizeof(int));
 	for (i = 0; i < layer->numremoves; i++) {
 		remove = layer->removes + i;
-		data.remove.model = -remove->model;
+		if (remove->model == -1) {
+			data.remove.model = -1;
+		} else {
+			data.remove.model = -remove->model;
+		}
 		data.remove.pos = remove->origin;
 		data.remove.radius = (float) sqrt(remove->radiussq);
 		write(sizeof(data.remove));
@@ -121,7 +125,7 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 			write(sizeof(data.remove));
 		}
 
-		data.c = remove->lodmodel != 0;
+		data.c = remove->model != -1 && remove->lodmodel != 0;
 		fwrite(data.buf, sizeof(char), 1, meta);
 		if (remove->description == NULL) {
 			data.i = 0;
@@ -182,7 +186,11 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 		if (data.i < 0) { /*model*/
 			read(sizeof(data.remove));
 			rad = data.remove.radius;
-			remove->model = -data.remove.model;
+			if (data.remove.model == -1) {
+				remove->model = -1;
+			} else {
+				remove->model = -data.remove.model;
+			}
 			remove->origin = data.remove.pos;
 			remove->radiussq = rad * rad;
 			if (!meta) {
