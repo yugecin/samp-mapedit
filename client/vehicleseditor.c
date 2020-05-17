@@ -58,15 +58,15 @@ void cb_btn_random_color(struct UI_BUTTON *btn)
 }
 
 static
-void cb_in_coords_heading(struct UI_INPUT *in)
+void cb_in_coords(struct UI_INPUT *in)
 {
-	float value;
+	*((float*) in->_parent.userdata) = (float) atof(in->value);
+}
 
-	value = (float) atof(in->value);
-	if (in == in_heading) {
-		value /= 180.0f * M_PI;
-	}
-	*((float*) in->_parent.userdata) = value;
+static
+void cb_in_heading(struct UI_INPUT *in)
+{
+	editingVehicle->heading = (float) atof(in->value) / 180.0f * M_PI;
 }
 
 static
@@ -94,6 +94,7 @@ void cb_btn_move(struct UI_BUTTON *btn)
 static
 void cb_btn_tp_to_camera(struct UI_BUTTON *btn)
 {
+	editingVehicle->pos = camera->position;
 	game_ObjectSetPos(manipulateEntity, &camera->position);
 }
 
@@ -154,7 +155,6 @@ void vehedit_show(struct VEHICLE *veh, void (*cb)())
 	in_coord_x->_parent.userdata = &veh->pos.x;
 	in_coord_y->_parent.userdata = &veh->pos.y;
 	in_coord_z->_parent.userdata = &veh->pos.z;
-	in_heading->_parent.userdata = &veh->heading;
 	update_inputs();
 	ui_show_window(wnd);
 	callback = cb;
@@ -210,7 +210,8 @@ int draw_window_vehedit(struct UI_ELEMENT *wnd)
 	if (moveFromManipulateObject) {
 		if (ui_active_element == in_coord_x ||
 			ui_active_element == in_coord_y ||
-			ui_active_element == in_coord_z)
+			ui_active_element == in_coord_z ||
+			ui_active_element == in_heading)
 		{
 			moveFromManipulateObject = 0;
 		} else {
@@ -251,19 +252,19 @@ void vehedit_init()
 	btn->_parent.span = 3;
 	ui_wnd_add_child(wnd, btn);
 	ui_wnd_add_child(wnd, ui_lbl_make("Pos:"));
-	in_coord_x = ui_in_make(cb_in_coords_heading);
+	in_coord_x = ui_in_make(cb_in_coords);
 	in_coord_x->_parent.span = 2;
 	ui_wnd_add_child(wnd, in_coord_x);
 	ui_wnd_add_child(wnd, NULL);
-	in_coord_y = ui_in_make(cb_in_coords_heading);
+	in_coord_y = ui_in_make(cb_in_coords);
 	in_coord_y->_parent.span = 2;
 	ui_wnd_add_child(wnd, in_coord_y);
 	ui_wnd_add_child(wnd, NULL);
-	in_coord_z = ui_in_make(cb_in_coords_heading);
+	in_coord_z = ui_in_make(cb_in_coords);
 	in_coord_z->_parent.span = 2;
 	ui_wnd_add_child(wnd, in_coord_z);
 	ui_wnd_add_child(wnd, ui_lbl_make("Heading:"));
-	in_heading = ui_in_make(cb_in_coords_heading);
+	in_heading = ui_in_make(cb_in_heading);
 	in_heading->_parent.span = 2;
 	ui_wnd_add_child(wnd, in_heading);
 	btn = ui_btn_make("Move", cb_btn_move);
