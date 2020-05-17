@@ -45,6 +45,7 @@ void racecp_prj_save(FILE *f, char *buf)
 	int i;
 	FILE *textfile;
 
+	textfile = NULL;
 	if (numcheckpoints) {
 		sprintf(buf, "samp-mapedit\\%s_cps.txt", prj_get_name());
 		textfile = fopen(buf, "w");
