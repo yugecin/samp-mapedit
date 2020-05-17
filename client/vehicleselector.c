@@ -46,6 +46,7 @@ void cb_btn_create(struct UI_BUTTON *btn)
 void vehsel_show(void (*cb)(short))
 {
 	callback = cb;
+	btn_create->enabled = 0;
 	ui_show_window(wnd);
 }
 
