@@ -125,7 +125,7 @@ void cb_in_radius(struct UI_INPUT *in)
 static
 void cb_in_description(struct UI_INPUT *in)
 {
-	memcpy(checkpointDescriptions[editingCheckpoint], in->value, strlen(in->value));
+	memcpy(checkpointDescriptions[editingCheckpoint], in->value, strlen(in->value) + 1);
 }
 
 static
