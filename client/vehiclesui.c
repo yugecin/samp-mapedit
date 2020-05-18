@@ -60,7 +60,6 @@ void cb_list_item_selected(struct UI_LIST *lst)
 static
 void cb_list_hover_update(struct UI_LIST *lst)
 {
-	struct RwV3D pos;
 	int idx;
 
 	idx = ui_lst_get_selected_index(lst);
@@ -73,8 +72,7 @@ void cb_list_hover_update(struct UI_LIST *lst)
 	}
 	highlightedVehicle = vehicles[idx].sa_vehicle;
 	if (chk_snap_camera->checked) {
-		game_ObjectGetPos(highlightedVehicle, &pos);
-		center_camera_on(&pos);
+		center_camera_on(&vehicles[idx].pos);
 	}
 }
 
