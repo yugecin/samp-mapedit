@@ -57,6 +57,7 @@ void objects_prj_postload();
 void objects_open_persistent_state();
 void objects_clearlayers();
 struct OBJECT *objects_find_by_sa_handle(int sa_handle);
+/*changes the active layer to the layer the object is in*/
 struct OBJECT *objects_find_by_sa_object(void *sa_object);
 void objects_clone(struct CEntity *entity);
 void objects_delete_obj(struct OBJECT *obj);

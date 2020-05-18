@@ -97,6 +97,8 @@ int objects_object_created(struct OBJECT *object)
 	objui_select_entity(NULL);
 
 	cloning_object.model = 0;
+
+	objedit_show(object);
 	return 1;
 }
 
@@ -432,13 +434,16 @@ TODO: optimize this
 */
 struct OBJECT *objects_find_by_sa_object(void *sa_object)
 {
-	int i;
+	int layerid, i;
 	struct OBJECT *objects;
 
-	if (active_layer != NULL) {
-		objects = active_layer->objects;
-		for (i = active_layer->numobjects - 1; i >= 0; i--) {
+	for (layerid = 0; layerid < numlayers; layerid++) {
+		objects = layers[layerid].objects;
+		for (i = layers[layerid].numobjects - 1; i >= 0; i--) {
 			if (objects[i].sa_object == sa_object) {
+				if (active_layer - layers != layerid) {
+					objects_activate_layer(layerid);
+				}
 				return objects + i;
 			}
 		}

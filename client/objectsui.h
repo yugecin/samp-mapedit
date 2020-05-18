@@ -17,5 +17,6 @@ void objui_layer_changed();
 void objui_frame_update();
 void objui_prj_preload();
 void objui_prj_postload();
+int objsui_on_background_element_just_clicked();
 void objui_init();
 void objui_dispose();

@@ -9,6 +9,7 @@
 #include "objects.h"
 #include "objectsui.h"
 #include "objbrowser.h"
+#include "objectseditor.h"
 #include "objectstorage.h"
 #include "persistence.h"
 #include "player.h"
@@ -27,6 +28,7 @@ static struct UI_LABEL *lbl_layer;
 
 static struct UI_BUTTON *btn_mainmenu_layers, *btn_mainmenu_selectobject;
 static struct UI_BUTTON *btn_contextmenu_mkobject;
+static struct UI_BUTTON *btn_contextmenu_editobject;
 static struct UI_LIST *lst_layers;
 static struct UI_INPUT *in_layername;
 
@@ -85,7 +87,7 @@ void cb_msg_openlayers(int choice)
 }
 
 static
-void cb_btn_mkobject(struct UI_BUTTON *btn)
+void cb_btn_contextmenu_mkobject(struct UI_BUTTON *btn)
 {
 	if (active_layer == NULL) {
 		msg_message = "Create_and_select_an_object_layer_first!";
@@ -100,6 +102,12 @@ void cb_btn_mkobject(struct UI_BUTTON *btn)
 	} else {
 		objbrowser_show(&nextObjectPosition);
 	}
+}
+
+static
+void cb_btn_contextmenu_editobject(struct UI_BUTTON *btn)
+{
+	objedit_show(objects_find_by_sa_object(clicked_entity));
 }
 
 static
@@ -326,11 +334,15 @@ void objui_init()
 	memset(&selected_colored, 0, sizeof(selected_colored));
 	selected_object = NULL;
 
-	/*context menu entry*/
-	btn = ui_btn_make("Make_Object", cb_btn_mkobject);
+	/*context menu entries*/
+	btn = ui_btn_make("Make_Object", cb_btn_contextmenu_mkobject);
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
 	btn_contextmenu_mkobject = btn;
+	btn = ui_btn_make("Edit_Object", cb_btn_contextmenu_editobject);
+	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_editobject = btn;
 
 	/*main menu entries*/
 	lbl = ui_lbl_make("=_Objects_=");
@@ -593,6 +605,10 @@ int objui_on_background_element_just_clicked()
 		objui_select_entity(entity);
 		return 0;
 	}
+
+	btn_contextmenu_editobject->enabled =
+		clicked_entity != NULL &&
+		objects_find_by_sa_object(clicked_entity) != NULL;
 
 	ui_get_clicked_position(&nextObjectPosition);
 	return 1;

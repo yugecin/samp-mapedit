@@ -355,6 +355,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\objectseditor.c"
+			>
+		</File>
+		<File
+			RelativePath="..\objectseditor.h"
+			>
+		</File>
+		<File
 			RelativePath="..\objectstorage.c"
 			>
 		</File>

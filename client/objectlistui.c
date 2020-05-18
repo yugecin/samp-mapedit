@@ -7,6 +7,7 @@
 #include "objects.h"
 #include "objectsui.h"
 #include "objectlistui.h"
+#include "objectseditor.h"
 #include "msgbox.h"
 #include "removebuildingeditor.h"
 #include "removedbuildings.h"
@@ -25,6 +26,7 @@ static struct UI_BUTTON *btn_move;
 static struct UI_BUTTON *btn_tp_to_cam;
 static struct UI_BUTTON *btn_delete;
 static struct UI_BUTTON *btn_clone;
+static struct UI_BUTTON *btn_edit;
 
 static char txt_currentlayer[100];
 static char txt_numobjects[20];
@@ -64,6 +66,7 @@ void objlistui_refresh_list_from_layer()
 	fromLayers = 1;
 	btn_delete->enabled = 0;
 	btn_move->enabled = 0;
+	btn_edit->enabled = 0;
 
 	obj = active_layer->objects;
 	for (i = 0; i < active_layer->numobjects; i++) {
@@ -88,6 +91,7 @@ void objlistui_refresh_list_from_nearby()
 	fromLayers = 0;
 	btn_delete->enabled = 0;
 	btn_move->enabled = 0;
+	btn_edit->enabled = 0;
 
 	game_WorldFindObjectsInRange(
 		&camera->position,
@@ -256,6 +260,22 @@ void cb_btn_clone(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_edit(struct UI_BUTTON *btn)
+{
+	struct CEntity *entity;
+	struct OBJECT *obj;
+
+	entity = objlistui_index_to_entity(lst->selectedindex);
+	if (entity != NULL) {
+		obj = objects_find_by_sa_object(entity);
+		if (obj != NULL) {
+			objedit_show(obj);
+			return;
+		}
+	}
+}
+
+static
 void cb_list_item_selected(struct UI_LIST *lst)
 {
 	struct CEntity *entity;
@@ -267,14 +287,16 @@ void cb_list_item_selected(struct UI_LIST *lst)
 			btn_move->enabled =
 			btn_tp_to_cam->enabled =
 			btn_delete->enabled =
-			btn_clone->enabled = 0;
+			btn_clone->enabled =
+			btn_edit->enabled = 0;
 	} else {
 		btn_center->enabled =
 			btn_delete->enabled =
 			btn_clone->enabled = 1;
 		obj = objects_find_by_sa_object(entity);
-		btn_move->enabled = obj != NULL;
-		btn_tp_to_cam->enabled = obj != NULL;
+		btn_move->enabled =
+			btn_tp_to_cam->enabled =
+			btn_edit->enabled = obj != NULL;
 	}
 }
 
@@ -310,6 +332,8 @@ void objlistui_init()
 	ui_wnd_add_child(wnd, btn_delete);
 	btn_clone = ui_btn_make("Clone", cb_btn_clone);
 	ui_wnd_add_child(wnd, btn_clone);
+	btn_edit = ui_btn_make("Edit", cb_btn_edit);
+	ui_wnd_add_child(wnd, btn_edit);
 }
 
 void objlistui_dispose()

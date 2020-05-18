@@ -10,6 +10,7 @@
 #include "objectsui.h"
 #include "objbrowser.h"
 #include "objectlistui.h"
+#include "objectseditor.h"
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
@@ -160,6 +161,7 @@ void client_finalize()
 	racecpui_dispose();
 	vehiclesui_dispose();
 	objbrowser_dispose();
+	objedit_dispose();
 	objlistui_dispose();
 	objui_dispose();
 	objects_dispose();
@@ -223,6 +225,7 @@ void client_init()
 	objui_init();
 	objlistui_init();
 	objbrowser_init();
+	objedit_init();
 	rbe_init();
 	rbui_init();
 	vehiclesui_init();
