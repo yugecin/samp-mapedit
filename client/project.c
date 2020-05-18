@@ -190,6 +190,7 @@ void cb_btn_project(struct UI_BUTTON *btn)
 static
 void cb_btn_createnew(struct UI_BUTTON *btn)
 {
+	char new_project_name[INPUT_TEXTLEN + 1];
 	char projectfile[FILE_LEN];
 	FILE *file;
 
@@ -199,16 +200,13 @@ void cb_btn_createnew(struct UI_BUTTON *btn)
 		msg_btn1text = "Ok";
 		msg_show(cb_show_project_window);
 	} else {
-		memcpy(open_project_name,
-			in_newprojectname->value,
-			INPUT_TEXTLEN + 1);
+		strcpy(open_project_name, in_newprojectname->value);
 		ui_hide_window();
 		btn_main_save->enabled = 1;
-		mk_project_filename(projectfile, open_project_name);
+		mk_project_filename(projectfile, new_project_name);
 		if (file = fopen(projectfile, "r")) {
 			prj_open_by_file(file);
 		} else {
-			prj_save();
 			prj_preload();
 			prj_postload();
 		}
