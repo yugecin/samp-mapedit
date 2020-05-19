@@ -5,6 +5,7 @@
 #include "project.h"
 #include "ui.h"
 #include "vehicles.h"
+#include "vehnames.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -58,7 +59,7 @@ void vehiclestorage_save()
 	if (!veh) {
 		return;
 	}
-	txt = vs_fopen("txt", "wb");
+	txt = vs_fopen("txt", "w");
 	if (!txt) {
 		fclose(veh);
 		return;
@@ -76,14 +77,15 @@ void vehiclestorage_save()
 		fwrite(data.buf, sizeof(data.vehicle), 1, veh);
 		fwrite(data.buf,
 			sprintf(data.buf,
-				"%hd %.4f %.4f %.4f %.4f %hd %hd\n",
+				"%hd %.4f %.4f %.4f %.4f %hd %hd // %s\n",
 				v->model,
 				v->pos.x,
 				v->pos.y,
 				v->pos.z,
 				v->heading * 180.0f / M_PI,
 				(short) v->col[0],
-				(short) v->col[1]),
+				(short) v->col[1],
+				vehnames[v->model - 400]),
 			1,
 			txt);
 	}
