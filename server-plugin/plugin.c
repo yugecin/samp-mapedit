@@ -421,10 +421,8 @@ void msg_resetvehicles()
 	int idx;
 
 	for (idx = 0; idx < MAX_VEHICLES; idx++) {
-		if (objectidused[idx]) {
-			nc_params.asint[1] = idx;
-			natives[NC_DestroyVehicle].fp(amx, nc_params.asint);
-		}
+		nc_params.asint[1] = idx;
+		natives[NC_DestroyVehicle].fp(amx, nc_params.asint);
 	}
 }
 
