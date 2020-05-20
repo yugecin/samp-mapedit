@@ -29,8 +29,6 @@ void update_inputs()
 
 	/*sometimes, when cloning a cloned object, sa_object is NULL for one frame..*/
 	if (editingObject->sa_object == NULL) {
-		sprintf(debugstring, "obj is null %p", editingObject);
-		ui_push_debug_string();
 		return;
 	}
 
