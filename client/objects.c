@@ -9,6 +9,7 @@
 #include "objects.h"
 #include "objectsui.h"
 #include "objbrowser.h"
+#include "objectseditor.h"
 #include "objectstorage.h"
 #include "persistence.h"
 #include "player.h"
