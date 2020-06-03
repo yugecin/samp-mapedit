@@ -630,6 +630,8 @@ void ui_render()
 			entity_draw_bound_rect(highlighted_entity, 0xFF);
 		}
 
+		bulkedit_render();
+
 		if (ui_exclusive_mode != NULL) {
 			ui_exclusive_mode();
 			return;

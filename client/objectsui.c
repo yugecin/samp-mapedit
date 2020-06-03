@@ -7,6 +7,7 @@
 #include "msgbox.h"
 #include "ui.h"
 #include "objects.h"
+#include "bulkedit.h"
 #include "objectsui.h"
 #include "objbrowser.h"
 #include "objectseditor.h"
@@ -29,6 +30,8 @@ static struct UI_LABEL *lbl_layer;
 static struct UI_BUTTON *btn_mainmenu_layers, *btn_mainmenu_selectobject;
 static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_BUTTON *btn_contextmenu_editobject;
+static struct UI_BUTTON *btn_contextmenu_addtobulk;
+static struct UI_BUTTON *btn_contextmenu_removefrombulk;
 static struct UI_LIST *lst_layers;
 static struct UI_INPUT *in_layername;
 
@@ -108,6 +111,24 @@ static
 void cb_btn_contextmenu_editobject(struct UI_BUTTON *btn)
 {
 	objedit_show(objects_find_by_sa_object(clicked_entity));
+}
+
+static
+void cb_btn_contextmenu_addtobulk(struct UI_BUTTON *btn)
+{
+	bulkedit_add(objects_find_by_sa_object(clicked_entity));
+}
+
+static
+void cb_btn_contextmenu_removefrombulk(struct UI_BUTTON *btn)
+{
+	bulkedit_remove(objects_find_by_sa_object(clicked_entity));
+}
+
+static
+void cb_btn_contextmenu_disbandbulk(struct UI_BUTTON *btn)
+{
+	bulkedit_reset();
 }
 
 static
@@ -343,6 +364,16 @@ void objui_init()
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
 	btn_contextmenu_editobject = btn;
+	btn = ui_btn_make("Add_to_bulkedit", cb_btn_contextmenu_addtobulk);
+	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_addtobulk = btn;
+	btn = ui_btn_make("Remove_from_bulkedit", cb_btn_contextmenu_removefrombulk);
+	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_removefrombulk = btn;
+	btn = ui_btn_make("Disband_bulkedit", cb_btn_contextmenu_disbandbulk);
+	ui_wnd_add_child(context_menu, btn);
 
 	/*main menu entries*/
 	lbl = ui_lbl_make("=_Objects_=");
@@ -599,6 +630,7 @@ int objui_on_background_element_just_clicked()
 {
 	struct CEntity *entity;
 	struct CColPoint cp;
+	struct OBJECT *clicked_object;
 
 	if (is_selecting_object) {
 		get_object_pointed_at(&entity, &cp);
@@ -608,7 +640,9 @@ int objui_on_background_element_just_clicked()
 
 	btn_contextmenu_editobject->enabled =
 		clicked_entity != NULL &&
-		objects_find_by_sa_object(clicked_entity) != NULL;
+		(clicked_object = objects_find_by_sa_object(clicked_entity)) != NULL;
+	btn_contextmenu_addtobulk->enabled = clicked_object != NULL && !bulkedit_is_in_list(clicked_object);
+	btn_contextmenu_removefrombulk->enabled = clicked_object != NULL && bulkedit_is_in_list(clicked_object);
 
 	ui_get_clicked_position(&nextObjectPosition);
 	return 1;

@@ -11,6 +11,7 @@
 #include "objbrowser.h"
 #include "objectseditor.h"
 #include "objectstorage.h"
+#include "bulkedit.h"
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
@@ -471,6 +472,8 @@ void objects_delete_obj(struct OBJECT *obj)
 	nc.nc = NC_DestroyObject;
 	nc.params.asint[1] = obj->samp_objectid;
 	sockets_send(&nc, sizeof(nc));
+
+	bulkedit_remove(obj);
 
 	idx = 0;
 	for (;;) {

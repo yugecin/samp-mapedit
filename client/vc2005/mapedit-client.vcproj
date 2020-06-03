@@ -259,6 +259,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\bulkedit.c"
+			>
+		</File>
+		<File
+			RelativePath="..\bulkedit.h"
+			>
+		</File>
+		<File
 			RelativePath="..\carcols.c"
 			>
 		</File>

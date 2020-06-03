@@ -4,6 +4,7 @@
 #include "game.h"
 #include "msgbox.h"
 #include "objects.h"
+#include "bulkedit.h"
 #include "objectseditor.h"
 #include "ui.h"
 #include "sockets.h"
@@ -16,6 +17,8 @@ static struct UI_INPUT *in_coord_z;
 static struct UI_INPUT *in_rot_x;
 static struct UI_INPUT *in_rot_y;
 static struct UI_INPUT *in_rot_z;
+static struct UI_BUTTON *btn_add_to_bulkedit;
+static struct UI_BUTTON *btn_remove_from_bulkedit;
 static struct OBJECT *editingObject;
 
 static char updateFromMoving;
@@ -64,6 +67,10 @@ void cb_in_coords(struct UI_INPUT *in)
 	nc.params.asflt[2] = pos.x;
 	nc.params.asflt[3] = pos.y;
 	nc.params.asflt[4] = pos.z;
+
+	game_ObjectSetPos(editingObject->sa_object, &pos);
+	bulkedit_update();
+
 	sockets_send(&nc, sizeof(nc));
 }
 
@@ -83,6 +90,13 @@ void cb_in_rotation(struct UI_INPUT *in)
 	nc.params.asflt[2] = rot.x;
 	nc.params.asflt[3] = rot.y;
 	nc.params.asflt[4] = rot.z;
+
+	rot.x *= M_PI / 180.0f;
+	rot.y *= M_PI / 180.0f;
+	rot.z *= M_PI / 180.0f;
+	game_ObjectSetRotRad(editingObject->sa_object, &rot);
+	bulkedit_update();
+
 	sockets_send(&nc, sizeof(nc));
 }
 
@@ -117,6 +131,7 @@ static
 void cb_msg_delete_confirm(int opt)
 {
 	if (opt == MSGBOX_RESULT_1) {
+		bulkedit_revert();
 		objects_delete_obj(editingObject);
 	} else {
 		ui_show_window(wnd);
@@ -135,9 +150,52 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 }
 
 static
+void objedit_update_bulkedit_buttons()
+{
+	btn_add_to_bulkedit->enabled =
+		!(btn_remove_from_bulkedit->enabled = bulkedit_is_in_list(editingObject));
+}
+
+static
+void cb_btn_add_to_bulkedit(struct UI_BUTTON *btn)
+{
+	if (bulkedit_add(editingObject)) {
+		bulkedit_begin(editingObject);
+	}
+	objedit_update_bulkedit_buttons();
+}
+
+static
+void cb_btn_remove_from_bulkedit(struct UI_BUTTON *btn)
+{
+	if (bulkedit_remove(editingObject)) {
+		bulkedit_revert();
+		bulkedit_end();
+	}
+	objedit_update_bulkedit_buttons();
+}
+
+static
+void cb_btn_undo_bulkedit(struct UI_BUTTON *btn)
+{
+	updateFromMoving = 0;
+	bulkedit_revert();
+	update_inputs();
+	cb_in_coords(NULL);
+	cb_in_rotation(NULL);
+}
+
+static
 void cb_btn_clone(struct UI_BUTTON *btn)
 {
 	objects_clone(editingObject->sa_object);
+}
+
+static
+void cb_btn_close(struct UI_BUTTON *btn)
+{
+	bulkedit_commit();
+	ui_hide_window();
 }
 
 void objedit_show(struct OBJECT *obj)
@@ -146,6 +204,8 @@ void objedit_show(struct OBJECT *obj)
 	updateFromMoving = 1;
 	update_inputs();
 	ui_show_window(wnd);
+	objedit_update_bulkedit_buttons();
+	bulkedit_begin(obj);
 }
 
 static
@@ -163,6 +223,7 @@ int draw_window_objedit(struct UI_ELEMENT *wnd)
 		} else {
 			update_inputs();
 		}
+		bulkedit_update();
 	}
 	return proc_draw_window_objedit(wnd);
 }
@@ -173,6 +234,7 @@ void objedit_init()
 
 	wnd = ui_wnd_make(5000.0f, 300.0f, "Object");
 	wnd->columns = 2;
+	wnd->closeable = 0;
 	proc_draw_window_objedit = wnd->_parent._parent.proc_draw;
 	wnd->_parent._parent.proc_draw = draw_window_objedit;
 
@@ -203,7 +265,19 @@ void objedit_init()
 	btn = ui_btn_make("Delete", cb_btn_delete);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
+	btn_add_to_bulkedit = ui_btn_make("Add_to_bulk_edit", cb_btn_add_to_bulkedit);
+	btn_add_to_bulkedit->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn_add_to_bulkedit);
+	btn_remove_from_bulkedit = ui_btn_make("Remove_from_bulk_edit", cb_btn_remove_from_bulkedit);
+	btn_remove_from_bulkedit->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn_remove_from_bulkedit);
+	btn = ui_btn_make("Undo_bulk_edit", cb_btn_undo_bulkedit);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Clone", cb_btn_clone);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn);
+	btn = ui_btn_make("Close", cb_btn_close);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
 }

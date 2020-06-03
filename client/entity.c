@@ -142,7 +142,7 @@ void entity_color(info, entity, color)
 	}
 }
 
-void entity_draw_bound_rect(struct CEntity *entity, int col)
+void entity_draw_bound_rect(struct CEntity *entity, int colARGB)
 {
 #define P(A,B,C,D) \
 	if(A.z>0.0f&&B.z>0.0f&&C.z>0.0f&&D.z>0.0f){\
@@ -171,7 +171,7 @@ void entity_draw_bound_rect(struct CEntity *entity, int col)
 	}
 
 	alpha = (char) (55 * (1.0f - fabs(sinf(*timeInGame * 0.004f))));
-	col = (alpha << 24) | (col & 0xFFFFFF);
+	colARGB = (alpha << 24) | (colARGB & 0xFFFFFF);
 
 	colmodel = game_EntityGetColModel(entity);
 	if (colmodel == NULL) {
@@ -182,7 +182,7 @@ void entity_draw_bound_rect(struct CEntity *entity, int col)
 		fakeColModel.max.x = 10.0f;
 		fakeColModel.max.y = 10.0f;
 		fakeColModel.max.z = 10.0f;
-		col = (col & 0xFF) | (~col & 0xFFFFFF00);
+		colARGB = (colARGB & 0xFF) | (~colARGB & 0xFFFFFF00);
 	}
 
 	if (entity->_parent.matrix != NULL) {
@@ -256,7 +256,7 @@ void entity_draw_bound_rect(struct CEntity *entity, int col)
 	game_WorldToScreen(&g, &_g);
 	game_WorldToScreen(&h, &_h);
 
-	verts[0].col = verts[1].col = verts[2].col = verts[3].col = col;
+	verts[0].col = verts[1].col = verts[2].col = verts[3].col = colARGB;
 	game_RwIm2DPrepareRender();
 	P(a, b, c, d);
 	P(e, f, g, h);

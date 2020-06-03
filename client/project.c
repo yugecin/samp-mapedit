@@ -3,6 +3,7 @@
 #include "common.h"
 #include "game.h"
 #include "ui.h"
+#include "bulkedit.h"
 #include "msgbox.h"
 #include "objects.h"
 #include "objectsui.h"
@@ -116,6 +117,7 @@ void prj_postload()
 	timeweather_prj_postload();
 	rb_do_all();
 	rbui_refresh_list();
+	bulkedit_reset();
 	btn_main_save->enabled = 1;
 	lbl_current->text = open_project_name;
 	persistence_set_project_to_load(open_project_name);
