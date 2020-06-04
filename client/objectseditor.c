@@ -5,6 +5,7 @@
 #include "msgbox.h"
 #include "objects.h"
 #include "bulkedit.h"
+#include "bulkeditui.h"
 #include "objectseditor.h"
 #include "ui.h"
 #include "sockets.h"
@@ -186,6 +187,12 @@ void cb_btn_undo_bulkedit(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_bulkedit(struct UI_BUTTON *btn)
+{
+	bulkeditui_show();
+}
+
+static
 void cb_btn_clone(struct UI_BUTTON *btn)
 {
 	objects_clone(editingObject->sa_object);
@@ -196,6 +203,7 @@ void cb_btn_close(struct UI_BUTTON *btn)
 {
 	bulkedit_commit();
 	ui_hide_window();
+	bulkeditui_hide();
 }
 
 void objedit_show(struct OBJECT *obj)
@@ -272,6 +280,9 @@ void objedit_init()
 	btn_remove_from_bulkedit->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn_remove_from_bulkedit);
 	btn = ui_btn_make("Undo_bulk_edit", cb_btn_undo_bulkedit);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn);
+	btn = ui_btn_make("Bulk_edit...", cb_btn_bulkedit);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Clone", cb_btn_clone);

@@ -9,4 +9,11 @@ void bulkedit_update();
 void bulkedit_commit();
 void bulkedit_revert();
 void bulkedit_end();
-void bulkedit_render();
+void bulkedit_draw_object_boxes();
+void bulkedit_update_pos_sync();
+void bulkedit_update_pos_spread();
+void bulkedit_update_pos_copyx();
+void bulkedit_update_pos_copyy();
+void bulkedit_update_pos_copyz();
+
+extern void (*bulkedit_pos_update_method)();

@@ -267,6 +267,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\bulkeditui.c"
+			>
+		</File>
+		<File
+			RelativePath="..\bulkeditui.h"
+			>
+		</File>
+		<File
 			RelativePath="..\carcols.c"
 			>
 		</File>

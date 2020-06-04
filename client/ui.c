@@ -1,5 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#include "bulkedit.h"
+#include "bulkeditui.h"
 #include "common.h"
 #include "client.h"
 #include "entity.h"
@@ -630,7 +632,7 @@ void ui_render()
 			entity_draw_bound_rect(highlighted_entity, 0xFF);
 		}
 
-		bulkedit_render();
+		bulkedit_draw_object_boxes();
 
 		if (ui_exclusive_mode != NULL) {
 			ui_exclusive_mode();
@@ -645,8 +647,8 @@ void ui_render()
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if ((context_menu_active &&
 				ui_wnd_mouseup(context_menu)) ||
-				(active_window != NULL &&
-				ui_wnd_mouseup(active_window)) ||
+				(active_window != NULL && ui_wnd_mouseup(active_window)) ||
+				(bulkeditui_shown && ui_wnd_mouseup(bulkeditui_wnd)) ||
 				ui_wnd_mouseup(main_menu) ||
 				ui_cnt_mouseup(background_element));
 			context_menu_active = 0;
@@ -691,10 +693,9 @@ void ui_render()
 
 		if (ui_element_being_clicked == NULL && ui_mouse_is_just_down) {
 			ui_active_element = NULL;
-			if ((context_menu_active &&
-				ui_wnd_mousedown(context_menu)) ||
-				(active_window != NULL &&
-				ui_wnd_mousedown(active_window)) ||
+			if ((context_menu_active && ui_wnd_mousedown(context_menu)) ||
+				(active_window != NULL && ui_wnd_mousedown(active_window)) ||
+				(bulkeditui_shown && ui_wnd_mousedown(bulkeditui_wnd)) ||
 				ui_wnd_mousedown(main_menu) ||
 				ui_cnt_mousedown(background_element))
 			{
@@ -711,6 +712,9 @@ void ui_render()
 		if (context_menu_active) {
 			ui_wnd_update(context_menu);
 		}
+		if (bulkeditui_shown) {
+			ui_wnd_update(bulkeditui_wnd);
+		}
 		ui_wnd_update(main_menu);
 		ui_cnt_update(background_element);
 
@@ -722,6 +726,9 @@ void ui_render()
 		ui_wnd_draw(main_menu);
 		if (active_window != NULL) {
 			UIPROC(active_window, proc_draw);
+		}
+		if (bulkeditui_shown) {
+			UIPROC(bulkeditui_wnd, proc_draw);
 		}
 		if (context_menu_active) {
 			ui_wnd_draw(context_menu);

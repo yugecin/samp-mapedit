@@ -1,5 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#include "bulkeditui.h"
 #include "common.h"
 #include "detours.h"
 #include "entity.h"
@@ -157,6 +158,7 @@ void client_finalize()
 	TRACE("client_finalize");
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
+	bulkeditui_dispose();
 	racecpeditor_dispose();
 	racecpui_dispose();
 	vehiclesui_dispose();
@@ -231,6 +233,7 @@ void client_init()
 	vehiclesui_init();
 	racecpui_init();
 	racecpeditor_init();
+	bulkeditui_init();
 
 	prj_do_show_window();
 
