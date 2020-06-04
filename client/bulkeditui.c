@@ -17,6 +17,13 @@ void cb_posrdbgroup_changed(struct UI_RADIOBUTTON *rdb)
 }
 
 static
+void cb_rotrdbgroup_changed(struct UI_RADIOBUTTON *rdb)
+{
+	bulkedit_rot_update_method = rdb->_parent._parent.userdata;
+	bulkedit_update();
+}
+
+static
 void cb_btn_commit(struct UI_BUTTON *btn)
 {
 	bulkedit_commit();
@@ -50,22 +57,27 @@ void bulkeditui_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_RADIOBUTTON *rdb;
-	struct RADIOBUTTONGROUP *posrdbgroup;
+	struct RADIOBUTTONGROUP *posrdbgroup, *rotrdbgroup;
 
 	bulkeditui_wnd = ui_wnd_make(200.0f, 20.0f, "Bulkedit");
 	bulkeditui_wnd->columns = 2;
 
 	posrdbgroup = ui_rdbgroup_make(cb_posrdbgroup_changed);
+	rotrdbgroup = ui_rdbgroup_make(cb_rotrdbgroup_changed);
 	ui_wnd_add_child(bulkeditui_wnd, ui_lbl_make("position"));
 	ui_wnd_add_child(bulkeditui_wnd, ui_lbl_make("rotation"));
 	rdb = ui_rdb_make("Sync_movement", posrdbgroup, 1);
 	rdb->_parent._parent.userdata = (void*) bulkedit_update_pos_sync;
 	ui_wnd_add_child(bulkeditui_wnd, rdb);
-	ui_wnd_add_child(bulkeditui_wnd, NULL);
+	rdb = ui_rdb_make("Sync_movement", rotrdbgroup, 1);
+	rdb->_parent._parent.userdata = (void*) bulkedit_update_rot_sync;
+	ui_wnd_add_child(bulkeditui_wnd, rdb);
 	rdb = ui_rdb_make("Spread", posrdbgroup, 0);
 	rdb->_parent._parent.userdata = (void*) bulkedit_update_pos_spread;
 	ui_wnd_add_child(bulkeditui_wnd, rdb);
-	ui_wnd_add_child(bulkeditui_wnd, NULL);
+	rdb = ui_rdb_make("Spread", rotrdbgroup, 0);
+	rdb->_parent._parent.userdata = (void*) bulkedit_update_rot_spread;
+	ui_wnd_add_child(bulkeditui_wnd, rdb);
 	rdb = ui_rdb_make("Copy_x", posrdbgroup, 0);
 	rdb->_parent._parent.userdata = (void*) bulkedit_update_pos_copyx;
 	ui_wnd_add_child(bulkeditui_wnd, rdb);

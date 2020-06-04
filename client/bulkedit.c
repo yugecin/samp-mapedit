@@ -17,6 +17,7 @@ static struct OBJECT *bulkEditObjects[1000];
 static int numBulkEditObjects;
 
 void (*bulkedit_pos_update_method)() = bulkedit_update_pos_sync;
+void (*bulkedit_rot_update_method)() = bulkedit_update_rot_sync;
 
 void bulkedit_begin(struct OBJECT *object)
 {
@@ -44,6 +45,7 @@ void bulkedit_update()
 {
 	if (handlingObject != NULL) {
 		bulkedit_pos_update_method();
+		bulkedit_rot_update_method();
 	}
 }
 
@@ -230,6 +232,73 @@ void bulkedit_update_pos_copyz()
 			game_ObjectGetPos(bulkEditObjects[i]->sa_object, &pos);
 			pos.z = z;
 			game_ObjectSetPos(bulkEditObjects[i]->sa_object, &pos);
+		}
+	}
+}
+
+void bulkedit_update_rot_sync()
+{
+	struct RwV3D rot;
+	struct RwV3D delta;
+	int i;
+
+	game_ObjectGetRot(handlingObject->sa_object, &rot);
+	delta.x = rot.x * M_PI / 180.0f - initialRot.x;
+	delta.y = rot.y * M_PI / 180.0f - initialRot.y;
+	delta.z = rot.z * M_PI / 180.0f - initialRot.z;
+	for (i = 0; i < numBulkEditObjects; i++) {
+		if (bulkEditObjects[i] != handlingObject) {
+			rot = initialRotations[i];
+			rot.x += delta.x;
+			rot.y += delta.y;
+			rot.z += delta.z;
+			game_ObjectSetRotRad(bulkEditObjects[i]->sa_object, &rot);
+		}
+	}
+}
+
+void bulkedit_update_rot_spread()
+{
+	struct RwV3D pos, rot;
+	struct RwV3D handle_pos, handle_rot, furthest_rot, delta;
+	int i, j;
+	float p, furthest_distance, distance;
+
+	if (numBulkEditObjects < 2) {
+		return;
+	}
+
+	/*it may scramble the objects but oh well, worries for later*/
+	game_ObjectGetPos(handlingObject->sa_object, &handle_pos);
+	furthest_distance = -10.0f;
+	for (i = 0; i < numBulkEditObjects; i++) {
+		if (bulkEditObjects[i] != handlingObject) {
+			game_ObjectGetPos(bulkEditObjects[i]->sa_object, &pos);
+			delta.x = pos.x - handle_pos.x;
+			delta.y = pos.y - handle_pos.y;
+			delta.z = pos.z - handle_pos.z;
+			distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+			if (distance > furthest_distance) {
+				furthest_distance = distance;
+				game_ObjectGetRot(bulkEditObjects[i]->sa_object, &furthest_rot);
+			}
+		}
+	}
+	furthest_rot.x *= M_PI / 180.0f;
+	furthest_rot.y *= M_PI / 180.0f;
+	furthest_rot.z *= M_PI / 180.0f;
+	game_ObjectGetRot(handlingObject->sa_object, &handle_rot);
+	delta.x = handle_rot.x * M_PI / 180.0f - furthest_rot.x;
+	delta.y = handle_rot.y * M_PI / 180.0f - furthest_rot.y;
+	delta.z = handle_rot.z * M_PI / 180.0f - furthest_rot.z;
+	for (i = 0, j = 0; i < numBulkEditObjects; i++) {
+		if (bulkEditObjects[i] != handlingObject) {
+			p = (float) j / (numBulkEditObjects - 1);
+			rot.x = furthest_rot.x + delta.x * p;
+			rot.y = furthest_rot.y + delta.y * p;
+			rot.z = furthest_rot.z + delta.z * p;
+			game_ObjectSetRotRad(bulkEditObjects[i]->sa_object, &rot);
+			j++;
 		}
 	}
 }

@@ -15,5 +15,8 @@ void bulkedit_update_pos_spread();
 void bulkedit_update_pos_copyx();
 void bulkedit_update_pos_copyy();
 void bulkedit_update_pos_copyz();
+void bulkedit_update_rot_sync();
+void bulkedit_update_rot_spread();
 
 extern void (*bulkedit_pos_update_method)();
+extern void (*bulkedit_rot_update_method)();
