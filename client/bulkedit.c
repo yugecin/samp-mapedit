@@ -6,6 +6,7 @@
 #include "objects.h"
 #include "bulkedit.h"
 #include "entity.h"
+#include <math.h>
 #include <string.h>
 
 static struct RwV3D initialPositions[1000];
@@ -18,6 +19,7 @@ static int numBulkEditObjects;
 
 void (*bulkedit_pos_update_method)() = bulkedit_update_pos_sync;
 void (*bulkedit_rot_update_method)() = bulkedit_update_rot_sync;
+char bulkedit_direction_add_90, bulkedit_direction_remove_90, bulkedit_direction_add_180;
 
 void bulkedit_begin(struct OBJECT *object)
 {
@@ -122,6 +124,47 @@ void bulkedit_draw_object_boxes()
 	}
 }
 
+/**
+Puts the furthest object at the first position.
+*/
+static
+struct OBJECT *bulkedit_get_furthest_object_ensure_first()
+{
+	struct OBJECT *obj, *temp_obj;
+	struct RwV3D pos;
+	struct RwV3D handle_pos, furthest_pos, delta;
+	int i, furthest_object_index;
+	float furthest_distance, distance;
+
+	game_ObjectGetPos(handlingObject->sa_object, &handle_pos);
+	furthest_distance = -10.0f;
+	for (i = 0; i < numBulkEditObjects; i++) {
+		if (bulkEditObjects[i] != handlingObject) {
+			game_ObjectGetPos(bulkEditObjects[i]->sa_object, &pos);
+			delta.x = pos.x - handle_pos.x;
+			delta.y = pos.y - handle_pos.y;
+			delta.z = pos.z - handle_pos.z;
+			distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+			if (distance > furthest_distance) {
+				furthest_distance = distance;
+				furthest_pos = pos;
+				obj = bulkEditObjects[i];
+				furthest_object_index = i;
+			}
+		}
+	}
+	if (furthest_object_index != 0) {
+	        temp_obj = bulkEditObjects[0];
+		bulkEditObjects[0] = bulkEditObjects[furthest_object_index];
+		bulkEditObjects[furthest_object_index] = temp_obj;
+	}
+	return obj;
+}
+
+void bulkedit_update_nop()
+{
+}
+
 void bulkedit_update_pos_sync()
 {
 	struct RwV3D pos;
@@ -145,31 +188,20 @@ void bulkedit_update_pos_sync()
 
 void bulkedit_update_pos_spread()
 {
+	struct OBJECT *furthest_obj;
 	struct RwV3D pos;
 	struct RwV3D handle_pos, furthest_pos, delta;
 	int i, j;
-	float p, furthest_distance, distance;
+	float p;
 
 	if (numBulkEditObjects < 2) {
 		return;
 	}
 
 	/*it may scramble the objects but oh well, worries for later*/
+	furthest_obj = bulkedit_get_furthest_object_ensure_first();
 	game_ObjectGetPos(handlingObject->sa_object, &handle_pos);
-	furthest_distance = -10.0f;
-	for (i = 0; i < numBulkEditObjects; i++) {
-		if (bulkEditObjects[i] != handlingObject) {
-			game_ObjectGetPos(bulkEditObjects[i]->sa_object, &pos);
-			delta.x = pos.x - handle_pos.x;
-			delta.y = pos.y - handle_pos.y;
-			delta.z = pos.z - handle_pos.z;
-			distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
-			if (distance > furthest_distance) {
-				furthest_distance = distance;
-				furthest_pos = pos;
-			}
-		}
-	}
+	game_ObjectGetPos(furthest_obj->sa_object, &furthest_pos);
 	delta.x = handle_pos.x - furthest_pos.x;
 	delta.y = handle_pos.y - furthest_pos.y;
 	delta.z = handle_pos.z - furthest_pos.z;
@@ -259,31 +291,19 @@ void bulkedit_update_rot_sync()
 
 void bulkedit_update_rot_spread()
 {
-	struct RwV3D pos, rot;
+	struct OBJECT *furthest_obj;
+	struct RwV3D rot;
 	struct RwV3D handle_pos, handle_rot, furthest_rot, delta;
 	int i, j;
-	float p, furthest_distance, distance;
+	float p;
 
 	if (numBulkEditObjects < 2) {
 		return;
 	}
 
-	/*it may scramble the objects but oh well, worries for later*/
+	furthest_obj = bulkedit_get_furthest_object_ensure_first();
 	game_ObjectGetPos(handlingObject->sa_object, &handle_pos);
-	furthest_distance = -10.0f;
-	for (i = 0; i < numBulkEditObjects; i++) {
-		if (bulkEditObjects[i] != handlingObject) {
-			game_ObjectGetPos(bulkEditObjects[i]->sa_object, &pos);
-			delta.x = pos.x - handle_pos.x;
-			delta.y = pos.y - handle_pos.y;
-			delta.z = pos.z - handle_pos.z;
-			distance = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
-			if (distance > furthest_distance) {
-				furthest_distance = distance;
-				game_ObjectGetRot(bulkEditObjects[i]->sa_object, &furthest_rot);
-			}
-		}
-	}
+	game_ObjectGetRot(furthest_obj->sa_object, &furthest_rot);
 	furthest_rot.x *= M_PI / 180.0f;
 	furthest_rot.y *= M_PI / 180.0f;
 	furthest_rot.z *= M_PI / 180.0f;
@@ -300,5 +320,32 @@ void bulkedit_update_rot_spread()
 			game_ObjectSetRotRad(bulkEditObjects[i]->sa_object, &rot);
 			j++;
 		}
+	}
+}
+
+void bulkedit_update_rot_object_direction()
+{
+	struct OBJECT *furthest_obj;
+	struct RwV3D handle_pos, furthest_pos, rot;
+	float angle;
+	int i;
+
+	furthest_obj = bulkedit_get_furthest_object_ensure_first();
+	game_ObjectGetPos(handlingObject->sa_object, &handle_pos);
+	game_ObjectGetPos(furthest_obj->sa_object, &furthest_pos);
+	angle = (float) atan((furthest_pos.y - handle_pos.y) / (furthest_pos.x - handle_pos.x));
+	if (bulkedit_direction_add_90) {
+		angle += M_PI2;
+	} else if (bulkedit_direction_remove_90) {
+		angle -= M_PI2;
+	} else if (bulkedit_direction_add_180) {
+		angle += M_PI;
+	}
+	for (i = 0; i < numBulkEditObjects; i++) {
+		game_ObjectGetRot(bulkEditObjects[i]->sa_object, &rot);
+		rot.x *= M_PI / 180.0f;
+		rot.y *= M_PI / 180.0f;
+		rot.z = angle;
+		game_ObjectSetRotRad(bulkEditObjects[i]->sa_object, &rot);
 	}
 }
