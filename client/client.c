@@ -158,7 +158,6 @@ void client_finalize()
 	TRACE("client_finalize");
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
-	bulkeditui_dispose();
 	racecpeditor_dispose();
 	racecpui_dispose();
 	vehiclesui_dispose();
@@ -173,6 +172,7 @@ void client_finalize()
 	sockets_dispose();
 	vehsel_dispose();
 	vehedit_dispose();
+	bulkeditui_dispose();
 
 	ui_dispose();
 	timeweather_dispose();
@@ -214,6 +214,7 @@ void client_init()
 	racecp_resetall();
 
 	/*order of init affects layout of main menu and context menu*/
+	bulkeditui_init();
 	settings_init();
 	player_init();
 	prj_init();
@@ -233,7 +234,6 @@ void client_init()
 	vehiclesui_init();
 	racecpui_init();
 	racecpeditor_init();
-	bulkeditui_init();
 
 	prj_do_show_window();
 

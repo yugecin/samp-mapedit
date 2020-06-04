@@ -328,6 +328,7 @@ void ui_set_fontsize(int fs, int fr)
 			background_element);
 		context_menu->_parent._parent.proc_recalc_size(context_menu);
 		main_menu->_parent._parent.proc_recalc_size(main_menu);
+		bulkeditui_wnd->_parent._parent.proc_recalc_size(bulkeditui_wnd);
 		if (active_window != NULL) {
 			active_window->_parent._parent.proc_recalc_size(
 				active_window);
