@@ -43,9 +43,9 @@ void cb_btn_revert(struct UI_BUTTON *btn)
 	bulkedit_revert();
 }
 
-void bulkeditui_show()
+void bulkeditui_toggle()
 {
-	bulkeditui_shown = 1;
+	bulkeditui_shown = !bulkeditui_shown;
 }
 
 void bulkeditui_hide()
@@ -61,6 +61,7 @@ void bulkeditui_init()
 
 	bulkeditui_wnd = ui_wnd_make(200.0f, 20.0f, "Bulkedit");
 	bulkeditui_wnd->columns = 2;
+	bulkeditui_wnd->closeable = 0;
 
 	posrdbgroup = ui_rdbgroup_make(cb_posrdbgroup_changed);
 	rotrdbgroup = ui_rdbgroup_make(cb_rotrdbgroup_changed);

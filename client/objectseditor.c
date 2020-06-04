@@ -189,7 +189,7 @@ void cb_btn_undo_bulkedit(struct UI_BUTTON *btn)
 static
 void cb_btn_bulkedit(struct UI_BUTTON *btn)
 {
-	bulkeditui_show();
+	bulkeditui_toggle();
 }
 
 static

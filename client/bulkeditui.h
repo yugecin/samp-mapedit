@@ -1,6 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-void bulkeditui_show();
+void bulkeditui_toggle();
 void bulkeditui_hide();
 void bulkeditui_init();
 void bulkeditui_dispose();
