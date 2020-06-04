@@ -61,6 +61,7 @@ void objects_set_position_rotation_after_creation(struct OBJECT *object)
 static
 int objects_object_created(struct OBJECT *object)
 {
+	struct OBJECT *newobject;
 	struct MSG_NC nc;
 
 	if (object != &cloning_object) {
@@ -79,7 +80,8 @@ int objects_object_created(struct OBJECT *object)
 		return 1;
 	}
 
-	active_layer->objects[active_layer->numobjects] = cloning_object;
+	newobject = active_layer->objects + active_layer->numobjects;
+	*newobject = cloning_object;
 	active_layer->numobjects++;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
@@ -100,7 +102,7 @@ int objects_object_created(struct OBJECT *object)
 
 	cloning_object.model = 0;
 
-	objedit_show(object);
+	objedit_show(newobject);
 	return 1;
 }
 

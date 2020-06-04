@@ -31,11 +31,6 @@ void update_inputs()
 	struct RwV3D vec;
 	char buf[20];
 
-	/*sometimes, when cloning a cloned object, sa_object is NULL for one frame..*/
-	if (editingObject->sa_object == NULL) {
-		return;
-	}
-
 	game_ObjectGetPos(editingObject->sa_object, &vec);
 	sprintf(buf, "%.4f", vec.x);
 	ui_in_set_text(in_coord_x, buf);
