@@ -47,7 +47,7 @@ static char need_camera_update, has_set_camera_once;
 static int context_menu_active = 0;
 static int trapped_in_ui;
 static int speedmod = 3;
-static float speeds[] = { 0.1f, 0.2f, 0.5f, 1.0f, 3.0f, 8.0f, 12.0f, 16.0f };
+static float speeds[] = { 0.1f, 0.2f, 0.5f, 1.0f, 3.0f, 8.0f, 16.0f, 32.0f };
 
 struct CEntity *clicked_entity;
 struct CColPoint clicked_colpoint;
