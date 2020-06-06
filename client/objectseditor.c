@@ -5,6 +5,7 @@
 #include "ide.h"
 #include "msgbox.h"
 #include "objects.h"
+#include "objbrowser.h"
 #include "bulkedit.h"
 #include "bulkeditui.h"
 #include "objectseditor.h"
@@ -203,6 +204,17 @@ void cb_btn_close(struct UI_BUTTON *btn)
 	bulkeditui_hide();
 }
 
+static
+void cb_btn_view_in_object_browser(struct UI_BUTTON *btn)
+{
+	struct RwV3D pos;
+
+	game_ObjectGetPos(editingObject->sa_object, &pos);
+	cb_btn_close(NULL);
+	objbrowser_highlight_model(editingObject->model);
+	objbrowser_show(&pos);
+}
+
 void objedit_show(struct OBJECT *obj)
 {
 	editingObject = obj;
@@ -247,6 +259,8 @@ void objedit_init()
 	lbl_txt_model[0] = 0;
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
 	ui_wnd_add_child(wnd, ui_lbl_make(lbl_txt_model));
+	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, ui_btn_make("View_in_object_browser", cb_btn_view_in_object_browser));
 	ui_wnd_add_child(wnd, ui_lbl_make("Pos:"));
 	in_coord_x = ui_in_make(cb_in_coords);
 	ui_wnd_add_child(wnd, in_coord_x);

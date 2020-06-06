@@ -366,6 +366,17 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	*cloud_render_opcode = 0xC3; /*ret*/
 }
 
+void objbrowser_highlight_model(int model)
+{
+	int idx;
+
+	idx = list_valid_index_for_model(model);
+	if (idx != -1) {
+		ui_lst_set_selected_index(lst_browser, idx);
+		picking_object.model = model;
+	}
+}
+
 static
 void cb_lst_object_selected(struct UI_LIST *lst)
 {

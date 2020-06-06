@@ -2,6 +2,7 @@
 
 int objbrowser_object_created(struct OBJECT *object);
 void objbrowser_show(struct RwV3D *positionToCreate);
+void objbrowser_highlight_model(int model);
 void objbrowser_init();
 void objbrowser_dispose();
 int objbrowser_handle_esc();
