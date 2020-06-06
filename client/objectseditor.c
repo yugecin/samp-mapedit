@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "ide.h"
 #include "msgbox.h"
 #include "objects.h"
 #include "bulkedit.h"
@@ -22,6 +23,7 @@ static struct UI_BUTTON *btn_add_to_bulkedit;
 static struct UI_BUTTON *btn_remove_from_bulkedit;
 static struct OBJECT *editingObject;
 
+static char lbl_txt_model[50];
 static char updateFromMoving;
 static ui_method *proc_draw_window_objedit;
 
@@ -209,6 +211,7 @@ void objedit_show(struct OBJECT *obj)
 	ui_show_window(wnd);
 	objedit_update_bulkedit_buttons();
 	bulkedit_begin(obj);
+	sprintf(lbl_txt_model, modelNames[obj->model]);
 }
 
 static
@@ -241,6 +244,9 @@ void objedit_init()
 	proc_draw_window_objedit = wnd->_parent._parent.proc_draw;
 	wnd->_parent._parent.proc_draw = draw_window_objedit;
 
+	lbl_txt_model[0] = 0;
+	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
+	ui_wnd_add_child(wnd, ui_lbl_make(lbl_txt_model));
 	ui_wnd_add_child(wnd, ui_lbl_make("Pos:"));
 	in_coord_x = ui_in_make(cb_in_coords);
 	ui_wnd_add_child(wnd, in_coord_x);
