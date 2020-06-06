@@ -447,6 +447,10 @@ static
 void cb_in_filter_updated(struct UI_INPUT *in)
 {
 	ui_lst_recalculate_filter(lst_browser);
+	if (lst_browser->numitems == 1) {
+		ui_lst_set_selected_index(lst_browser, lst_browser->filteredIndexMapping[0]);
+		cb_lst_object_selected(lst_browser);
+	}
 }
 
 static ui_method *proc_lst_browser_recalc_size;
