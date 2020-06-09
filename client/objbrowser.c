@@ -414,6 +414,7 @@ void objbrowser_set_list_data()
 	int numnames;
 	int i;
 
+	TRACE("objbrowser_set_list_data");
 	numnames = 0;
 	for (i = 0; i < 20000; i++) {
 		if (modelNames[i] != NULL && !blacklistedObjects[i]) {

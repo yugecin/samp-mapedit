@@ -48,7 +48,7 @@ static struct UI_BUTTON *btn_move_obj;
 static struct UI_BUTTON *btn_tp_obj_to_cam;
 static struct UI_BUTTON *btn_delete_obj;
 
-static char txt_contextmenu_model[9];
+static char txt_contextmenu_model[50];
 static char txt_objentity[9];
 static char txt_objmodel[45];
 static char txt_objtype[9];
@@ -147,6 +147,7 @@ void update_layer_list()
 	char *layernames[MAX_LAYERS];
 	int i;
 
+	TRACE("objectsui:update_layer_list");
 	for (i = 0; i < MAX_LAYERS; i++) {
 		layernames[i] = layers[i].name;
 	}

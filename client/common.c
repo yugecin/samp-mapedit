@@ -82,6 +82,6 @@ void common_trace(char *data)
 		traceptr = tracedata;
 	}
 	strcpy(traceptr, data);
-	traceptr += len + 1;
 	*((int*) 0xBAB2C8) = (int) traceptr;
+	traceptr += len + 1;
 }

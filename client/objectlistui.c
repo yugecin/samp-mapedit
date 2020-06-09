@@ -63,6 +63,7 @@ void objlistui_refresh_list_from_layer()
 	int i;
 	struct OBJECT *obj;
 
+	TRACE("objlistui_refresh_list_from_layer");
 	fromLayers = 1;
 	btn_delete->enabled = 0;
 	btn_move->enabled = 0;
@@ -88,6 +89,7 @@ void objlistui_refresh_list_from_nearby()
 	char *names[MAX_OBJECTS];
 	int i;
 
+	TRACE("objlistui_refresh_list_from_nearby");
 	fromLayers = 0;
 	btn_delete->enabled = 0;
 	btn_move->enabled = 0;
