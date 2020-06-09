@@ -25,12 +25,15 @@
 #define MAX_FILES 1000
 #define NAME_LEN 50
 #define FILE_LEN NAME_LEN + 15
+#define MAX_RECENT_PROJECT_BUTTONS 4
 
 static struct UI_WINDOW *window_project;
 static struct UI_INPUT *in_newprojectname;
 static struct UI_LIST *lst_projects;
 static struct UI_BUTTON *btn_main_save, *btn_open;
 static struct UI_LABEL *lbl_current;
+static struct UI_BUTTON *btn_recents[MAX_RECENT_PROJECT_BUTTONS];
+static char recents[6][INPUT_TEXTLEN + 1];
 static char open_project_name[INPUT_TEXTLEN + 1];
 static char tmp_files[MAX_FILES][NAME_LEN];
 static int numfiles;
@@ -45,6 +48,22 @@ static
 void mk_project_filename(char *buf, char *project_name)
 {
 	sprintf(buf, "samp-mapedit\\%s.mep", project_name);
+}
+
+static
+void cb_btn_open_recent(struct UI_BUTTON *btn)
+{
+	char to_open[INPUT_TEXTLEN + 1];
+	int index;
+	int i;
+
+	index = (int) btn->_parent.userdata;
+	memcpy(to_open, recents[index], INPUT_TEXTLEN + 1);
+	for (i = index; i < MAX_RECENT_PROJECT_BUTTONS - 1; i++) {
+		memcpy(recents[i], recents[i + 1], INPUT_TEXTLEN);
+	}
+	recents[MAX_RECENT_PROJECT_BUTTONS - 1][0] = 0;
+	prj_open_by_name(to_open);
 }
 
 static
@@ -106,7 +125,15 @@ void prj_preload()
 static
 void prj_postload()
 {
+	int i;
+
 	TRACE("prj_postload");
+	for (i = MAX_RECENT_PROJECT_BUTTONS - 1; i > 0; i--) {
+		memcpy(recents[i], recents[i - 1], sizeof(recents[0]));
+		btn_recents[i]->enabled = recents[i][0];
+	}
+	memcpy(recents[0], open_project_name, sizeof(recents[0]));
+	btn_recents[0]->enabled = 1;
 	racecp_resetall();
 	ui_prj_postload();
 	objects_prj_postload();
@@ -244,6 +271,7 @@ void prj_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
+	int i;
 
 	lbl = ui_lbl_make("=_Project_=");
 	lbl->_parent.span = 2;
@@ -283,6 +311,19 @@ void prj_init()
 	btn_open->_parent.span = 2;
 	btn_open->enabled = 0;
 	ui_wnd_add_child(window_project, btn_open);
+	ui_wnd_add_child(window_project, NULL);
+	ui_wnd_add_child(window_project, lbl = ui_lbl_make("Recent_projects:"));
+	lbl->_parent.span = 2;
+	for (i = 0; i < MAX_RECENT_PROJECT_BUTTONS; i++) {
+		recents[i][0] = 0;
+		btn = btn_recents[i] = ui_btn_make(NULL, cb_btn_open_recent);
+		btn->text = recents[i];
+		btn->_parent.userdata = (void*) i;
+		btn->_parent.span = 2;
+		btn->enabled = 0;
+		ui_wnd_add_child(window_project, NULL);
+		ui_wnd_add_child(window_project, btn);
+	}
 }
 
 void prj_do_show_window()
@@ -293,7 +334,12 @@ void prj_do_show_window()
 
 void prj_dispose()
 {
+	int i;
+
 	TRACE("prj_dispose");
+	for (i = 0; i < MAX_RECENT_PROJECT_BUTTONS; i++) {
+		btn_recents[i]->text = NULL; /*so they don't get free'd*/
+	}
 	ui_wnd_dispose(window_project);
 }
 
