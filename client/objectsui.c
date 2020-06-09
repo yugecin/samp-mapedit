@@ -30,8 +30,10 @@ static struct UI_LABEL *lbl_layer;
 static struct UI_BUTTON *btn_mainmenu_layers, *btn_mainmenu_selectobject;
 static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_BUTTON *btn_contextmenu_editobject;
+static struct UI_BUTTON *btn_contextmenu_moveobject;
 static struct UI_BUTTON *btn_contextmenu_addtobulk;
 static struct UI_BUTTON *btn_contextmenu_removefrombulk;
+static struct UI_LABEL *lbl_contextmenu_model;
 static struct UI_LIST *lst_layers;
 static struct UI_INPUT *in_layername;
 
@@ -46,6 +48,7 @@ static struct UI_BUTTON *btn_move_obj;
 static struct UI_BUTTON *btn_tp_obj_to_cam;
 static struct UI_BUTTON *btn_delete_obj;
 
+static char txt_contextmenu_model[9];
 static char txt_objentity[9];
 static char txt_objmodel[45];
 static char txt_objtype[9];
@@ -111,6 +114,13 @@ static
 void cb_btn_contextmenu_editobject(struct UI_BUTTON *btn)
 {
 	objedit_show(objects_find_by_sa_object(clicked_entity));
+}
+
+static
+void cb_btn_contextmenu_moveobject(struct UI_BUTTON *btn)
+{
+	objedit_show(objects_find_by_sa_object(clicked_entity));
+	objedit_move();
 }
 
 static
@@ -356,6 +366,9 @@ void objui_init()
 	selected_object = NULL;
 
 	/*context menu entries*/
+	txt_contextmenu_model[0] = '_';
+	txt_contextmenu_model[1] = 0;
+	ui_wnd_add_child(context_menu, lbl_contextmenu_model = ui_lbl_make(txt_contextmenu_model));
 	btn = ui_btn_make("Make_Object", cb_btn_contextmenu_mkobject);
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
@@ -364,6 +377,10 @@ void objui_init()
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
 	btn_contextmenu_editobject = btn;
+	btn = ui_btn_make("Move_Object", cb_btn_contextmenu_moveobject);
+	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_moveobject = btn;
 	btn = ui_btn_make("Add_to_bulkedit", cb_btn_contextmenu_addtobulk);
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
@@ -638,11 +655,21 @@ int objui_on_background_element_just_clicked()
 		return 0;
 	}
 
+	clicked_object = NULL;
 	btn_contextmenu_editobject->enabled =
+	btn_contextmenu_moveobject->enabled =
 		clicked_entity != NULL &&
 		(clicked_object = objects_find_by_sa_object(clicked_entity)) != NULL;
 	btn_contextmenu_addtobulk->enabled = clicked_object != NULL && !bulkedit_is_in_list(clicked_object);
 	btn_contextmenu_removefrombulk->enabled = clicked_object != NULL && bulkedit_is_in_list(clicked_object);
+
+	if (clicked_object == NULL) {
+		txt_contextmenu_model[0] = '_';
+		txt_contextmenu_model[1] = 0;
+	} else {
+		strcpy(txt_contextmenu_model, modelNames[clicked_object->model]);
+	}
+	ui_lbl_recalc_size(lbl_contextmenu_model);
 
 	ui_get_clicked_position(&nextObjectPosition);
 	return 1;

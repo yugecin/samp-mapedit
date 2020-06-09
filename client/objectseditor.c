@@ -102,14 +102,7 @@ void cb_in_rotation(struct UI_INPUT *in)
 static
 void cb_btn_move(struct UI_BUTTON *btn)
 {
-	struct MSG_NC nc;
-
-	updateFromMoving = 1;
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc.nc = NC_EditObject;
-	nc.params.asint[1] = 0;
-	nc.params.asint[2] = editingObject->samp_objectid;
-	sockets_send(&nc, sizeof(nc));
+	objedit_move();
 }
 
 static
@@ -224,6 +217,18 @@ void objedit_show(struct OBJECT *obj)
 	objedit_update_bulkedit_buttons();
 	bulkedit_begin(obj);
 	sprintf(lbl_txt_model, modelNames[obj->model]);
+}
+
+void objedit_move()
+{
+	struct MSG_NC nc;
+
+	updateFromMoving = 1;
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc.nc = NC_EditObject;
+	nc.params.asint[1] = 0;
+	nc.params.asint[2] = editingObject->samp_objectid;
+	sockets_send(&nc, sizeof(nc));
 }
 
 static
