@@ -499,7 +499,7 @@ void ui_get_entity_pointed_at(void **entity, struct CColPoint *colpoint)
 	struct RwV3D target, from;
 
 	from = camera->position;
-	game_ScreenToWorld(&target, cursorx, cursory, 300.0f);
+	game_ScreenToWorld(&target, cursorx, cursory, 700.0f);
 	if (!game_WorldIntersectEntity(&from, &target, colpoint, entity)) {
 		*entity = NULL;
 	}
