@@ -664,11 +664,11 @@ int objui_on_background_element_just_clicked()
 	btn_contextmenu_addtobulk->enabled = clicked_object != NULL && !bulkedit_is_in_list(clicked_object);
 	btn_contextmenu_removefrombulk->enabled = clicked_object != NULL && bulkedit_is_in_list(clicked_object);
 
-	if (clicked_object == NULL) {
+	if (clicked_entity == NULL) {
 		txt_contextmenu_model[0] = '_';
 		txt_contextmenu_model[1] = 0;
 	} else {
-		strcpy(txt_contextmenu_model, modelNames[clicked_object->model]);
+		strcpy(txt_contextmenu_model, modelNames[clicked_entity->model]);
 	}
 	ui_lbl_recalc_size(lbl_contextmenu_model);
 
