@@ -4,6 +4,7 @@
 #include "bulkeditui.h"
 #include "common.h"
 #include "client.h"
+#include "detours.h"
 #include "entity.h"
 #include "game.h"
 #include "objbrowser.h"
@@ -83,6 +84,12 @@ void cb_btn_reload(struct UI_BUTTON *btn)
 }
 
 static
+void cb_chk_showwater(struct UI_CHECKBOX *chk)
+{
+	showWater = chk->checked;
+}
+
+static
 void ui_recalculate_sizes()
 {
 	struct Rect textbounds;
@@ -118,6 +125,7 @@ void ui_push_debug_string()
 void ui_init()
 {
 	struct UI_BUTTON *btn;
+	struct UI_CHECKBOX *chk;
 
 	key_w = VK_Z;
 	key_a = VK_Q;
@@ -144,6 +152,10 @@ void ui_init()
 	btn = ui_btn_make("Reload_client", cb_btn_reload);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
+
+	chk = ui_chk_make("Show water", 1, cb_chk_showwater);
+	chk->_parent._parent.span = 2;
+	ui_wnd_add_child(main_menu, chk);
 }
 
 void ui_show_window(struct UI_WINDOW *wnd)

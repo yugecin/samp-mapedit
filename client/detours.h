@@ -2,3 +2,5 @@
 
 void detours_install();
 void detours_uninstall();
+
+extern int showWater;

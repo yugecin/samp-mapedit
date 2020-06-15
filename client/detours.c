@@ -13,6 +13,7 @@
 #include <windows.h>
 
 struct CEntity *lastCarSpawned;
+int showWater;
 
 static
 __declspec(naked) void render_centity_detour()
@@ -40,9 +41,13 @@ static
 __declspec(naked) void render_water_detour()
 {
 	_asm {
+		mov eax, showWater
+		test eax, eax
+		jz norender
 		mov eax, exclusiveEntity
 		test eax, eax
 		jz continuerender
+norender:
 		add esp, 0x4
 		pop edi
 		pop esi
@@ -252,6 +257,8 @@ void detours_install()
 	VirtualProtect((void*) 0x486B00, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	CTheScripts__ClearSpaceForMissionEntity_op = *((char*) 0x486B00);
 	*((char*) 0x486B00) = 0xC3;
+
+	showWater = 1;
 }
 
 void detours_uninstall()
