@@ -19,6 +19,7 @@
 #include "removebuildingeditor.h"
 #include "removedbuildingsui.h"
 #include "sockets.h"
+#include "vehnames.h"
 #include "../shared/serverlink.h"
 #include <string.h>
 #include <stdio.h>
@@ -664,11 +665,23 @@ int objui_on_background_element_just_clicked()
 	btn_contextmenu_addtobulk->enabled = clicked_object != NULL && !bulkedit_is_in_list(clicked_object);
 	btn_contextmenu_removefrombulk->enabled = clicked_object != NULL && bulkedit_is_in_list(clicked_object);
 
-	if (clicked_entity == NULL) {
+	if (clicked_entity != NULL)
+	{
+		if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_VEHICLE)) {
+			sprintf(txt_contextmenu_model, "%d:_%s",
+				clicked_entity->model, vehnames[clicked_entity->model - 400]);
+		} else if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_BUILDING) ||
+			ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_OBJECT) ||
+			ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_DUMMY))
+		{
+			strcpy(txt_contextmenu_model, modelNames[clicked_entity->model]);
+		} else {
+			goto nothing;
+		}
+	} else {
+nothing:
 		txt_contextmenu_model[0] = '_';
 		txt_contextmenu_model[1] = 0;
-	} else {
-		strcpy(txt_contextmenu_model, modelNames[clicked_entity->model]);
 	}
 	ui_lbl_recalc_size(lbl_contextmenu_model);
 
