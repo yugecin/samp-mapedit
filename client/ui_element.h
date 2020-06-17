@@ -1,7 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-typedef (ui_method)(void*);
-typedef (ui_method1)(void*, void*);
+typedef int (ui_method)(void*);
+typedef int (ui_method1)(void*, void*);
 
 #define UIPROC(ELEM,PROC,...) \
 	((struct UI_ELEMENT*) ELEM)->PROC(ELEM,__VA_ARGS__)

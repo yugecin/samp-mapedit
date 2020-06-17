@@ -214,7 +214,6 @@ void client_init()
 	racecp_resetall();
 
 	/*order of init affects layout of main menu and context menu*/
-	bulkeditui_init();
 	settings_init();
 	player_init();
 	prj_init();
@@ -229,6 +228,7 @@ void client_init()
 	objlistui_init();
 	objbrowser_init();
 	objedit_init();
+	bulkeditui_init();
 	rbe_init();
 	rbui_init();
 	vehiclesui_init();

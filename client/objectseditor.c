@@ -168,33 +168,9 @@ void cb_btn_remove_from_bulkedit(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_undo_bulkedit(struct UI_BUTTON *btn)
-{
-	updateFromMoving = 0;
-	bulkedit_revert();
-	update_inputs();
-	cb_in_coords(NULL);
-	cb_in_rotation(NULL);
-}
-
-static
-void cb_btn_bulkedit(struct UI_BUTTON *btn)
-{
-	bulkeditui_toggle();
-}
-
-static
 void cb_btn_clone(struct UI_BUTTON *btn)
 {
 	objects_clone(editingObject->sa_object);
-}
-
-static
-void cb_btn_close(struct UI_BUTTON *btn)
-{
-	bulkedit_commit();
-	ui_hide_window();
-	bulkeditui_hide();
 }
 
 static
@@ -203,9 +179,22 @@ void cb_btn_view_in_object_browser(struct UI_BUTTON *btn)
 	struct RwV3D pos;
 
 	game_ObjectGetPos(editingObject->sa_object, &pos);
-	cb_btn_close(NULL);
+	ui_hide_window();
 	objbrowser_highlight_model(editingObject->model);
 	objbrowser_show(&pos);
+}
+
+static
+int cb_close(struct UI_WINDOW *wnd)
+{
+	bulkedit_commit();
+	editingObject = NULL;
+	return 1;
+}
+
+struct OBJECT *objedit_get_editing_object()
+{
+	return editingObject;
 }
 
 void objedit_show(struct OBJECT *obj)
@@ -257,9 +246,9 @@ void objedit_init()
 
 	wnd = ui_wnd_make(5000.0f, 300.0f, "Object");
 	wnd->columns = 2;
-	wnd->closeable = 0;
 	proc_draw_window_objedit = wnd->_parent._parent.proc_draw;
 	wnd->_parent._parent.proc_draw = draw_window_objedit;
+	wnd->proc_close = cb_close;
 
 	lbl_txt_model[0] = 0;
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));
@@ -299,16 +288,7 @@ void objedit_init()
 	btn_remove_from_bulkedit = ui_btn_make("Remove_from_bulk_edit", cb_btn_remove_from_bulkedit);
 	btn_remove_from_bulkedit->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn_remove_from_bulkedit);
-	btn = ui_btn_make("Undo_bulk_edit", cb_btn_undo_bulkedit);
-	btn->_parent.span = 2;
-	ui_wnd_add_child(wnd, btn);
-	btn = ui_btn_make("Bulk_edit...", cb_btn_bulkedit);
-	btn->_parent.span = 2;
-	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Clone", cb_btn_clone);
-	btn->_parent.span = 2;
-	ui_wnd_add_child(wnd, btn);
-	btn = ui_btn_make("Close", cb_btn_close);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
 }

@@ -6,6 +6,7 @@
 #include "objects.h"
 #include "bulkedit.h"
 #include "entity.h"
+#include "objectseditor.h"
 #include <math.h>
 #include <string.h>
 
@@ -16,6 +17,7 @@ static struct RwV3D initialRot;
 static struct OBJECT *handlingObject;
 static struct OBJECT *bulkEditObjects[1000];
 static int numBulkEditObjects;
+static char hasUpdated;
 
 void (*bulkedit_pos_update_method)() = bulkedit_update_pos_sync;
 void (*bulkedit_rot_update_method)() = bulkedit_update_rot_sync;
@@ -30,6 +32,7 @@ void bulkedit_begin(struct OBJECT *object)
 		return;
 	}
 
+	hasUpdated = 0;
 	handlingObject = object;
 
 	for (i = 0; i < numBulkEditObjects; i++) {
@@ -41,11 +44,15 @@ void bulkedit_begin(struct OBJECT *object)
 	}
 	game_ObjectGetPos(object->sa_object, &initialPos);
 	game_ObjectGetRot(object->sa_object, &initialRot);
+	initialRot.x *= M_PI / 180.0f;
+	initialRot.y *= M_PI / 180.0f;
+	initialRot.z *= M_PI / 180.0f;
 }
 
 void bulkedit_update()
 {
 	if (handlingObject != NULL) {
+		hasUpdated = 1;
 		bulkedit_pos_update_method();
 		bulkedit_rot_update_method();
 	}
@@ -63,6 +70,9 @@ void bulkedit_revert()
 {
 	int i;
 
+	if (!hasUpdated) {
+		return;
+	}
 	for (i = 0; i < numBulkEditObjects; i++) {
 		game_ObjectSetPos(bulkEditObjects[i]->sa_object, initialPositions + i);
 		game_ObjectSetRotRad(bulkEditObjects[i]->sa_object, initialRotations + i);
@@ -84,6 +94,9 @@ int bulkedit_add(struct OBJECT *object)
 {
 	if (!bulkedit_is_in_list(object)) {
 		bulkEditObjects[numBulkEditObjects++] = object;
+		if (objedit_get_editing_object() == object) {
+			bulkedit_begin(object);
+		}
 		return 1;
 	}
 	return 0;

@@ -32,8 +32,6 @@ static struct UI_BUTTON *btn_mainmenu_layers, *btn_mainmenu_selectobject;
 static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_BUTTON *btn_contextmenu_editobject;
 static struct UI_BUTTON *btn_contextmenu_moveobject;
-static struct UI_BUTTON *btn_contextmenu_addtobulk;
-static struct UI_BUTTON *btn_contextmenu_removefrombulk;
 static struct UI_LABEL *lbl_contextmenu_model;
 static struct UI_LIST *lst_layers;
 static struct UI_INPUT *in_layername;
@@ -46,8 +44,7 @@ static struct UI_LABEL *lbl_objlodmodel;
 static struct UI_BUTTON *btn_view_in_browser;
 static struct UI_BUTTON *btn_remove_building;
 static struct UI_BUTTON *btn_objclone;
-static struct UI_BUTTON *btn_move_obj;
-static struct UI_BUTTON *btn_tp_obj_to_cam;
+static struct UI_BUTTON *btn_edit_obj;
 static struct UI_BUTTON *btn_delete_obj;
 
 static char txt_contextmenu_model[50];
@@ -123,18 +120,6 @@ void cb_btn_contextmenu_moveobject(struct UI_BUTTON *btn)
 {
 	objedit_show(objects_find_by_sa_object(clicked_entity));
 	objedit_move();
-}
-
-static
-void cb_btn_contextmenu_addtobulk(struct UI_BUTTON *btn)
-{
-	bulkedit_add(objects_find_by_sa_object(clicked_entity));
-}
-
-static
-void cb_btn_contextmenu_removefrombulk(struct UI_BUTTON *btn)
-{
-	bulkedit_remove(objects_find_by_sa_object(clicked_entity));
 }
 
 static
@@ -314,34 +299,9 @@ void cb_btn_objclone(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_move_obj(struct UI_BUTTON *btn)
+void cb_btn_edit_obj(struct UI_BUTTON *btn)
 {
-	struct MSG_NC nc;
-
-	if (selected_object != NULL) {
-		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc.nc = NC_EditObject;
-		nc.params.asint[1] = 0;
-		nc.params.asint[2] = selected_object->samp_objectid;
-		sockets_send(&nc, sizeof(nc));
-	}
-}
-
-static
-void cb_btn_tp_obj_to_cam(struct UI_BUTTON *btn)
-{
-	struct MSG_NC nc;
-
-	if (selected_object != NULL) {
-		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc.nc = NC_SetObjectPos;
-		nc.params.asint[1] = selected_object->samp_objectid;
-		nc.params.asflt[2] = camera->position.x;
-		nc.params.asflt[3] = camera->position.y;
-		nc.params.asflt[4] = camera->position.z;
-		sockets_send(&nc, sizeof(nc));
-		objui_select_entity(selected_object->sa_object);
-	}
+	objedit_show(selected_object);
 }
 
 static struct OBJECT *object_to_delete_after_confirm;
@@ -397,16 +357,6 @@ void objui_init()
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
 	btn_contextmenu_moveobject = btn;
-	btn = ui_btn_make("Add_to_bulkedit", cb_btn_contextmenu_addtobulk);
-	ui_wnd_add_child(context_menu, btn);
-	btn->enabled = 0;
-	btn_contextmenu_addtobulk = btn;
-	btn = ui_btn_make("Remove_from_bulkedit", cb_btn_contextmenu_removefrombulk);
-	ui_wnd_add_child(context_menu, btn);
-	btn->enabled = 0;
-	btn_contextmenu_removefrombulk = btn;
-	btn = ui_btn_make("Disband_bulkedit", cb_btn_contextmenu_disbandbulk);
-	ui_wnd_add_child(context_menu, btn);
 
 	/*main menu entries*/
 	lbl = ui_lbl_make("=_Objects_=");
@@ -477,12 +427,9 @@ void objui_init()
 	btn = ui_btn_make("Clone", cb_btn_objclone);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(window_objinfo, btn_objclone = btn);
-	btn = ui_btn_make("Move_Object", cb_btn_move_obj);
+	btn = ui_btn_make("Edit_Object", cb_btn_edit_obj);
 	btn->_parent.span = 2;
-	ui_wnd_add_child(window_objinfo, btn_move_obj = btn);
-	btn = ui_btn_make("TP_Object_to_camera", cb_btn_tp_obj_to_cam);
-	btn->_parent.span = 2;
-	ui_wnd_add_child(window_objinfo, btn_tp_obj_to_cam = btn);
+	ui_wnd_add_child(window_objinfo, btn_edit_obj = btn);
 	btn = ui_btn_make("Delete_Object", cb_btn_delete_obj);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(window_objinfo, btn_delete_obj = btn);
@@ -593,8 +540,7 @@ void objui_select_entity(void *entity)
 		selected_object = NULL;
 		btn_view_in_browser->enabled = 0;
 		btn_remove_building->enabled = 0;
-		btn_move_obj->enabled = 0;
-		btn_tp_obj_to_cam->enabled = 0;
+		btn_edit_obj->enabled = 0;
 		btn_delete_obj->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objmodel, "0");
@@ -638,14 +584,12 @@ void objui_select_entity(void *entity)
 	if (selected_object == NULL) {
 		btn_view_in_browser->enabled = 1;
 		btn_remove_building->enabled = 1;
-		btn_move_obj->enabled = 0;
-		btn_tp_obj_to_cam->enabled = 0;
+		btn_edit_obj->enabled = 0;
 		btn_delete_obj->enabled = 0;
 	} else {
 		btn_view_in_browser->enabled = 0;
 		btn_remove_building->enabled = 0;
-		btn_move_obj->enabled = 1;
-		btn_tp_obj_to_cam->enabled = 1;
+		btn_edit_obj->enabled = 1;
 		btn_delete_obj->enabled = 1;
 	}
 }
@@ -678,8 +622,6 @@ int objui_on_background_element_just_clicked()
 	btn_contextmenu_moveobject->enabled =
 		clicked_entity != NULL &&
 		(clicked_object = objects_find_by_sa_object(clicked_entity)) != NULL;
-	btn_contextmenu_addtobulk->enabled = clicked_object != NULL && !bulkedit_is_in_list(clicked_object);
-	btn_contextmenu_removefrombulk->enabled = clicked_object != NULL && bulkedit_is_in_list(clicked_object);
 
 	if (clicked_entity != NULL)
 	{
@@ -729,8 +671,7 @@ void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 		objui_prepare_selecting_object();
 		btn_view_in_browser->enabled = 0;
 		btn_remove_building->enabled = 0;
-		btn_move_obj->enabled = 0;
-		btn_tp_obj_to_cam->enabled = 0;
+		btn_edit_obj->enabled = 0;
 		btn_delete_obj->enabled = 0;
 	} else if (is_selecting_object) {
 		is_selecting_object = 0;

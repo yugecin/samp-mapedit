@@ -2,6 +2,7 @@
 
 struct UI_WINDOW {
 	struct UI_CONTAINER _parent;
+	ui_method *proc_close;
 	short columns;
 	char *title;
 	float grabx, graby;

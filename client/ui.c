@@ -340,7 +340,9 @@ void ui_set_fontsize(int fs, int fr)
 			background_element);
 		context_menu->_parent._parent.proc_recalc_size(context_menu);
 		main_menu->_parent._parent.proc_recalc_size(main_menu);
-		bulkeditui_wnd->_parent._parent.proc_recalc_size(bulkeditui_wnd);
+		if (bulkeditui_wnd) {
+			bulkeditui_wnd->_parent._parent.proc_recalc_size(bulkeditui_wnd);
+		}
 		if (active_window != NULL) {
 			active_window->_parent._parent.proc_recalc_size(
 				active_window);
@@ -533,7 +535,8 @@ void background_element_just_clicked()
 
 	if (objui_on_background_element_just_clicked() &&
 		player_on_background_element_just_clicked() &&
-		vehiclesui_on_background_element_just_clicked())
+		vehiclesui_on_background_element_just_clicked() &&
+		bulkeditui_on_background_element_just_clicked())
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;

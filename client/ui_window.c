@@ -8,6 +8,12 @@
 #define GRABX_VAL_CLOSEBTN -1000
 #define GRABX_VAL_NOGRAB -2000
 
+static
+int wnd_close_proc(struct UI_ELEMENT *elem)
+{
+	return 0;
+}
+
 struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 {
 	struct UI_WINDOW *wnd;
@@ -26,6 +32,7 @@ struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 	wnd->_parent._parent.proc_recalc_size = (ui_method*) ui_cnt_recalc_size;
 	wnd->_parent.childcount = 0;
 	wnd->_parent.need_layout = 1;
+	wnd->proc_close = wnd_close_proc;
 	wnd->columns = 1;
 	wnd->title = title;
 	wnd->closeable = 1;
@@ -320,7 +327,9 @@ int ui_wnd_mouseup(struct UI_WINDOW *wnd)
 		wnd->grabx == GRABX_VAL_CLOSEBTN &&
 		is_closebtn_hovered(wnd))
 	{
-		ui_hide_window();
+		if (wnd->proc_close(wnd)) {
+			ui_hide_window();
+		}
 		return 1;
 	}
 	return ui_cnt_mouseup((struct UI_CONTAINER*) wnd);

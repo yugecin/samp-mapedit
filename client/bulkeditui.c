@@ -3,6 +3,8 @@
 #include "bulkedit.h"
 #include "bulkeditui.h"
 #include "common.h"
+#include "game.h"
+#include "objects.h"
 #include "ui.h"
 #include <string.h>
 
@@ -43,7 +45,6 @@ void cb_btn_disband(struct UI_BUTTON *btn)
 {
 	bulkedit_revert();
 	bulkedit_reset();
-	bulkeditui_hide();
 }
 
 static
@@ -52,14 +53,37 @@ void cb_btn_revert(struct UI_BUTTON *btn)
 	bulkedit_revert();
 }
 
-void bulkeditui_toggle()
+static
+void cb_btn_mainmenu_bulkedit(struct UI_BUTTON *btn)
 {
-	bulkeditui_shown = !bulkeditui_shown;
+	struct OBJECT *obj;
+
+	bulkeditui_shown = 1;
+	bulkeditui_wnd->_parent._parent.proc_recalc_size(bulkeditui_wnd);
+	obj = objedit_get_editing_object();
+	if (obj) {
+		bulkedit_begin(obj);
+	}
 }
 
-void bulkeditui_hide()
+int bulkeditui_proc_close(struct UI_WINDOW *wnd)
 {
 	bulkeditui_shown = 0;
+	return 1;
+}
+
+int bulkeditui_on_background_element_just_clicked()
+{
+	struct OBJECT *obj;
+
+	if (bulkeditui_shown && (obj = objects_find_by_sa_object(clicked_entity))) {
+		if (bulkedit_is_in_list(obj)) {
+			bulkedit_remove(obj);
+		} else {
+			bulkedit_add(obj);
+		}
+	}
+	return 1;
 }
 
 void bulkeditui_init()
@@ -69,9 +93,13 @@ void bulkeditui_init()
 	struct UI_RADIOBUTTON *rdb;
 	struct RADIOBUTTONGROUP *posrdbgroup, *rotrdbgroup, *directionrdbgroup;
 
+	btn = ui_btn_make("Bulkedit", cb_btn_mainmenu_bulkedit);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
+
 	bulkeditui_wnd = ui_wnd_make(200.0f, 20.0f, "Bulkedit");
 	bulkeditui_wnd->columns = 3;
-	bulkeditui_wnd->closeable = 0;
+	bulkeditui_wnd->proc_close = bulkeditui_proc_close;
 
 	posrdbgroup = ui_rdbgroup_make(cb_posrdbgroup_changed);
 	rotrdbgroup = ui_rdbgroup_make(cb_rotrdbgroup_changed);

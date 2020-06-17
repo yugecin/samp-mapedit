@@ -4,3 +4,4 @@ void objedit_show(struct OBJECT *obj);
 void objedit_move();
 void objedit_init();
 void objedit_dispose();
+struct OBJECT *objedit_get_editing_object();
