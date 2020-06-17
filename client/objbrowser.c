@@ -21,6 +21,7 @@ static struct UI_WINDOW *wnd;
 static struct UI_BUTTON *btn_next, *btn_prev;
 static struct UI_BUTTON *btn_create;
 static struct UI_LABEL *lbl_modelname;
+static struct UI_INPUT *in_filter;
 static struct UI_LIST *lst_browser;
 static char lbltxt_modelid[7], lbltxt_modelname[40];
 static int lst_index_to_model_mapping[MAX_MODELS];
@@ -31,7 +32,7 @@ static int isactive = 0;
 static int hasvalidobject = 0;
 static struct RwV3D originalCameraPos, originalCameraRot;
 static struct OBJECT picking_object;
-static struct RwV3D *positionToCommit;
+static struct RwV3D positionToCommit;
 static struct RwV3D positionToPreview;
 static int rotationStartTime;
 static float camera_distance;
@@ -323,7 +324,7 @@ void cb_btn_create(struct UI_BUTTON *btn)
 	object = active_layer->objects + active_layer->numobjects++;
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
 	object->rot = NULL;
-	object->pos = *positionToCommit;
+	object->pos = positionToCommit;
 	objects_mkobject(object);
 	restore_after_hide();
 }
@@ -348,7 +349,7 @@ void cb_btn_switchtime(struct UI_BUTTON *btn)
 void objbrowser_show(struct RwV3D *positionToCreate)
 {
 	lbltxt_modelid[0] = lbltxt_modelname[0] = 0;
-	positionToCommit = positionToCreate;
+	positionToCommit = *positionToCreate;
 	originalCameraPos = camera->position;
 	originalCameraRot = camera->lookVector;
 	positionToPreview.x = camera->position.x;
@@ -370,6 +371,8 @@ void objbrowser_highlight_model(int model)
 {
 	int idx;
 
+	ui_in_set_text(in_filter, "");
+	ui_lst_recalculate_filter(lst_browser);
 	idx = list_valid_index_for_model(model);
 	if (idx != -1) {
 		ui_lst_set_selected_index(lst_browser, idx);
@@ -465,7 +468,6 @@ void lst_browser_recalc_size(struct UI_LIST *lst)
 
 void objbrowser_init()
 {
-	struct UI_INPUT *filter;
 	struct UI_BUTTON *btn;
 	DWORD oldvp;
 
@@ -500,15 +502,15 @@ void objbrowser_init()
 	btn_create = ui_btn_make("Create", cb_btn_create);
 	ui_wnd_add_child(wnd, btn_create);
 	ui_wnd_add_child(wnd, ui_btn_make("Cancel", (void*) cb_btn_cancel));
-	filter = ui_in_make(cb_in_filter_updated);
-	ui_wnd_add_child(wnd, filter);
+	in_filter = ui_in_make(cb_in_filter_updated);
+	ui_wnd_add_child(wnd, in_filter);
 	lst_browser = ui_lst_make(35, cb_lst_object_selected);
 	proc_lst_browser_recalc_size = lst_browser->_parent.proc_recalc_size;
 	lst_browser->_parent.proc_recalc_size = (void*) lst_browser_recalc_size;
 	proc_orig_lst_post_layout = lst_browser->_parent.proc_post_layout;
 	lst_browser->_parent.proc_post_layout = objbrowser_lst_post_layout;
 	ui_wnd_add_child(wnd, lst_browser);
-	lst_browser->filter = filter->value;
+	lst_browser->filter = in_filter->value;
 
 	objbrowser_set_list_data();
 }

@@ -43,6 +43,7 @@ static struct UI_LABEL *lbl_objentity;
 static struct UI_LABEL *lbl_objflags;
 static struct UI_LABEL *lbl_objmodel;
 static struct UI_LABEL *lbl_objlodmodel;
+static struct UI_BUTTON *btn_view_in_browser;
 static struct UI_BUTTON *btn_remove_building;
 static struct UI_BUTTON *btn_objclone;
 static struct UI_BUTTON *btn_move_obj;
@@ -272,6 +273,19 @@ void cb_btn_delete_layer()
 }
 
 static
+void cb_btn_view_in_object_browser(struct UI_BUTTON *btn)
+{
+	struct RwV3D pos;
+
+	if (selected_entity) {
+		game_ObjectGetPos(selected_entity, &pos);
+		objbrowser_highlight_model(selected_entity->model);
+		ui_hide_window(); /*clears selected_entity*/
+		objbrowser_show(&pos);
+	}
+}
+
+static
 void cb_btn_remove_building(struct UI_BUTTON *btn)
 {
 	struct CEntity *entity;
@@ -442,6 +456,10 @@ void objui_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Model:"));
 	lbl_objmodel = ui_lbl_make(txt_objmodel);
 	ui_wnd_add_child(window_objinfo, lbl_objmodel);
+	btn = ui_btn_make("View_in_object_browser", cb_btn_view_in_object_browser);
+	btn->_parent.span = 2;
+	btn->enabled = 0;
+	ui_wnd_add_child(window_objinfo, btn_view_in_browser = btn);
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Type:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objtype));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Flags:"));
@@ -455,23 +473,18 @@ void objui_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objlodflags));
 	btn = ui_btn_make("Remove_Building", cb_btn_remove_building);
 	btn->_parent.span = 2;
-	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_remove_building = btn);
 	btn = ui_btn_make("Clone", cb_btn_objclone);
 	btn->_parent.span = 2;
-	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_objclone = btn);
 	btn = ui_btn_make("Move_Object", cb_btn_move_obj);
 	btn->_parent.span = 2;
-	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_move_obj = btn);
 	btn = ui_btn_make("TP_Object_to_camera", cb_btn_tp_obj_to_cam);
 	btn->_parent.span = 2;
-	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_tp_obj_to_cam = btn);
 	btn = ui_btn_make("Delete_Object", cb_btn_delete_obj);
 	btn->_parent.span = 2;
-	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_delete_obj = btn);
 }
 
@@ -578,6 +591,7 @@ void objui_select_entity(void *entity)
 	if (entity == NULL) {
 		btn_objclone->enabled = 0;
 		selected_object = NULL;
+		btn_view_in_browser->enabled = 0;
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 0;
 		btn_tp_obj_to_cam->enabled = 0;
@@ -622,11 +636,13 @@ void objui_select_entity(void *entity)
 	ui_lbl_recalc_size(lbl_objlodmodel);
 	selected_object = objects_find_by_sa_object(entity);
 	if (selected_object == NULL) {
+		btn_view_in_browser->enabled = 1;
 		btn_remove_building->enabled = 1;
 		btn_move_obj->enabled = 0;
 		btn_tp_obj_to_cam->enabled = 0;
 		btn_delete_obj->enabled = 0;
 	} else {
+		btn_view_in_browser->enabled = 0;
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 1;
 		btn_tp_obj_to_cam->enabled = 1;
@@ -711,6 +727,7 @@ void objects_on_active_window_changed(struct UI_WINDOW *wnd)
 	if (wnd == window_objinfo) {
 		is_selecting_object = 1;
 		objui_prepare_selecting_object();
+		btn_view_in_browser->enabled = 0;
 		btn_remove_building->enabled = 0;
 		btn_move_obj->enabled = 0;
 		btn_tp_obj_to_cam->enabled = 0;
