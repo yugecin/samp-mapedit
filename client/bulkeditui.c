@@ -4,6 +4,7 @@
 #include "bulkeditui.h"
 #include "common.h"
 #include "game.h"
+#include "ide.h"
 #include "objects.h"
 #include "objectseditor.h"
 #include "ui.h"
@@ -11,6 +12,21 @@
 
 struct UI_WINDOW *bulkeditui_wnd;
 char bulkeditui_shown;
+
+static struct UI_CHECKBOX *chk_captureclicks;
+static ui_method *bulkeditui_original_proc_wnd_draw;
+
+static char capture_clicks;
+
+#define MAX_LABELS 5
+struct FLOATING_LABEL {
+	float x, y;
+	char txt[80];
+	int timeout;
+};
+
+struct FLOATING_LABEL labels[MAX_LABELS];
+int label_next_idx;
 
 static
 void cb_posrdbgroup_changed(struct UI_RADIOBUTTON *rdb)
@@ -76,15 +92,45 @@ int bulkeditui_proc_close(struct UI_WINDOW *wnd)
 int bulkeditui_on_background_element_just_clicked()
 {
 	struct OBJECT *obj;
+	struct FLOATING_LABEL *lbl;
 
-	if (bulkeditui_shown && (obj = objects_find_by_sa_object(clicked_entity))) {
+	if (bulkeditui_shown &&
+		(obj = objects_find_by_sa_object(clicked_entity)) &&
+		chk_captureclicks->checked)
+	{
+		lbl = labels + label_next_idx;
+		label_next_idx++;
+		if (label_next_idx >= MAX_LABELS) {
+			label_next_idx = 0;
+		}
 		if (bulkedit_is_in_list(obj)) {
 			bulkedit_remove(obj);
+			sprintf(lbl->txt, "~r~del_~w~%s", modelNames[obj->model]);
 		} else {
 			bulkedit_add(obj);
+			sprintf(lbl->txt, "~g~add_~w~%s", modelNames[obj->model]);
 		}
+		lbl->timeout = *timeInGame + 800;
+		lbl->x = cursorx;
+		lbl->y = cursory + 10.0f;
+		return 0;
 	}
 	return 1;
+}
+
+static
+int bulkeditui_proc_wnd_draw(void *wnd)
+{
+	int val, i;
+
+	val = bulkeditui_original_proc_wnd_draw(wnd);
+	for (i = 0; i < MAX_LABELS; i++) {
+		if (*timeInGame < labels[i].timeout) {
+			game_TextSetAlign(CENTER);
+			game_TextPrintString(labels[i].x, labels[i].y, labels[i].txt);
+		}
+	}
+	return val;
 }
 
 void bulkeditui_init()
@@ -98,9 +144,11 @@ void bulkeditui_init()
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 
-	bulkeditui_wnd = ui_wnd_make(200.0f, 20.0f, "Bulkedit");
+	bulkeditui_wnd = ui_wnd_make(300.0f, 20.0f, "Bulkedit");
 	bulkeditui_wnd->columns = 3;
 	bulkeditui_wnd->proc_close = bulkeditui_proc_close;
+	bulkeditui_original_proc_wnd_draw = bulkeditui_wnd->_parent._parent.proc_draw;
+	bulkeditui_wnd->_parent._parent.proc_draw = bulkeditui_proc_wnd_draw;
 
 	posrdbgroup = ui_rdbgroup_make(cb_posrdbgroup_changed);
 	rotrdbgroup = ui_rdbgroup_make(cb_rotrdbgroup_changed);
@@ -170,6 +218,9 @@ void bulkeditui_init()
 	btn = ui_btn_make("Revert_bulk_edit", cb_btn_revert);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, btn);
+	chk_captureclicks = ui_chk_make("Select_objects_for_bulkedit", 0, NULL);
+	chk_captureclicks->_parent._parent.span = 3;
+	ui_wnd_add_child(bulkeditui_wnd, chk_captureclicks);
 }
 
 void bulkeditui_dispose()
