@@ -639,7 +639,19 @@ int ui_handle_keydown(int vk)
 		return 1;
 	}
 	if (vk == VK_ESCAPE) {
-		return objbrowser_handle_esc() || objui_handle_esc();
+		if (objbrowser_handle_esc()) {
+			return 1;
+		}
+		if (active_window != NULL && active_window->proc_close(active_window)) {
+			return 1;
+		}
+		/*
+		Not sure if I want this to hide when pressing ESC
+		if (bulkeditui_shown) {
+			bulkeditui_shown = 0;
+			return 1;
+		}
+		*/
 	}
 	return ui_active_element != NULL &&
 		UIPROC(ui_active_element, proc_accept_keydown, (void*) vk);

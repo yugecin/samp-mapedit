@@ -185,10 +185,11 @@ void cb_btn_view_in_object_browser(struct UI_BUTTON *btn)
 }
 
 static
-int cb_close(struct UI_WINDOW *wnd)
+int objedit_proc_close(struct UI_WINDOW *wnd)
 {
 	bulkedit_commit();
 	editingObject = NULL;
+	ui_hide_window();
 	return 1;
 }
 
@@ -248,7 +249,7 @@ void objedit_init()
 	wnd->columns = 2;
 	proc_draw_window_objedit = wnd->_parent._parent.proc_draw;
 	wnd->_parent._parent.proc_draw = draw_window_objedit;
-	wnd->proc_close = cb_close;
+	wnd->proc_close = objedit_proc_close;
 
 	lbl_txt_model[0] = 0;
 	ui_wnd_add_child(wnd, ui_lbl_make("Model:"));

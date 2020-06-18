@@ -5,6 +5,7 @@
 #include "common.h"
 #include "game.h"
 #include "objects.h"
+#include "objectseditor.h"
 #include "ui.h"
 #include <string.h>
 

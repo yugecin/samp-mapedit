@@ -2,6 +2,7 @@
 
 struct UI_WINDOW {
 	struct UI_CONTAINER _parent;
+	/**return 1 to say it was handled (for when pressing esc etc)*/
 	ui_method *proc_close;
 	short columns;
 	char *title;
