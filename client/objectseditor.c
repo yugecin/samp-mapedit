@@ -27,6 +27,7 @@ static struct OBJECT *editingObject;
 static char lbl_txt_model[50];
 static char updateFromMoving;
 static ui_method *proc_draw_window_objedit;
+static struct RwV3D initialPos, initialRot;
 
 static
 void update_inputs()
@@ -103,6 +104,32 @@ static
 void cb_btn_move(struct UI_BUTTON *btn)
 {
 	objedit_move();
+}
+
+static
+void cb_btn_undo_move(struct UI_BUTTON *btn)
+{
+	struct RwV3D rot;
+	struct MSG_NC nc;
+
+	game_ObjectSetPos(editingObject->sa_object, &initialPos);
+
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc.nc = NC_SetObjectRot;
+	nc.params.asint[1] = editingObject->samp_objectid;
+	nc.params.asflt[2] = initialRot.x;
+	nc.params.asflt[3] = initialRot.y;
+	nc.params.asflt[4] = initialRot.z;
+
+	rot = initialRot;
+	rot.x *= M_PI / 180.0f;
+	rot.y *= M_PI / 180.0f;
+	rot.z *= M_PI / 180.0f;
+	game_ObjectSetRotRad(editingObject->sa_object, &rot);
+	bulkedit_update();
+
+	sockets_send(&nc, sizeof(nc));
+	update_inputs();
 }
 
 static
@@ -200,6 +227,8 @@ struct OBJECT *objedit_get_editing_object()
 
 void objedit_show(struct OBJECT *obj)
 {
+	game_ObjectGetPos(obj->sa_object, &initialPos);
+	game_ObjectGetRot(obj->sa_object, &initialRot);
 	editingObject = obj;
 	updateFromMoving = 1;
 	update_inputs();
@@ -275,6 +304,9 @@ void objedit_init()
 	in_rot_z = ui_in_make(cb_in_rotation);
 	ui_wnd_add_child(wnd, in_rot_z);
 	btn = ui_btn_make("Move", cb_btn_move);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn);
+	btn = ui_btn_make("Undo_move", cb_btn_undo_move);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Tp_to_camera", cb_btn_tp_to_camera);
