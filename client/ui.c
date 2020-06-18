@@ -7,6 +7,7 @@
 #include "detours.h"
 #include "entity.h"
 #include "game.h"
+#include "ide.h"
 #include "objbrowser.h"
 #include "objects.h"
 #include "objectsui.h"
@@ -23,6 +24,7 @@
 #include "vehicles.h"
 #include "vehiclesui.h"
 #include "vehicleseditor.h"
+#include "vehnames.h"
 #include "vk.h"
 #include "windows.h"
 #include <math.h>
@@ -232,10 +234,10 @@ void ui_draw_default_help_text()
 
 void ui_draw_cursor()
 {
-	/*TODO because this is drawn with rects, it draws below textdraws...*/
 	/* (inner|outer)(width|height)(radius|diam)*/
 	float iwr, iwd, ihr, ihd;
 	float owr, owd, ohr, ohd;
+	float typex, detailx;
 
 	if (activeMouseState->lmb) {
 		iwr = 2.0f; iwd = 4.0f;
@@ -253,6 +255,36 @@ void ui_draw_cursor()
 	game_DrawRect(cursorx - ohr, cursory - owr, ohd, owd, 0xFF000000);
 	game_DrawRect(cursorx - iwr, cursory - ihr, iwd, ihd, 0xFFFFFFFF);
 	game_DrawRect(cursorx - ihr, cursory - iwr, ihd, iwd, 0xFFFFFFFF);
+
+	if (clicked_entity && !ui_is_cursor_hovering_any_window()) {
+		typex = fresx / 2.0f - 5.0f;
+		detailx = fresx / 2.0f + 5.0f;
+		if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_VEHICLE)) {
+			game_TextSetAlign(RIGHT);
+			game_TextPrintString(typex, 3.0f, "~g~Vehicle");
+			game_TextSetAlign(LEFT);
+			game_TextPrintString(detailx, 3.0f, vehnames[clicked_entity->model - 400]);
+		} else if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_PED)) {
+			game_TextSetAlign(RIGHT);
+			game_TextPrintString(typex, 3.0f, "~b~Ped");
+		} else if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_OBJECT)) {
+			game_TextSetAlign(RIGHT);
+			game_TextPrintString(typex, 3.0f, "~y~Object");
+			game_TextSetAlign(LEFT);
+			if (modelNames[clicked_entity->model] != NULL) {
+				game_TextPrintString(detailx, 3.0f, modelNames[clicked_entity->model]);
+			}
+		} else if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_BUILDING) ||
+			ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_DUMMY))
+		{
+			game_TextSetAlign(RIGHT);
+			game_TextPrintString(typex, 3.0f, "~r~Building");
+			game_TextSetAlign(LEFT);
+			if (modelNames[clicked_entity->model] != NULL) {
+				game_TextPrintString(detailx, 3.0f, modelNames[clicked_entity->model]);
+			}
+		}
+	}
 }
 
 void ui_update_camera_after_manual_position()
@@ -650,6 +682,8 @@ void ui_render()
 
 		bulkedit_draw_object_boxes();
 
+		ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
+
 		if (ui_exclusive_mode != NULL) {
 			ui_exclusive_mode();
 			return;
@@ -839,11 +873,10 @@ void ui_prj_postload()
 int ui_is_cursor_hovering_any_window()
 {
 	return
-		(active_window != NULL &&
-			ui_element_is_hovered((void*) active_window)) ||
-		(context_menu_active &&
-			ui_element_is_hovered((void*) context_menu)) ||
-		ui_element_is_hovered((void*) main_menu);
+		(active_window != NULL && ui_element_is_hovered((void*) active_window)) ||
+		(context_menu_active && ui_element_is_hovered((void*) context_menu)) ||
+		ui_element_is_hovered((void*) main_menu) ||
+		(bulkeditui_shown && ui_element_is_hovered((void*) bulkeditui_wnd));
 }
 
 void ui_set_trapped_in_ui(int flag)
