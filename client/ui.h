@@ -35,6 +35,8 @@ extern void *ui_active_element;
 extern void (*ui_exclusive_mode)();
 extern struct CEntity *clicked_entity;
 extern struct CColPoint clicked_colpoint;
+extern struct CEntity *hovered_entity;
+extern struct CColPoint hovered_colpoint;
 extern struct RwV3D *player_position_for_camera;
 /**
 Last char that was down, if it's not printable this will be 0

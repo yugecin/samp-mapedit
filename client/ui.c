@@ -54,6 +54,8 @@ static float speeds[] = { 0.1f, 0.2f, 0.5f, 1.0f, 3.0f, 8.0f, 16.0f, 32.0f };
 
 struct CEntity *clicked_entity;
 struct CColPoint clicked_colpoint;
+struct CEntity *hovered_entity;
+struct CColPoint hovered_colpoint;
 /**
 Follows clicked_entity, but set to NULL as soon the context menu is closed.
 */
@@ -256,32 +258,32 @@ void ui_draw_cursor()
 	game_DrawRect(cursorx - iwr, cursory - ihr, iwd, ihd, 0xFFFFFFFF);
 	game_DrawRect(cursorx - ihr, cursory - iwr, ihd, iwd, 0xFFFFFFFF);
 
-	if (clicked_entity && !ui_is_cursor_hovering_any_window()) {
+	if (hovered_entity && !ui_is_cursor_hovering_any_window()) {
 		typex = fresx / 2.0f - 5.0f;
 		detailx = fresx / 2.0f + 5.0f;
-		if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_VEHICLE)) {
+		if (ENTITY_IS_TYPE(hovered_entity, ENTITY_TYPE_VEHICLE)) {
 			game_TextSetAlign(RIGHT);
 			game_TextPrintString(typex, 3.0f, "~g~Vehicle");
 			game_TextSetAlign(LEFT);
-			game_TextPrintString(detailx, 3.0f, vehnames[clicked_entity->model - 400]);
-		} else if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_PED)) {
+			game_TextPrintString(detailx, 3.0f, vehnames[hovered_entity->model - 400]);
+		} else if (ENTITY_IS_TYPE(hovered_entity, ENTITY_TYPE_PED)) {
 			game_TextSetAlign(RIGHT);
 			game_TextPrintString(typex, 3.0f, "~b~Ped");
-		} else if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_OBJECT)) {
+		} else if (ENTITY_IS_TYPE(hovered_entity, ENTITY_TYPE_OBJECT)) {
 			game_TextSetAlign(RIGHT);
 			game_TextPrintString(typex, 3.0f, "~y~Object");
 			game_TextSetAlign(LEFT);
-			if (modelNames[clicked_entity->model] != NULL) {
-				game_TextPrintString(detailx, 3.0f, modelNames[clicked_entity->model]);
+			if (modelNames[hovered_entity->model] != NULL) {
+				game_TextPrintString(detailx, 3.0f, modelNames[hovered_entity->model]);
 			}
-		} else if (ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_BUILDING) ||
-			ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_DUMMY))
+		} else if (ENTITY_IS_TYPE(hovered_entity, ENTITY_TYPE_BUILDING) ||
+			ENTITY_IS_TYPE(hovered_entity, ENTITY_TYPE_DUMMY))
 		{
 			game_TextSetAlign(RIGHT);
 			game_TextPrintString(typex, 3.0f, "~r~Building");
 			game_TextSetAlign(LEFT);
-			if (modelNames[clicked_entity->model] != NULL) {
-				game_TextPrintString(detailx, 3.0f, modelNames[clicked_entity->model]);
+			if (modelNames[hovered_entity->model] != NULL) {
+				game_TextPrintString(detailx, 3.0f, modelNames[hovered_entity->model]);
 			}
 		}
 	}
@@ -694,7 +696,9 @@ void ui_render()
 
 		bulkedit_draw_object_boxes();
 
-		ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
+		/*can't use clicked_entity, because it would change here while the user
+		is still in the context menu*/
+		ui_get_entity_pointed_at(&hovered_entity, &hovered_colpoint);
 
 		if (ui_exclusive_mode != NULL) {
 			ui_exclusive_mode();
