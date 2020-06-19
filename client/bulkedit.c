@@ -198,8 +198,15 @@ int bulkedit_remove(struct OBJECT *object)
 
 	for (i = 0; i < numBulkEditObjects; i++) {
 		if (bulkEditObjects[i] == object) {
+			if (handlingObject) {
+				/*means edit is going on, so need to revert*/
+				game_ObjectSetPos(object->sa_object, &initialPositions[i]);
+				game_ObjectSetRotRad(object->sa_object, &initialRotations[i]);
+			}
 			numBulkEditObjects--;
 			bulkEditObjects[i] = bulkEditObjects[numBulkEditObjects];
+			initialPositions[i] = initialPositions[numBulkEditObjects];
+			initialRotations[i] = initialRotations[numBulkEditObjects];
 			return 1;
 		}
 	}
