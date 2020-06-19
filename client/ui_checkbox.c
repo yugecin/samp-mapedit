@@ -5,13 +5,18 @@
 #include "ui.h"
 #include <string.h>
 
+void ui_chk_updatetext(struct UI_CHECKBOX *chk)
+{
+	chk->_parent.text[1] = ' ' + ('x' - ' ') * chk->checked;
+}
+
 static
 int ui_chk_mouseup(struct UI_CHECKBOX *chk)
 {
 	if (ui_element_being_clicked == chk) {
 		if (ui_element_is_hovered(&chk->_parent._parent)) {
 			chk->checked = !chk->checked;
-			chk->_parent.text[1] = ' ' + ('x' - ' ') * chk->checked;
+			ui_chk_updatetext(chk);
 			if (chk->cb) {
 				chk->cb(chk);
 			}

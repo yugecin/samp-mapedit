@@ -12,3 +12,4 @@ struct UI_CHECKBOX *ui_chk_make(char *text, int check, chkcb *cb);
 void ui_chk_dispose(struct UI_CHECKBOX *chk);
 void ui_chk_update(struct UI_CHECKBOX *chk);
 int ui_chk_mouseup(struct UI_CHECKBOX *chk);
+void ui_chk_updatetext(struct UI_CHECKBOX *chk);

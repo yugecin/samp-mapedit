@@ -4,6 +4,7 @@
 #include "bulkeditui.h"
 #include "common.h"
 #include "game.h"
+#include "entity.h"
 #include "ide.h"
 #include "objects.h"
 #include "objectseditor.h"
@@ -14,9 +15,19 @@ struct UI_WINDOW *bulkeditui_wnd;
 char bulkeditui_shown;
 
 static struct UI_CHECKBOX *chk_captureclicks;
+static struct UI_CHECKBOX *chk_dragselect;
 static ui_method *bulkeditui_original_proc_wnd_draw;
 
+static char txt_bulk_selected_objects[70];
+static struct UI_LABEL *lbl_bulk;
+static struct UI_LABEL *lbl_bulk_filter;
+static struct UI_INPUT *in_bulk_filter;
+static struct UI_LIST *lst_bulk_filter;
+static struct UI_BUTTON *btn_bulk_addall;
+
 static char capture_clicks;
+static char is_dragselecting;
+static float dragselect_start_x, dragselect_start_y;
 
 #define MAX_LABELS 5
 struct FLOATING_LABEL {
@@ -25,8 +36,18 @@ struct FLOATING_LABEL {
 	int timeout;
 };
 
-struct FLOATING_LABEL labels[MAX_LABELS];
-int label_next_idx;
+static struct FLOATING_LABEL labels[MAX_LABELS];
+static int label_next_idx;
+
+struct ON_SCREEN_OBJECT {
+	float x, y;
+	struct OBJECT *obj;
+	int selected;
+	int passes_filter;
+};
+
+static struct ON_SCREEN_OBJECT on_screen_objects[MAX_OBJECTS];
+static int num_on_screen_objects;
 
 static
 void cb_posrdbgroup_changed(struct UI_RADIOBUTTON *rdb)
@@ -83,8 +104,91 @@ void cb_btn_mainmenu_bulkedit(struct UI_BUTTON *btn)
 	}
 }
 
+static
+void bulkeditui_update_list_data()
+{
+	int i;
+	char *lst_items[1000];
+	char num_lst_items;
+	char *name;
+
+	num_lst_items = 0;
+	for (i = 0; i < num_on_screen_objects; i++) {
+		if (on_screen_objects[i].selected) {
+			name = modelNames[on_screen_objects[i].obj->model];
+			if (!in_bulk_filter->valuelen || stristr(name, in_bulk_filter->value) != NULL) {
+				on_screen_objects[i].passes_filter = 1;
+				lst_items[num_lst_items++] = name;
+			} else {
+				on_screen_objects[i].passes_filter = 0;
+			}
+		}
+	}
+	sprintf(txt_bulk_selected_objects, "Selected_objects_(%d/%d):", num_lst_items, num_on_screen_objects);
+	ui_lst_set_data(lst_bulk_filter, lst_items, num_lst_items);
+}
+
+void cb_chk_dragselect(struct UI_CHECKBOX *chk);
+
+static
+void cb_chk_captureclicks(struct UI_CHECKBOX *chk)
+{
+	if (chk->checked && chk_dragselect->checked) {
+		chk_dragselect->checked = 0;
+		ui_chk_updatetext(chk_dragselect);
+		cb_chk_dragselect(chk_dragselect);
+	}
+}
+
+static
+void cb_chk_dragselect(struct UI_CHECKBOX *chk)
+{
+	if (chk->checked) {
+		if (chk_captureclicks->checked) {
+			chk_captureclicks->checked = 0;
+			ui_chk_updatetext(chk_captureclicks);
+			cb_chk_captureclicks(chk_captureclicks);
+		}
+		ui_wnd_add_child(bulkeditui_wnd, lbl_bulk);
+		ui_wnd_add_child(bulkeditui_wnd, lbl_bulk_filter);
+		ui_wnd_add_child(bulkeditui_wnd, in_bulk_filter);
+		ui_wnd_add_child(bulkeditui_wnd, lst_bulk_filter);
+		ui_wnd_add_child(bulkeditui_wnd, btn_bulk_addall);
+	} else {
+		num_on_screen_objects = 0;
+		bulkeditui_update_list_data();
+		ui_wnd_remove_child(bulkeditui_wnd, lbl_bulk);
+		ui_wnd_remove_child(bulkeditui_wnd, lbl_bulk_filter);
+		ui_wnd_remove_child(bulkeditui_wnd, in_bulk_filter);
+		ui_wnd_remove_child(bulkeditui_wnd, lst_bulk_filter);
+		ui_wnd_remove_child(bulkeditui_wnd, btn_bulk_addall);
+	}
+}
+
+static
+void cb_in_bulkfilter(struct UI_INPUT *in)
+{
+	bulkeditui_update_list_data();
+}
+
+static
+void cb_btn_bulkaddall(struct UI_BUTTON *btn)
+{
+	int i;
+
+	for (i = 0; i < num_on_screen_objects; i++) {
+		if (on_screen_objects[i].passes_filter) {
+			bulkedit_add(on_screen_objects[i].obj);
+		}
+	}
+
+	num_on_screen_objects = 0;
+	bulkeditui_update_list_data();
+}
+
 int bulkeditui_proc_close(struct UI_WINDOW *wnd)
 {
+	is_dragselecting = 0;
 	bulkeditui_shown = 0;
 	return 1;
 }
@@ -93,6 +197,11 @@ int bulkeditui_on_background_element_just_clicked()
 {
 	struct OBJECT *obj;
 	struct FLOATING_LABEL *lbl;
+
+	if (is_dragselecting && bulkeditui_shown) {
+		is_dragselecting = 0;
+		return 0;
+	}
 
 	if (bulkeditui_shown &&
 		(obj = objects_find_by_sa_object(clicked_entity)) &&
@@ -121,13 +230,76 @@ int bulkeditui_on_background_element_just_clicked()
 static
 int bulkeditui_proc_wnd_draw(void *wnd)
 {
-	int val, i;
+	struct RwV3D screenpos;
+	int val, i, j;
+	float x, y;
+	float minx, miny, maxx, maxy;
 
 	val = bulkeditui_original_proc_wnd_draw(wnd);
 	for (i = 0; i < MAX_LABELS; i++) {
 		if (*timeInGame < labels[i].timeout) {
 			game_TextSetAlign(CENTER);
 			game_TextPrintString(labels[i].x, labels[i].y, labels[i].txt);
+		}
+	}
+
+	if (!is_dragselecting && ui_mouse_is_just_down &&
+		chk_dragselect->checked &&
+		!ui_is_cursor_hovering_any_window())
+	{
+		is_dragselecting = 1;
+		dragselect_start_x = cursorx;
+		dragselect_start_y = cursory;
+		num_on_screen_objects = 0;
+		for (i = 0; i < numlayers; i++) {
+			for (j = 0; j < layers[i].numobjects; j++) {
+				game_WorldToScreen(&screenpos, &layers[i].objects[j].pos);
+				if (screenpos.z > 0.0f) {
+					on_screen_objects[num_on_screen_objects].x = screenpos.x;
+					on_screen_objects[num_on_screen_objects].y = screenpos.y;
+					on_screen_objects[num_on_screen_objects].obj = layers[i].objects + j;
+					num_on_screen_objects++;
+				}
+			}
+		}
+	}
+
+	if (is_dragselecting) {
+		if (dragselect_start_x < cursorx) {
+			minx = dragselect_start_x;
+			maxx = cursorx;
+		} else {
+			minx = cursorx;
+			maxx = dragselect_start_x;
+		}
+		if (dragselect_start_y < cursory) {
+			miny = dragselect_start_y;
+			maxy = cursory;
+		} else {
+			miny = cursory;
+			maxy = dragselect_start_y;
+		}
+		for (i = 0; i < num_on_screen_objects; i++) {
+			x = on_screen_objects[i].x;
+			y = on_screen_objects[i].y;
+			if (minx < x && x < maxx && miny < y && y < maxy) {
+				on_screen_objects[i].selected = 1;
+			} else {
+				on_screen_objects[i].selected = 0;
+				on_screen_objects[i].passes_filter = 0;
+			}
+		}
+		/*So this sets lits data every frame... not very efficient but good enough for now*/
+		bulkeditui_update_list_data();
+		game_DrawRect(
+			dragselect_start_x, dragselect_start_y,
+			cursorx - dragselect_start_x, cursory - dragselect_start_y,
+			0x4400cc00);
+	}
+
+	for (i = 0; i < num_on_screen_objects; i++) {
+		if (on_screen_objects[i].passes_filter) {
+			entity_draw_bound_rect(on_screen_objects[i].obj->sa_object, 0x22FFFFFF);
 		}
 	}
 	return val;
@@ -218,12 +390,40 @@ void bulkeditui_init()
 	btn = ui_btn_make("Revert_bulk_edit", cb_btn_revert);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, btn);
-	chk_captureclicks = ui_chk_make("Select_objects_for_bulkedit", 0, NULL);
+	chk_captureclicks = ui_chk_make("Select_objects_for_bulkedit", 0, cb_chk_captureclicks);
 	chk_captureclicks->_parent._parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, chk_captureclicks);
+	chk_dragselect = ui_chk_make("Bulk_drag_select", 0, cb_chk_dragselect);
+	chk_dragselect->_parent._parent.span = 3;
+	ui_wnd_add_child(bulkeditui_wnd, chk_dragselect);
+
+	lbl_bulk = ui_lbl_make(txt_bulk_selected_objects);
+	lbl_bulk->_parent.span = 3;
+	lbl_bulk_filter = ui_lbl_make("Filter:");
+	in_bulk_filter = ui_in_make(cb_in_bulkfilter);
+	in_bulk_filter->_parent.span = 2;
+	lst_bulk_filter = ui_lst_make(20, NULL);
+	lst_bulk_filter->_parent.span = 3;
+	btn_bulk_addall = ui_btn_make("Add_above_to_bulk_edit", cb_btn_bulkaddall);
+	btn_bulk_addall->_parent.span = 3;
 }
 
 void bulkeditui_dispose()
 {
+	if (!lbl_bulk->_parent.parent) {
+		UIPROC(lbl_bulk, proc_dispose);
+	}
+	if (!lbl_bulk_filter->_parent.parent) {
+		UIPROC(lbl_bulk_filter, proc_dispose);
+	}
+	if (!in_bulk_filter->_parent.parent) {
+		UIPROC(in_bulk_filter, proc_dispose);
+	}
+	if (!lst_bulk_filter->_parent.parent) {
+		UIPROC(lst_bulk_filter, proc_dispose);
+	}
+	if (!btn_bulk_addall->_parent.parent) {
+		UIPROC(btn_bulk_addall, proc_dispose);
+	}
 	ui_wnd_dispose(bulkeditui_wnd);
 }
