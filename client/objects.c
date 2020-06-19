@@ -1,6 +1,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "bulkedit.h"
 #include "entity.h"
 #include "game.h"
 #include "ide.h"
@@ -324,6 +325,7 @@ void objects_delete_layer(struct OBJECTLAYER *layer)
 	struct MSG_NC nc;
 	int i, idx;
 
+	bulkedit_reset();
 	idx = layer - layers;
 	objectstorage_mark_layerfile_for_deletion(layer);
 	for (i = 0; i < layer->numremoves; i++) {
