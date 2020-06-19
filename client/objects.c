@@ -325,6 +325,7 @@ void objects_delete_layer(struct OBJECTLAYER *layer)
 	struct MSG_NC nc;
 	int i, idx;
 
+	bulkedit_revert();
 	bulkedit_reset();
 	idx = layer - layers;
 	objectstorage_mark_layerfile_for_deletion(layer);

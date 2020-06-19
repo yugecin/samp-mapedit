@@ -9,6 +9,7 @@
 #include "objects.h"
 #include "objectseditor.h"
 #include "ui.h"
+#include "msgbox.h"
 #include <string.h>
 
 struct UI_WINDOW *bulkeditui_wnd;
@@ -76,6 +77,25 @@ static
 void cb_btn_clone_all(struct UI_BUTTON *btn)
 {
 	bulkedit_clone_all();
+}
+
+static
+void cb_msg_delete_confirm(int opt)
+{
+	if (opt == MSGBOX_RESULT_1) {
+		bulkedit_delete_objects();
+	}
+}
+
+static
+void cb_btn_delete_all(struct UI_BUTTON *btn)
+{
+	msg_title = "Bulk_delete";
+	msg_message = "Delete_objects?";
+	msg_message2 = "This_cannot_be_undone!";
+	msg_btn1text = "Yes";
+	msg_btn2text = "No";
+	msg_show(cb_msg_delete_confirm);
 }
 
 static
@@ -388,6 +408,9 @@ void bulkeditui_init()
 	ui_wnd_add_child(bulkeditui_wnd, rdb);
 
 	btn = ui_btn_make("Clone_all_objects", cb_btn_clone_all);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(bulkeditui_wnd, btn);
+	btn = ui_btn_make("Delete_all_objects", cb_btn_delete_all);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, btn);
 	btn = ui_btn_make("Commit_positions", cb_btn_commit);

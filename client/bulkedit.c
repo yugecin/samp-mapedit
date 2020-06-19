@@ -24,6 +24,37 @@ void (*bulkedit_pos_update_method)() = bulkedit_update_pos_sync;
 void (*bulkedit_rot_update_method)() = bulkedit_update_rot_sync;
 char bulkedit_direction_add_90, bulkedit_direction_remove_90, bulkedit_direction_add_180;
 
+void bulkedit_delete_objects()
+{
+	int i, numToDelete, highestPos, highestPosIndex;
+	struct OBJECT *objects_to_delete[MAX_OBJECTS];
+
+	/*since deleting objects shift the objects around in the layer,
+	collect them from highest address to lowest and delete them as such,
+	then the remaining objects to delete _should_ never change address*/
+	numToDelete = 0;
+	while (numBulkEditObjects > 0) {
+		highestPosIndex = 0;
+		highestPos = (int) bulkEditObjects[0];
+		for (i = 1; i < numBulkEditObjects; i++) {
+			if ((int) bulkEditObjects[i] > highestPos) {
+				highestPos = (int) bulkEditObjects[i];
+				highestPosIndex = i;
+			}
+		}
+		objects_to_delete[numToDelete++] = bulkEditObjects[highestPosIndex];
+		numBulkEditObjects--;
+		if (highestPosIndex != numBulkEditObjects) {
+			bulkEditObjects[highestPosIndex] = bulkEditObjects[numBulkEditObjects];
+		}
+	}
+	numBulkEditObjects = 0;
+
+	for (i = 0; i < numToDelete; i++) {
+		objects_delete_obj(objects_to_delete[i]);
+	}
+}
+
 void bulkedit_clone_all()
 {
 	struct OBJECT *clone;
