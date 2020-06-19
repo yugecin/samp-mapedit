@@ -214,6 +214,10 @@ void cb_btn_view_in_object_browser(struct UI_BUTTON *btn)
 static
 int objedit_proc_close(struct UI_WINDOW *wnd)
 {
+	if (updateFromMoving) {
+		updateFromMoving = 0;
+		return 1;
+	}
 	bulkedit_commit();
 	editingObject = NULL;
 	ui_hide_window();
@@ -230,7 +234,7 @@ void objedit_show(struct OBJECT *obj)
 	game_ObjectGetPos(obj->sa_object, &initialPos);
 	game_ObjectGetRot(obj->sa_object, &initialRot);
 	editingObject = obj;
-	updateFromMoving = 1;
+	updateFromMoving = 0;
 	update_inputs();
 	ui_show_window(wnd);
 	objedit_update_bulkedit_buttons();
