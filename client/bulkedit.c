@@ -177,7 +177,13 @@ void bulkedit_reset()
 int bulkedit_add(struct OBJECT *object)
 {
 	if (!bulkedit_is_in_list(object)) {
-		bulkEditObjects[numBulkEditObjects++] = object;
+		bulkEditObjects[numBulkEditObjects] = object;
+		game_ObjectGetPos(object->sa_object, initialPositions + numBulkEditObjects);
+		game_ObjectGetRot(object->sa_object, initialRotations + numBulkEditObjects);
+		initialRotations[numBulkEditObjects].x *= M_PI / 180.0f;
+		initialRotations[numBulkEditObjects].y *= M_PI / 180.0f;
+		initialRotations[numBulkEditObjects].z *= M_PI / 180.0f;
+		numBulkEditObjects++;
 		if (objedit_get_editing_object() == object) {
 			bulkedit_begin(object);
 		}
