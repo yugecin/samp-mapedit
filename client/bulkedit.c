@@ -7,6 +7,7 @@
 #include "bulkedit.h"
 #include "entity.h"
 #include "objectseditor.h"
+#include "msgbox.h"
 #include <math.h>
 #include <string.h>
 
@@ -22,6 +23,58 @@ static char hasUpdated;
 void (*bulkedit_pos_update_method)() = bulkedit_update_pos_sync;
 void (*bulkedit_rot_update_method)() = bulkedit_update_rot_sync;
 char bulkedit_direction_add_90, bulkedit_direction_remove_90, bulkedit_direction_add_180;
+
+void bulkedit_clone_all()
+{
+	struct OBJECT *clone;
+	int i;
+
+	if (numBulkEditObjects == 0) {
+		return;
+	}
+
+	if (active_layer == NULL) {
+		msg_title = "Bulk_edit";
+		msg_message = "Select_a_layer_first!";
+		msg_btn1text = "Ok";
+		msg_show(NULL);
+		return;
+	}
+
+	if (active_layer->numobjects > MAX_OBJECTS - numBulkEditObjects) {
+		msg_title = "Bulk_edit";
+		msg_message = "New_objects_would_not_fit,_too_many_objects!";
+		msg_btn1text = "Ok";
+		msg_show(NULL);
+		return;
+	}
+
+	bulkedit_commit();
+
+	for (i = 0; i < numBulkEditObjects; i++) {
+		clone = active_layer->objects + active_layer->numobjects;
+		memcpy(clone, bulkEditObjects[i], sizeof(struct OBJECT));
+		game_ObjectGetPos(bulkEditObjects[i]->sa_object, &clone->pos);
+		clone->rot = malloc(sizeof(struct RwV3D));
+		game_ObjectGetRot(bulkEditObjects[i]->sa_object, clone->rot);
+		objects_mkobject(clone);
+		active_layer->numobjects++;
+	}
+
+	for (i = 0; i < numBulkEditObjects; i++) {
+		bulkEditObjects[i] = active_layer->objects + active_layer->numobjects - numBulkEditObjects + i;
+	}
+
+	bulkedit_begin(NULL);
+	/*so the cloned objects are still being created at this point*/
+	/*stuff will crash when bulkedit updates, but that doesn't happen
+	until the user selects an object (handlingObject)*/
+	/*assume for now that the objects will be created by the time the user manages
+	to choose a handlingObject, and stuff will not crash*/
+	/*we could be lazy and use the original objects instead of the cloned ones,
+	they're clones after all, but they're cloned to the active layer and may come from
+	other layers... so I guess we should really use the cloned objects?*/
+}
 
 void bulkedit_begin(struct OBJECT *object)
 {

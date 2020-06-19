@@ -1,5 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+void bulkedit_clone_all();
 void bulkedit_reset();
 int bulkedit_add(struct OBJECT *object);
 int bulkedit_remove(struct OBJECT *object);

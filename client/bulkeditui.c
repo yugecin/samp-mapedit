@@ -73,6 +73,12 @@ void cb_directionrdbgroup_changed(struct UI_RADIOBUTTON *rdb)
 }
 
 static
+void cb_btn_clone_all(struct UI_BUTTON *btn)
+{
+	bulkedit_clone_all();
+}
+
+static
 void cb_btn_commit(struct UI_BUTTON *btn)
 {
 	bulkedit_commit();
@@ -381,6 +387,9 @@ void bulkeditui_init()
 	rdb->_parent._parent.userdata = (void*) 3;
 	ui_wnd_add_child(bulkeditui_wnd, rdb);
 
+	btn = ui_btn_make("Clone_all_objects", cb_btn_clone_all);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(bulkeditui_wnd, btn);
 	btn = ui_btn_make("Commit_positions", cb_btn_commit);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, btn);
