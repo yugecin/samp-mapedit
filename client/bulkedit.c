@@ -138,7 +138,9 @@ void bulkedit_update()
 	if (handlingObject != NULL) {
 		hasUpdated = 1;
 		bulkedit_pos_update_method();
-		bulkedit_rot_update_method();
+		if (bulkedit_pos_update_method != bulkedit_update_pos_rotaroundz) {
+			bulkedit_rot_update_method();
+		}
 	}
 }
 
@@ -374,6 +376,46 @@ void bulkedit_update_pos_copyz()
 			game_ObjectGetPos(bulkEditObjects[i]->sa_object, &pos);
 			pos.z = z;
 			game_ObjectSetPos(bulkEditObjects[i]->sa_object, &pos);
+		}
+	}
+}
+
+void bulkedit_update_pos_rotaroundz()
+{
+	struct RwV3D dif;
+	struct RwV3D d;
+	struct RwV3D pos;
+	struct RwV3D rot;
+	int i;
+	float angledif;
+	float distance;
+	float angle;
+
+	game_ObjectGetPos(handlingObject->sa_object, &pos);
+	game_ObjectGetRot(handlingObject->sa_object, &rot);
+	rot.x *= M_PI / 180.0f;
+	rot.y *= M_PI / 180.0f;
+	rot.z *= M_PI / 180.0f;
+	dif.x = pos.x - initialPos.x;
+	dif.y = pos.y - initialPos.y;
+	dif.z = pos.z - initialPos.z;
+	angledif = initialRot.z - rot.z;
+
+	for (i = 0; i < numBulkEditObjects; i++) {
+		if (bulkEditObjects[i] != handlingObject) {
+			d.x = initialPositions[i].x - initialPos.x;
+			d.y = initialPositions[i].y - initialPos.y;
+			d.z = initialPositions[i].z + dif.z;
+			distance = (float) sqrt(d.x * d.x + d.y * d.y);
+			angle = (float) atan2(d.y, d.x);
+			angle -= angledif;
+			d.x = pos.x + (float) cos(angle) * distance;
+			d.y = pos.y + (float) sin(angle) * distance;
+			game_ObjectSetPos(bulkEditObjects[i]->sa_object, &d);
+			rot.x = initialRotations[i].x;
+			rot.y = initialRotations[i].y;
+			rot.z = initialRotations[i].z - angledif;
+			game_ObjectSetRotRad(bulkEditObjects[i]->sa_object, &rot);
 		}
 	}
 }

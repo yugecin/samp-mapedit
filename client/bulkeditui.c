@@ -396,7 +396,9 @@ void bulkeditui_init()
 	rdb = ui_rdb_make("+90", directionrdbgroup, 0);
 	rdb->_parent._parent.userdata = (void*) 1;
 	ui_wnd_add_child(bulkeditui_wnd, rdb);
-	ui_wnd_add_child(bulkeditui_wnd, NULL);
+	rdb = ui_rdb_make("Sync_around_z", posrdbgroup, 0);
+	rdb->_parent._parent.userdata = (void*) bulkedit_update_pos_rotaroundz;
+	ui_wnd_add_child(bulkeditui_wnd, rdb);
 	ui_wnd_add_child(bulkeditui_wnd, NULL);
 	rdb = ui_rdb_make("-90", directionrdbgroup, 0);
 	rdb->_parent._parent.userdata = (void*) 2;

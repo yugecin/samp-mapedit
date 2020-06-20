@@ -18,6 +18,7 @@ void bulkedit_update_pos_spread();
 void bulkedit_update_pos_copyx();
 void bulkedit_update_pos_copyy();
 void bulkedit_update_pos_copyz();
+void bulkedit_update_pos_rotaroundz();
 void bulkedit_update_rot_sync();
 void bulkedit_update_rot_spread();
 void bulkedit_update_rot_object_direction();
