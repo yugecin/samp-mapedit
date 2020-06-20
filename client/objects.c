@@ -153,7 +153,7 @@ void objects_do_create_object(struct OBJECT *object)
 		nc.params.asflt[6] = 0.0f;
 		nc.params.asflt[7] = 0.0f;
 	}
-	nc.params.asflt[8] = 1000.0f;
+	nc.params.asflt[8] = 1500.0f;
 	sockets_send(&nc, sizeof(nc));
 }
 

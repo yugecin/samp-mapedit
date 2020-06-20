@@ -48,6 +48,7 @@ static struct UI_BUTTON *btn_edit_obj;
 static struct UI_BUTTON *btn_delete_obj;
 
 static char txt_contextmenu_model[50];
+static char txt_contextmenu_objsize[50];
 static char txt_objentity[9];
 static char txt_objmodel[45];
 static char txt_objtype[9];
@@ -342,9 +343,10 @@ void objui_init()
 	selected_object = NULL;
 
 	/*context menu entries*/
-	txt_contextmenu_model[0] = '_';
-	txt_contextmenu_model[1] = 0;
+	txt_contextmenu_objsize[0] = txt_contextmenu_model[0] = '_';
+	txt_contextmenu_objsize[1] = txt_contextmenu_model[1] = 0;
 	ui_wnd_add_child(context_menu, lbl_contextmenu_model = ui_lbl_make(txt_contextmenu_model));
+	ui_wnd_add_child(context_menu, ui_lbl_make(txt_contextmenu_objsize));
 	btn = ui_btn_make("Make_Object", cb_btn_contextmenu_mkobject);
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
@@ -610,6 +612,7 @@ int objui_on_background_element_just_clicked()
 	struct CEntity *entity;
 	struct CColPoint cp;
 	struct OBJECT *clicked_object;
+	struct CColModel *colmodel;
 
 	if (is_selecting_object) {
 		get_object_pointed_at(&entity, &cp);
@@ -636,7 +639,23 @@ int objui_on_background_element_just_clicked()
 		} else {
 			goto nothing;
 		}
+
+		colmodel = game_EntityGetColModel(clicked_entity);
+		if (colmodel == NULL) {
+			txt_contextmenu_objsize[0] = '_';
+			txt_contextmenu_objsize[1] = 0;
+		} else {
+			sprintf(
+				txt_contextmenu_objsize,
+				"%.0fx%.0fx%.0f",
+				colmodel->max.x - colmodel->min.x,
+				colmodel->max.y - colmodel->min.y,
+				colmodel->max.z - colmodel->min.z
+			);
+		}
 	} else {
+		txt_contextmenu_objsize[0] = '_';
+		txt_contextmenu_objsize[1] = 0;
 nothing:
 		txt_contextmenu_model[0] = '_';
 		txt_contextmenu_model[1] = 0;
