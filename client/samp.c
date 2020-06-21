@@ -21,18 +21,18 @@ void samp_init()
 	DWORD oldvp;
 
 	samp_handle = (int) GetModuleHandle("samp.dll");
-	pCmdWindow += samp_handle;
 	old_ui_mode_value = -1;
 
-	/*check for "-R2 " string in startup message*/
-	if (*((int*) (samp_handle + 0xD3988)) == 0x7B203252) {
-		isR2 = 1;
-		ui_mode = *((int**) (samp_handle + 0x21A0EC)) + 2;
+	if (*((int*) (samp_handle + 0xE5B91)) == 0x0034522D/* "-R4\0" */) {
+		ui_mode = *((int**) (samp_handle + 0x26E9F8/*chatWindow*/)) + 2;
+		pCmdWindow = samp_handle + 0x26E9FC;
+		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x69440);
+	} else if (*((int*) (samp_handle + 0xE5B8C)) == 0x7B203252/* "R2 {" */) {
+		ui_mode = *((int**) (samp_handle + 0x21A0EC/*chatWindow*/)) + 2;
 		pCmdWindow = samp_handle + 0x21A0F0;
 		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x658B0);
 	} else {
-		isR2 = 0;
-		ui_mode = *((int**) (samp_handle + 0x21A0E4)) + 2;
+		ui_mode = *((int**) (samp_handle + 0x21A0E4/*chatWindow*/)) + 2;
 		pCmdWindow = samp_handle + 0x21A0E8;
 		chat_bar_enable_op = (unsigned char*) (samp_handle + 0x657E0);
 	}
