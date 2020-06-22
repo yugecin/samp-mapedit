@@ -244,6 +244,7 @@ int ui_lst_mouseup(struct UI_LIST *lst)
 static int ui_lst_mousewheel(struct UI_LIST *lst, int value)
 {
 	if (ui_active_element == lst || ui_element_is_hovered((void*) lst)) {
+		value *= 5;
 		while (value > 0 && lst->topoffset > 0) {
 			lst->topoffset--;
 			value--;
