@@ -135,7 +135,7 @@ void bulkeditui_update_list_data()
 {
 	int i;
 	char *lst_items[1000];
-	char num_lst_items;
+	int num_lst_items;
 	char *name;
 
 	num_lst_items = 0;
