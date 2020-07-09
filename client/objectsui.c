@@ -51,6 +51,7 @@ static char txt_contextmenu_model[50];
 static char txt_contextmenu_objsize[50];
 static char txt_objentity[9];
 static char txt_objmodel[45];
+static char txt_modelsize[20];
 static char txt_objtype[9];
 static char txt_objflags[9];
 static char txt_objlodentity[9];
@@ -408,6 +409,8 @@ void objui_init()
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Model:"));
 	lbl_objmodel = ui_lbl_make(txt_objmodel);
 	ui_wnd_add_child(window_objinfo, lbl_objmodel);
+	ui_wnd_add_child(window_objinfo, ui_lbl_make("Size:"));
+	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_modelsize));
 	btn = ui_btn_make("View_in_object_browser", cb_btn_view_in_object_browser);
 	btn->_parent.span = 2;
 	btn->enabled = 0;
@@ -531,6 +534,7 @@ void objui_select_entity(void *entity)
 {
 	void *lod;
 	unsigned short modelid, lodmodel;
+	struct CColModel *colmodel;
 
 	selected_entity = entity;
 	/*remove hovered entity to revert its changes first*/
@@ -546,6 +550,7 @@ void objui_select_entity(void *entity)
 		btn_delete_obj->enabled = 0;
 		strcpy(txt_objentity, "00000000");
 		strcpy(txt_objmodel, "0");
+		strcpy(txt_modelsize, "0");
 		strcpy(txt_objtype, "00000000");
 		strcpy(txt_objflags, "00000000");
 		strcpy(txt_objlodentity, "00000000");
@@ -558,11 +563,23 @@ void objui_select_entity(void *entity)
 	lod = *((int**) ((char*) entity + 0x30));
 	modelid = *((unsigned short*) entity + 0x11);
 	sprintf(txt_objentity, "%p", entity);
-	sprintf(txt_objmodel, "%hd", modelid);
 	if (modelNames[modelid]) {
 		sprintf(txt_objmodel, "%s", modelNames[modelid]);
 	} else {
 		sprintf(txt_objmodel, "%hd", modelid);
+	}
+	colmodel = game_EntityGetColModel(entity);
+	if (colmodel == NULL) {
+		txt_modelsize[0] = '_';
+		txt_modelsize[1] = 0;
+	} else {
+		sprintf(
+			txt_modelsize,
+			"%.0fx%.0fx%.0f",
+			colmodel->max.x - colmodel->min.x,
+			colmodel->max.y - colmodel->min.y,
+			colmodel->max.z - colmodel->min.z
+		);
 	}
 	sprintf(txt_objtype, "%d", (int) *((char*) entity + 0x36));
 	sprintf(txt_objflags, "%p", *((int*) entity + 7));
