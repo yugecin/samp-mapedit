@@ -94,6 +94,18 @@ void cb_chk_showwater(struct UI_CHECKBOX *chk)
 }
 
 static
+void cb_chk_clouds(struct UI_CHECKBOX *chk)
+{
+	showClouds = chk->checked;
+}
+
+static
+void cb_chk_foglighting(struct UI_CHECKBOX *chk)
+{
+	doFogLighting = chk->checked;
+}
+
+static
 void ui_recalculate_sizes()
 {
 	struct Rect textbounds;
@@ -157,7 +169,13 @@ void ui_init()
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 
-	chk = ui_chk_make("Show water", 1, cb_chk_showwater);
+	chk = ui_chk_make("Water", 1, cb_chk_showwater);
+	ui_wnd_add_child(main_menu, chk);
+
+	chk = ui_chk_make("Clouds", 1, cb_chk_clouds);
+	ui_wnd_add_child(main_menu, chk);
+
+	chk = ui_chk_make("Fog/Lighting", 1, cb_chk_foglighting);
 	chk->_parent._parent.span = 2;
 	ui_wnd_add_child(main_menu, chk);
 }

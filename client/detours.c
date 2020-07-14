@@ -14,6 +14,8 @@
 
 struct CEntity *lastCarSpawned;
 int showWater;
+int showClouds;
+int doFogLighting;
 
 static
 __declspec(naked) void render_centity_detour()
@@ -58,6 +60,32 @@ norender:
 continuerender:
 		mov eax, 0x53C4B0
 		jmp eax
+	}
+}
+
+static
+__declspec(naked) void render_clouds_detour()
+{
+	_asm {
+		mov eax, showClouds
+		test eax, eax
+		jz no
+		push 0x7154B0
+no:
+		ret
+	}
+}
+
+static
+__declspec(naked) void foglighting_detour()
+{
+	_asm {
+		mov eax, doFogLighting
+		test eax, eax
+		jz no
+		push 0x53E170
+no:
+		ret
 	}
 }
 
@@ -197,6 +225,8 @@ static struct DETOUR detour_0453;
 static struct DETOUR detour_render_object;
 static struct DETOUR detour_render_centity;
 static struct DETOUR detour_render_water;
+static struct DETOUR detour_clouds;
+static struct DETOUR detour_foglighting;
 static struct DETOUR detour_cworld_remove;
 static struct DETOUR detour_cworld_add;
 static struct DETOUR detour_spawn_car;
@@ -233,6 +263,10 @@ void detours_install()
 	detour_render_centity.new_target = (int) render_centity_detour;
 	detour_render_water.target = (int*) 0x6EF658;
 	detour_render_water.new_target = (int) render_water_detour;
+	detour_clouds.target = (int*) 0x53E122;
+	detour_clouds.new_target = (int) render_clouds_detour;
+	detour_foglighting.target = (int*) 0x53EAD4;
+	detour_foglighting.new_target = (int) foglighting_detour;
 	detour_cworld_remove.target = (int*) 0x563281;
 	detour_cworld_remove.new_target = (int) cworld_remove_detour;
 	detour_cworld_add.target = (int*) 0x563221;
@@ -247,6 +281,8 @@ void detours_install()
 	VirtualProtect((void*) 0x534312, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x534312) = 0xE8;
 	install_detour(&detour_render_water);
+	install_detour(&detour_clouds);
+	install_detour(&detour_foglighting);
 	install_detour(&detour_cworld_remove);
 	VirtualProtect((void*) 0x563280, 1, PAGE_EXECUTE_READWRITE, &oldvp);
 	*((char*) 0x563280) = 0xE8;
@@ -259,6 +295,8 @@ void detours_install()
 	*((char*) 0x486B00) = 0xC3;
 
 	showWater = 1;
+	showClouds = 1;
+	doFogLighting = 1;
 }
 
 void detours_uninstall()
@@ -271,6 +309,8 @@ void detours_uninstall()
 	*((char*) 0x534312) = 0x51;
 	*((int*) 0x534313) = 0x8BF18B56;
 	uninstall_detour(&detour_render_water);
+	uninstall_detour(&detour_clouds);
+	uninstall_detour(&detour_foglighting);
 	uninstall_detour(&detour_cworld_remove);
 	*((char*) 0x563280) = 0x56;
 	uninstall_detour(&detour_cworld_add);
