@@ -521,3 +521,15 @@ void objects_show_creation_progress()
 		game_TextPrintString(fresx / 2.0f, fresy / 2.0f, buf);
 	}
 }
+
+struct OBJECTLAYER *objects_layer_for_object(struct OBJECT *obj)
+{
+	int i;
+
+	for (i = 0; i < numlayers; i++) {
+		if (layers[i].objects + 0 <= obj && obj < layers[i].objects + MAX_OBJECTS) {
+			return layers + i;
+		}
+	}
+	return NULL;
+}

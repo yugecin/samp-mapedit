@@ -61,6 +61,7 @@ struct OBJECT *objects_find_by_sa_handle(int sa_handle);
 struct OBJECT *objects_find_by_sa_object(void *sa_object);
 void objects_clone(struct CEntity *entity);
 void objects_delete_obj(struct OBJECT *obj);
+struct OBJECTLAYER *objects_layer_for_object(struct OBJECT *obj);
 
 extern struct OBJECTLAYER layers[MAX_LAYERS];
 extern struct OBJECTLAYER *active_layer;

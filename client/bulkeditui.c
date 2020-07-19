@@ -15,6 +15,7 @@
 struct UI_WINDOW *bulkeditui_wnd;
 char bulkeditui_shown;
 
+static struct UI_CHECKBOX *chk_select_from_active_layer;
 static struct UI_CHECKBOX *chk_captureclicks;
 static struct UI_CHECKBOX *chk_dragselect;
 static ui_method *bulkeditui_original_proc_wnd_draw;
@@ -219,36 +220,46 @@ int bulkeditui_proc_close(struct UI_WINDOW *wnd)
 	return 1;
 }
 
-int bulkeditui_on_background_element_just_clicked()
+int bulkeditui_on_background_element_just_clicked(struct OBJECTLAYER *real_active_layer)
 {
 	struct OBJECT *obj;
 	struct FLOATING_LABEL *lbl;
 
 	if (is_dragselecting && bulkeditui_shown) {
 		is_dragselecting = 0;
+		if (real_active_layer != active_layer) {
+			objects_activate_layer(real_active_layer - layers);
+		}
 		return 0;
 	}
 
-	if (bulkeditui_shown &&
-		(obj = objects_find_by_sa_object(clicked_entity)) &&
-		chk_captureclicks->checked)
-	{
-		lbl = labels + label_next_idx;
-		label_next_idx++;
-		if (label_next_idx >= MAX_LABELS) {
-			label_next_idx = 0;
+	if (bulkeditui_shown) {
+		obj = objects_find_by_sa_object(clicked_entity);
+		if (real_active_layer != active_layer) {
+			objects_activate_layer(real_active_layer - layers);
 		}
-		if (bulkedit_is_in_list(obj)) {
-			bulkedit_remove(obj);
-			sprintf(lbl->txt, "~r~del_~w~%s", modelNames[obj->model]);
-		} else {
-			bulkedit_add(obj);
-			sprintf(lbl->txt, "~g~add_~w~%s", modelNames[obj->model]);
+		if (obj != NULL && chk_captureclicks->checked) {
+			if (!chk_select_from_active_layer->checked ||
+				objects_layer_for_object(obj) == active_layer)
+			{
+				lbl = labels + label_next_idx;
+				label_next_idx++;
+				if (label_next_idx >= MAX_LABELS) {
+					label_next_idx = 0;
+				}
+				if (bulkedit_is_in_list(obj)) {
+					bulkedit_remove(obj);
+					sprintf(lbl->txt, "~r~del_~w~%s", modelNames[obj->model]);
+				} else {
+					bulkedit_add(obj);
+					sprintf(lbl->txt, "~g~add_~w~%s", modelNames[obj->model]);
+				}
+				lbl->timeout = *timeInGame + 800;
+				lbl->x = cursorx;
+				lbl->y = cursory + 10.0f;
+			}
+			return 0;
 		}
-		lbl->timeout = *timeInGame + 800;
-		lbl->x = cursorx;
-		lbl->y = cursory + 10.0f;
-		return 0;
 	}
 	return 1;
 }
@@ -278,13 +289,15 @@ int bulkeditui_proc_wnd_draw(void *wnd)
 		dragselect_start_y = cursory;
 		num_on_screen_objects = 0;
 		for (i = 0; i < numlayers; i++) {
-			for (j = 0; j < layers[i].numobjects; j++) {
-				game_WorldToScreen(&screenpos, &layers[i].objects[j].pos);
-				if (screenpos.z > 0.0f) {
-					on_screen_objects[num_on_screen_objects].x = screenpos.x;
-					on_screen_objects[num_on_screen_objects].y = screenpos.y;
-					on_screen_objects[num_on_screen_objects].obj = layers[i].objects + j;
-					num_on_screen_objects++;
+			if (!chk_select_from_active_layer->checked || layers + i == active_layer) {
+				for (j = 0; j < layers[i].numobjects; j++) {
+					game_WorldToScreen(&screenpos, &layers[i].objects[j].pos);
+					if (screenpos.z > 0.0f) {
+						on_screen_objects[num_on_screen_objects].x = screenpos.x;
+						on_screen_objects[num_on_screen_objects].y = screenpos.y;
+						on_screen_objects[num_on_screen_objects].obj = layers[i].objects + j;
+						num_on_screen_objects++;
+					}
 				}
 			}
 		}
@@ -424,6 +437,9 @@ void bulkeditui_init()
 	btn = ui_btn_make("Revert_bulk_edit", cb_btn_revert);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, btn);
+	chk_select_from_active_layer = ui_chk_make("Select_from_active_layer_only", 0, NULL);
+	chk_select_from_active_layer->_parent._parent.span = 3;
+	ui_wnd_add_child(bulkeditui_wnd, chk_select_from_active_layer);
 	chk_captureclicks = ui_chk_make("Select_objects_for_bulkedit", 0, cb_chk_captureclicks);
 	chk_captureclicks->_parent._parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, chk_captureclicks);

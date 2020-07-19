@@ -583,12 +583,16 @@ void ui_get_clicked_position(struct RwV3D *pos)
 static
 void background_element_just_clicked()
 {
+	struct OBJECTLAYER *last_active_layer;
+
+	last_active_layer = active_layer; // because the call below set the active layer,
+	                                  // but bulkeditui needs the REAL active layer (it'll revert the change)
 	ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
 
 	if (objui_on_background_element_just_clicked() &&
 		player_on_background_element_just_clicked() &&
 		vehiclesui_on_background_element_just_clicked() &&
-		bulkeditui_on_background_element_just_clicked())
+		bulkeditui_on_background_element_just_clicked(last_active_layer))
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;
