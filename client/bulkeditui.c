@@ -26,6 +26,7 @@ static struct UI_LABEL *lbl_bulk_filter;
 static struct UI_INPUT *in_bulk_filter;
 static struct UI_LIST *lst_bulk_filter;
 static struct UI_BUTTON *btn_bulk_addall;
+static struct UI_BUTTON *btn_layer[MAX_LAYERS];
 
 static char capture_clicks;
 static char is_dragselecting;
@@ -213,6 +214,39 @@ void cb_btn_bulkaddall(struct UI_BUTTON *btn)
 	bulkeditui_update_list_data();
 }
 
+static
+void cb_btn_move_all_to_layer(struct UI_BUTTON *btn)
+{
+	int i;
+
+	if (!btn_layer[0]->_parent.parent) {
+		for (i = 0; i < numlayers; i++) {
+			btn_layer[i]->text = layers[i].name;
+			ui_wnd_add_child(bulkeditui_wnd, btn_layer[i]);
+		}
+	} else {
+		for (i = 0; i < MAX_LAYERS; i++) {
+			if (btn_layer[i]->_parent.parent) {
+				ui_wnd_remove_child(bulkeditui_wnd, btn_layer[i]);
+			}
+		}
+	}
+}
+
+static
+void cb_btn_movelayer(struct UI_BUTTON *btn)
+{
+	int i;
+
+	ui_hide_window();
+	bulkedit_move_layer(layers + (int) btn->_parent.userdata);
+	for (i = 0; i < MAX_LAYERS; i++) {
+		if (btn_layer[i]->_parent.parent) {
+			ui_wnd_remove_child(bulkeditui_wnd, btn_layer[i]);
+		}
+	}
+}
+
 int bulkeditui_proc_close(struct UI_WINDOW *wnd)
 {
 	is_dragselecting = 0;
@@ -350,6 +384,7 @@ void bulkeditui_init()
 	struct UI_BUTTON *btn;
 	struct UI_RADIOBUTTON *rdb;
 	struct RADIOBUTTONGROUP *posrdbgroup, *rotrdbgroup, *directionrdbgroup;
+	int i;
 
 	btn = ui_btn_make("Bulkedit", cb_btn_mainmenu_bulkedit);
 	btn->_parent.span = 2;
@@ -447,6 +482,15 @@ void bulkeditui_init()
 	chk_dragselect->_parent._parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, chk_dragselect);
 
+	btn = ui_btn_make("Move_all_to_layer", cb_btn_move_all_to_layer);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(bulkeditui_wnd, btn);
+	for (i = 0; i < MAX_LAYERS; i++) {
+		btn = btn_layer[i] = ui_btn_make("", cb_btn_movelayer);
+		btn->_parent.userdata = (void*) i;
+		btn->_parent.span = 3;
+	}
+
 	lbl_bulk = ui_lbl_make(txt_bulk_selected_objects);
 	lbl_bulk->_parent.span = 3;
 	lbl_bulk_filter = ui_lbl_make("Filter:");
@@ -460,6 +504,8 @@ void bulkeditui_init()
 
 void bulkeditui_dispose()
 {
+	int i;
+
 	if (!lbl_bulk->_parent.parent) {
 		UIPROC(lbl_bulk, proc_dispose);
 	}
@@ -474,6 +520,11 @@ void bulkeditui_dispose()
 	}
 	if (!btn_bulk_addall->_parent.parent) {
 		UIPROC(btn_bulk_addall, proc_dispose);
+	}
+	for (i = 0; i < MAX_LAYERS; i++) {
+		if (!btn_layer[i]->_parent.parent) {
+			UIPROC(btn_bulk_addall, proc_dispose);
+		}
 	}
 	ui_wnd_dispose(bulkeditui_wnd);
 }

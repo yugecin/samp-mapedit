@@ -227,6 +227,35 @@ int bulkedit_is_in_list(struct OBJECT *object)
 	return 0;
 }
 
+void bulkedit_move_layer(struct OBJECTLAYER *tolayer)
+{
+	struct OBJECT *originobject, *destobject;
+	struct OBJECTLAYER *originlayer;
+	int i;
+
+	if (MAX_OBJECTS - tolayer->numobjects < numBulkEditObjects) {
+		msg_title = "Bulk_edit";
+		msg_message = "Not_enough_free_space_in_selected_layer!";
+		msg_btn1text = "Ok";
+		msg_show(NULL);
+	}
+
+	for (i = 0; i < numBulkEditObjects; i++) {
+		originobject = bulkEditObjects[i];
+		originlayer = objects_layer_for_object(originobject);
+		if (originlayer != tolayer) {
+			destobject = tolayer->objects + tolayer->numobjects++;
+			memcpy(destobject, originobject, sizeof(struct OBJECT));
+			originlayer->numobjects--;
+			if (originobject != originlayer->objects + originlayer->numobjects) {
+				memcpy(originobject, originlayer->objects + originlayer->numobjects, sizeof(struct OBJECT));
+			}
+		}
+	}
+	/*since indexes will get messed up..*/
+	bulkedit_reset();
+}
+
 void bulkedit_draw_object_boxes()
 {
 	int i;
