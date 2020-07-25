@@ -185,6 +185,7 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	active_window = wnd;
 	ui_active_element = NULL;
 	wnd->_parent._parent.proc_recalc_size(wnd);
+	wnd->proc_shown(wnd);
 	/*recalc_size queues layout update, so not needed here anymore*/
 	objects_on_active_window_changed(wnd);
 	objlistui_on_active_window_changed(wnd);

@@ -4,6 +4,7 @@ struct UI_WINDOW {
 	struct UI_CONTAINER _parent;
 	/**return 1 to say it was handled (for when pressing esc etc)*/
 	ui_method *proc_close;
+	ui_method *proc_shown;
 	short columns;
 	char *title;
 	float grabx, graby;

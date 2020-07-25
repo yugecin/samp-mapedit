@@ -33,6 +33,7 @@ struct UI_WINDOW *ui_wnd_make(float x, float y, char *title)
 	wnd->_parent.childcount = 0;
 	wnd->_parent.need_layout = 1;
 	wnd->proc_close = wnd_proc_close;
+	wnd->proc_shown = ui_elem_dummy_proc;
 	wnd->columns = 1;
 	wnd->title = title;
 	wnd->closeable = 1;

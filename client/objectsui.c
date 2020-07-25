@@ -33,8 +33,17 @@ static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_BUTTON *btn_contextmenu_editobject;
 static struct UI_BUTTON *btn_contextmenu_moveobject;
 static struct UI_LABEL *lbl_contextmenu_model;
-static struct UI_LIST *lst_layers;
-static struct UI_INPUT *in_layername;
+static struct UI_BUTTON *btn_add_layer;
+static struct UI_LABEL *lbl_layers_info;
+static struct UI_BUTTON *btn_layer_delete[MAX_LAYERS];
+static struct UI_INPUT *in_layer_name[MAX_LAYERS];
+static struct UI_LABEL *lbl_layer_removes[MAX_LAYERS];
+static struct UI_LABEL *lbl_layer_objects[MAX_LAYERS];
+static struct UI_LABEL *lbl_layer_models[MAX_LAYERS];
+static char txt_layer_removes[MAX_LAYERS][8];
+static char txt_layer_objects[MAX_LAYERS][8];
+static char txt_layer_models[MAX_LAYERS][8];
+static char txt_lbl_layers_info[100];
 
 static struct UI_WINDOW *window_objinfo;
 static struct UI_LABEL *lbl_objentity;
@@ -130,28 +139,32 @@ void cb_btn_contextmenu_disbandbulk(struct UI_BUTTON *btn)
 	bulkedit_reset();
 }
 
-static
-void update_layer_list()
-{
-	char *layernames[MAX_LAYERS];
-	int i;
+static void update_layer_ui();
+static struct OBJECTLAYER *layertodelete;
 
-	TRACE("objectsui:update_layer_list");
-	for (i = 0; i < MAX_LAYERS; i++) {
-		layernames[i] = layers[i].name;
+static
+void cb_delete_layer_confirm(int choice)
+{
+	if (choice == MSGBOX_RESULT_1) {
+		objects_delete_layer(layertodelete);
+		update_layer_ui();
+		if (active_layer == NULL) {
+			lbl_layer->text = "<none>";
+		}
 	}
-	ui_lst_set_data(lst_layers, layernames, numlayers);
+	ui_show_window(window_layers);
 }
 
 static
-void cb_lst_layers(struct UI_LIST *lst)
+void cb_btn_layer_delete(struct UI_BUTTON *btn)
 {
-	int i;
-
-	i = lst->selectedindex;
-	if (0 <= i && i < numlayers) {
-		objects_activate_layer(i);
-	}
+	layertodelete = layers + (int) btn->_parent.userdata;
+	msg_message = "Delete_layer?";
+	msg_message2 = "All_Objects_in_the_layer_will_be_deleted!";
+	msg_title = "Delete_Layer";
+	msg_btn1text = "Yes";
+	msg_btn2text = "No";
+	msg_show(cb_delete_layer_confirm);
 }
 
 static
@@ -174,8 +187,115 @@ void cb_in_layername(struct UI_INPUT *in)
 		}
 	}
 	ensure_layer_name_unique(active_layer);
-	update_layer_list();
 	ui_lbl_recalc_size(lbl_layer);
+}
+
+static
+void update_layer_ui()
+{
+	int i, j;
+	int model;
+	int total_objects;
+	int object_models;
+	int object_usage[20000];
+	int object_usage_layer[20000];
+
+	ui_wnd_remove_child(window_layers, btn_add_layer);
+	ui_wnd_remove_child(window_layers, lbl_layers_info);
+
+	for (i = 0; i < MAX_LAYERS; i++) {
+		if (btn_layer_delete[i]) {
+			ui_wnd_remove_child(window_layers, btn_layer_delete[i]);
+			UIPROC(btn_layer_delete[i], proc_dispose);
+			btn_layer_delete[i] = NULL;
+		}
+		if (in_layer_name[i]) {
+			ui_wnd_remove_child(window_layers, in_layer_name[i]);
+			UIPROC(in_layer_name[i], proc_dispose);
+			in_layer_name[i] = NULL;
+		}
+		if (lbl_layer_removes[i]) {
+			ui_wnd_remove_child(window_layers, lbl_layer_removes[i]);
+			UIPROC(lbl_layer_removes[i], proc_dispose);
+			lbl_layer_removes[i] = NULL;
+		}
+		if (lbl_layer_objects[i]) {
+			ui_wnd_remove_child(window_layers, lbl_layer_objects[i]);
+			UIPROC(lbl_layer_objects[i], proc_dispose);
+			lbl_layer_objects[i] = NULL;
+		}
+		if (lbl_layer_models[i]) {
+			ui_wnd_remove_child(window_layers, lbl_layer_models[i]);
+			UIPROC(lbl_layer_models[i], proc_dispose);
+			lbl_layer_models[i] = NULL;
+		}
+	}
+
+	memset(object_usage, 0, sizeof(object_usage));
+	total_objects = 0;
+	for (i = 0; i < numlayers; i++) {
+		if (!btn_layer_delete[i]) {
+			btn_layer_delete[i] = ui_btn_make("X", cb_btn_layer_delete);
+			btn_layer_delete[i]->_parent.userdata = (void*) i;
+			ui_wnd_add_child(window_layers, btn_layer_delete[i]);
+		}
+		if (!in_layer_name[i]) {
+			in_layer_name[i] = ui_in_make(cb_in_layername);
+			in_layer_name[i]->_parent.userdata = (void*) i;
+			ui_wnd_add_child(window_layers, in_layer_name[i]);
+		}
+		if (!lbl_layer_removes[i]) {
+			lbl_layer_removes[i] = ui_lbl_make(txt_layer_removes[i]);
+			ui_wnd_add_child(window_layers, lbl_layer_removes[i]);
+		}
+		if (!lbl_layer_objects[i]) {
+			lbl_layer_objects[i] = ui_lbl_make(txt_layer_objects[i]);
+			ui_wnd_add_child(window_layers, lbl_layer_objects[i]);
+		}
+		if (!lbl_layer_models[i]) {
+			lbl_layer_models[i] = ui_lbl_make(txt_layer_models[i]);
+			ui_wnd_add_child(window_layers, lbl_layer_models[i]);
+		}
+
+		memset(object_usage_layer, 0, sizeof(object_usage_layer));
+		total_objects += layers[i].numobjects;
+		for (j = 0; j < layers[i].numobjects; j++) {
+			model = layers[i].objects[j].model;
+			object_usage_layer[model]++;
+			object_usage[model]++;
+		}
+		object_models = 0;
+		for (j = 0; j < 20000; j++) {
+			if (object_usage_layer[j]) {
+				object_models++;
+			}
+		}
+		sprintf(txt_layer_removes[i], "%d", layers[i].numremoves);
+		sprintf(txt_layer_objects[i], "%d", layers[i].numobjects);
+		sprintf(txt_layer_models[i], "%d", object_models);
+		ui_in_set_text(in_layer_name[i], layers[i].name);
+	}
+	object_models = 0;
+	for (j = 0; j < 20000; j++) {
+		if (object_usage[j]) {
+			object_models++;
+		}
+	}
+	sprintf(txt_lbl_layers_info, "total_objects:_%d,_models:_%d", total_objects, object_models);
+
+	ui_wnd_add_child(window_layers, lbl_layers_info);
+	ui_wnd_add_child(window_layers, btn_add_layer);
+}
+
+static
+void cb_lst_layers(struct UI_LIST *lst)
+{
+	int i;
+
+	i = lst->selectedindex;
+	if (0 <= i && i < numlayers) {
+		objects_activate_layer(i);
+	}
 }
 
 static
@@ -220,42 +340,8 @@ void cb_btn_add_layer(struct UI_BUTTON *btn)
 		strcpy(layers[numlayers].name, "new_layer");
 		ensure_layer_name_unique(layers + numlayers);
 		numlayers++;
-		update_layer_list();
+		update_layer_ui();
 		objects_activate_layer(numlayers - 1);
-	}
-}
-
-static
-void cb_delete_layer_confirm(int choice)
-{
-	struct OBJECTLAYER *layer;
-	int idx;
-
-	idx = lst_layers->selectedindex;
-	if (choice == MSGBOX_RESULT_1 && 0 <= idx && idx < numlayers) {
-		layer = layers + idx;
-		objects_delete_layer(layer);
-		update_layer_list();
-		if (active_layer == NULL) {
-			lbl_layer->text = "<none>";
-		}
-	}
-	ui_show_window(window_layers);
-}
-
-static
-void cb_btn_delete_layer()
-{
-	int idx;
-
-	idx = lst_layers->selectedindex;
-	if (0 <= idx && idx < numlayers) {
-		msg_message = "Delete_layer?";
-		msg_message2 = "All_Objects_in_the_layer_will_be_deleted!";
-		msg_title = "Delete_Layer";
-		msg_btn1text = "Yes";
-		msg_btn2text = "No";
-		msg_show(cb_delete_layer_confirm);
 	}
 }
 
@@ -338,7 +424,6 @@ void objui_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
-	struct UI_COLORPICKER *cp;
 
 	memset(&selected_colored, 0, sizeof(selected_colored));
 	selected_object = NULL;
@@ -382,23 +467,19 @@ void objui_init()
 
 	/*layers window*/
 	window_layers = ui_wnd_make(500.0f, 500.0f, "Object_Layers");
-	window_layers->columns = 2;
+	window_layers->columns = 5;
+	window_layers->proc_shown = (ui_method*) update_layer_ui;
 
-	lst_layers = ui_lst_make(5, cb_lst_layers);
-	lst_layers->_parent.span = 2;
-	ui_wnd_add_child(window_layers, lst_layers);
-	btn = ui_btn_make("add_layer", cb_btn_add_layer);
-	ui_wnd_add_child(window_layers, btn);
-	btn = ui_btn_make("delete_layer", (void*) cb_btn_delete_layer);
-	ui_wnd_add_child(window_layers, btn);
-	lbl = ui_lbl_make("Layer_name:");
-	ui_wnd_add_child(window_layers, lbl);
-	in_layername = ui_in_make(cb_in_layername);
-	ui_wnd_add_child(window_layers, in_layername);
-	lbl = ui_lbl_make("Layer_color:");
-	ui_wnd_add_child(window_layers, lbl);
-	cp = ui_colpick_make(35.0f, cb_cp_layercolor);
-	ui_wnd_add_child(window_layers, cp);
+	ui_wnd_add_child(window_layers, ui_lbl_make("Del"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Name"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Removes"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Objects"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Models"));
+	lbl_layers_info = ui_lbl_make(txt_lbl_layers_info);
+	lbl_layers_info->_parent.span = 5;
+	btn_add_layer = ui_btn_make("Add_layer", cb_btn_add_layer);
+	btn_add_layer->_parent.span = 5;
+	/*colorpicker? dome? drawdistance?*/
 
 	/*objinfo window*/
 	window_objinfo = ui_wnd_make(1500.0f, 400.0f, "Entity_Info");
@@ -452,12 +533,11 @@ void objui_prj_preload()
 {
 	lbl_layer->text = "<none>";
 	ui_lbl_recalc_size(lbl_layer);
-	ui_in_set_text(in_layername, "");
 }
 
 void objui_prj_postload()
 {
-	update_layer_list();
+	update_layer_ui();
 	btn_contextmenu_mkobject->enabled = 1;
 	btn_mainmenu_layers->enabled = 1;
 	btn_mainmenu_selectobject->enabled = 1;
@@ -513,8 +593,6 @@ void objui_layer_changed()
 {
 	lbl_layer->text = active_layer->name;
 	ui_lbl_recalc_size(lbl_layer);
-	ui_in_set_text(in_layername, active_layer->name);
-	ui_lst_set_selected_index(lst_layers, active_layer - layers);
 }
 
 void objui_frame_update()
