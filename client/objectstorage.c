@@ -139,8 +139,13 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	for (i = 0; i < layer->numobjects; i++) {
 		object = layer->objects + i;
 		data.object.model = object->model;
-		game_ObjectGetPos(object->sa_object, &data.object.pos);
-		game_ObjectGetRot(object->sa_object, &data.object.rot);
+		if (object->sa_object) {
+			game_ObjectGetPos(object->sa_object, &data.object.pos);
+			game_ObjectGetRot(object->sa_object, &data.object.rot);
+		} else {
+			data.object.pos = object->pos;
+			data.object.rot = object->rot;
+		}
 		data.object.drawdistance = 500.0f; /*TODO drawdistance*/
 		write(sizeof(data.object));
 	}
@@ -219,9 +224,12 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 			read(sizeof(data.object));
 			object->model = data.object.model;
 			object->pos = data.object.pos;
-			object->rot = malloc(sizeof(struct RwV3D));
-			*object->rot = data.object.rot;
-			objects_mkobject(object);
+			object->rot = data.object.rot;
+			if (layer->show) {
+				objects_mkobject(object);
+			} else {
+				objects_mkobject_dontcreate(object);
+			}
 			object++;
 		}
 	}

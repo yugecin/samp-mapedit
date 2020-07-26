@@ -42,6 +42,7 @@ struct UI_CHECKBOX *ui_chk_make(char *text, int check, chkcb *cb)
 	chk->_parent._parent.proc_mouseup = (ui_method*) ui_chk_mouseup;
 	/*recalcsize for radiobutton can be the button proc*/
 	chk->_parent._parent.proc_recalc_size = (ui_method*) ui_btn_recalc_size;
+	chk->_parent.alignment = CENTER;
 	chk->_parent.text = malloc(sizeof(char) * textlenandzero);
 	chk->_parent.text[0] = '[';
 	chk->_parent.text[1] = ' ' + ('x' - ' ') * check;

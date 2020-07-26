@@ -8,6 +8,7 @@
 #define OBJECT_STATUS_CREATED 0
 #define OBJECT_STATUS_CREATING 1
 #define OBJECT_STATUS_WAITING 2
+#define OBJECT_STATUS_HIDDEN 3
 
 struct OBJECT {
 	void *sa_object;
@@ -15,7 +16,7 @@ struct OBJECT {
 	int samp_objectid;
 	int model;
 	struct RwV3D pos; /*only used during creation*/
-	struct RwV3D *rot; /*only used during project load*/
+	struct RwV3D rot; /*only used during creation/project load*/
 	char status;
 };
 
@@ -31,6 +32,7 @@ struct REMOVEDBUILDING {
 struct OBJECTLAYER {
 	char name[50 + 1];
 	int color;
+	int show;
 	struct OBJECT objects[MAX_OBJECTS];
 	int numobjects;
 	struct REMOVEDBUILDING removes[MAX_REMOVES];
@@ -42,6 +44,7 @@ void objects_update();
 pos and rot must be set (rot can be null)
 */
 void objects_mkobject(struct OBJECT *object);
+void objects_mkobject_dontcreate(struct OBJECT *object);
 void objects_server_object_created(struct MSG_OBJECT_CREATED *msg);
 void objects_client_object_created(object, sa_object, sa_handle);
 void objects_object_rotation_changed(int sa_handle);
@@ -51,6 +54,7 @@ void objects_init();
 void objects_dispose();
 void objects_prj_save(FILE *f, char *buf);
 int objects_prj_load_line(char *buf);
+void objects_layer_destroy_objects(struct OBJECTLAYER *layer);
 void objects_delete_layer(struct OBJECTLAYER *layer);
 void objects_prj_preload();
 void objects_prj_postload();

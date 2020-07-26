@@ -35,11 +35,13 @@ static struct UI_BUTTON *btn_contextmenu_moveobject;
 static struct UI_LABEL *lbl_contextmenu_model;
 static struct UI_BUTTON *btn_add_layer;
 static struct UI_LABEL *lbl_layers_info;
+static struct UI_BUTTON *btn_layer_activate[MAX_LAYERS];
 static struct UI_BUTTON *btn_layer_delete[MAX_LAYERS];
 static struct UI_INPUT *in_layer_name[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_removes[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_objects[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_models[MAX_LAYERS];
+static struct UI_CHECKBOX *chk_layer_visible[MAX_LAYERS];
 static char txt_layer_removes[MAX_LAYERS][8];
 static char txt_layer_objects[MAX_LAYERS][8];
 static char txt_layer_models[MAX_LAYERS][8];
@@ -139,6 +141,51 @@ void cb_btn_contextmenu_disbandbulk(struct UI_BUTTON *btn)
 	bulkedit_reset();
 }
 
+static
+void update_layer_info_text()
+{
+	int total_objects;
+	int active_objects;
+	int model;
+	int total_object_models;
+	int active_object_models;
+	int model_usage_total[20000];
+	int model_usage_active[20000];
+	int i, j;
+
+	memset(model_usage_total, 0, sizeof(model_usage_total));
+	memset(model_usage_active, 0, sizeof(model_usage_active));
+	total_objects = 0;
+	active_objects = 0;
+	total_object_models = 0;
+	active_object_models = 0;
+	for (i = 0; i < numlayers; i++) {
+		total_objects += layers[i].numobjects;
+		if (layers[i].show) {
+			active_objects += layers[i].numobjects;
+		}
+		for (j = 0; j < layers[i].numobjects; j++) {
+			model = layers[i].objects[j].model;
+			if (!model_usage_total[model]) {
+				model_usage_total[model] = 1;
+				total_object_models++;
+			}
+			if (layers[i].show) {
+				if (!model_usage_active[model]) {
+					model_usage_active[model] = 1;
+					active_object_models++;
+				}
+			}
+		}
+	}
+	sprintf(txt_lbl_layers_info,
+		"total_objects:_%d_(active:_%d),_models:_%d_(active:_%d)",
+		total_objects,
+		active_objects,
+		total_object_models,
+		active_object_models);
+}
+
 static void update_layer_ui();
 static struct OBJECTLAYER *layertodelete;
 
@@ -168,6 +215,12 @@ void cb_btn_layer_delete(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_layer_activate(struct UI_BUTTON *btn)
+{
+	objects_activate_layer((int) btn->_parent.userdata);
+}
+
+static
 void cb_in_layername(struct UI_INPUT *in)
 {
 	int i;
@@ -191,14 +244,37 @@ void cb_in_layername(struct UI_INPUT *in)
 }
 
 static
+void cb_chk_layer_show(struct UI_CHECKBOX *chk)
+{
+	struct OBJECTLAYER *layer;
+	int numobjects;
+	struct OBJECT *objects;
+	int i;
+
+	layer = layers + (int) chk->_parent._parent.userdata;
+	if (chk->checked) {
+		numobjects = layer->numobjects;
+		objects = layer->objects;
+		for (i = 0; i < numobjects; i++) {
+			if (objects[i].samp_objectid == -1) {
+				objects_mkobject(objects + i);
+			}
+		}
+		layer->show = 1;
+	} else {
+		objects_layer_destroy_objects(layer);
+		layer->show = 0;
+	}
+	update_layer_info_text();
+}
+
+static
 void update_layer_ui()
 {
 	int i, j;
 	int model;
-	int total_objects;
 	int object_models;
-	int object_usage[20000];
-	int object_usage_layer[20000];
+	int model_usage[20000];
 
 	ui_wnd_remove_child(window_layers, btn_add_layer);
 	ui_wnd_remove_child(window_layers, lbl_layers_info);
@@ -208,6 +284,11 @@ void update_layer_ui()
 			ui_wnd_remove_child(window_layers, btn_layer_delete[i]);
 			UIPROC(btn_layer_delete[i], proc_dispose);
 			btn_layer_delete[i] = NULL;
+		}
+		if (btn_layer_activate[i]) {
+			ui_wnd_remove_child(window_layers, btn_layer_activate[i]);
+			UIPROC(btn_layer_activate[i], proc_dispose);
+			btn_layer_activate[i] = NULL;
 		}
 		if (in_layer_name[i]) {
 			ui_wnd_remove_child(window_layers, in_layer_name[i]);
@@ -229,15 +310,23 @@ void update_layer_ui()
 			UIPROC(lbl_layer_models[i], proc_dispose);
 			lbl_layer_models[i] = NULL;
 		}
+		if (chk_layer_visible[i]) {
+			ui_wnd_remove_child(window_layers, chk_layer_visible[i]);
+			UIPROC(chk_layer_visible[i], proc_dispose);
+			chk_layer_visible[i] = NULL;
+		}
 	}
 
-	memset(object_usage, 0, sizeof(object_usage));
-	total_objects = 0;
 	for (i = 0; i < numlayers; i++) {
 		if (!btn_layer_delete[i]) {
 			btn_layer_delete[i] = ui_btn_make("X", cb_btn_layer_delete);
 			btn_layer_delete[i]->_parent.userdata = (void*) i;
 			ui_wnd_add_child(window_layers, btn_layer_delete[i]);
+		}
+		if (!btn_layer_activate[i]) {
+			btn_layer_activate[i] = ui_btn_make("set_active", cb_btn_layer_activate);
+			btn_layer_activate[i]->_parent.userdata = (void*) i;
+			ui_wnd_add_child(window_layers, btn_layer_activate[i]);
 		}
 		if (!in_layer_name[i]) {
 			in_layer_name[i] = ui_in_make(cb_in_layername);
@@ -256,17 +345,18 @@ void update_layer_ui()
 			lbl_layer_models[i] = ui_lbl_make(txt_layer_models[i]);
 			ui_wnd_add_child(window_layers, lbl_layer_models[i]);
 		}
+		if (!chk_layer_visible[i]) {
+			chk_layer_visible[i] = ui_chk_make("Show_objs", layers[i].show, cb_chk_layer_show);
+			chk_layer_visible[i]->_parent._parent.userdata = (void*) i;
+			ui_wnd_add_child(window_layers, chk_layer_visible[i]);
+		}
 
-		memset(object_usage_layer, 0, sizeof(object_usage_layer));
-		total_objects += layers[i].numobjects;
+		memset(model_usage, 0, sizeof(model_usage));
+		object_models = 0;
 		for (j = 0; j < layers[i].numobjects; j++) {
 			model = layers[i].objects[j].model;
-			object_usage_layer[model]++;
-			object_usage[model]++;
-		}
-		object_models = 0;
-		for (j = 0; j < 20000; j++) {
-			if (object_usage_layer[j]) {
+			if (!model_usage[model]) {
+				model_usage[model]++;
 				object_models++;
 			}
 		}
@@ -275,13 +365,7 @@ void update_layer_ui()
 		sprintf(txt_layer_models[i], "%d", object_models);
 		ui_in_set_text(in_layer_name[i], layers[i].name);
 	}
-	object_models = 0;
-	for (j = 0; j < 20000; j++) {
-		if (object_usage[j]) {
-			object_models++;
-		}
-	}
-	sprintf(txt_lbl_layers_info, "total_objects:_%d,_models:_%d", total_objects, object_models);
+	update_layer_info_text();
 
 	ui_wnd_add_child(window_layers, lbl_layers_info);
 	ui_wnd_add_child(window_layers, btn_add_layer);
@@ -296,11 +380,6 @@ void cb_lst_layers(struct UI_LIST *lst)
 	if (0 <= i && i < numlayers) {
 		objects_activate_layer(i);
 	}
-}
-
-static
-void cb_cp_layercolor(struct UI_COLORPICKER *cp)
-{
 }
 
 static
@@ -337,6 +416,7 @@ void cb_btn_add_layer(struct UI_BUTTON *btn)
 		layers[numlayers].color = 0xFF000000;
 		layers[numlayers].numobjects = 0;
 		layers[numlayers].numremoves = 0;
+		layers[numlayers].show = 1;
 		strcpy(layers[numlayers].name, "new_layer");
 		ensure_layer_name_unique(layers + numlayers);
 		numlayers++;
@@ -467,18 +547,20 @@ void objui_init()
 
 	/*layers window*/
 	window_layers = ui_wnd_make(500.0f, 500.0f, "Object_Layers");
-	window_layers->columns = 5;
+	window_layers->columns = 7;
 	window_layers->proc_shown = (ui_method*) update_layer_ui;
 
 	ui_wnd_add_child(window_layers, ui_lbl_make("Del"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Actiate"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Name"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Removes"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Objects"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Models"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Show"));
 	lbl_layers_info = ui_lbl_make(txt_lbl_layers_info);
-	lbl_layers_info->_parent.span = 5;
+	lbl_layers_info->_parent.span = 7;
 	btn_add_layer = ui_btn_make("Add_layer", cb_btn_add_layer);
-	btn_add_layer->_parent.span = 5;
+	btn_add_layer->_parent.span = 7;
 	/*colorpicker? dome? drawdistance?*/
 
 	/*objinfo window*/

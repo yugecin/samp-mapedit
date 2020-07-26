@@ -323,8 +323,8 @@ void cb_btn_create(struct UI_BUTTON *btn)
 
 	object = active_layer->objects + active_layer->numobjects++;
 	memcpy(object, &picking_object, sizeof(struct OBJECT));
-	object->rot = NULL;
 	object->pos = positionToCommit;
+	memset(&object->rot, 0, sizeof(struct RwV3D));
 	objects_mkobject(object);
 	restore_after_hide();
 }
@@ -472,7 +472,7 @@ void objbrowser_init()
 	DWORD oldvp;
 
 	picking_object.model = 3279;
-	picking_object.rot = NULL;
+	memset(&picking_object.rot, 0, sizeof(struct RwV3D));
 	desired_time = 12;
 
 	objbrowser_init_blacklist();

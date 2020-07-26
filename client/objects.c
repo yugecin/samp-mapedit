@@ -142,17 +142,9 @@ void objects_do_create_object(struct OBJECT *object)
 	nc.params.asint[2] = (int) object;
 	nc.params.asflt[3] = object->pos.y;
 	nc.params.asflt[4] = object->pos.z;
-	if (object->rot) {
-		nc.params.asflt[5] = object->rot->x;
-		nc.params.asflt[6] = object->rot->y;
-		nc.params.asflt[7] = object->rot->z;
-		free(object->rot);
-		object->rot = NULL;
-	} else {
-		nc.params.asflt[5] = 0.0f;
-		nc.params.asflt[6] = 0.0f;
-		nc.params.asflt[7] = 0.0f;
-	}
+	nc.params.asflt[5] = object->rot.x;
+	nc.params.asflt[6] = object->rot.y;
+	nc.params.asflt[7] = object->rot.z;
 	nc.params.asflt[8] = 1500.0f;
 	sockets_send(&nc, sizeof(nc));
 }
@@ -185,6 +177,14 @@ void objects_mkobject(struct OBJECT *object)
 	object->sa_object = NULL;
 
 	objects_do_create_object(object);
+}
+
+void objects_mkobject_dontcreate(struct OBJECT *object)
+{
+	TRACE("objects_mkobject_dontcreate");
+	object->status = OBJECT_STATUS_HIDDEN;
+	object->samp_objectid = -1;
+	object->sa_object = NULL;
 }
 
 void objects_server_object_created(struct MSG_OBJECT_CREATED *msg)
@@ -320,10 +320,39 @@ int objects_prj_load_line(char *buf)
 	return 0;
 }
 
-void objects_delete_layer(struct OBJECTLAYER *layer)
+void objects_layer_destroy_objects(struct OBJECTLAYER *layer)
 {
 	struct MSG_BULKDELETE *msg;
-	int i, idx, len;
+	struct OBJECT *object;
+	int i, len;
+
+	if (layer->numobjects) {
+		len = sizeof(struct MSG_BULKDELETE) + sizeof(int) * layer->numobjects;
+		msg = malloc(len);
+		msg->_parent.id = MAPEDIT_MSG_BULKDELETE;
+		msg->num_deletions = 0;
+		for (i = 0; i < layer->numobjects; i++) {
+			object = layer->objects + i;
+			if (object->samp_objectid != -1) {
+				msg->objectids[msg->num_deletions++] = object->samp_objectid;
+				if (object->sa_object) {
+					game_ObjectGetPos(object->sa_object, &object->pos);
+					game_ObjectGetRot(object->sa_object, &object->rot);
+				}
+				object->samp_objectid = -1;
+				object->sa_object = NULL;
+				object->status = OBJECT_STATUS_HIDDEN;
+			}
+		}
+		if (msg->num_deletions) {
+			sockets_send(msg, len);
+		}
+	}
+}
+
+void objects_delete_layer(struct OBJECTLAYER *layer)
+{
+	int i, idx;
 
 	bulkedit_revert();
 	bulkedit_reset();
@@ -334,20 +363,7 @@ void objects_delete_layer(struct OBJECTLAYER *layer)
 			free(layer->removes[i].description);
 		}
 	}
-	if (layer->numobjects) {
-		len = sizeof(struct MSG_BULKDELETE) + sizeof(int) * layer->numobjects;
-		msg = malloc(len);
-		msg->_parent.id = MAPEDIT_MSG_BULKDELETE;
-		msg->num_deletions = 0;
-		for (i = 0; i < layer->numobjects; i++) {
-			if (layer->objects[i].samp_objectid != -1) {
-				msg->objectids[msg->num_deletions++] = layer->objects[i].samp_objectid;
-			}
-		}
-		if (msg->num_deletions) {
-			sockets_send(msg, len);
-		}
-	}
+	objects_layer_destroy_objects(layer);
 	if (idx < numlayers - 1) {
 		memcpy(layers + idx,
 			layers + idx + 1,
@@ -385,6 +401,7 @@ void objects_prj_postload()
 
 	cloning_object.model = 0;
 	for (layeridx = 0; layeridx < numlayers; layeridx++) {
+		layers[layeridx].show = layeridx == 0;
 		objectstorage_load_layer(layers + layeridx);
 	}
 }

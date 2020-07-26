@@ -86,8 +86,7 @@ void bulkedit_clone_all()
 		clone = active_layer->objects + active_layer->numobjects;
 		memcpy(clone, bulkEditObjects[i], sizeof(struct OBJECT));
 		game_ObjectGetPos(bulkEditObjects[i]->sa_object, &clone->pos);
-		clone->rot = malloc(sizeof(struct RwV3D));
-		game_ObjectGetRot(bulkEditObjects[i]->sa_object, clone->rot);
+		game_ObjectGetRot(bulkEditObjects[i]->sa_object, &clone->rot);
 		objects_mkobject(clone);
 		active_layer->numobjects++;
 	}

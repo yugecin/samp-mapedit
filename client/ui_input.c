@@ -34,7 +34,6 @@ void ui_in_position_caret_based_on_cursor_pos(struct UI_INPUT *in)
 		index = min + (max - min) / 2;
 		replacedCharacter = txt[index];
 		txt[index] = 0;
-		ui_push_debug_string();
 		if (game_TextGetSizeX(txt, 0, 0) > relativeCursorX) {
 			max = index;
 		} else {
