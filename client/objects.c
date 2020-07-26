@@ -322,8 +322,8 @@ int objects_prj_load_line(char *buf)
 
 void objects_delete_layer(struct OBJECTLAYER *layer)
 {
-	struct MSG_NC nc;
-	int i, idx;
+	struct MSG_BULKDELETE *msg;
+	int i, idx, len;
 
 	bulkedit_revert();
 	bulkedit_reset();
@@ -334,11 +334,19 @@ void objects_delete_layer(struct OBJECTLAYER *layer)
 			free(layer->removes[i].description);
 		}
 	}
-	for (i = 0; i < layer->numobjects; i++) {
-		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-		nc.nc = NC_DestroyObject;
-		nc.params.asint[1] = layer->objects[i].samp_objectid;
-		sockets_send(&nc, sizeof(nc));
+	if (layer->numobjects) {
+		len = sizeof(struct MSG_BULKDELETE) + sizeof(int) * layer->numobjects;
+		msg = malloc(len);
+		msg->_parent.id = MAPEDIT_MSG_BULKDELETE;
+		msg->num_deletions = 0;
+		for (i = 0; i < layer->numobjects; i++) {
+			if (layer->objects[i].samp_objectid != -1) {
+				msg->objectids[msg->num_deletions++] = layer->objects[i].samp_objectid;
+			}
+		}
+		if (msg->num_deletions) {
+			sockets_send(msg, len);
+		}
 	}
 	if (idx < numlayers - 1) {
 		memcpy(layers + idx,

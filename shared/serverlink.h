@@ -22,6 +22,7 @@
 #define MAPEDIT_MSG_NATIVECALL 1
 #define MAPEDIT_MSG_OBJECT_CREATED 2
 #define MAPEDIT_MSG_RESETVEHICLES 3
+#define MAPEDIT_MSG_BULKDELETE 4
 
 #pragma pack(push,1)
 struct MSG {
@@ -41,5 +42,11 @@ struct MSG_OBJECT_CREATED {
 	struct MSG _parent;
 	int samp_objectid;
 	struct OBJECT *object;
+};
+
+struct MSG_BULKDELETE {
+	struct MSG _parent;
+	int num_deletions;
+	int objectids[1];
 };
 #pragma pack(pop)

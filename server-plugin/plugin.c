@@ -447,6 +447,17 @@ void msg_nativecall(struct MSG_NC *msg)
 	}
 }
 
+static
+void msg_bulkdelete(struct MSG_BULKDELETE *msg)
+{
+	int i;
+
+	for (i = 0; i < msg->num_deletions; i++) {
+		nc_params.asint[1] = msg->objectids[i];
+		natives[NC_DestroyObject].fp(amx, nc_params.asint);
+	}
+}
+
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
 	static struct sockaddr_in remote_client;
@@ -470,6 +481,11 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 			break;
 		case MAPEDIT_MSG_RESETVEHICLES:
 			msg_resetvehicles();
+			break;
+		case MAPEDIT_MSG_BULKDELETE:
+			if (recvsize >= sizeof(struct MSG_BULKDELETE)) {
+				msg_bulkdelete((struct MSG_BULKDELETE*) buf);
+			}
 			break;
 		default:
 			logprintf("unknown MSG: %d", msgid);
