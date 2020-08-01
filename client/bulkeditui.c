@@ -512,7 +512,7 @@ void bulkeditui_init()
 	for (i = 0; i < MAX_LAYERS; i++) {
 		btn = btn_layer[i] = ui_btn_make("", cb_btn_movelayer);
 		btn->_parent.userdata = (void*) i;
-		btn->_parent.span = 3;
+		btn->_parent.span = (i % 2) + 1;
 	}
 
 	lbl_bulk = ui_lbl_make(txt_bulk_selected_objects);

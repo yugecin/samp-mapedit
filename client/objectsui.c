@@ -223,23 +223,25 @@ void cb_btn_layer_activate(struct UI_BUTTON *btn)
 static
 void cb_in_layername(struct UI_INPUT *in)
 {
+	struct OBJECTLAYER *layer;
 	int i;
 	char c;
 
-	if (active_layer == NULL) {
+	if ((int) in->_parent.userdata >= numlayers) {
 		return;
 	}
-	for (i = 0; i < sizeof(active_layer->name); i++) {
+	layer = layers + (int) in->_parent.userdata;
+	for (i = 0; i < sizeof(layer->name); i++) {
 		c = in->value[i];
 		if (c == ' ') {
 			c = '_';
 		}
-		active_layer->name[i] = c;
+		layer->name[i] = c;
 		if (c == 0) {
 			break;
 		}
 	}
-	ensure_layer_name_unique(active_layer);
+	ensure_layer_name_unique(layer);
 	ui_lbl_recalc_size(lbl_layer);
 }
 
