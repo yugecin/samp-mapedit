@@ -260,7 +260,9 @@ void bulkedit_draw_object_boxes()
 	int i;
 
 	for (i = 0; i < numBulkEditObjects; i++) {
-		entity_draw_bound_rect(bulkEditObjects[i]->sa_object, 0xFF8000);
+		if (bulkEditObjects[i]->sa_object) {
+			entity_draw_bound_rect(bulkEditObjects[i]->sa_object, 0xFF8000);
+		}
 	}
 }
 

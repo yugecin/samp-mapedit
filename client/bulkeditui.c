@@ -15,10 +15,12 @@
 struct UI_WINDOW *bulkeditui_wnd;
 char bulkeditui_shown;
 
+static struct UI_CHECKBOX *chk_plant_objects;
 static struct UI_CHECKBOX *chk_select_from_active_layer;
 static struct UI_CHECKBOX *chk_captureclicks;
 static struct UI_CHECKBOX *chk_dragselect;
 static ui_method *bulkeditui_original_proc_wnd_draw;
+static struct OBJECT *plantObj;
 
 static char txt_bulk_selected_objects[70];
 static struct UI_LABEL *lbl_bulk;
@@ -269,6 +271,20 @@ int bulkeditui_on_background_element_just_clicked(struct OBJECTLAYER *real_activ
 
 	if (bulkeditui_shown) {
 		obj = objects_find_by_sa_object(clicked_entity);
+		if (chk_plant_objects->checked) {
+			if (active_layer->numobjects < 950) {
+				plantObj = active_layer->objects + active_layer->numobjects++;
+				if (clicked_entity) {
+					plantObj->pos = clicked_colpoint.pos;
+				} else {
+					game_ScreenToWorld(&plantObj->pos, cursorx, cursory, 30.0f);
+				}
+				plantObj->rot.x = plantObj->rot.y = plantObj->rot.z = 0.0f;
+				plantObj->model = lastMadeObjectModel;
+				objects_mkobject(plantObj);
+				return 0;
+			}
+		}
 		if (real_active_layer != active_layer) {
 			objects_activate_layer(real_active_layer - layers);
 		}
@@ -305,6 +321,11 @@ int bulkeditui_proc_wnd_draw(void *wnd)
 	int val, i, j;
 	float x, y;
 	float minx, miny, maxx, maxy;
+
+	if (plantObj != NULL && plantObj->sa_object) {
+		bulkedit_add(plantObj);
+		plantObj = NULL;
+	}
 
 	val = bulkeditui_original_proc_wnd_draw(wnd);
 	for (i = 0; i < MAX_LABELS; i++) {
@@ -472,6 +493,9 @@ void bulkeditui_init()
 	btn = ui_btn_make("Revert_bulk_edit", cb_btn_revert);
 	btn->_parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, btn);
+	chk_plant_objects = ui_chk_make("Plant_objects", 0, NULL);
+	chk_plant_objects->_parent._parent.span = 3;
+	ui_wnd_add_child(bulkeditui_wnd, chk_plant_objects);
 	chk_select_from_active_layer = ui_chk_make("Select_from_active_layer_only", 0, NULL);
 	chk_select_from_active_layer->_parent._parent.span = 3;
 	ui_wnd_add_child(bulkeditui_wnd, chk_select_from_active_layer);

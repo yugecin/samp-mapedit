@@ -39,6 +39,8 @@ int numlayers = 0;
 struct OBJECT manipulateObject;
 struct CEntity *manipulateEntity = NULL;
 
+int lastMadeObjectModel = 1297;
+
 /**
 Since x-coord of creation is a pointer to the object handle, the position needs
 to be reset.
@@ -172,6 +174,8 @@ void objects_update()
 void objects_mkobject(struct OBJECT *object)
 {
 	TRACE("objects_mkobject");
+	lastMadeObjectModel = object->model;
+
 	object->status = OBJECT_STATUS_CREATING;
 	object->samp_objectid = -1;
 	object->sa_object = NULL;

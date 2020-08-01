@@ -1,6 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define MAX_LAYERS 10
+#define MAX_LAYERS 25
 #define MAX_OBJECTS 1000
 /*250 and every remove can have a LOD (and nobody should remove that much)*/
 #define MAX_REMOVES 500
@@ -72,4 +72,5 @@ extern struct OBJECTLAYER *active_layer;
 extern int numlayers;
 extern struct OBJECT manipulateObject;
 extern struct CEntity *manipulateEntity;
+extern int lastMadeObjectModel;
 void objects_show_creation_progress();
