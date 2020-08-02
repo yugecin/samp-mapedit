@@ -11,20 +11,30 @@
 
 #pragma pack(push,1)
 union MAPDATA {
-	char buf[200];
-	char c;
-	short s;
-	int i;
+	char buf[100];
+	struct {
+		int version;
+		int numremoves;
+		int numobjects;
+		int numzones;
+		float streamin;
+		float streamout;
+		float drawdistance;
+	} header;
 	struct {
 		int model;
-		struct RwV3D pos, rot;
-		float drawdistance;
+		struct RwV3D pos;
+		struct RwV3D rot;
 	} object;
 	struct {
 		int model;
 		struct RwV3D pos;
 		float radius;
 	} remove;
+	struct {
+		float west, south, east, north;
+		int color;
+	} zone;
 };
 #pragma pack(pop)
 
@@ -76,7 +86,6 @@ FILE *layer_fopen(struct OBJECTLAYER *layer, char *ext, enum fopen_mode mode)
 	return file;
 }
 
-#define write(X) fwrite(data.buf,X,1,f)
 void objectstorage_save_layer(struct OBJECTLAYER *layer)
 {
 	struct OBJECT *object;
@@ -84,7 +93,8 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	FILE *f, *meta;
 	union MAPDATA data;
 	int i;
-	int totalremoves;
+	char haslod;
+	char descriptionlen;
 
 	if (!(f = layer_fopen(layer, "map", MODE_WRITE))) {
 		return;
@@ -95,47 +105,47 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 		meta = NULL;
 	}
 
-	totalremoves = 0;
+	data.header.version = 0x0250414D;
+	data.header.numremoves = 0;
 	for (i = 0; i < layer->numremoves; i++) {
 		if (layer->removes[i].lodmodel) {
-			totalremoves += 2;
+			data.header.numremoves += 2;
 		} else {
-			totalremoves += 1;
+			data.header.numremoves += 1;
 		}
 	}
+	data.header.numobjects = layer->numobjects;
+	data.header.numzones = 0; // TODO
+	data.header.streamin = layer->stream_in_radius;
+	data.header.streamout = layer->stream_out_radius;
+	data.header.drawdistance = layer->drawdistance;
+	fwrite(&data.header, sizeof(data.header), 1, f);
 
-	data.i = 1; /*spec version*/
-	write(sizeof(int));
-	data.i = totalremoves;
-	write(sizeof(int));
-	data.i = layer->numobjects;
-	write(sizeof(int));
 	for (i = 0; i < layer->numremoves; i++) {
 		remove = layer->removes + i;
-		if (remove->model == -1) {
-			data.remove.model = -1;
-		} else {
-			data.remove.model = -remove->model;
-		}
+
+		data.remove.model = remove->model;
 		data.remove.pos = remove->origin;
 		data.remove.radius = (float) sqrt(remove->radiussq);
-		write(sizeof(data.remove));
+		fwrite(&data.remove, sizeof(data.remove), 1, f);
+
 		if (remove->lodmodel != 0) {
-			data.remove.model = -remove->lodmodel;
-			write(sizeof(data.remove));
+			data.remove.model = remove->lodmodel;
+			fwrite(&data.remove, sizeof(data.remove), 1, f);
 		}
 
-		data.c = remove->model != -1 && remove->lodmodel != 0;
-		fwrite(data.buf, sizeof(char), 1, meta);
+		haslod = remove->model != -1 && remove->lodmodel != 0;
+		fwrite(&haslod, sizeof(char), 1, meta);
+
 		if (remove->description == NULL) {
-			data.i = 0;
-			fwrite(data.buf, sizeof(char), 1, meta);
+			descriptionlen = 0;
 		} else {
-			data.i = strlen(remove->description);
-			fwrite(data.buf, sizeof(char), 1, meta);
-			fwrite(remove->description, data.i, 1, meta);
+			descriptionlen = strlen(remove->description);
+			fwrite(remove->description, descriptionlen, 1, meta);
 		}
+		fwrite(&descriptionlen, sizeof(char), 1, meta);
 	}
+
 	for (i = 0; i < layer->numobjects; i++) {
 		object = layer->objects + i;
 		data.object.model = object->model;
@@ -146,8 +156,7 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 			data.object.pos = object->pos;
 			data.object.rot = object->rot;
 		}
-		data.object.drawdistance = 500.0f; /*TODO drawdistance*/
-		write(sizeof(data.object));
+		fwrite(&data.object, sizeof(data.object), 1, f);
 	}
 
 	fclose(f);
@@ -155,91 +164,99 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 		fclose(meta);
 	}
 }
-#undef write
 
-#define read(X) fread(data.buf,X,1,f)
 void objectstorage_load_layer(struct OBJECTLAYER *layer)
 {
 	struct OBJECT *object;
 	struct REMOVEDBUILDING *remove;
 	FILE *f, *meta;
 	union MAPDATA data;
-	int entriestoread;
-	float rad;
+	int i;
+	char descriptionlen;
+	char haslod;
 
 	if (!(f = layer_fopen(layer, "map", MODE_READ))) {
 		return;
 	}
 	meta = layer_fopen(layer, "met", MODE_READ_META);
 
-	read(sizeof(int));
-	if (data.i != 1) { /*spec version*/
-		sprintf(debugstring, "wrong map file version %d", data.i);
-		ui_push_debug_string();
-		return;
+	if (!(fread(&data.header, sizeof(data.header), 1, f))) {
+		goto corrupted;
 	}
-	read(sizeof(int));
-	layer->numremoves = data.i;
-	read(sizeof(int));
-	layer->numobjects = data.i;
+
+	if (data.header.version != 0x0250414D) {
+		sprintf(debugstring, "wrong map file version %p", data.header.version);
+		ui_push_debug_string();
+		goto ret;
+	}
+	layer->numremoves = data.header.numremoves;
+	layer->numobjects = data.header.numobjects;
+	layer->stream_in_radius = data.header.streamin;
+	layer->stream_out_radius = data.header.streamout;
+	layer->drawdistance = data.header.drawdistance;
+
 	remove = layer->removes;
 	object = layer->objects;
-	entriestoread = layer->numremoves + layer->numobjects;
-	while (entriestoread-- > 0) {
-		read(sizeof(int));
-		fseek(f, -(int) sizeof(int), SEEK_CUR);
-		if (data.i < 0) { /*model*/
-			read(sizeof(data.remove));
-			rad = data.remove.radius;
-			if (data.remove.model == -1) {
-				remove->model = -1;
-			} else {
-				remove->model = -data.remove.model;
-			}
-			remove->origin = data.remove.pos;
-			remove->radiussq = rad * rad;
-			if (!meta) {
-				remove->description = NULL;
-				remove++;
-				continue;
-			}
 
-			fread(data.buf, sizeof(char), 1, meta);
-			if (data.c) { /*lod model*/
-				read(sizeof(data.remove));
-				remove->lodmodel = -data.remove.model;
-				layer->numremoves--;
-				entriestoread--;
-			}
-			fread(data.buf, sizeof(char), 1, meta);
-			if (data.c) {
-				remove->description = malloc(INPUT_TEXTLEN + 1);
-				fread(remove->description, data.c, 1, meta);
-				remove->description[data.c] = 0;
-			} else {
-				remove->description = NULL;
-			}
-			remove++;
-		} else {
-			read(sizeof(data.object));
-			object->model = data.object.model;
-			object->pos = data.object.pos;
-			object->rot = data.object.rot;
-			if (layer->show) {
-				objects_mkobject(object);
-			} else {
-				objects_mkobject_dontcreate(object);
-			}
-			object++;
+	for (i = 0; i < layer->numremoves; i++) {
+		if (!(fread(&data.remove, sizeof(data.remove), 1, f))) {
+			goto corrupted;
 		}
+
+		remove->model = data.remove.model;
+		remove->origin = data.remove.pos;
+		remove->radiussq = data.remove.radius * data.remove.radius;
+		remove->description = NULL;
+
+		if (meta) {
+			fread(&haslod, sizeof(char), 1, meta);
+			if (haslod) { /*lod model*/
+				if (!(fread(&data.remove, sizeof(data.remove), 1, f))) {
+					goto corrupted;
+				}
+				remove->lodmodel = data.remove.model;
+				layer->numremoves--;
+			}
+			fread(&descriptionlen, sizeof(char), 1, meta);
+			if (descriptionlen) {
+				remove->description = malloc(INPUT_TEXTLEN + 1);
+				fread(remove->description, descriptionlen, 1, meta);
+				remove->description[descriptionlen] = 0;
+			}
+		}
+		remove++;
 	}
 
+	for (i = 0; i < layer->numobjects; i++) {
+		if (!(fread(&data.object, sizeof(data.object), 1, f))) {
+			sprintf(debugstring, "missing %d objects", layer->numobjects - i - 1);
+			ui_push_debug_string();
+			goto corrupted;
+		}
+		object->model = data.object.model;
+		object->pos = data.object.pos;
+		object->rot = data.object.rot;
+		if (layer->show) {
+			objects_mkobject(object);
+		} else {
+			objects_mkobject_dontcreate(object);
+		}
+		object++;
+	}
+
+	// TODO: zones
+
+ret:
 	fclose(f);
 	if (meta) {
 		fclose(meta);
 	}
+	return;
+corrupted:
+	sprintf(debugstring, "layer corrupted: %s", layer->name);
+	ui_push_debug_string();
+	goto ret;
 }
-#undef read
 
 void objectstorage_mark_layerfile_for_deletion(struct OBJECTLAYER *layer)
 {

@@ -37,6 +37,9 @@ struct OBJECTLAYER {
 	int numobjects;
 	struct REMOVEDBUILDING removes[MAX_REMOVES];
 	int numremoves;
+	float stream_in_radius;
+	float stream_out_radius;
+	float drawdistance;
 };
 
 void objects_update();

@@ -38,10 +38,12 @@ static struct UI_LABEL *lbl_layers_info;
 static struct UI_BUTTON *btn_layer_activate[MAX_LAYERS];
 static struct UI_BUTTON *btn_layer_delete[MAX_LAYERS];
 static struct UI_INPUT *in_layer_name[MAX_LAYERS];
+static struct UI_CHECKBOX *chk_layer_visible[MAX_LAYERS];
+static struct UI_INPUT *in_layer_radin[MAX_LAYERS];
+static struct UI_INPUT *in_layer_radout[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_removes[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_objects[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_models[MAX_LAYERS];
-static struct UI_CHECKBOX *chk_layer_visible[MAX_LAYERS];
 static char txt_layer_removes[MAX_LAYERS][8];
 static char txt_layer_objects[MAX_LAYERS][8];
 static char txt_layer_models[MAX_LAYERS][8];
@@ -271,12 +273,25 @@ void cb_chk_layer_show(struct UI_CHECKBOX *chk)
 }
 
 static
+void cb_in_radin(struct UI_INPUT *in)
+{
+	layers[(int) in->_parent.userdata].stream_in_radius = (float) atof(in->value);
+}
+
+static
+void cb_in_radout(struct UI_INPUT *in)
+{
+	layers[(int) in->_parent.userdata].stream_out_radius = (float) atof(in->value);
+}
+
+static
 void update_layer_ui()
 {
 	int i, j;
 	int model;
 	int object_models;
 	int model_usage[20000];
+	char buf[20];
 
 	ui_wnd_remove_child(window_layers, btn_add_layer);
 	ui_wnd_remove_child(window_layers, lbl_layers_info);
@@ -297,6 +312,21 @@ void update_layer_ui()
 			UIPROC(in_layer_name[i], proc_dispose);
 			in_layer_name[i] = NULL;
 		}
+		if (chk_layer_visible[i]) {
+			ui_wnd_remove_child(window_layers, chk_layer_visible[i]);
+			UIPROC(chk_layer_visible[i], proc_dispose);
+			chk_layer_visible[i] = NULL;
+		}
+		if (in_layer_radin[i]) {
+			ui_wnd_remove_child(window_layers, in_layer_radin[i]);
+			UIPROC(in_layer_radin[i], proc_dispose);
+			in_layer_radin[i] = NULL;
+		}
+		if (in_layer_radout[i]) {
+			ui_wnd_remove_child(window_layers, in_layer_radout[i]);
+			UIPROC(in_layer_radout[i], proc_dispose);
+			in_layer_radout[i] = NULL;
+		}
 		if (lbl_layer_removes[i]) {
 			ui_wnd_remove_child(window_layers, lbl_layer_removes[i]);
 			UIPROC(lbl_layer_removes[i], proc_dispose);
@@ -311,11 +341,6 @@ void update_layer_ui()
 			ui_wnd_remove_child(window_layers, lbl_layer_models[i]);
 			UIPROC(lbl_layer_models[i], proc_dispose);
 			lbl_layer_models[i] = NULL;
-		}
-		if (chk_layer_visible[i]) {
-			ui_wnd_remove_child(window_layers, chk_layer_visible[i]);
-			UIPROC(chk_layer_visible[i], proc_dispose);
-			chk_layer_visible[i] = NULL;
 		}
 	}
 
@@ -335,6 +360,23 @@ void update_layer_ui()
 			in_layer_name[i]->_parent.userdata = (void*) i;
 			ui_wnd_add_child(window_layers, in_layer_name[i]);
 		}
+		if (!chk_layer_visible[i]) {
+			chk_layer_visible[i] = ui_chk_make("Show_objs", layers[i].show, cb_chk_layer_show);
+			chk_layer_visible[i]->_parent._parent.userdata = (void*) i;
+			ui_wnd_add_child(window_layers, chk_layer_visible[i]);
+		}
+		if (!in_layer_radin[i]) {
+			in_layer_radin[i] = ui_in_make(cb_in_radin);
+			in_layer_radin[i]->_parent.userdata = (void*) i;
+			in_layer_radin[i]->_parent.pref_width = 80.0f;
+			ui_wnd_add_child(window_layers, in_layer_radin[i]);
+		}
+		if (!in_layer_radout[i]) {
+			in_layer_radout[i] = ui_in_make(cb_in_radout);
+			in_layer_radout[i]->_parent.userdata = (void*) i;
+			in_layer_radout[i]->_parent.pref_width = 80.0f;
+			ui_wnd_add_child(window_layers, in_layer_radout[i]);
+		}
 		if (!lbl_layer_removes[i]) {
 			lbl_layer_removes[i] = ui_lbl_make(txt_layer_removes[i]);
 			ui_wnd_add_child(window_layers, lbl_layer_removes[i]);
@@ -346,11 +388,6 @@ void update_layer_ui()
 		if (!lbl_layer_models[i]) {
 			lbl_layer_models[i] = ui_lbl_make(txt_layer_models[i]);
 			ui_wnd_add_child(window_layers, lbl_layer_models[i]);
-		}
-		if (!chk_layer_visible[i]) {
-			chk_layer_visible[i] = ui_chk_make("Show_objs", layers[i].show, cb_chk_layer_show);
-			chk_layer_visible[i]->_parent._parent.userdata = (void*) i;
-			ui_wnd_add_child(window_layers, chk_layer_visible[i]);
 		}
 
 		memset(model_usage, 0, sizeof(model_usage));
@@ -366,6 +403,10 @@ void update_layer_ui()
 		sprintf(txt_layer_objects[i], "%d", layers[i].numobjects);
 		sprintf(txt_layer_models[i], "%d", object_models);
 		ui_in_set_text(in_layer_name[i], layers[i].name);
+		sprintf(buf, "%d", (int) layers[i].stream_in_radius);
+		ui_in_set_text(in_layer_radin[i], buf);
+		sprintf(buf, "%d", (int) layers[i].stream_out_radius);
+		ui_in_set_text(in_layer_radout[i], buf);
 	}
 	update_layer_info_text();
 
@@ -419,6 +460,8 @@ void cb_btn_add_layer(struct UI_BUTTON *btn)
 		layers[numlayers].numobjects = 0;
 		layers[numlayers].numremoves = 0;
 		layers[numlayers].show = 1;
+		layers[numlayers].stream_in_radius = 500.0f;
+		layers[numlayers].stream_out_radius = 600.0f;
 		strcpy(layers[numlayers].name, "new_layer");
 		ensure_layer_name_unique(layers + numlayers);
 		numlayers++;
@@ -549,20 +592,22 @@ void objui_init()
 
 	/*layers window*/
 	window_layers = ui_wnd_make(500.0f, 500.0f, "Object_Layers");
-	window_layers->columns = 7;
+	window_layers->columns = 9;
 	window_layers->proc_shown = (ui_method*) update_layer_ui;
 
 	ui_wnd_add_child(window_layers, ui_lbl_make("Del"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Actiate"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Name"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Show"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("radin"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("radout"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Removes"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Objects"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Models"));
-	ui_wnd_add_child(window_layers, ui_lbl_make("Show"));
 	lbl_layers_info = ui_lbl_make(txt_lbl_layers_info);
-	lbl_layers_info->_parent.span = 7;
+	lbl_layers_info->_parent.span = 9;
 	btn_add_layer = ui_btn_make("Add_layer", cb_btn_add_layer);
-	btn_add_layer->_parent.span = 7;
+	btn_add_layer->_parent.span = 9;
 	/*colorpicker? dome? drawdistance?*/
 
 	/*objinfo window*/
