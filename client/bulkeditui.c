@@ -271,6 +271,9 @@ int bulkeditui_on_background_element_just_clicked(struct OBJECTLAYER *real_activ
 
 	if (bulkeditui_shown) {
 		obj = objects_find_by_sa_object(clicked_entity);
+		if (real_active_layer != active_layer) {
+			objects_activate_layer(real_active_layer - layers);
+		}
 		if (chk_plant_objects->checked) {
 			if (active_layer->numobjects < 950) {
 				plantObj = active_layer->objects + active_layer->numobjects++;
@@ -284,9 +287,6 @@ int bulkeditui_on_background_element_just_clicked(struct OBJECTLAYER *real_activ
 				objects_mkobject(plantObj);
 				return 0;
 			}
-		}
-		if (real_active_layer != active_layer) {
-			objects_activate_layer(real_active_layer - layers);
 		}
 		if (obj != NULL && chk_captureclicks->checked) {
 			if (!chk_select_from_active_layer->checked ||
