@@ -6,6 +6,7 @@
 #include "entity.h"
 #include "game.h"
 #include "ide.h"
+#include "massmove.h"
 #include "msgbox.h"
 #include "objects.h"
 #include "objectsui.h"
@@ -158,6 +159,7 @@ void client_finalize()
 	TRACE("client_finalize");
 	SetWindowLong(*((HWND*) gameHwnd), GWL_WNDPROC, (LONG) hOldProc);
 
+	massmove_dispose();
 	racecpeditor_dispose();
 	racecpui_dispose();
 	vehiclesui_dispose();
@@ -234,6 +236,7 @@ void client_init()
 	vehiclesui_init();
 	racecpui_init();
 	racecpeditor_init();
+	massmove_init();
 
 	prj_do_show_window();
 

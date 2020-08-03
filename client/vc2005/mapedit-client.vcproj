@@ -339,6 +339,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\massmove.c"
+			>
+		</File>
+		<File
+			RelativePath="..\massmove.h"
+			>
+		</File>
+		<File
 			RelativePath="..\msgbox.c"
 			>
 		</File>

@@ -15,6 +15,7 @@
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
+#include "massmove.h"
 #include "msgbox.h"
 #include "racecp.h"
 #include "racecpui.h"
