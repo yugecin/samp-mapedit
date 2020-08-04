@@ -414,6 +414,9 @@ void gangzone_on_active_window_changed(struct UI_WINDOW *_wnd)
 		// update list
 		update_list();
 	} else {
+		if (IS_VALID_INDEX_SELECTED) {
+			gangzone_data[lst->selectedindex].altcolor = gangzone_data[lst->selectedindex].color;
+		}
 		gangzonesactive = 0;
 	}
 }
