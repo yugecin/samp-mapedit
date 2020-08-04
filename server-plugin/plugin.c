@@ -70,6 +70,9 @@ struct NATIVE natives[] = {
 	{ "SetWorldTime", 0 },
 	{ "SetWeather", 0 },
 	{ "DestroyVehicle", 0 },
+	{ "GangZoneCreate", 0 },
+	{ "GangZoneShowForAll", 0 },
+	{ "GangZoneDestroy", 0 },
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
 
@@ -413,6 +416,19 @@ void msg_resetobjects()
 			objectidused[idx] = 0;
 		}
 	}
+
+	/*
+	nc_params.asint[1] = 0;
+	natives[NC_GangZoneDestroy].fp(amx, nc_params.asint);
+	nc_params.asint[1] = 0x44556677;
+	nc_params.asint[2] = 0x88996677;
+	nc_params.asint[3] = 0x11223344;
+	nc_params.asint[4] = 0xF3388FF8;
+	natives[NC_GangZoneCreate].fp(amx, nc_params.asint);
+	nc_params.asint[1] = 0;
+	nc_params.asint[2] = 0xFF00FFFF;
+	natives[NC_GangZoneShowForAll].fp(amx, nc_params.asint);
+	*/
 }
 
 static

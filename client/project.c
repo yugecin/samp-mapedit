@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "gangzone.h"
 #include "ui.h"
 #include "bulkedit.h"
 #include "msgbox.h"
@@ -120,6 +121,7 @@ void prj_preload()
 	timeweather_prj_preload();
 	rb_undo_all();
 	vehicles_destroy();
+	numgangzones = 0;
 }
 
 static

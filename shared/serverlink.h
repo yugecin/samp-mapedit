@@ -17,6 +17,9 @@
 #define NC_SetWorldTime 10
 #define NC_SetWeather 11
 #define NC_DESTROYVEHICLE 12
+#define NC_GangZoneCreate 13
+#define NC_GangZoneShowForAll 14
+#define NC_GangZoneDestroy 15
 
 #define MAPEDIT_MSG_RESETOBJECTS 0
 #define MAPEDIT_MSG_NATIVECALL 1

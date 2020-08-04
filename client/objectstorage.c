@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "game.h"
+#include "gangzone.h"
 #include "objects.h"
 #include "objectstorage.h"
 #include "project.h"
@@ -34,7 +35,7 @@ union MAPDATA {
 	struct {
 		float west, south, east, north;
 		int color;
-	} zone;
+	} gangzone;
 };
 #pragma pack(pop)
 
@@ -95,6 +96,9 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	int i;
 	char haslod;
 	char descriptionlen;
+	int dogangzones;
+
+	dogangzones = layer == layers;
 
 	if (!(f = layer_fopen(layer, "map", MODE_WRITE))) {
 		return;
@@ -115,7 +119,7 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 		}
 	}
 	data.header.numobjects = layer->numobjects;
-	data.header.numzones = 0; // TODO
+	data.header.numzones = dogangzones ? numgangzones : 0;
 	data.header.streamin = layer->stream_in_radius;
 	data.header.streamout = layer->stream_out_radius;
 	data.header.drawdistance = layer->drawdistance;
@@ -159,6 +163,17 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 		fwrite(&data.object, sizeof(data.object), 1, f);
 	}
 
+	if (dogangzones) {
+		for (i = 0; i < numgangzones; i++) {
+			data.gangzone.west = gangzone_data[i].minx;
+			data.gangzone.south = gangzone_data[i].miny;
+			data.gangzone.east = gangzone_data[i].maxx;
+			data.gangzone.north = gangzone_data[i].maxy;
+			data.gangzone.color = gangzone_data[i].color;
+			fwrite(&data.gangzone, sizeof(data.gangzone), 1, f);
+		}
+	}
+
 	fclose(f);
 	if (meta) {
 		fclose(meta);
@@ -174,6 +189,10 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 	int i;
 	char descriptionlen;
 	char haslod;
+	int dogangzones;
+	int actual_num_gangzones_in_file;
+
+	dogangzones = layer == layers;
 
 	if (!(f = layer_fopen(layer, "map", MODE_READ))) {
 		return;
@@ -191,6 +210,10 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 	}
 	layer->numremoves = data.header.numremoves;
 	layer->numobjects = data.header.numobjects;
+	actual_num_gangzones_in_file = data.header.numzones;
+	if (dogangzones) {
+		numgangzones = data.header.numzones;
+	}
 	layer->stream_in_radius = data.header.streamin;
 	layer->stream_out_radius = data.header.streamout;
 	layer->drawdistance = data.header.drawdistance;
@@ -244,7 +267,24 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 		object++;
 	}
 
-	// TODO: zones
+	if (dogangzones) {
+		memset(gangzone_enable, 0, sizeof(int) * MAX_GANG_ZONES);
+	}
+	for (i = 0; i < actual_num_gangzones_in_file; i++) {
+		if (!(fread(&data.gangzone, sizeof(data.gangzone), 1, f))) {
+			sprintf(debugstring, "missing %d gangzones", numgangzones - i - 1);
+			ui_push_debug_string();
+			goto corrupted;
+		}
+		if (dogangzones) {
+			gangzone_data[i].minx = data.gangzone.west;
+			gangzone_data[i].miny = data.gangzone.south;
+			gangzone_data[i].maxx = data.gangzone.east;
+			gangzone_data[i].maxy = data.gangzone.north;
+			gangzone_data[i].color = gangzone_data[i].altcolor = data.gangzone.color;
+			gangzone_enable[i] = 1;
+		}
+	}
 
 ret:
 	fclose(f);

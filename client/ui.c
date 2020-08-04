@@ -7,6 +7,7 @@
 #include "detours.h"
 #include "entity.h"
 #include "game.h"
+#include "gangzone.h"
 #include "ide.h"
 #include "objbrowser.h"
 #include "objects.h"
@@ -192,6 +193,7 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	objlistui_on_active_window_changed(wnd);
 	vehiclesui_on_active_window_changed(wnd);
 	racecpui_on_active_window_changed(wnd);
+	gangzone_on_active_window_changed(wnd);
 }
 
 void ui_hide_window()
@@ -200,6 +202,7 @@ void ui_hide_window()
 	ui_active_element = NULL;
 	objects_on_active_window_changed(NULL);
 	objlistui_on_active_window_changed(NULL);
+	gangzone_on_active_window_changed(NULL);
 }
 
 struct UI_WINDOW *ui_get_active_window()
@@ -594,7 +597,8 @@ void background_element_just_clicked()
 	if (objui_on_background_element_just_clicked() &&
 		player_on_background_element_just_clicked() &&
 		vehiclesui_on_background_element_just_clicked() &&
-		bulkeditui_on_background_element_just_clicked(last_active_layer))
+		bulkeditui_on_background_element_just_clicked(last_active_layer) &&
+		gangzone_on_background_element_just_clicked())
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;
@@ -811,6 +815,7 @@ void ui_render()
 		objui_frame_update();
 		objlistui_frame_update();
 		vehiclesui_frame_update();
+		gangzone_frame_update();
 
 		ui_cnt_draw(background_element);
 		ui_wnd_draw(main_menu);

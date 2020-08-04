@@ -323,6 +323,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\gangzone.c"
+			>
+		</File>
+		<File
+			RelativePath="..\gangzone.h"
+			>
+		</File>
+		<File
 			RelativePath="..\ide.c"
 			>
 		</File>
