@@ -129,6 +129,8 @@ static
 void objects_do_create_object(struct OBJECT *object)
 {
 	struct MSG_NC nc;
+	struct OBJECTLAYER *layer;
+	float drawdistance;
 
 	if (objects_created_this_frame > 50) {
 		object->status = OBJECT_STATUS_WAITING;
@@ -137,6 +139,9 @@ void objects_do_create_object(struct OBJECT *object)
 		return;
 	}
 	objects_created_this_frame++;
+
+	layer = objects_layer_for_object(object);
+	drawdistance = layer ? layer->drawdistance : 1500.0f;
 
 	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
 	nc.nc = NC_CreateObject;
@@ -147,7 +152,7 @@ void objects_do_create_object(struct OBJECT *object)
 	nc.params.asflt[5] = object->rot.x;
 	nc.params.asflt[6] = object->rot.y;
 	nc.params.asflt[7] = object->rot.z;
-	nc.params.asflt[8] = 1500.0f;
+	nc.params.asflt[8] = drawdistance;
 	sockets_send(&nc, sizeof(nc));
 }
 
