@@ -4,6 +4,7 @@
 #include "entity.h"
 #include "game.h"
 #include "ide.h"
+#include "im2d.h"
 #include "msgbox.h"
 #include "ui.h"
 #include "objects.h"
@@ -41,13 +42,20 @@ static struct UI_INPUT *in_layer_name[MAX_LAYERS];
 static struct UI_CHECKBOX *chk_layer_visible[MAX_LAYERS];
 static struct UI_INPUT *in_layer_radin[MAX_LAYERS];
 static struct UI_INPUT *in_layer_radout[MAX_LAYERS];
+static struct UI_INPUT *in_layer_drawdistance[MAX_LAYERS];
+static struct UI_CHECKBOX *chk_layer_showspheres[MAX_LAYERS];
+static struct UI_LABEL *lbl_layer_radstatus[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_removes[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_objects[MAX_LAYERS];
 static struct UI_LABEL *lbl_layer_models[MAX_LAYERS];
 static char txt_layer_removes[MAX_LAYERS][8];
 static char txt_layer_objects[MAX_LAYERS][8];
 static char txt_layer_models[MAX_LAYERS][8];
+static char txt_lbl_layer_radstatus[MAX_LAYERS][14];
 static char txt_lbl_layers_info[100];
+static struct IM2DSPHERE *layerspherein[MAX_LAYERS];
+static struct IM2DSPHERE *layersphereout[MAX_LAYERS];
+static struct IM2DSPHERE *layerspheredd[MAX_LAYERS];
 
 static struct UI_WINDOW *window_objinfo;
 static struct UI_LABEL *lbl_objentity;
@@ -285,6 +293,12 @@ void cb_in_radout(struct UI_INPUT *in)
 }
 
 static
+void cb_in_drawdistance(struct UI_INPUT *in)
+{
+	layers[(int) in->_parent.userdata].drawdistance = (float) atof(in->value);
+}
+
+static
 void update_layer_ui()
 {
 	int i, j;
@@ -326,6 +340,21 @@ void update_layer_ui()
 			ui_wnd_remove_child(window_layers, in_layer_radout[i]);
 			UIPROC(in_layer_radout[i], proc_dispose);
 			in_layer_radout[i] = NULL;
+		}
+		if (in_layer_drawdistance[i]) {
+			ui_wnd_remove_child(window_layers, in_layer_drawdistance[i]);
+			UIPROC(in_layer_drawdistance[i], proc_dispose);
+			in_layer_drawdistance[i] = NULL;
+		}
+		if (chk_layer_showspheres[i]) {
+			ui_wnd_remove_child(window_layers, chk_layer_showspheres[i]);
+			UIPROC(chk_layer_showspheres[i], proc_dispose);
+			chk_layer_showspheres[i] = NULL;
+		}
+		if (lbl_layer_radstatus[i]) {
+			ui_wnd_remove_child(window_layers, lbl_layer_radstatus[i]);
+			UIPROC(lbl_layer_radstatus[i], proc_dispose);
+			lbl_layer_radstatus[i] = NULL;
 		}
 		if (lbl_layer_removes[i]) {
 			ui_wnd_remove_child(window_layers, lbl_layer_removes[i]);
@@ -377,6 +406,20 @@ void update_layer_ui()
 			in_layer_radout[i]->_parent.pref_width = 80.0f;
 			ui_wnd_add_child(window_layers, in_layer_radout[i]);
 		}
+		if (!in_layer_drawdistance[i]) {
+			in_layer_drawdistance[i] = ui_in_make(cb_in_drawdistance);
+			in_layer_drawdistance[i]->_parent.userdata = (void*) i;
+			in_layer_drawdistance[i]->_parent.pref_width = 80.0f;
+			ui_wnd_add_child(window_layers, in_layer_drawdistance[i]);
+		}
+		if (!chk_layer_showspheres[i]) {
+			chk_layer_showspheres[i] = ui_chk_make("_", 0, NULL);
+			ui_wnd_add_child(window_layers, chk_layer_showspheres[i]);
+		}
+		if (!lbl_layer_radstatus[i]) {
+			lbl_layer_radstatus[i] = ui_lbl_make(txt_lbl_layer_radstatus[i]);
+			ui_wnd_add_child(window_layers, lbl_layer_radstatus[i]);
+		}
 		if (!lbl_layer_removes[i]) {
 			lbl_layer_removes[i] = ui_lbl_make(txt_layer_removes[i]);
 			ui_wnd_add_child(window_layers, lbl_layer_removes[i]);
@@ -407,6 +450,8 @@ void update_layer_ui()
 		ui_in_set_text(in_layer_radin[i], buf);
 		sprintf(buf, "%d", (int) layers[i].stream_out_radius);
 		ui_in_set_text(in_layer_radout[i], buf);
+		sprintf(buf, "%d", (int) layers[i].drawdistance);
+		ui_in_set_text(in_layer_drawdistance[i], buf);
 	}
 	update_layer_info_text();
 
@@ -549,6 +594,7 @@ void objui_init()
 {
 	struct UI_BUTTON *btn;
 	struct UI_LABEL *lbl;
+	int i;
 
 	memset(&selected_colored, 0, sizeof(selected_colored));
 	selected_object = NULL;
@@ -592,22 +638,25 @@ void objui_init()
 
 	/*layers window*/
 	window_layers = ui_wnd_make(500.0f, 500.0f, "Object_Layers");
-	window_layers->columns = 9;
+	window_layers->columns = 12;
 	window_layers->proc_shown = (ui_method*) update_layer_ui;
 
 	ui_wnd_add_child(window_layers, ui_lbl_make("Del"));
-	ui_wnd_add_child(window_layers, ui_lbl_make("Actiate"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("Activate"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Name"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Show"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("radin"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("radout"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("drawdist"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("sphrs"));
+	ui_wnd_add_child(window_layers, ui_lbl_make("x_x_x_20000"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Removes"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Objects"));
 	ui_wnd_add_child(window_layers, ui_lbl_make("Models"));
 	lbl_layers_info = ui_lbl_make(txt_lbl_layers_info);
-	lbl_layers_info->_parent.span = 9;
+	lbl_layers_info->_parent.span = 12;
 	btn_add_layer = ui_btn_make("Add_layer", cb_btn_add_layer);
-	btn_add_layer->_parent.span = 9;
+	btn_add_layer->_parent.span = 12;
 	/*colorpicker? dome? drawdistance?*/
 
 	/*objinfo window*/
@@ -648,10 +697,24 @@ void objui_init()
 	btn = ui_btn_make("Delete_Object", cb_btn_delete_obj);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(window_objinfo, btn_delete_obj = btn);
+
+	for (i = 0; i < MAX_LAYERS; i++) {
+		layerspherein[i] = im2d_sphere_make(0x20CC2222);
+		layersphereout[i] = im2d_sphere_make(0x202222CC);
+		layerspheredd[i] = im2d_sphere_make(0x2022CC22);
+	}
 }
 
 void objui_dispose()
 {
+	int i;
+
+	for (i = 0; i < MAX_LAYERS; i++) {
+		free(layerspherein[i]);
+		free(layersphereout[i]);
+		free(layerspheredd[i]);
+	}
+
 	entity_color(&selected_colored, NULL, 0);
 	entity_color(&hovered_colored, NULL, 0);
 	ui_wnd_dispose(window_objinfo);
@@ -726,6 +789,11 @@ void objui_layer_changed()
 
 void objui_frame_update()
 {
+	struct OBJECT *obj;
+	int i, j;
+	struct RwV3D mid, pos;
+	float dx, dy, dist;
+
 	if (is_selecting_object) {
 		objui_do_hover();
 		entity_draw_bound_rect(selected_colored.entity, 0xFF0000);
@@ -734,6 +802,48 @@ void objui_frame_update()
 		game_TextSetAlign(CENTER);
 		game_TextPrintString(fresx / 2.0f, 50.0f,
 			"~w~Hover over an object and ~r~click~w~ to select it");
+	}
+
+	if (ui_get_active_window() == window_layers) {
+		for (i = 0; i < numlayers; i++) {
+			if (layers[i].numobjects > 0) {
+				mid.x = mid.y = mid.z = 0.0f;
+				obj = layers[i].objects;
+				for (j = 0; j < layers[i].numobjects; j++) {
+					if (obj->sa_object) {
+						game_ObjectGetPos(obj->sa_object, &pos);
+					} else {
+						pos = obj->pos;
+					}
+					mid.x += pos.x;
+					mid.y += pos.y;
+					mid.z += pos.z;
+					obj++;
+				}
+				mid.x /= j;
+				mid.y /= j;
+				mid.z /= j;
+				dx = mid.x - camera->position.x;
+				dy = mid.y - camera->position.y;
+				dist = (float) sqrt(dx * dx + dy * dy);
+				sprintf(txt_lbl_layer_radstatus[i], "%c_%c_%c_%.0f",
+					dist < layers[i].stream_in_radius ? 'x' : '-',
+					dist < layers[i].stream_out_radius ? 'x' : '-',
+					dist < layers[i].drawdistance ? 'x' : '-',
+					dist);
+				if (chk_layer_showspheres[i]->checked) {
+					im2d_sphere_pos(layerspheredd[i], &mid, layers[i].drawdistance);
+					im2d_sphere_pos(layerspherein[i], &mid, layers[i].stream_in_radius);
+					im2d_sphere_pos(layersphereout[i], &mid, layers[i].stream_out_radius);
+					im2d_sphere_project(layerspheredd[i]);
+					im2d_sphere_project(layerspherein[i]);
+					im2d_sphere_project(layersphereout[i]);
+					im2d_sphere_draw(layerspheredd[i]);
+					im2d_sphere_draw(layerspherein[i]);
+					im2d_sphere_draw(layersphereout[i]);
+				}
+			}
+		}
 	}
 }
 
