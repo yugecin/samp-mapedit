@@ -271,6 +271,7 @@ void objects_prj_save(FILE *f, char *buf)
 {
 	int i;
 
+	fwrite(buf, sprintf(buf, "obj.numlayers %d\n", numlayers), 1, f);
 	for (i = 0; i < numlayers; i++) {
 		_asm push f
 		_asm push 1
@@ -280,9 +281,6 @@ void objects_prj_save(FILE *f, char *buf)
 		_asm mov [esp+0x4], eax
 		_asm call fwrite
 		sprintf(buf, "obj.layer.%c.col %d\n", i + 'a', layers[i].color);
-		_asm mov [esp+0x4], eax
-		_asm call fwrite
-		sprintf(buf, "obj.numlayers %d\n", numlayers);
 		_asm mov [esp+0x4], eax
 		_asm call fwrite
 		_asm add esp, 0x10
