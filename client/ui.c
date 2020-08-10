@@ -81,6 +81,7 @@ char ui_last_char_down;
 int ui_last_key_down;
 int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
+int hide_all_ui;
 
 static
 void cb_btn_reload(struct UI_BUTTON *btn)
@@ -711,6 +712,11 @@ void ui_render()
 	}
 
 	if (active) {
+		if (prevKeyState->standards[VK_U] && !currentKeyState->standards[VK_U]) {
+			hide_all_ui = !hide_all_ui;
+			racecp_resetall();
+		}
+
 		ui_mouse_is_just_down =
 			activeMouseState->lmb && !prevMouseState->lmb;
 		ui_mouse_is_just_up =
@@ -736,7 +742,9 @@ void ui_render()
 		game_PedSetPos(player, &player_position);
 
 		/*this one should be _before_ update and input handling*/
-		racecp_frame_update();
+		if (!hide_all_ui) {
+			racecp_frame_update();
+		}
 
 		if (ui_element_being_clicked && ui_mouse_is_just_up) {
 			if ((context_menu_active &&
@@ -817,28 +825,32 @@ void ui_render()
 		vehiclesui_frame_update();
 		gangzone_frame_update();
 
-		ui_cnt_draw(background_element);
-		ui_wnd_draw(main_menu);
-		if (active_window != NULL) {
-			UIPROC(active_window, proc_draw);
-		}
-		if (bulkeditui_shown) {
-			UIPROC(bulkeditui_wnd, proc_draw);
-		}
-		if (context_menu_active) {
-			ui_wnd_draw(context_menu);
-		}
+		if (!hide_all_ui) {
+			ui_cnt_draw(background_element);
+			ui_wnd_draw(main_menu);
+			if (active_window != NULL) {
+				UIPROC(active_window, proc_draw);
+			}
+			if (bulkeditui_shown) {
+				UIPROC(bulkeditui_wnd, proc_draw);
+			}
+			if (context_menu_active) {
+				ui_wnd_draw(context_menu);
+			}
 
-		ui_draw_debug_strings();
+			ui_draw_debug_strings();
 
-		ui_draw_cursor();
+			ui_draw_cursor();
+		}
 
 		if (ui_element_being_clicked == background_element) {
 			bgclickx = cursorx;
 			bgclicky = cursory;
 		}
 
-		ui_draw_default_help_text();
+		if (!hide_all_ui) {
+			ui_draw_default_help_text();
+		}
 	} else {
 justdeactivated:
 		originalHudScaleX = *hudScaleX;

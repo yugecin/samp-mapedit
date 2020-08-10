@@ -48,6 +48,7 @@ extern int ui_mouse_is_just_up;
 extern struct UI_CONTAINER *background_element;
 extern struct UI_WINDOW *main_menu, *context_menu;
 extern char *debugstring;
+extern int hide_all_ui;
 
 /**
 To be called after writing to debugstring
