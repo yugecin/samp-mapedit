@@ -214,6 +214,17 @@ void objects_client_object_created(object, sa_object, sa_handle)
 	struct CEntity *sa_object;
 	int sa_handle;
 {
+	int layeridx, i;
+
+	for (layeridx = 0; layeridx < MAX_LAYERS; layeridx++) {
+		for (i = 0; i < MAX_OBJECTS; i++) {
+			if (layers[layeridx].objects <= object && object < layers[layeridx].objects + MAX_OBJECTS) {
+				goto valid;
+			}
+		}
+	}
+	return;
+valid:
 	object->sa_object = sa_object;
 	object->sa_handle = sa_handle;
 }
