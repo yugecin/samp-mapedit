@@ -38,6 +38,7 @@ static struct UI_INPUT *in_shadow;
 static struct UI_INPUT *in_x, *in_y;
 static struct UI_INPUT *in_boxx, *in_boxy;
 static struct UI_INPUT *in_letterx, *in_lettery;
+static struct UI_INPUT *in_model, *in_col1, *in_col2, *in_rx, *in_ry, *in_rz, *in_zoom;
 static int textdrawsactive;
 static char lbl_num_text[35];
 #define MAX_LIST_ENTRY_LEN 20
@@ -131,6 +132,40 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 	ui_chk_updatetext(chk_prop);
 	ui_chk_updatetext(chk_outline);
 	ui_chk_updatetext(chk_box);
+
+	sprintf(tmptxt, "%d", td->sModel);
+	ui_in_set_text(in_model, tmptxt);
+	sprintf(tmptxt, "%d", td->sColor[0]);
+	ui_in_set_text(in_col1, tmptxt);
+	sprintf(tmptxt, "%d", td->sColor[1]);
+	ui_in_set_text(in_col2, tmptxt);
+	sprintf(tmptxt, "%.3f", td->fRot[0]);
+	ui_in_set_text(in_rx, tmptxt);
+	sprintf(tmptxt, "%.3f", td->fRot[1]);
+	ui_in_set_text(in_ry, tmptxt);
+	sprintf(tmptxt, "%.3f", td->fRot[2]);
+	ui_in_set_text(in_rz, tmptxt);
+	sprintf(tmptxt, "%.3f", td->fZoom);
+	ui_in_set_text(in_zoom, tmptxt);
+}
+
+static
+void cb_in_float(struct UI_INPUT *in)
+{
+	if (IS_VALID_INDEX_SELECTED) {
+		*(float*)((int) &textdraws[lst->selectedindex] + (int) in->_parent.userdata) = (float) atof(in->value);
+		/*would this cause memleaks? if it works by creating textures, maybe doing this doesn't
+		free earlier made textures.*/
+		textdraws[lst->selectedindex].__unk4 = -1;
+	}
+}
+
+static
+void cb_in_int(struct UI_INPUT *in)
+{
+	if (IS_VALID_INDEX_SELECTED) {
+		*(int*)((int) &textdraws[lst->selectedindex] + (int) in->_parent.userdata) = (int) atoi(in->value);
+	}
 }
 
 static
@@ -165,62 +200,6 @@ void cb_in_font(struct UI_INPUT *in)
 		if (textdraws[lst->selectedindex].iStyle != 5) {
 			textdraws[lst->selectedindex].__unk4 = -1;
 		}
-	}
-}
-
-static
-void cb_in_shadow(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].byteShadowSize = atoi(in->value);
-	}
-}
-
-static
-void cb_in_x(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].fX = (float) atof(in->value);
-	}
-}
-
-static
-void cb_in_y(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].fY = (float) atof(in->value);
-	}
-}
-
-static
-void cb_in_letterx(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].fLetterWidth = (float) atof(in->value);
-	}
-}
-
-static
-void cb_in_lettery(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].fLetterHeight = (float) atof(in->value);
-	}
-}
-
-static
-void cb_in_boxx(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].fBoxSizeX = (float) atof(in->value);
-	}
-}
-
-static
-void cb_in_boxy(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].fBoxSizeY = (float) atof(in->value);
 	}
 }
 
@@ -320,8 +299,8 @@ void cb_btn_add(struct UI_BUTTON *btn)
 			textdraws[0].fX = 200.0f;
 			textdraws[0].fY = 200.0f;
 			textdraws[0].iStyle = 1;
-			textdraws[0].fBoxSizeX = 600.0f;
-			textdraws[0].fBoxSizeY = 900.0f;
+			textdraws[0].fBoxSizeX = 200.0f;
+			textdraws[0].fBoxSizeY = 200.0f;
 			textdraws[0].dwBoxColor = 0x66FF0000;
 			textdraws[0].byteLeft = 1;
 			textdraws[0].byteOutline = 1;
@@ -332,6 +311,8 @@ void cb_btn_add(struct UI_BUTTON *btn)
 			textdraws[0].__unk2 = -1;
 			textdraws[0].__unk3 = -1;
 			textdraws[0].__unk4 = -1;
+			textdraws[0].fZoom = 2.0f;
+			textdraws[0].sModel = 411;
 		}
 		index_to_select = numtextdraws;
 	}
@@ -368,10 +349,78 @@ int textdraws_on_background_element_just_clicked()
 	return 1;
 }
 
+static int dragging;
+static float origCursorX, origCursorY;
+static float *dragging_prop_x;
+static float *dragging_prop_y;
+
+static
+void dragging_lbl_mousedown(struct UI_ELEMENT *elem)
+{
+	int off_x, off_y;
+
+	if (ui_element_is_hovered(elem) && IS_VALID_INDEX_SELECTED) {
+		dragging = 1;
+		origCursorX = cursorx;
+		origCursorY = cursory;
+		off_x = (int) elem->userdata & 0xFFFF;
+		off_y = (unsigned int) elem->userdata >> 16;
+		if (off_x == 0) {
+			dragging_prop_x = 0;
+		} else {
+			dragging_prop_x = (float*) ((int) &textdraws[lst->selectedindex] + off_x);
+		}
+		if (off_y == 0) {
+			dragging_prop_y = 0;
+		} else {
+			dragging_prop_y = (float*) ((int) &textdraws[lst->selectedindex] + off_y);
+		}
+	}
+}
+
+static
+struct UI_LABEL* mk_dragging_lbl(char *text, void *ptr1, void *ptr2)
+{
+	struct UI_LABEL *lbl;
+
+	lbl = ui_lbl_make(text);
+	lbl->_parent.userdata =
+		(void*) (((int) ptr1 - (int) &textdraws[0]) | ((((int) ptr2 - (int) &textdraws[0])) << 16));
+	lbl->_parent.proc_mousedown = (ui_method*) dragging_lbl_mousedown;
+
+	return lbl;
+}
+
 void textdraws_frame_update()
 {
+	float diff;
+
 	if (!textdrawsactive) {
 		return;
+	}
+
+	if (!activeMouseState->lmb) {
+		dragging = 0;
+	}
+	if (dragging) {
+		cursorx = origCursorX;
+		cursory = origCursorY;
+		if (dragging_prop_x) {
+			diff = activeMouseState->x;
+			if (activeKeyState->shift) {
+				diff /= 2.0f;
+			}
+			*dragging_prop_x += diff;
+		}
+		if (dragging_prop_y) {
+			/*TODO is if off (copied from ui_do_cursor_movement)*/
+			diff = -activeMouseState->y * fresx / fresy;
+			if (activeKeyState->shift) {
+				diff /= 2.0f;
+			}
+			*dragging_prop_y += diff;
+		}
+		cb_lst_item_selected(lst);
 	}
 
 	sprintf(lbl_num_text, "num_textdraws:_%d", numtextdraws);
@@ -424,6 +473,7 @@ void textdraws_ui_deactivated()
 
 void textdraws_init()
 {
+	struct UI_ELEMENT *elem;
 	struct UI_RADIOBUTTON *rdb;
 	struct UI_BUTTON *btn;
 	int poolsaddr;
@@ -432,11 +482,6 @@ void textdraws_init()
 	int **ptr;
 	int i;
 
-	sprintf(debugstring, "%p", textdraws);
-	ui_push_debug_string();
-	ui_push_debug_string();
-	ui_push_debug_string();
-	ui_push_debug_string();
 	poolsaddr = *(int*) (*(int*)(samp_handle + /*samp_info_offset*/0x26EA0C) + /*pools*/0x3DE);
 	textdrawpool = *(int*) (poolsaddr + 0x20);
 	textdraw_enabled = (void*) textdrawpool;
@@ -482,38 +527,45 @@ void textdraws_init()
 	ui_wnd_add_child(wnd, in_font);
 
 	ui_wnd_add_child(wnd, ui_lbl_make("shadow"));
-	in_shadow = ui_in_make(cb_in_shadow);
+	in_shadow = ui_in_make(cb_in_int);
 	in_shadow->_parent.span = 2;
+	in_shadow->_parent.userdata = (void*) ((int) &textdraws[0].byteShadowSize - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_shadow);
 
-	ui_wnd_add_child(wnd, ui_lbl_make("x"));
-	in_x = ui_in_make(cb_in_x);
+	ui_wnd_add_child(wnd, mk_dragging_lbl("x", &textdraws[0].fX, &textdraws[0].fY));
+	in_x = ui_in_make(cb_in_float);
 	in_x->_parent.span = 2;
+	in_x->_parent.userdata = (void*) ((int) &textdraws[0].fX - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_x);
 
-	ui_wnd_add_child(wnd, ui_lbl_make("y"));
-	in_y = ui_in_make(cb_in_y);
+	ui_wnd_add_child(wnd, mk_dragging_lbl("y", &textdraws[0].fX, &textdraws[0].fY));
+	in_y = ui_in_make(cb_in_float);
 	in_y->_parent.span = 2;
+	in_y->_parent.userdata = (void*) ((int) &textdraws[0].fY - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_y);
 
-	ui_wnd_add_child(wnd, ui_lbl_make("lsx"));
-	in_letterx = ui_in_make(cb_in_letterx);
+	ui_wnd_add_child(wnd, mk_dragging_lbl("lsx", &textdraws[0].fLetterWidth, &textdraws[0].fLetterHeight));
+	in_letterx = ui_in_make(cb_in_float);
 	in_letterx->_parent.span = 2;
+	in_letterx->_parent.userdata = (void*) ((int) &textdraws[0].fLetterWidth - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_letterx);
 
-	ui_wnd_add_child(wnd, ui_lbl_make("lsy"));
-	in_lettery = ui_in_make(cb_in_lettery);
+	ui_wnd_add_child(wnd, mk_dragging_lbl("lsy", &textdraws[0].fLetterWidth, &textdraws[0].fLetterHeight));
+	in_lettery = ui_in_make(cb_in_float);
 	in_lettery->_parent.span = 2;
+	in_lettery->_parent.userdata = (void*) ((int) &textdraws[0].fLetterHeight - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_lettery);
 
-	ui_wnd_add_child(wnd, ui_lbl_make("boxsx"));
-	in_boxx = ui_in_make(cb_in_boxx);
+	ui_wnd_add_child(wnd, mk_dragging_lbl("boxsx", &textdraws[0].fBoxSizeX, &textdraws[0].fBoxSizeY));
+	in_boxx = ui_in_make(cb_in_float);
 	in_boxx->_parent.span = 2;
+	in_boxx->_parent.userdata = (void*) ((int) &textdraws[0].fBoxSizeX - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_boxx);
 
-	ui_wnd_add_child(wnd, ui_lbl_make("boxsy"));
-	in_boxy = ui_in_make(cb_in_boxy);
+	ui_wnd_add_child(wnd, mk_dragging_lbl("boxsy", &textdraws[0].fBoxSizeX, &textdraws[0].fBoxSizeY));
+	in_boxy = ui_in_make(cb_in_float);
 	in_boxy->_parent.span = 2;
+	in_boxy->_parent.userdata = (void*) ((int) &textdraws[0].fBoxSizeY - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_boxy);
 
 	ui_wnd_add_child(wnd, ui_lbl_make("txtcol"));
@@ -548,6 +600,39 @@ void textdraws_init()
 	ui_wnd_add_child(wnd, chk_prop = ui_chk_make("prop", 1, cb_chk_prop));
 	ui_wnd_add_child(wnd, chk_outline = ui_chk_make("outline", 1, cb_chk_outline));
 	ui_wnd_add_child(wnd, chk_box = ui_chk_make("box", 1, cb_chk_box));
+
+	in_model = ui_in_make(cb_in_int);
+	in_model->_parent.userdata = (void*) ((int) &textdraws[0].sModel - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_model);
+	in_col1 = ui_in_make(cb_in_int);
+	in_col1->_parent.userdata = (void*) ((int) &textdraws[0].sColor[0] - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_col1);
+	in_col2 = ui_in_make(cb_in_int);
+	in_col2->_parent.userdata = (void*) ((int) &textdraws[0].sColor[1] - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_col2);
+
+	in_rx = ui_in_make(cb_in_float);
+	in_rx->_parent.userdata = (void*) ((int) &textdraws[0].fRot[0] - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_rx);
+	in_ry = ui_in_make(cb_in_float);
+	in_ry->_parent.userdata = (void*) ((int) &textdraws[0].fRot[1] - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_ry);
+	in_rz = ui_in_make(cb_in_float);
+	in_rz->_parent.userdata = (void*) ((int) &textdraws[0].fRot[2] - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_rz);
+
+	ui_wnd_add_child(wnd, ui_lbl_make("zoom"));
+	in_zoom = ui_in_make(cb_in_float);
+	in_zoom->_parent.span = 2;
+	in_zoom->_parent.userdata = (void*) ((int) &textdraws[0].fZoom - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_zoom);
+
+	for (i = 0; i < wnd->_parent.childcount; i++) {
+		elem = wnd->_parent.children[i];
+		if (elem->type == UIE_INPUT) {
+			elem->pref_width = 20.0f;
+		}
+	}
 }
 
 void textdraws_dispose()
