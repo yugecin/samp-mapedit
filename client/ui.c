@@ -8,6 +8,7 @@
 #include "entity.h"
 #include "game.h"
 #include "gangzone.h"
+#include "textdraws.h"
 #include "ide.h"
 #include "objbrowser.h"
 #include "objects.h"
@@ -44,9 +45,9 @@ char key_w, key_a, key_s, key_d;
 char directional_movement;
 void (*ui_exclusive_mode)() = NULL;
 struct RwV3D *player_position_for_camera = &player_position;
+float originalHudScaleX, originalHudScaleY;
 
 static char active = 0;
-static float originalHudScaleX, originalHudScaleY;
 static float horizLookAngle, vertLookAngle;
 static char need_camera_update, has_set_camera_once;
 static int context_menu_active = 0;
@@ -146,6 +147,9 @@ void ui_init()
 	struct UI_BUTTON *btn;
 	struct UI_CHECKBOX *chk;
 
+	originalHudScaleX = *hudScaleX;
+	originalHudScaleY = *hudScaleY;
+
 	key_w = VK_Z;
 	key_a = VK_Q;
 	key_s = VK_S;
@@ -195,6 +199,7 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	vehiclesui_on_active_window_changed(wnd);
 	racecpui_on_active_window_changed(wnd);
 	gangzone_on_active_window_changed(wnd);
+	textdraws_on_active_window_changed(wnd);
 }
 
 void ui_hide_window()
@@ -204,6 +209,7 @@ void ui_hide_window()
 	objects_on_active_window_changed(NULL);
 	objlistui_on_active_window_changed(NULL);
 	gangzone_on_active_window_changed(NULL);
+	textdraws_on_active_window_changed(NULL);
 }
 
 struct UI_WINDOW *ui_get_active_window()
@@ -238,7 +244,7 @@ void ui_draw_default_help_text()
 
 	game_TextSetAlign(CENTER);
 	game_TextPrintStringFromBottom(fresx / 2.0f, fresy - 2.0f,
-		"~w~press ~r~Y ~w~to reset camera");
+		"~w~press_~r~Y_~w~to_reset_camera");
 	sprintf(buf, "Movement_speed_(scrollwheel):_-------");
 	for (i = 0; i < speedmod; i++) {
 		buf[30 + i] = '+';
@@ -248,7 +254,7 @@ void ui_draw_default_help_text()
 		fresy - fontheight - 4.0f,
 		buf);
 	sprintf(buf,
-		"x%.2f y%.2f z%.2f",
+		"x%.2f_y%.2f_z%.2f",
 		camera->position.x,
 		camera->position.y,
 		camera->position.z);
@@ -357,15 +363,14 @@ void ui_activate()
 		}
 		need_camera_update = 1;
 		*enableHudByOpcode = 0;
-		originalHudScaleX = *hudScaleX;
-		originalHudScaleY = *hudScaleY;
 		/*note: scaling the hud might mess up projections*/
-		*hudScaleX = 0.0009f;
-		*hudScaleY = 0.0014f;
+		*hudScaleX = NEW_HUD_SCALE_X;
+		*hudScaleY = NEW_HUD_SCALE_Y;
 		ui_element_being_clicked = NULL;
 		samp_break_chat_bar();
 		objui_ui_activated();
 		vehicles_ui_activated();
+		textdraws_ui_activated();
 	}
 }
 
@@ -382,6 +387,7 @@ void ui_deactivate()
 		samp_restore_chat_bar();
 		objui_ui_deactivated();
 		vehicles_ui_deactivated();
+		textdraws_ui_deactivated();
 	}
 }
 
@@ -599,7 +605,8 @@ void background_element_just_clicked()
 		player_on_background_element_just_clicked() &&
 		vehiclesui_on_background_element_just_clicked() &&
 		bulkeditui_on_background_element_just_clicked(last_active_layer) &&
-		gangzone_on_background_element_just_clicked())
+		gangzone_on_background_element_just_clicked() &&
+		textdraws_on_background_element_just_clicked())
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;
@@ -824,6 +831,7 @@ void ui_render()
 		objlistui_frame_update();
 		vehiclesui_frame_update();
 		gangzone_frame_update();
+		textdraws_frame_update();
 
 		if (!hide_all_ui) {
 			ui_cnt_draw(background_element);

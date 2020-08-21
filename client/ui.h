@@ -50,6 +50,11 @@ extern struct UI_WINDOW *main_menu, *context_menu;
 extern char *debugstring;
 extern int hide_all_ui;
 
+#define NEW_HUD_SCALE_X 0.0009f
+#define NEW_HUD_SCALE_Y 0.0014f
+
+extern float originalHudScaleX, originalHudScaleY;
+
 /**
 To be called after writing to debugstring
 */

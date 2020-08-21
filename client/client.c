@@ -6,6 +6,7 @@
 #include "entity.h"
 #include "game.h"
 #include "gangzone.h"
+#include "textdraws.h"
 #include "ide.h"
 #include "massmove.h"
 #include "msgbox.h"
@@ -187,6 +188,7 @@ void client_finalize()
 
 	undetour();
 	gangzone_dispose();
+	textdraws_dispose();
 	samp_dispose();
 	detours_uninstall();
 	common_dispose();
@@ -239,6 +241,7 @@ void client_init()
 	vehiclesui_init();
 	racecpui_init();
 	racecpeditor_init();
+	textdraws_init();
 	massmove_init();
 
 	prj_do_show_window();

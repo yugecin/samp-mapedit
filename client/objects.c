@@ -214,6 +214,8 @@ void objects_client_object_created(object, sa_object, sa_handle)
 	struct CEntity *sa_object;
 	int sa_handle;
 {
+	/*TODO: manipulate obje &  obj chooser*/
+	/*
 	int layeridx, i;
 
 	for (layeridx = 0; layeridx < MAX_LAYERS; layeridx++) {
@@ -224,7 +226,7 @@ void objects_client_object_created(object, sa_object, sa_handle)
 		}
 	}
 	return;
-valid:
+valid:*/
 	object->sa_object = sa_object;
 	object->sa_handle = sa_handle;
 }

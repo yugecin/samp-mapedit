@@ -507,6 +507,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\textdraws.c"
+			>
+		</File>
+		<File
+			RelativePath="..\textdraws.h"
+			>
+		</File>
+		<File
 			RelativePath="..\timeweather.c"
 			>
 		</File>
