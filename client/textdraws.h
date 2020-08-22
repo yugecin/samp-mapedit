@@ -30,7 +30,7 @@ struct TEXTDRAW
 	int		__unk2;	// -1 // -1
 	int		__unk3;	// -1 // -1
 	int		__unk4; // -1 // -1
-	char		byte9A7; // 0
+	char		selectable; // 0
 	short		sModel;
 	float		fRot[3];
 	float		fZoom; // 1.0

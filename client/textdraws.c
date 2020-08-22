@@ -8,6 +8,8 @@
 #include "ui.h"
 #include "player.h"
 #include "samp.h"
+#include "sockets.h"
+#include "../shared/serverlink.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -32,7 +34,7 @@ static struct UI_LABEL *lbl_num;
 static struct RADIOBUTTONGROUP *rdbgroup_align;
 static struct UI_INPUT *in_txt;
 static struct UI_INPUT *in_txtcol, *in_boxcol, *in_shdcol;
-static struct UI_CHECKBOX *chk_prop, *chk_outline, *chk_box;
+static struct UI_CHECKBOX *chk_prop, *chk_sel, *chk_box;
 static struct UI_INPUT *in_font;
 static struct UI_INPUT *in_shadow, *in_outline;
 static struct UI_INPUT *in_x, *in_y;
@@ -98,8 +100,10 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 	ui_in_set_text(in_boxy, tmptxt);
 
 	chk_prop->checked = td->byteProportional;
+	chk_sel->checked = td->selectable;
 	chk_box->checked = td->byteBox;
 	ui_chk_updatetext(chk_prop);
+	ui_chk_updatetext(chk_sel);
 	ui_chk_updatetext(chk_box);
 
 	sprintf(tmptxt, "%d", td->sModel);
@@ -299,10 +303,10 @@ void cb_chk_prop(struct UI_CHECKBOX *chk)
 }
 
 static
-void cb_chk_outline(struct UI_CHECKBOX *chk)
+void cb_chk_sel(struct UI_CHECKBOX *chk)
 {
 	if (IS_VALID_INDEX_SELECTED) {
-		textdraws[lst->selectedindex].byteOutline = chk->checked;
+		textdraws[lst->selectedindex].selectable = chk->checked;
 	}
 }
 
@@ -312,6 +316,18 @@ void cb_chk_box(struct UI_CHECKBOX *chk)
 	if (IS_VALID_INDEX_SELECTED) {
 		textdraws[lst->selectedindex].byteBox = chk->checked;
 	}
+}
+
+static
+void cb_btn_testselection(struct UI_BUTTON *btn)
+{
+	struct MSG_NC nc;
+
+	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+	nc.nc = NC_SelectTextDraw;
+	nc.params.asint[1] = 0;
+	nc.params.asint[2] = 0xFFFF0000;
+	sockets_send(&nc, sizeof(nc));
 }
 
 static
@@ -335,7 +351,7 @@ void cb_btn_add(struct UI_BUTTON *btn)
 			textdraws[0].fX = 200.0f;
 			textdraws[0].fY = 200.0f;
 			textdraws[0].iStyle = 1;
-			textdraws[0].fBoxSizeX = 200.0f;
+			textdraws[0].fBoxSizeX = 500.0f;
 			textdraws[0].fBoxSizeY = 200.0f;
 			textdraws[0].dwBoxColor = 0x66000000;
 			textdraws[0].byteLeft = 1;
@@ -670,7 +686,7 @@ void textdraws_init()
 	ui_wnd_add_child(wnd, rdb);
 
 	ui_wnd_add_child(wnd, chk_prop = ui_chk_make("prop", 1, cb_chk_prop));
-	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, chk_sel = ui_chk_make("sel", 1, cb_chk_sel));
 	ui_wnd_add_child(wnd, chk_box = ui_chk_make("box", 1, cb_chk_box));
 
 	in_model = ui_in_make(cb_in_int);
@@ -698,6 +714,10 @@ void textdraws_init()
 	in_zoom->_parent.span = 2;
 	in_zoom->_parent.userdata = (void*) ((int) &textdraws[0].fZoom - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_zoom);
+
+	btn = ui_btn_make("test_selection", cb_btn_testselection);
+	btn->_parent.span = 3;
+	ui_wnd_add_child(wnd, btn);
 
 	for (i = 0; i < wnd->_parent.childcount; i++) {
 		elem = wnd->_parent.children[i];

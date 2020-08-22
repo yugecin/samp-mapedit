@@ -20,6 +20,7 @@
 #define NC_GangZoneCreate 13
 #define NC_GangZoneShowForAll 14
 #define NC_GangZoneDestroy 15
+#define NC_SelectTextDraw 16
 
 #define MAPEDIT_MSG_RESETOBJECTS 0
 #define MAPEDIT_MSG_NATIVECALL 1

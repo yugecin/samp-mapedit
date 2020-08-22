@@ -73,6 +73,7 @@ struct NATIVE natives[] = {
 	{ "GangZoneCreate", 0 },
 	{ "GangZoneShowForAll", 0 },
 	{ "GangZoneDestroy", 0 },
+	{ "SelectTextDraw", 0 },
 };
 #define NUMNATIVES (sizeof(natives)/sizeof(struct NATIVE))
 
