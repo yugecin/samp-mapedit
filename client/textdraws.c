@@ -34,7 +34,7 @@ static struct UI_INPUT *in_txt;
 static struct UI_INPUT *in_txtcol, *in_boxcol, *in_shdcol;
 static struct UI_CHECKBOX *chk_prop, *chk_outline, *chk_box;
 static struct UI_INPUT *in_font;
-static struct UI_INPUT *in_shadow;
+static struct UI_INPUT *in_shadow, *in_outline;
 static struct UI_INPUT *in_x, *in_y;
 static struct UI_INPUT *in_boxx, *in_boxy;
 static struct UI_INPUT *in_letterx, *in_lettery;
@@ -43,38 +43,6 @@ static int textdrawsactive;
 static char lbl_num_text[35];
 #define MAX_LIST_ENTRY_LEN 20
 static char listnames[MAX_TEXTDRAWS * MAX_LIST_ENTRY_LEN];
-
-static
-void cb_chk_click(struct UI_CHECKBOX *chk)
-{
-	((struct UI_CHECKBOX*) chk->_parent._parent.userdata)->checked = 0;
-	ui_chk_updatetext(chk->_parent._parent.userdata);
-}
-
-static
-void cb_btn_mainmenu_textdraws(struct UI_BUTTON *btn)
-{
-	ui_show_window(wnd);
-}
-
-static
-void cb_in_txt(struct UI_INPUT *in)
-{
-	if (IS_VALID_INDEX_SELECTED) {
-		strcpy(textdraws[lst->selectedindex].szString, in->value);
-		strcpy(textdraws[lst->selectedindex].szText, in->value);
-	}
-}
-
-static
-void cb_lst_hover(struct UI_LIST *lst)
-{
-	int i;
-
-	for (i = 0; i < numtextdraws; i++) {
-		textdraw_enabled[i] = (i == lst->hoveredindex) || (lst->hoveredindex == -1);
-	}
-}
 
 static
 void cb_lst_item_selected(struct UI_LIST *lst)
@@ -106,6 +74,9 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 	sprintf(tmptxt, "%d", td->byteShadowSize);
 	ui_in_set_text(in_shadow, tmptxt);
 
+	sprintf(tmptxt, "%d", td->byteOutline);
+	ui_in_set_text(in_outline, tmptxt);
+
 	sprintf(tmptxt, "%02X", td->dwLetterColor);
 	ui_in_set_text(in_txtcol, tmptxt);
 	sprintf(tmptxt, "%02X", td->dwShadowColor);
@@ -127,10 +98,8 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 	ui_in_set_text(in_boxy, tmptxt);
 
 	chk_prop->checked = td->byteProportional;
-	chk_outline->checked = td->byteOutline;
 	chk_box->checked = td->byteBox;
 	ui_chk_updatetext(chk_prop);
-	ui_chk_updatetext(chk_outline);
 	ui_chk_updatetext(chk_box);
 
 	sprintf(tmptxt, "%d", td->sModel);
@@ -150,21 +119,97 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 }
 
 static
+void update_list()
+{
+	int i, selected_index, j;
+	char *names[MAX_TEXTDRAWS];
+	char tmpchar;
+
+	selected_index = lst->selectedindex;
+	for (i = 0; i < numtextdraws; i++) {
+		names[i] = listnames + i * MAX_LIST_ENTRY_LEN;
+		for (j = 0; j < MAX_LIST_ENTRY_LEN; j++) {
+			tmpchar = textdraws[i].szString[j];
+			if (tmpchar == ' ') {
+				names[i][j] = '_';
+			} else {
+				names[i][j] = tmpchar;
+			}
+		}
+		names[i][MAX_LIST_ENTRY_LEN] = 0;
+	}
+	ui_lst_set_data(lst, names, numtextdraws);
+	ui_lst_set_selected_index(lst, selected_index);
+	cb_lst_item_selected(lst);
+}
+
+static
+void cb_chk_click(struct UI_CHECKBOX *chk)
+{
+	((struct UI_CHECKBOX*) chk->_parent._parent.userdata)->checked = 0;
+	ui_chk_updatetext(chk->_parent._parent.userdata);
+}
+
+static
+void cb_btn_mainmenu_textdraws(struct UI_BUTTON *btn)
+{
+	ui_show_window(wnd);
+}
+
+static
+void cb_in_txt(struct UI_INPUT *in)
+{
+	if (IS_VALID_INDEX_SELECTED) {
+		strcpy(textdraws[lst->selectedindex].szString, in->value);
+		strcpy(textdraws[lst->selectedindex].szText, in->value);
+		update_list();
+	}
+}
+
+static
+void cb_lst_hover(struct UI_LIST *lst)
+{
+	int i;
+
+	for (i = 0; i < numtextdraws; i++) {
+		textdraw_enabled[i] = (i == lst->hoveredindex) || (lst->hoveredindex == -1);
+	}
+}
+
+static
 void cb_in_float(struct UI_INPUT *in)
 {
 	if (IS_VALID_INDEX_SELECTED) {
 		*(float*)((int) &textdraws[lst->selectedindex] + (int) in->_parent.userdata) = (float) atof(in->value);
 		/*would this cause memleaks? if it works by creating textures, maybe doing this doesn't
 		free earlier made textures.*/
-		textdraws[lst->selectedindex].__unk4 = -1;
+		if (textdraws[lst->selectedindex].iStyle == 5) {
+			textdraws[lst->selectedindex].__unk4 = -1;
+		}
 	}
 }
 
 static
 void cb_in_int(struct UI_INPUT *in)
 {
+	int offset, font;
+
 	if (IS_VALID_INDEX_SELECTED) {
-		*(int*)((int) &textdraws[lst->selectedindex] + (int) in->_parent.userdata) = (int) atoi(in->value);
+		offset = (int) in->_parent.userdata;
+		font = textdraws[lst->selectedindex].iStyle;
+		*(int*)((int) &textdraws[lst->selectedindex] + offset) = (int) atoi(in->value);
+		if (offset != (int) &textdraws[0].iStyle - (int) &textdraws[0]) {
+			/*for some reason font resets to 0 when writing to outline? so fix it here again*/
+			textdraws[lst->selectedindex].iStyle = font;
+		}
+		if (offset == (int) &textdraws[0].byteShadowSize - (int) &textdraws[0]) {
+			textdraws[lst->selectedindex].byteOutline = 0;
+			ui_in_set_text(in_outline, "0");
+		}
+		if (offset == (int) &textdraws[0].byteOutline - (int) &textdraws[0]) {
+			textdraws[lst->selectedindex].byteShadowSize = 0;
+			ui_in_set_text(in_shadow, "0");
+		}
 	}
 }
 
@@ -253,31 +298,6 @@ void cb_chk_box(struct UI_CHECKBOX *chk)
 }
 
 static
-void update_list()
-{
-	int i, selected_index, j;
-	char *names[MAX_TEXTDRAWS];
-	char tmpchar;
-
-	selected_index = lst->selectedindex;
-	for (i = 0; i < numtextdraws; i++) {
-		names[i] = listnames + i * MAX_LIST_ENTRY_LEN;
-		for (j = 0; j < MAX_LIST_ENTRY_LEN; j++) {
-			tmpchar = textdraws[i].szString[j];
-			if (tmpchar == ' ') {
-				names[i][j] = '_';
-			} else {
-				names[i][j] = tmpchar;
-			}
-		}
-		names[i][MAX_LIST_ENTRY_LEN] = 0;
-	}
-	ui_lst_set_data(lst, names, numtextdraws);
-	ui_lst_set_selected_index(lst, selected_index);
-	cb_lst_item_selected(lst);
-}
-
-static
 void cb_btn_add(struct UI_BUTTON *btn)
 {
 	int i, index_to_select;
@@ -294,18 +314,18 @@ void cb_btn_add(struct UI_BUTTON *btn)
 			sprintf(textdraws[0].szString, "hi hi");
 			sprintf(textdraws[0].szText, "hi hi");
 			textdraws[0].fLetterHeight = 1.0f;
-			textdraws[0].fLetterWidth = 1.0f;
+			textdraws[0].fLetterWidth = .25f;
 			textdraws[0].dwLetterColor = -1;
 			textdraws[0].fX = 200.0f;
 			textdraws[0].fY = 200.0f;
 			textdraws[0].iStyle = 1;
 			textdraws[0].fBoxSizeX = 200.0f;
 			textdraws[0].fBoxSizeY = 200.0f;
-			textdraws[0].dwBoxColor = 0x66FF0000;
+			textdraws[0].dwBoxColor = 0x66000000;
 			textdraws[0].byteLeft = 1;
 			textdraws[0].byteOutline = 1;
-			textdraws[0].byteShadowSize = 1;
-			textdraws[0].dwShadowColor = 0xFF00FFFF;
+			textdraws[0].byteShadowSize = 0;
+			textdraws[0].dwShadowColor = 0xFF000000;
 			textdraws[0].byteProportional = 1;
 			textdraws[0].byteBox = 1;
 			textdraws[0].__unk2 = -1;
@@ -321,6 +341,34 @@ void cb_btn_add(struct UI_BUTTON *btn)
 	update_list();
 	ui_lst_set_selected_index(lst, index_to_select);
 	cb_lst_item_selected(lst);
+}
+
+static
+void cb_btn_up(struct UI_BUTTON *btn)
+{
+	struct TEXTDRAW tmp;
+
+	if (IS_VALID_INDEX_SELECTED && lst->selectedindex > 0) {
+		tmp = textdraws[lst->selectedindex - 1];
+		textdraws[lst->selectedindex - 1] = textdraws[lst->selectedindex];
+		textdraws[lst->selectedindex] = tmp;
+		lst->selectedindex--;
+		update_list();
+	}
+}
+
+static
+void cb_btn_down(struct UI_BUTTON *btn)
+{
+	struct TEXTDRAW tmp;
+
+	if (IS_VALID_INDEX_SELECTED && lst->selectedindex < numtextdraws - 1) {
+		tmp = textdraws[lst->selectedindex + 1];
+		textdraws[lst->selectedindex + 1] = textdraws[lst->selectedindex];
+		textdraws[lst->selectedindex] = tmp;
+		lst->selectedindex++;
+		update_list();
+	}
 }
 
 static
@@ -407,16 +455,16 @@ void textdraws_frame_update()
 		cursory = origCursorY;
 		if (dragging_prop_x) {
 			diff = activeMouseState->x;
-			if (activeKeyState->shift) {
-				diff /= 2.0f;
+			if (activeKeyState->lshift) {
+				diff /= 10.0f;
 			}
 			*dragging_prop_x += diff;
 		}
 		if (dragging_prop_y) {
 			/*TODO is if off (copied from ui_do_cursor_movement)*/
 			diff = -activeMouseState->y * fresx / fresy;
-			if (activeKeyState->shift) {
-				diff /= 2.0f;
+			if (activeKeyState->lshift) {
+				diff /= 10.0f;
 			}
 			*dragging_prop_y += diff;
 		}
@@ -510,10 +558,12 @@ void textdraws_init()
 	ui_wnd_add_child(wnd, lst);
 
 	btn = ui_btn_make("Copy_selected/Add", cb_btn_add);
-	btn->_parent.span = 2;
+	btn->_parent.span = 3;
 	ui_wnd_add_child(wnd, btn);
+
+	ui_wnd_add_child(wnd, ui_btn_make("Up", cb_btn_up));
+	ui_wnd_add_child(wnd, ui_btn_make("Down", cb_btn_down));
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
-	btn_delete->_parent.span = 1;
 	btn_delete->enabled = 0;
 	ui_wnd_add_child(wnd, btn_delete);
 
@@ -531,6 +581,12 @@ void textdraws_init()
 	in_shadow->_parent.span = 2;
 	in_shadow->_parent.userdata = (void*) ((int) &textdraws[0].byteShadowSize - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_shadow);
+
+	ui_wnd_add_child(wnd, ui_lbl_make("outline"));
+	in_outline = ui_in_make(cb_in_int);
+	in_outline->_parent.span = 2;
+	in_outline->_parent.userdata = (void*) ((int) &textdraws[0].byteOutline - (int) &textdraws[0]);
+	ui_wnd_add_child(wnd, in_outline);
 
 	ui_wnd_add_child(wnd, mk_dragging_lbl("x", &textdraws[0].fX, &textdraws[0].fY));
 	in_x = ui_in_make(cb_in_float);
@@ -598,7 +654,7 @@ void textdraws_init()
 	ui_wnd_add_child(wnd, rdb);
 
 	ui_wnd_add_child(wnd, chk_prop = ui_chk_make("prop", 1, cb_chk_prop));
-	ui_wnd_add_child(wnd, chk_outline = ui_chk_make("outline", 1, cb_chk_outline));
+	ui_wnd_add_child(wnd, NULL);
 	ui_wnd_add_child(wnd, chk_box = ui_chk_make("box", 1, cb_chk_box));
 
 	in_model = ui_in_make(cb_in_int);
@@ -629,7 +685,7 @@ void textdraws_init()
 
 	for (i = 0; i < wnd->_parent.childcount; i++) {
 		elem = wnd->_parent.children[i];
-		if (elem->type == UIE_INPUT) {
+		if (elem && elem->type == UIE_INPUT) {
 			elem->pref_width = 20.0f;
 		}
 	}
