@@ -64,4 +64,3 @@ void textdraws_frame_update();
 void textdraws_ui_activated();
 void textdraws_ui_deactivated();
 void textdraws_on_active_window_changed(struct UI_WINDOW *_wnd);
-int textdraws_on_background_element_just_clicked();

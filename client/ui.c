@@ -605,8 +605,7 @@ void background_element_just_clicked()
 		player_on_background_element_just_clicked() &&
 		vehiclesui_on_background_element_just_clicked() &&
 		bulkeditui_on_background_element_just_clicked(last_active_layer) &&
-		gangzone_on_background_element_just_clicked() &&
-		textdraws_on_background_element_just_clicked())
+		gangzone_on_background_element_just_clicked())
 	{
 		context_menu_active = 1;
 		context_menu->_parent._parent.x = cursorx + 10.0f;

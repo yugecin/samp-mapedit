@@ -297,7 +297,7 @@ void cb_in_col(struct UI_INPUT *in)
 					}
 				}
 			}
-			col |= c << ((8 - j) * 4);
+			col |= c << ((7 - j) * 4);
 		}
 		*(int*) ((int) &textdraws[lst->selectedindex] + (int) in->_parent.userdata) = col;
 	}
@@ -429,14 +429,6 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 		ui_lst_set_selected_index(lst, i);
 	}
 	cb_lst_item_selected(lst);
-}
-
-int textdraws_on_background_element_just_clicked()
-{
-	if (textdrawsactive) {
-		return 0;
-	}
-	return 1;
 }
 
 static int dragging;
