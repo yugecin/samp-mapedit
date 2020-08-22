@@ -69,7 +69,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason_for_call, LPVOID lpResrvd)
 		f = fopen("CLEO\\mapedit-client.dll.txt", "r");
 		if (f) {
 			clientcompilepath = malloc(200);
-			fread(clientcompilepath, 200, 1, f);
+			clientcompilepath[fread(clientcompilepath, 1, 200, f)] = 0;
 			clientcompilepath[199] = 0;
 			c = clientcompilepath;
 			while (*c != 0 && *c != '\n') c++;

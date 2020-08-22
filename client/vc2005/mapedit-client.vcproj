@@ -515,6 +515,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\textdrawstorage.c"
+			>
+		</File>
+		<File
+			RelativePath="..\textdrawstorage.h"
+			>
+		</File>
+		<File
 			RelativePath="..\timeweather.c"
 			>
 		</File>

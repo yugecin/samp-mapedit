@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="mapedit-client-loader-cleo"
 	ProjectGUID="{6F18A958-A233-4672-99BD-215BABE03024}"
+	RootNamespace="mapedit-client-loader-cleo"
 	>
 	<Platforms>
 		<Platform
@@ -36,8 +37,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="0"
 				AdditionalIncludeDirectories="&quot;c:\Program Files (x86)\Windows Kits\8.0\Include\shared&quot;;&quot;c:\Program Files (x86)\Windows Kits\8.0\Include\um&quot;"
 				WarningLevel="3"
+				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
 			<Tool
@@ -55,6 +58,7 @@
 				OutputFile="$(SolutionDir)\out-$(ConfigurationName)\$(ProjectName).cleo"
 				AdditionalLibraryDirectories="..\CLEO_SDK"
 				IgnoreDefaultLibraryNames="uuid.lib"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
