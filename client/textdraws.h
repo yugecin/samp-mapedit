@@ -7,7 +7,7 @@
 struct TEXTDRAW
 {
 	char		szText[800 + 1];
-	char		szString[1600 + 2];
+	char		szString[1600 + 2]; /*copied into from szText by samp's draw func*/
 	float		fLetterWidth; // 0.24
 	float		fLetterHeight; // 1.0
 	int		dwLetterColor; // -1

@@ -66,7 +66,7 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 		ui_rdb_click_match_userdata(rdbgroup_align, (void*) ALIGN_RIGHT);
 	}
 
-	ui_in_set_text(in_txt, td->szString);
+	ui_in_set_text(in_txt, td->szText);
 
 	sprintf(tmptxt, "%d", td->iStyle);
 	ui_in_set_text(in_font, tmptxt);
@@ -129,7 +129,7 @@ void update_list()
 	for (i = 0; i < numtextdraws; i++) {
 		names[i] = listnames + i * MAX_LIST_ENTRY_LEN;
 		for (j = 0; j < MAX_LIST_ENTRY_LEN; j++) {
-			tmpchar = textdraws[i].szString[j];
+			tmpchar = textdraws[i].szText[j];
 			if (tmpchar == ' ') {
 				names[i][j] = '_';
 			} else {
@@ -159,10 +159,27 @@ void cb_btn_mainmenu_textdraws(struct UI_BUTTON *btn)
 static
 void cb_in_txt(struct UI_INPUT *in)
 {
+	int i;
+	int tildes;
+	char v;
+
 	if (IS_VALID_INDEX_SELECTED) {
-		strcpy(textdraws[lst->selectedindex].szString, in->value);
-		strcpy(textdraws[lst->selectedindex].szText, in->value);
-		update_list();
+		i = 0;
+		tildes = 0;
+		for (;;) {
+			v = in->value[i];
+			if (v == '~') {
+				tildes++;
+			}
+			textdraws[lst->selectedindex].szText[i] = v;
+			if (v == 0) {
+				if (tildes % 2) {
+					strcpy(textdraws[lst->selectedindex].szText, "unmatched tilde");
+				}
+				break;
+			}
+			i++;
+		}
 	}
 }
 
@@ -311,7 +328,6 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		if (numtextdraws > 0) {
 			textdraws[numtextdraws] = textdraws[numtextdraws - 1];
 		} else {
-			sprintf(textdraws[0].szString, "hi hi");
 			sprintf(textdraws[0].szText, "hi hi");
 			textdraws[0].fLetterHeight = 1.0f;
 			textdraws[0].fLetterWidth = .25f;

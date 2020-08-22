@@ -12,6 +12,9 @@ char value_to_display_char(char value)
 	if (value == ' ') {
 		return '_';
 	}
+	if (value == '~') {
+		return '#';
+	}
 	return value;
 }
 
