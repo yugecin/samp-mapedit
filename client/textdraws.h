@@ -4,6 +4,12 @@
 #define MAX_PLAYER_TEXTDRAWS 256
 
 #pragma pack(push,1)
+struct TDNAME
+{
+	char szText[700+1];
+	char name[100];
+};
+
 struct TEXTDRAW
 {
 	char		szText[800 + 1];
@@ -29,7 +35,7 @@ struct TEXTDRAW
 	char		__unk1[8]; // 0, 0, 0, 0, 0, 0, 0, 0
 	int		__unk2;	// -1 // -1
 	int		__unk3;	// -1 // -1
-	int		__unk4; // -1 // -1
+	int		probablyTextureIdForPreview; // -1 // -1
 	char		selectable; // 0
 	short		sModel;
 	float		fRot[3];

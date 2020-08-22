@@ -32,7 +32,7 @@ static struct UI_CHECKBOX *chk_show;
 static struct UI_BUTTON *btn_edit, *btn_delete;
 static struct UI_LABEL *lbl_num;
 static struct RADIOBUTTONGROUP *rdbgroup_align;
-static struct UI_INPUT *in_txt;
+static struct UI_INPUT *in_name, *in_txt;
 static struct UI_INPUT *in_txtcol, *in_boxcol, *in_shdcol;
 static struct UI_CHECKBOX *chk_prop, *chk_sel, *chk_box;
 static struct UI_INPUT *in_font;
@@ -68,6 +68,7 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 		ui_rdb_click_match_userdata(rdbgroup_align, (void*) ALIGN_RIGHT);
 	}
 
+	ui_in_set_text(in_name, ((struct TDNAME*) td)->name);
 	ui_in_set_text(in_txt, td->szText);
 
 	sprintf(tmptxt, "%d", td->iStyle);
@@ -133,7 +134,7 @@ void update_list()
 	for (i = 0; i < numtextdraws; i++) {
 		names[i] = listnames + i * MAX_LIST_ENTRY_LEN;
 		for (j = 0; j < MAX_LIST_ENTRY_LEN; j++) {
-			tmpchar = textdraws[i].szText[j];
+			tmpchar = ((struct TDNAME*) &textdraws[i])->name[j];
 			if (tmpchar == ' ') {
 				names[i][j] = '_';
 			} else {
@@ -144,7 +145,6 @@ void update_list()
 	}
 	ui_lst_set_data(lst, names, numtextdraws);
 	ui_lst_set_selected_index(lst, selected_index);
-	cb_lst_item_selected(lst);
 }
 
 static
@@ -158,6 +158,15 @@ static
 void cb_btn_mainmenu_textdraws(struct UI_BUTTON *btn)
 {
 	ui_show_window(wnd);
+}
+
+static
+void cb_in_name(struct UI_INPUT *in)
+{
+	if (IS_VALID_INDEX_SELECTED) {
+		strcpy(((struct TDNAME*) &textdraws[lst->selectedindex])->name, in->value);
+		update_list();
+	}
 }
 
 static
@@ -205,7 +214,7 @@ void cb_in_float(struct UI_INPUT *in)
 		/*would this cause memleaks? if it works by creating textures, maybe doing this doesn't
 		free earlier made textures.*/
 		if (textdraws[lst->selectedindex].iStyle == 5) {
-			textdraws[lst->selectedindex].__unk4 = -1;
+			textdraws[lst->selectedindex].probablyTextureIdForPreview = -1;
 		}
 	}
 }
@@ -264,7 +273,7 @@ void cb_in_font(struct UI_INPUT *in)
 	if (IS_VALID_INDEX_SELECTED) {
 		textdraws[lst->selectedindex].iStyle = atoi(in->value);
 		if (textdraws[lst->selectedindex].iStyle != 5) {
-			textdraws[lst->selectedindex].__unk4 = -1;
+			textdraws[lst->selectedindex].probablyTextureIdForPreview = -1;
 		}
 	}
 }
@@ -344,6 +353,7 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		if (numtextdraws > 0) {
 			textdraws[numtextdraws] = textdraws[numtextdraws - 1];
 		} else {
+			sprintf(((struct TDNAME*) &textdraws[0])->name, "textdraw");
 			sprintf(textdraws[0].szText, "hi hi");
 			textdraws[0].fLetterHeight = 1.0f;
 			textdraws[0].fLetterWidth = .25f;
@@ -362,7 +372,7 @@ void cb_btn_add(struct UI_BUTTON *btn)
 			textdraws[0].byteBox = 1;
 			textdraws[0].__unk2 = -1;
 			textdraws[0].__unk3 = -1;
-			textdraws[0].__unk4 = -1;
+			textdraws[0].probablyTextureIdForPreview = -1;
 			textdraws[0].fZoom = 2.0f;
 			textdraws[0].sModel = 411;
 		}
@@ -519,6 +529,8 @@ void textdraws_on_active_window_changed(struct UI_WINDOW *_wnd)
 		for (i = 0; i < numtextdraws; i++) {
 			textdraw_enabled[i] = 1;
 		}
+		update_list();
+		cb_lst_item_selected(lst);
 	} else if (textdrawsactive) {
 		textdrawsactive = 0;
 		*hudScaleX = NEW_HUD_SCALE_X;
@@ -598,6 +610,10 @@ void textdraws_init()
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
 	btn_delete->enabled = 0;
 	ui_wnd_add_child(wnd, btn_delete);
+
+	in_name = ui_in_make(cb_in_name);
+	in_name->_parent.span = 3;
+	ui_wnd_add_child(wnd, in_name);
 
 	in_txt = ui_in_make(cb_in_txt);
 	in_txt->_parent.span = 3;
