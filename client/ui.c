@@ -84,6 +84,8 @@ int ui_mouse_is_just_down;
 int ui_mouse_is_just_up;
 int hide_all_ui;
 
+static int hide_main_menu;
+
 static
 void cb_btn_reload(struct UI_BUTTON *btn)
 {
@@ -722,6 +724,9 @@ void ui_render()
 			hide_all_ui = !hide_all_ui;
 			racecp_resetall();
 		}
+		if (prevKeyState->standards[VK_I] && !currentKeyState->standards[VK_I]) {
+			hide_main_menu = !hide_main_menu;
+		}
 
 		ui_mouse_is_just_down =
 			activeMouseState->lmb && !prevMouseState->lmb;
@@ -757,7 +762,7 @@ void ui_render()
 				ui_wnd_mouseup(context_menu)) ||
 				(active_window != NULL && ui_wnd_mouseup(active_window)) ||
 				(bulkeditui_shown && ui_wnd_mouseup(bulkeditui_wnd)) ||
-				ui_wnd_mouseup(main_menu) ||
+				(!hide_main_menu && ui_wnd_mouseup(main_menu)) ||
 				ui_cnt_mouseup(background_element));
 			context_menu_active = 0;
 			highlighted_entity = NULL;
@@ -804,7 +809,7 @@ void ui_render()
 			if ((context_menu_active && ui_wnd_mousedown(context_menu)) ||
 				(active_window != NULL && ui_wnd_mousedown(active_window)) ||
 				(bulkeditui_shown && ui_wnd_mousedown(bulkeditui_wnd)) ||
-				ui_wnd_mousedown(main_menu) ||
+				(!hide_main_menu && ui_wnd_mousedown(main_menu)) ||
 				ui_cnt_mousedown(background_element))
 			{
 				;
@@ -823,7 +828,9 @@ void ui_render()
 		if (bulkeditui_shown) {
 			ui_wnd_update(bulkeditui_wnd);
 		}
-		ui_wnd_update(main_menu);
+		if (!hide_main_menu) {
+			ui_wnd_update(main_menu);
+		}
 		ui_cnt_update(background_element);
 
 		objui_frame_update();
@@ -834,7 +841,9 @@ void ui_render()
 
 		if (!hide_all_ui) {
 			ui_cnt_draw(background_element);
-			ui_wnd_draw(main_menu);
+			if (!hide_main_menu) {
+				ui_wnd_draw(main_menu);
+			}
 			if (active_window != NULL) {
 				UIPROC(active_window, proc_draw);
 			}
