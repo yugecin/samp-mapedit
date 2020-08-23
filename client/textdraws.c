@@ -222,16 +222,22 @@ void cb_in_float(struct UI_INPUT *in)
 static
 void cb_in_int(struct UI_INPUT *in)
 {
-	int offset, font;
+	int offset;
 
 	if (IS_VALID_INDEX_SELECTED) {
 		offset = (int) in->_parent.userdata;
-		font = textdraws[lst->selectedindex].iStyle;
 		*(int*)((int) &textdraws[lst->selectedindex] + offset) = (int) atoi(in->value);
-		if (offset != (int) &textdraws[0].iStyle - (int) &textdraws[0]) {
-			/*for some reason font resets to 0 when writing to outline? so fix it here again*/
-			textdraws[lst->selectedindex].iStyle = font;
-		}
+	}
+}
+
+static
+void cb_in_byte(struct UI_INPUT *in)
+{
+	int offset;
+
+	if (IS_VALID_INDEX_SELECTED) {
+		offset = (int) in->_parent.userdata;
+		*(char*)((int) &textdraws[lst->selectedindex] + offset) = (char) atoi(in->value);
 		if (offset == (int) &textdraws[0].byteShadowSize - (int) &textdraws[0]) {
 			textdraws[lst->selectedindex].byteOutline = 0;
 			ui_in_set_text(in_outline, "0");
@@ -617,13 +623,13 @@ void textdraws_init()
 	ui_wnd_add_child(wnd, in_font);
 
 	ui_wnd_add_child(wnd, ui_lbl_make("shadow"));
-	in_shadow = ui_in_make(cb_in_int);
+	in_shadow = ui_in_make(cb_in_byte);
 	in_shadow->_parent.span = 2;
 	in_shadow->_parent.userdata = (void*) ((int) &textdraws[0].byteShadowSize - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_shadow);
 
 	ui_wnd_add_child(wnd, ui_lbl_make("outline"));
-	in_outline = ui_in_make(cb_in_int);
+	in_outline = ui_in_make(cb_in_byte);
 	in_outline->_parent.span = 2;
 	in_outline->_parent.userdata = (void*) ((int) &textdraws[0].byteOutline - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_outline);
