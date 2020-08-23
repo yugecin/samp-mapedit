@@ -79,10 +79,16 @@ checkagain:
 	in->displayvalue[in->cursorpos] = c;
 	while (in->caretoffsetx > maxwidth - caretwidth) {
 		in->displayvaluestart++;
+		/*when container is not layout yet, maxwidth will be wrong and this would loop too much*/
+		if (in->displayvaluestart > in->displayvalue + INPUT_TEXTLEN) {
+			in->displayvaluestart = in->displayvalue;
+			goto skip;
+		}
 		if (*in->displayvaluestart) {
 			goto checkagain;
 		}
 	}
+skip:
 
 	w = game_TextGetSizeX(in->displayvaluestart, 0, 0);
 	if (w > maxwidth) {
@@ -315,4 +321,5 @@ void ui_in_set_text(struct UI_INPUT *in, char *text)
 	in->displayvalue[in->valuelen] = 0;
 	in->cursorpos = 0;
 	in->displayvaluestart = in->displayvalue;
+	make_sure_caret_is_in_bounds(in); /*ensures the displayvalue doesn't go over the width*/
 }
