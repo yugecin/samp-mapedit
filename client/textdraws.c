@@ -287,6 +287,7 @@ void cb_in_font(struct UI_INPUT *in)
 static
 void cb_in_col(struct UI_INPUT *in)
 {
+	char unused[20];
 	int col;
 	int c;
 	int j;
@@ -303,6 +304,10 @@ void cb_in_col(struct UI_INPUT *in)
 					}
 				}
 			}
+			/*this sprintf is unused, but removing it results in wrong values*/
+			/*99000000 would deviate into 99000007 or something*/
+			/*no idea why, optimizations are even disabled*/
+			sprintf(unused, "%p", c << ((7 - j) * 4));
 			col |= c << ((7 - j) * 4);
 		}
 		*(int*) ((int) &textdraws[lst->selectedindex] + (int) in->_parent.userdata) = col;
