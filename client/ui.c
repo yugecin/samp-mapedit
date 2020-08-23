@@ -677,7 +677,7 @@ int ui_handle_keydown(int vk)
 	if (rbe_handle_keydown(vk)) {
 		return 1;
 	}
-	if (vk == VK_ESCAPE) {
+	if (vk == VK_ESCAPE && active) {
 		if (objbrowser_handle_esc()) {
 			return 1;
 		}
