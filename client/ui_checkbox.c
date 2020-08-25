@@ -7,7 +7,7 @@
 
 void ui_chk_updatetext(struct UI_CHECKBOX *chk)
 {
-	chk->_parent.text[1] = ' ' + ('x' - ' ') * chk->checked;
+	chk->_parent.text[1] = '_' + ('x' - '_') * chk->checked;
 }
 
 static
@@ -45,7 +45,7 @@ struct UI_CHECKBOX *ui_chk_make(char *text, int check, chkcb *cb)
 	chk->_parent.alignment = CENTER;
 	chk->_parent.text = malloc(sizeof(char) * textlenandzero);
 	chk->_parent.text[0] = '[';
-	chk->_parent.text[1] = ' ' + ('x' - ' ') * check;
+	chk->_parent.text[1] = '_' + ('x' - '_') * check;
 	chk->_parent.text[2] = ']';
 	memcpy(chk->_parent.text + 3, text, textlenandzero - 3);
 	chk->_parent.foregroundABGR = -1;
