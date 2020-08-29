@@ -87,7 +87,7 @@ void textdrawstorage_save()
 	fwrite("TXT\x1", 4, 1, text);
 	for (i = 0; i < numtextdraws; i++) {
 		memset(data.name, 0, sizeof(data.name));
-		strcpy(data.name, ((struct TDNAME*) &textdraws[i])->name);
+		strcpy(data.name, textdraw_name[i]);
 		data.name[sizeof(data.name) - 1] = 0;
 		data.textdraw.flags = 0;
 		data.textdraw.flags |= (textdraws[i].byteBox != 0);
@@ -115,9 +115,9 @@ void textdrawstorage_save()
 		data.textdraw.preview_zoom = textdraws[i].fZoom;
 		data.textdraw.preview_color_1 = textdraws[i].sColor[0];
 		data.textdraw.preview_color_2 = textdraws[i].sColor[1];
-		data.textdraw.text_length = strlen(textdraws[i].szText);
+		data.textdraw.text_length = strlen(textdraw_text[i]);
 		memset(data.textdraw.text, 0, sizeof(data.textdraw.text));
-		strcpy(data.textdraw.text, textdraws[i].szText);
+		strcpy(data.textdraw.text, textdraw_text[i]);
 		fwrite(&data, sizeof(data), 1, text);
 	}
 
@@ -171,8 +171,10 @@ void textdrawstorage_load()
 		textdraws[numtextdraws].fZoom = data.textdraw.preview_zoom;
 		textdraws[numtextdraws].sColor[0] = data.textdraw.preview_color_1;
 		textdraws[numtextdraws].sColor[1] = data.textdraw.preview_color_2;
+		memcpy(textdraw_text[numtextdraws], data.textdraw.text, sizeof(data.textdraw.text));
+		strcpy(textdraw_name[numtextdraws], data.name);
 		memcpy(textdraws[numtextdraws].szText, data.textdraw.text, sizeof(data.textdraw.text));
-		strcpy(((struct TDNAME*) &textdraws[numtextdraws])->name, data.name);
+		game_TextConvertKeybindings(textdraws[numtextdraws].szText);
 		textdraws[numtextdraws].__unk2 = -1;
 		textdraws[numtextdraws].__unk3 = -1;
 		textdraws[numtextdraws].probablyTextureIdForPreview = -1;

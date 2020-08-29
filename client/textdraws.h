@@ -4,12 +4,6 @@
 #define MAX_PLAYER_TEXTDRAWS 256
 
 #pragma pack(push,1)
-struct TDNAME
-{
-	char szText[700+1];
-	char name[100];
-};
-
 struct TEXTDRAW
 {
 	char		szText[800 + 1];
@@ -54,7 +48,12 @@ struct TEXTDRAW
 //EXPECT_SIZE(struct TEXTDRAW, 0x9D6);
 #pragma pack(pop)
 
+#define TEXTDRAW_NAME_LEN 100
+#define TEXTDRAW_TEXT_LEN 800
+
 extern struct TEXTDRAW textdraws[MAX_TEXTDRAWS];
+extern char textdraw_text[MAX_TEXTDRAWS][TEXTDRAW_TEXT_LEN];
+extern char textdraw_name[MAX_TEXTDRAWS][TEXTDRAW_NAME_LEN];
 extern int *textdraw_enabled;
 extern int numtextdraws;
 

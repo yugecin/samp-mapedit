@@ -21,6 +21,8 @@ enum alignment {
 };
 
 struct TEXTDRAW textdraws[MAX_TEXTDRAWS];
+char textdraw_text[MAX_TEXTDRAWS][800];
+char textdraw_name[MAX_TEXTDRAWS][100];
 int *textdraw_enabled;
 int numtextdraws;
 
@@ -68,8 +70,8 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 		ui_rdb_click_match_userdata(rdbgroup_align, (void*) ALIGN_RIGHT);
 	}
 
-	ui_in_set_text(in_name, ((struct TDNAME*) td)->name);
-	ui_in_set_text(in_txt, td->szText);
+	ui_in_set_text(in_name, textdraw_name[td - textdraws]);
+	ui_in_set_text(in_txt, textdraw_text[td - textdraws]);
 
 	sprintf(tmptxt, "%d", td->iStyle);
 	ui_in_set_text(in_font, tmptxt);
@@ -134,7 +136,7 @@ void update_list()
 	for (i = 0; i < numtextdraws; i++) {
 		names[i] = listnames + i * MAX_LIST_ENTRY_LEN;
 		for (j = 0; j < MAX_LIST_ENTRY_LEN; j++) {
-			tmpchar = ((struct TDNAME*) &textdraws[i])->name[j];
+			tmpchar = textdraw_name[i][j];
 			if (tmpchar == ' ') {
 				names[i][j] = '_';
 			} else {
@@ -164,7 +166,7 @@ static
 void cb_in_name(struct UI_INPUT *in)
 {
 	if (IS_VALID_INDEX_SELECTED) {
-		strcpy(((struct TDNAME*) &textdraws[lst->selectedindex])->name, in->value);
+		strcpy(textdraw_name[lst->selectedindex], in->value);
 		update_list();
 	}
 }
@@ -184,15 +186,18 @@ void cb_in_txt(struct UI_INPUT *in)
 			if (v == '~') {
 				tildes++;
 			}
-			textdraws[lst->selectedindex].szText[i] = v;
+			textdraw_text[lst->selectedindex][i] = v;
 			if (v == 0) {
 				if (tildes % 2) {
-					strcpy(textdraws[lst->selectedindex].szText, "unmatched tilde");
+					strcpy(textdraw_text[lst->selectedindex], "unmatched tilde");
 				}
 				break;
 			}
 			i++;
 		}
+		/*Normally I shouldn't have to do this and SA-MP does it, but somehow it doesn't work?*/
+		strcpy(textdraws[lst->selectedindex].szText, textdraw_text[lst->selectedindex]);
+		game_TextConvertKeybindings(textdraws[lst->selectedindex].szText);
 	}
 }
 
@@ -358,14 +363,19 @@ void cb_btn_add(struct UI_BUTTON *btn)
 	if (IS_VALID_INDEX_SELECTED) {
 		for (i = numtextdraws; i > lst->selectedindex; i--) {
 			textdraws[i] = textdraws[i - 1];
+			strcpy(textdraw_name[i], textdraw_name[i - 1]);
+			strcpy(textdraw_text[i], textdraw_text[i - 1]);
+			strcpy(textdraws[i].szText, textdraw_text[i]);
+			game_TextConvertKeybindings(textdraws[i].szText);
 		}
 		index_to_select = lst->selectedindex + 1;
 	} else {
 		if (numtextdraws > 0) {
 			textdraws[numtextdraws] = textdraws[numtextdraws - 1];
 		} else {
-			sprintf(((struct TDNAME*) &textdraws[0])->name, "textdraw");
-			sprintf(textdraws[0].szText, "hi hi");
+			sprintf(textdraw_name[0], "textdraw");
+			sprintf(textdraw_text[0], "hi hi");
+			strcpy(textdraws[0].szText, textdraw_text[0]);
 			textdraws[0].fLetterHeight = 1.0f;
 			textdraws[0].fLetterWidth = .25f;
 			textdraws[0].dwLetterColor = -1;
@@ -400,11 +410,19 @@ static
 void cb_btn_up(struct UI_BUTTON *btn)
 {
 	struct TEXTDRAW tmp;
+	char tmptext[TEXTDRAW_TEXT_LEN];
+	char tmpname[TEXTDRAW_TEXT_LEN];
 
 	if (IS_VALID_INDEX_SELECTED && lst->selectedindex > 0) {
 		tmp = textdraws[lst->selectedindex - 1];
 		textdraws[lst->selectedindex - 1] = textdraws[lst->selectedindex];
 		textdraws[lst->selectedindex] = tmp;
+		strcpy(tmptext, textdraw_text[lst->selectedindex - 1]);
+		strcpy(textdraw_text[lst->selectedindex - 1], textdraw_text[lst->selectedindex]);
+		strcpy(textdraw_text[lst->selectedindex], tmptext);
+		strcpy(tmpname, textdraw_name[lst->selectedindex - 1]);
+		strcpy(textdraw_name[lst->selectedindex - 1], textdraw_name[lst->selectedindex]);
+		strcpy(textdraw_name[lst->selectedindex], tmpname);
 		lst->selectedindex--;
 		update_list();
 	}
@@ -414,11 +432,19 @@ static
 void cb_btn_down(struct UI_BUTTON *btn)
 {
 	struct TEXTDRAW tmp;
+	char tmptext[TEXTDRAW_TEXT_LEN];
+	char tmpname[TEXTDRAW_TEXT_LEN];
 
 	if (IS_VALID_INDEX_SELECTED && lst->selectedindex < numtextdraws - 1) {
 		tmp = textdraws[lst->selectedindex + 1];
 		textdraws[lst->selectedindex + 1] = textdraws[lst->selectedindex];
 		textdraws[lst->selectedindex] = tmp;
+		strcpy(tmptext, textdraw_text[lst->selectedindex + 1]);
+		strcpy(textdraw_text[lst->selectedindex + 1], textdraw_text[lst->selectedindex]);
+		strcpy(textdraw_text[lst->selectedindex], tmptext);
+		strcpy(tmpname, textdraw_name[lst->selectedindex + 1]);
+		strcpy(textdraw_name[lst->selectedindex + 1], textdraw_name[lst->selectedindex]);
+		strcpy(textdraw_name[lst->selectedindex], tmpname);
 		lst->selectedindex++;
 		update_list();
 	}

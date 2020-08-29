@@ -33,6 +33,9 @@ unsigned char *logBuffer = (char*) 0xBAB278;
 unsigned char pedPosBeingUpdated = 0;
 int (*randMax65535)();
 
+char tmptext[1000];
+char *ptmptext = tmptext;
+
 void unprotect_stuff()
 {
 	DWORD oldvp;
@@ -575,8 +578,27 @@ __declspec(naked) int game_TextPrintChar(float x, float y, char character)
 	_asm jmp eax
 }
 
+__declspec(naked) int game_TextConvertKeybindings(char *text)
+{
+	_asm mov eax, 0x69E160
+	_asm jmp eax
+}
+
+static
+void mstrcpy(char *d, char *s)
+{
+	strcpy(d, s);
+}
+
 __declspec(naked) int game_TextPrintString(float x, float y, char *text)
 {
+	_asm push [esp+0xC]
+	_asm push ptmptext
+	_asm call mstrcpy
+	_asm call game_TextConvertKeybindings
+	_asm add esp, 0x8
+	_asm mov eax, ptmptext
+	_asm mov [esp+0xC], eax
 	_asm mov eax, 0x71A700
 	_asm jmp eax
 }
@@ -586,6 +608,13 @@ __declspec(naked) int game_TextPrintStringFromBottom(x, y, text)
 	float y;
 	char *text;
 {
+	_asm push [esp+0xC]
+	_asm push ptmptext
+	_asm call mstrcpy
+	_asm call game_TextConvertKeybindings
+	_asm add esp, 0x8
+	_asm mov eax, ptmptext
+	_asm mov [esp+0xC], eax
 	_asm mov eax, 0x71A820
 	_asm jmp eax
 }

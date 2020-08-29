@@ -425,6 +425,7 @@ void ui_default_font()
 	game_TextSetAlign(LEFT);
 	game_TextSetOutline(1);
 	game_TextSetFont(1);
+	game_TextSetWrapX(2000.0f);
 }
 
 static

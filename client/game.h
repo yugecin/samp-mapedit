@@ -427,6 +427,7 @@ int game_TextGetSizeXY(struct Rect *size, float sizex, float sizey, char *text);
 sdk CFont::PrintChar
 */
 int game_TextPrintChar(float x, float y, char character);
+int game_TextConvertKeybindings(char *text);
 /**
 idb _drawText
 sdk CFont::PrintString
