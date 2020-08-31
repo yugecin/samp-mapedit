@@ -459,6 +459,8 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 	textdraw_enabled[numtextdraws] = 0;
 	for (i = lst->selectedindex; i < numtextdraws; i++) {
 		textdraws[i] = textdraws[i + 1];
+		strcpy(textdraw_text[i], textdraw_text[i + 1]);
+		strcpy(textdraw_name[i], textdraw_name[i + 1]);
 	}
 	i = lst->selectedindex;
 	update_list();
