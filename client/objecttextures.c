@@ -114,19 +114,22 @@ void update_material()
 }
 
 static
-void cb_modelid(struct UI_INPUT *in)
+void cb_btn_reset_material(struct UI_BUTTON *in)
 {
-	update_material();
+	int materialIndex;
+
+	materialIndex = (int) rdbgroup_materialindex->activebutton->_parent._parent.userdata;
+	objects_set_material(
+		object,
+		-1,
+		materialIndex,
+		"none",
+		"none",
+		0);
 }
 
 static
-void cb_in_txd(struct UI_INPUT *in)
-{
-	update_material();
-}
-
-static
-void cb_in_texture(struct UI_INPUT *in)
+void cb_btn_applymaterial(struct UI_BUTTON *in)
 {
 	update_material();
 }
@@ -359,24 +362,33 @@ void objecttextures_init()
 	rdb->_parent._parent.userdata = (void*) 15;
 	ui_wnd_add_child(wnd, rdb);
 
+	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Reset"));
+	ui_wnd_add_child(wnd, lbl = ui_lbl_make("==============================="));
+	lbl->_parent.span = 4;
+	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, btn = ui_btn_make("Reset", cb_btn_reset_material));
+	btn->_parent.span = 4;
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Set_material"));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("==============================="));
 	lbl->_parent.span = 4;
-	ui_wnd_add_child(wnd, ui_lbl_make("model:"));
-	ui_wnd_add_child(wnd, in_modelid = ui_in_make(cb_modelid));
-	in_modelid->_parent.span = 4;
-	ui_wnd_add_child(wnd, ui_lbl_make("txd:"));
-	ui_wnd_add_child(wnd, in_txd = ui_in_make(cb_in_txd));
-	in_txd->_parent.span = 4;
-	ui_wnd_add_child(wnd, ui_lbl_make("texture:"));
-	ui_wnd_add_child(wnd, in_texture = ui_in_make(cb_in_texture));
-	in_texture->_parent.span = 4;
-	ui_wnd_add_child(wnd, ui_lbl_make("colARGB:"));
-	ui_wnd_add_child(wnd, in_matcol = ui_in_make(cb_in_matcol));
-	in_matcol->_parent.span = 4;
 	ui_wnd_add_child(wnd, ui_lbl_make("From_object:"));
 	ui_wnd_add_child(wnd, btn = ui_btn_make("pick_object", cb_btn_pick_object));
 	btn->_parent.span = 4;
+	ui_wnd_add_child(wnd, ui_lbl_make("model:"));
+	ui_wnd_add_child(wnd, in_modelid = ui_in_make(NULL));
+	in_modelid->_parent.span = 4;
+	ui_wnd_add_child(wnd, ui_lbl_make("txd:"));
+	ui_wnd_add_child(wnd, in_txd = ui_in_make(NULL));
+	in_txd->_parent.span = 4;
+	ui_wnd_add_child(wnd, ui_lbl_make("texture:"));
+	ui_wnd_add_child(wnd, in_texture = ui_in_make(NULL));
+	in_texture->_parent.span = 4;
+	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, btn = ui_btn_make("Apply", cb_btn_applymaterial));
+	btn->_parent.span = 4;
+	ui_wnd_add_child(wnd, ui_lbl_make("colARGB:"));
+	ui_wnd_add_child(wnd, in_matcol = ui_in_make(cb_in_matcol));
+	in_matcol->_parent.span = 4;
 
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Set_text"));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("==============================="));
