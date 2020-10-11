@@ -19,6 +19,7 @@
 #include "removedbuildings.h"
 #include "removebuildingeditor.h"
 #include "removedbuildingsui.h"
+#include "samp.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
 #include <string.h>
@@ -40,6 +41,122 @@ struct OBJECT manipulateObject;
 struct CEntity *manipulateEntity = NULL;
 
 int lastMadeObjectModel = 1297;
+
+void objects_set_material_text(
+	struct OBJECT *object,
+	char materialindex,
+	char texturesize,
+	char *font,
+	char fontsize,
+	char bold,
+	int textcol,
+	int bgcol,
+	char align,
+	char *text)
+{
+	struct RPCParameters rpc_parameters;
+	char rpcdata[500];
+	char *datapos;
+	int font_len, text_len;
+
+	font_len = strlen(font);
+	text_len = strlen(text) + 1; /*it's zero terminated in the bitstream*/
+
+	datapos = rpcdata;
+
+	*(short*) datapos = object->samp_objectid;
+	datapos += 2;
+	*datapos = 2; /*type text*/
+	datapos += 1;
+	*datapos = materialindex;
+	datapos++;
+	*datapos = texturesize;
+	datapos++;
+	*datapos = font_len;
+	datapos++;
+	memcpy(datapos, font, font_len);
+	datapos += font_len;
+	*datapos = fontsize;
+	datapos++;
+	*datapos = bold;
+	datapos++;
+	*(int*) datapos = textcol;
+	datapos += 4;
+	*(int*) datapos = bgcol;
+	datapos += 4;
+	*datapos = align;
+	datapos++;
+	/*hack around the compression/encryption by sending a known string and patching afterwards?*/
+	//memcpy(datapos, text, text_len); /*TODO: this is wrong (WriteCompressed)*/
+	//8C 18 FA 15 2A 13 B5 4;
+	*datapos = 0x8C;
+	datapos++;
+	*datapos = 0x18;
+	datapos++;
+	*datapos = 0xFA;
+	datapos++;
+	*datapos = 0x15;
+	datapos++;
+	*datapos = 0x2A;
+	datapos++;
+	*datapos = 0x13;
+	datapos++;
+	*datapos = 0xB5;
+	datapos++;
+	*datapos = 0x40;
+	text_len = 8;
+
+	rpc_parameters.data = rpcdata;
+	rpc_parameters.dataBitLength = (2 + 1 + 1 + 1 + 1 + font_len + 1 + 1 + 4 + 4 + 1 + text_len) * 8;
+	rpc_parameters.dataBitLength -= 4;
+
+	samp_patchObjectMaterialReadText(text);
+	samp_SetPlayerObjectMaterial(&rpc_parameters);
+	samp_unpatchObjectMaterialReadText();
+}
+
+void objects_set_material(
+	struct OBJECT *object,
+	short modelid,
+	char materialindex,
+	char *txdname,
+	char *texturename,
+	int materialcolor)
+{
+	struct RPCParameters rpc_parameters;
+	char rpcdata[500];
+	char *datapos;
+	struct PRCDATA_SetPlayerObjectMaterialText *rpcdata_;
+	int txdname_len, texturename_len;
+
+	txdname_len = strlen(txdname);
+	texturename_len = strlen(texturename);
+
+	rpcdata_ = (struct PRCDATA_SetPlayerObjectMaterialText*) rpcdata;
+
+	rpcdata_->objectid = object->samp_objectid;
+	rpcdata_->materialType = 1; /*material*/
+	rpcdata_->materialindex = materialindex;
+	rpcdata_->modelid = modelid;
+	datapos = rpcdata;
+	datapos += sizeof(struct PRCDATA_SetPlayerObjectMaterialText);
+	*datapos = (char) txdname_len;
+	datapos++;
+	memcpy(datapos, txdname, txdname_len);
+	datapos += txdname_len;
+	*datapos = (char) texturename_len;
+	datapos++;
+	memcpy(datapos, texturename, texturename_len);
+	datapos += texturename_len;
+	memcpy(datapos, &materialcolor, 4);
+
+	rpc_parameters.data = rpcdata;
+	rpc_parameters.dataBitLength =
+		(sizeof(struct PRCDATA_SetPlayerObjectMaterialText) +
+		1 + txdname_len + 1 + texturename_len + 4) * 8;
+
+	samp_SetPlayerObjectMaterial(&rpc_parameters);
+}
 
 /**
 Since x-coord of creation is a pointer to the object handle, the position needs
@@ -115,6 +232,11 @@ void objects_object_creation_confirmed(struct OBJECT *object)
 	TRACE("objects_object_creation_confirmed");
 	objects_set_position_rotation_after_creation(object);
 
+	//objects_set_material_text(object, 0, 20, "Arial", 12, -1, 0xFFFF0000, 0, "texting");
+	//objects_set_material(object, 4811, 0, "beach_las", "sandnew_law", 0xFFFFFFFF);
+	//objects_set_material(object, 4811, 1, "beach_las", "sandnew_law", 0xFFFFFFFF);
+	//objects_set_material(object, 4811, 2, "beach_las", "sandnew_law", 0xFFFFFFFF);
+	//objects_set_material(object, 4811, 3, "beach_las", "sandnew_law", 0xFFFFFFFF);
 	if (object == &manipulateObject) {
 		manipulateEntity = object->sa_object;
 		manipulateEntity->flags &= ~1; /*collision flag*/

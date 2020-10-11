@@ -411,6 +411,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\objecttextures.c"
+			>
+		</File>
+		<File
+			RelativePath="..\objecttextures.h"
+			>
+		</File>
+		<File
 			RelativePath="..\persistence.c"
 			>
 		</File>

@@ -101,3 +101,70 @@ __declspec(naked) int _samp_hide_chat_bar()
 	}
 }
 */
+
+__declspec(naked) void samp_SetPlayerObjectMaterial(struct RPCParameters *rpc_parameters)
+{
+	_asm {
+		mov eax, [samp_handle]
+		add eax, 0x1B650
+		jmp eax
+	}
+}
+
+static char materialText[2048];
+static char *materialTextPtr = materialText;
+static int materialTextLen;
+static char materialTextPatch1;
+static int materialTextPatch4;
+static int materialPatchRet;
+
+static
+void mstrcpy(char *dest, char *src)
+{
+	while (*dest++ = *src++);
+}
+
+__declspec(naked) void samp_RPC_SetPlayerObjectMaterial_Text_ReadTextPatch()
+{
+	_asm {
+		lea ecx, [esp+0C80h-0x818]
+		mov eax, [materialTextPtr]
+		push edx
+		mov edx, eax
+next:
+		mov al, [edx]
+		mov [ecx], al
+		add ecx, 1
+		add edx, 1
+		test al, al
+		jne next
+		pop edx
+		mov eax, [materialPatchRet]
+		jmp eax
+	}
+}
+
+void samp_patchObjectMaterialReadText(char *text)
+{
+	int addr;
+	DWORD oldvp;
+
+	materialTextLen = strlen(text) + 1;
+	memcpy(materialText, text, materialTextLen);
+
+	addr = samp_handle + 0x1B900;
+	materialPatchRet = samp_handle + 0x1B920;
+	VirtualProtect((void*) addr, 5, PAGE_EXECUTE_READWRITE, &oldvp);
+	materialTextPatch1 = *(char*) addr;
+	materialTextPatch4 = *(int*) (addr + 1);
+	*(char*) addr = 0xE9;
+	*(int*) (addr + 1) = (int) &samp_RPC_SetPlayerObjectMaterial_Text_ReadTextPatch - (addr + 5);
+}
+
+void samp_unpatchObjectMaterialReadText()
+{
+	int addr;
+	addr = samp_handle + 0x1B900;
+	*(char*) addr = materialTextPatch1;
+	*(int*) (addr + 1) = materialTextPatch4;
+}

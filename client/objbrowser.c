@@ -47,6 +47,9 @@ static unsigned char *cloud_render_opcode;
 static unsigned char cloud_render_original_opcode;
 static char blacklistedObjects[MAX_MODELS];
 
+int objbrowser_never_create;
+void (*objbrowser_cb)(int);
+
 #define DEFAULT_ANGLE_RATIO 0.2f
 
 static
@@ -321,12 +324,17 @@ void cb_btn_create(struct UI_BUTTON *btn)
 {
 	struct OBJECT *object;
 
-	object = active_layer->objects + active_layer->numobjects++;
-	memcpy(object, &picking_object, sizeof(struct OBJECT));
-	object->pos = positionToCommit;
-	memset(&object->rot, 0, sizeof(struct RwV3D));
-	objects_mkobject(object);
+	if (!objbrowser_never_create) {
+		object = active_layer->objects + active_layer->numobjects++;
+		memcpy(object, &picking_object, sizeof(struct OBJECT));
+		object->pos = positionToCommit;
+		memset(&object->rot, 0, sizeof(struct RwV3D));
+		objects_mkobject(object);
+	}
 	restore_after_hide();
+	if (objbrowser_cb) {
+		objbrowser_cb(picking_object.model);
+	}
 }
 
 static
@@ -348,6 +356,8 @@ void cb_btn_switchtime(struct UI_BUTTON *btn)
 
 void objbrowser_show(struct RwV3D *positionToCreate)
 {
+	objbrowser_never_create = 0;
+	objbrowser_cb = NULL;
 	lbltxt_modelid[0] = lbltxt_modelname[0] = 0;
 	positionToCommit = *positionToCreate;
 	originalCameraPos = camera->position;

@@ -3,8 +3,9 @@ samp-mapedit
 
 An in-game map editor for SA:MP/GTA San Andreas. The editor is backed by SA:MP,
 to ensure that all SA:MP specific functions (such as SetObjectMaterial and
-SetObjectMaterialText, still to be implemented) will behave exactly as shown in
-the editor.
+SetObjectMaterialText) will behave exactly as shown in the editor.
+
+demo/images: https://twitter.com/yugecin26/status/1255233630051487744
 
 Install
 -------

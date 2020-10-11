@@ -3,6 +3,7 @@
 #include "common.h"
 #include "ide.h"
 #include "ui.h"
+#include "objecttextures.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -79,6 +80,7 @@ int ide_load_file(char *filename)
 	int pos;
 	int modelid;
 	int amount;
+	char *txdptr;
 
 	amount = 0;
 	if (f = fopen(filename, "r")) {
@@ -133,6 +135,16 @@ nextchr:
 				pos++;
 				goto nextchr;
 			}
+			pos++;
+			if (buf[pos] == ' ') {
+				pos++;
+			}
+			txdptr = buf + pos;
+			while (buf[pos] && buf[pos] != ',') {
+				pos++;
+			}
+			buf[pos] = 0;
+			objecttextures_associate_model_txd(modelid, txdptr);
 		}
 		goto nextline;
 done:

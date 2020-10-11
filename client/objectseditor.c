@@ -9,6 +9,7 @@
 #include "bulkedit.h"
 #include "bulkeditui.h"
 #include "objectseditor.h"
+#include "objecttextures.h"
 #include "ui.h"
 #include "sockets.h"
 #include "../shared/serverlink.h"
@@ -98,6 +99,12 @@ void cb_in_rotation(struct UI_INPUT *in)
 	bulkedit_update();
 
 	sockets_send(&nc, sizeof(nc));
+}
+
+static
+void cb_btn_textures(struct UI_BUTTON *btn)
+{
+	objecttextures_show(editingObject);
 }
 
 static
@@ -307,6 +314,9 @@ void objedit_init()
 	ui_wnd_add_child(wnd, NULL);
 	in_rot_z = ui_in_make(cb_in_rotation);
 	ui_wnd_add_child(wnd, in_rot_z);
+	btn = ui_btn_make("Textures", cb_btn_textures);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Move", cb_btn_move);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);

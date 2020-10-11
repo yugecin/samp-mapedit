@@ -69,6 +69,24 @@ struct OBJECT *objects_find_by_sa_object(void *sa_object);
 void objects_clone(struct CEntity *entity);
 void objects_delete_obj(struct OBJECT *obj);
 struct OBJECTLAYER *objects_layer_for_object(struct OBJECT *obj);
+void objects_set_material_text(
+	struct OBJECT *object,
+	char materialindex,
+	char texturesize,
+	char *font,
+	char fontsize,
+	char bold,
+	int textcol,
+	int bgcol,
+	char align,
+	char *text);
+void objects_set_material(
+	struct OBJECT *object,
+	short modelid,
+	char materialindex,
+	char *txdname,
+	char *texturename,
+	int materialcolor);
 
 extern struct OBJECTLAYER layers[MAX_LAYERS];
 extern struct OBJECTLAYER *active_layer;

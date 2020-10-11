@@ -7,3 +7,6 @@ void objbrowser_init();
 void objbrowser_dispose();
 int objbrowser_handle_esc();
 struct OBJECT *objbrowser_object_by_handle(int sa_handle);
+
+extern int objbrowser_never_create;
+extern void (*objbrowser_cb)(int);

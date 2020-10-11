@@ -15,6 +15,7 @@
 #include "objbrowser.h"
 #include "objectlistui.h"
 #include "objectseditor.h"
+#include "objecttextures.h"
 #include "persistence.h"
 #include "player.h"
 #include "project.h"
@@ -177,6 +178,7 @@ void client_finalize()
 	vehsel_dispose();
 	vehedit_dispose();
 	bulkeditui_dispose();
+	objecttextures_dispose();
 
 	ui_dispose();
 	timeweather_dispose();
@@ -243,6 +245,7 @@ void client_init()
 	racecpeditor_init();
 	textdraws_init();
 	massmove_init();
+	objecttextures_init();
 
 	prj_do_show_window();
 
