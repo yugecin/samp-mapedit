@@ -7,6 +7,18 @@ SetObjectMaterialText) will behave exactly as shown in the editor.
 
 demo/images: https://twitter.com/yugecin26/status/1255233630051487744
 
+Note: I made this primarily for myself, as I had difficulties finding an editor
+with the features or ease of use that I wanted (although the ease of use for
+this editor is probably way different for someone that is not me). This editor
+works for me and is made to work with the game/server executables that I have.
+I'm not interested in spending time to make this editor work with other version
+of the game or to make it easier to use for the general public. This software
+is provided as is, with no guarantees and probably no support (though you can
+try your luck by asking simple questions). Adding support for different versions
+and other people's usecases is a chore and costs time and will probably kill my
+motivation for this project. You're welcome to run this and improve it.
+This project is licensed under GPLv3.
+
 Install
 -------
 * certain functions might not work when Silent Patch is used *
