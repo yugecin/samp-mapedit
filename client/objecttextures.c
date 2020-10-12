@@ -32,6 +32,10 @@ static struct UI_INPUT *in_font, *in_text, *in_fontsize, *in_fgcol;
 static struct UI_INPUT *in_bgcol, *in_matcol, *in_modelid, *in_txd, *in_texture;
 static struct UI_CHECKBOX *chk_bold;
 
+static int last_modelid;
+static char last_txd[100], last_texture[100];
+static int last_color;
+
 static struct UI_WINDOW *wnd_textures;
 #define NUM_TEXTURES_BUTTONS 63
 static struct UI_BUTTON *btn_textures[NUM_TEXTURES_BUTTONS];
@@ -99,18 +103,21 @@ void col(char *text, int *out)
 static
 void update_material()
 {
-	int modelid;
 	int materialIndex;
 
 	materialIndex = (int) rdbgroup_materialindex->activebutton->_parent._parent.userdata;
-	modelid = atoi(in_modelid->value);
+	last_modelid = atoi(in_modelid->value);
 	objects_set_material(
 		object,
-		modelid,
+		last_modelid,
 		materialIndex,
 		in_txd->value,
 		in_texture->value,
 		matcol);
+
+	strcpy(last_txd, in_txd->value);
+	strcpy(last_texture, in_texture->value);
+	last_color = matcol;
 }
 
 static
@@ -129,7 +136,7 @@ void cb_btn_reset_material(struct UI_BUTTON *in)
 }
 
 static
-void cb_btn_applymaterial(struct UI_BUTTON *in)
+void cb_btn_applymaterial(struct UI_BUTTON *btn)
 {
 	update_material();
 }
@@ -137,7 +144,19 @@ void cb_btn_applymaterial(struct UI_BUTTON *in)
 static
 void cb_in_matcol(struct UI_INPUT *in)
 {
-	col(in->value, &matcol);
+	update_material();
+}
+
+static
+void cb_btn_applyprev(struct UI_BUTTON *btn)
+{
+	char str[50];
+
+	sprintf(str, "%d", last_modelid);
+	ui_in_set_text(in_modelid, str);
+	ui_in_set_text(in_txd, last_txd);
+	ui_in_set_text(in_texture, last_texture);
+	matcol = last_color;
 	update_material();
 }
 
@@ -389,6 +408,9 @@ void objecttextures_init()
 	ui_wnd_add_child(wnd, ui_lbl_make("colARGB:"));
 	ui_wnd_add_child(wnd, in_matcol = ui_in_make(cb_in_matcol));
 	in_matcol->_parent.span = 4;
+	ui_wnd_add_child(wnd, NULL);
+	ui_wnd_add_child(wnd, btn = ui_btn_make("Apply_previously_applied_material", cb_btn_applyprev));
+	btn->_parent.span = 4;
 
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Set_text"));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("==============================="));
