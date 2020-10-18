@@ -85,3 +85,30 @@ void common_trace(char *data)
 	*((int*) 0xBAB2C8) = (int) traceptr;
 	traceptr += len + 1;
 }
+
+int common_col(char *text, int *out)
+{
+	int j, col, c;
+	char unused[30];
+
+	col = 0;
+	for (j = 0; j < 8; j++) {
+		c = text[j] - '0';
+		if (c < 0 || 9 < c) {
+			c = text[j] - 'A' + 10;
+			if (c < 10 || 15 < c) {
+				c = text[j] - 'a' + 10;
+				if (c < 10 || 15 < c) {
+					return 0;
+				}
+			}
+		}
+		/*this sprintf is unused, but removing it results in wrong values*/
+		/*99000000 would deviate into 99000007 or something*/
+		/*no idea why, optimizations are even disabled*/
+		sprintf(unused, "%p", c << ((7 - j) * 4));
+		col |= c << ((7 - j) * 4);
+	}
+	*out = col;
+	return 1;
+}

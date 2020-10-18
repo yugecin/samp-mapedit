@@ -36,6 +36,8 @@ static int last_modelid;
 static char last_txd[100], last_texture[100];
 static int last_color;
 
+static char txt_lbl_modified[100];
+
 static struct UI_WINDOW *wnd_textures;
 #define NUM_TEXTURES_BUTTONS 63
 static struct UI_BUTTON *btn_textures[NUM_TEXTURES_BUTTONS];
@@ -71,33 +73,6 @@ void objecttextures_associate_model_txd(int model, char *txd)
 			break;
 		}
 	}
-}
-
-static
-void col(char *text, int *out)
-{
-	int j, col, c;
-	char unused[30];
-
-	col = 0;
-	for (j = 0; j < 8; j++) {
-		c = text[j] - '0';
-		if (c < 0 || 9 < c) {
-			c = text[j] - 'A' + 10;
-			if (c < 10 || 15 < c) {
-				c = text[j] - 'a' + 10;
-				if (c < 10 || 15 < c) {
-					return;
-				}
-			}
-		}
-		/*this sprintf is unused, but removing it results in wrong values*/
-		/*99000000 would deviate into 99000007 or something*/
-		/*no idea why, optimizations are even disabled*/
-		sprintf(unused, "%p", c << ((7 - j) * 4));
-		col |= c << ((7 - j) * 4);
-	}
-	*out = col;
 }
 
 static
@@ -269,14 +244,14 @@ void cb_in_text(struct UI_INPUT *in)
 static
 void cb_in_fgcol(struct UI_INPUT *in)
 {
-	col(in->value, &fgcol);
+	common_col(in->value, &fgcol);
 	update_material_text();
 }
 
 static
 void cb_in_bgcol(struct UI_INPUT *in)
 {
-	col(in->value, &bgcol);
+	common_col(in->value, &bgcol);
 	update_material_text();
 }
 
@@ -380,6 +355,9 @@ void objecttextures_init()
 	rdb = ui_rdb_make("15", rdbgroup_materialindex, 0);
 	rdb->_parent._parent.userdata = (void*) 15;
 	ui_wnd_add_child(wnd, rdb);
+	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Modified_indices"));
+	ui_wnd_add_child(wnd, lbl = ui_lbl_make(txt_lbl_modified));
+	lbl->_parent.span = 4;
 
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("Reset"));
 	ui_wnd_add_child(wnd, lbl = ui_lbl_make("==============================="));

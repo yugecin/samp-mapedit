@@ -20,14 +20,14 @@ static struct UI_WINDOW *wnd;
 static struct UI_LIST *lst;
 static struct UI_BUTTON *btn_edit, *btn_delete;
 static struct UI_LABEL *lbl_num;
-static struct UI_INPUT *in_r, *in_g, *in_b, *in_a;
+static struct UI_INPUT *in_color;
 static float zone_z;
 static char lbl_num_text[35];
 #define GANG_ZONE_TEXT_LEN 16
 static char listnames[MAX_GANG_ZONES * GANG_ZONE_TEXT_LEN];
 static int gangzonesactive;
 static int was_lmb_down;
-static int dont_update_color_textboxes;
+static int dont_update_color_textbox;
 
 /*this is actually size/2*/
 #define HANDLE_SIZE (7.5f)
@@ -78,15 +78,9 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 	}
 	btn_delete->enabled = 1;
 
-	if (!dont_update_color_textboxes) {
-		sprintf(buf, "%d", gangzone_data[lst->selectedindex].color & 0xFF);
-		ui_in_set_text(in_r, buf);
-		sprintf(buf, "%d", (gangzone_data[lst->selectedindex].color >> 8) & 0xFF);
-		ui_in_set_text(in_g, buf);
-		sprintf(buf, "%d", (gangzone_data[lst->selectedindex].color >> 16) & 0xFF);
-		ui_in_set_text(in_b, buf);
-		sprintf(buf, "%d", (gangzone_data[lst->selectedindex].color >> 24) & 0xFF);
-		ui_in_set_text(in_a, buf);
+	if (!dont_update_color_textbox) {
+		sprintf(buf, "%08x", gangzone_data[lst->selectedindex].color);
+		ui_in_set_text(in_color, buf);
 	}
 	col = gangzone_data[lst->selectedindex].color;
 	col = (col & 0xFF00FF00) | (0xFF - (col & 0xFF)) |
@@ -165,14 +159,11 @@ void in_cb_color(struct UI_INPUT *in)
 {
 	int col;
 
-	if (IS_VALID_INDEX_SELECTED) {
-		col = gangzone_data[lst->selectedindex].color;
-		col &= ~(0xFF << (int) in->_parent.userdata);
-		col |= (0xFF & atoi(in->value)) << (int) in->_parent.userdata;
+	if (IS_VALID_INDEX_SELECTED && common_col(in->value, &col)) {
 		gangzone_data[lst->selectedindex].color = col;
-		dont_update_color_textboxes = 1;
+		dont_update_color_textbox = 1;
 		update_list();
-		dont_update_color_textboxes = 0;
+		dont_update_color_textbox = 0;
 	}
 };
 
@@ -459,22 +450,9 @@ void gangzone_init()
 	btn_delete->_parent.span = 2;
 	btn_delete->enabled = 0;
 	ui_wnd_add_child(wnd, btn_delete);
-	ui_wnd_add_child(wnd, ui_lbl_make("red"));
-	in_r = ui_in_make(in_cb_color);
-	in_r->_parent.userdata = (void*) 0;
-	ui_wnd_add_child(wnd, in_r);
-	ui_wnd_add_child(wnd, ui_lbl_make("green"));
-	in_g = ui_in_make(in_cb_color);
-	in_g->_parent.userdata = (void*) 8;
-	ui_wnd_add_child(wnd, in_g);
-	ui_wnd_add_child(wnd, ui_lbl_make("blue"));
-	in_b = ui_in_make(in_cb_color);
-	in_b->_parent.userdata = (void*) 16;
-	ui_wnd_add_child(wnd, in_b);
-	ui_wnd_add_child(wnd, ui_lbl_make("alpha"));
-	in_a = ui_in_make(in_cb_color);
-	in_a->_parent.userdata = (void*) 24;
-	ui_wnd_add_child(wnd, in_a);
+	ui_wnd_add_child(wnd, ui_lbl_make("colABGR"));
+	in_color = ui_in_make(in_cb_color);
+	ui_wnd_add_child(wnd, in_color);
 }
 
 void gangzone_dispose()

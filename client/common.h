@@ -35,3 +35,4 @@ void center_camera_on(struct RwV3D *pos);
 void common_trace(char *data);
 void common_init();
 void common_dispose();
+int common_col(char *text, int *out);
