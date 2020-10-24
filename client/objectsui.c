@@ -552,7 +552,7 @@ void cb_btn_objclone(struct UI_BUTTON *btn)
 	}
 
 	if (selected_entity != NULL) {
-		objects_clone(selected_entity);
+		objects_clone(NULL, selected_entity);
 	}
 }
 

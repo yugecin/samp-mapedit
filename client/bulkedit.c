@@ -58,7 +58,7 @@ void bulkedit_delete_objects()
 void bulkedit_clone_all()
 {
 	struct OBJECT *clone;
-	int i;
+	int i, j;
 
 	if (numBulkEditObjects == 0) {
 		return;
@@ -87,6 +87,11 @@ void bulkedit_clone_all()
 		memcpy(clone, bulkEditObjects[i], sizeof(struct OBJECT));
 		game_ObjectGetPos(bulkEditObjects[i]->sa_object, &clone->pos);
 		game_ObjectGetRot(bulkEditObjects[i]->sa_object, &clone->rot);
+		clone->num_materials = bulkEditObjects[i]->num_materials;
+		for (j = 0; j < OBJECT_MAX_MATERIALS; j++) {
+			clone->material_index[j] = bulkEditObjects[i]->material_index[j];
+			clone->material_texture[j] = bulkEditObjects[i]->material_texture[j];
+		}
 		objects_mkobject(clone);
 		active_layer->numobjects++;
 	}

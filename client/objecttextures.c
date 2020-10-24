@@ -79,6 +79,7 @@ static
 void update_material()
 {
 	int materialIndex;
+	int i;
 
 	materialIndex = (int) rdbgroup_materialindex->activebutton->_parent._parent.userdata;
 	last_modelid = atoi(in_modelid->value);
@@ -93,12 +94,29 @@ void update_material()
 	strcpy(last_txd, in_txd->value);
 	strcpy(last_texture, in_texture->value);
 	last_color = matcol;
+
+	for (i = 0; i < object->num_materials; i++) {
+		if (object->material_index[i] == materialIndex) {
+			goto storematerial;
+		}
+	}
+	object->num_materials++;
+storematerial:
+	object->material_index[i] = materialIndex;
+	object->material_type[i] = 1;
+	object->material_texture[i].model = last_modelid;
+	object->material_texture[i].txdname_len = strlen(in_txd->value);
+	strcpy(object->material_texture[i].txdname, in_txd->value);
+	object->material_texture[i].texture_len = strlen(in_texture->value);
+	strcpy(object->material_texture[i].texture, in_texture->value);
+	object->material_texture[i].color = matcol;
 }
 
 static
 void cb_btn_reset_material(struct UI_BUTTON *in)
 {
 	int materialIndex;
+	int i;
 
 	materialIndex = (int) rdbgroup_materialindex->activebutton->_parent._parent.userdata;
 	objects_set_material(
@@ -108,6 +126,18 @@ void cb_btn_reset_material(struct UI_BUTTON *in)
 		"none",
 		"none",
 		0);
+
+	for (i = 0; i < object->num_materials; i++) {
+		if (object->material_index[i] == materialIndex) {
+			while (i < object->num_materials - 1) {
+				object->material_index[i] = object->material_index[i + 1];
+				object->material_type[i] = object->material_type[i + 1];
+				object->material_texture[i] = object->material_texture[i + 1];
+				i++;
+			}
+			object->num_materials--;
+		}
+	}
 }
 
 static
@@ -119,7 +149,9 @@ void cb_btn_applymaterial(struct UI_BUTTON *btn)
 static
 void cb_in_matcol(struct UI_INPUT *in)
 {
-	update_material();
+	if (common_col(in->value, &matcol)) {
+		update_material();
+	}
 }
 
 static

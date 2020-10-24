@@ -229,14 +229,23 @@ int objects_object_created(struct OBJECT *object)
 static
 void objects_object_creation_confirmed(struct OBJECT *object)
 {
+	int i;
+
 	TRACE("objects_object_creation_confirmed");
 	objects_set_position_rotation_after_creation(object);
 
-	//objects_set_material_text(object, 0, 20, "Arial", 12, -1, 0xFFFF0000, 0, "texting");
-	//objects_set_material(object, 4811, 0, "beach_las", "sandnew_law", 0xFFFFFFFF);
-	//objects_set_material(object, 4811, 1, "beach_las", "sandnew_law", 0xFFFFFFFF);
-	//objects_set_material(object, 4811, 2, "beach_las", "sandnew_law", 0xFFFFFFFF);
-	//objects_set_material(object, 4811, 3, "beach_las", "sandnew_law", 0xFFFFFFFF);
+	for (i = 0; i < object->num_materials; i++) {
+		if (object->material_type[i] == 1) {
+			objects_set_material(
+				object,
+				object->material_texture[i].model,
+				object->material_index[i],
+				object->material_texture[i].txdname,
+				object->material_texture[i].texture,
+				object->material_texture[i].color);
+		}
+	}
+
 	if (object == &manipulateObject) {
 		manipulateEntity = object->sa_object;
 		manipulateEntity->flags &= ~1; /*collision flag*/
@@ -380,6 +389,7 @@ void objects_create_dummy_entity()
 	manipulateObject.pos.x = 0.0f;
 	manipulateObject.pos.x = 0.0f;
 	manipulateObject.pos.z = -10000.0;
+	manipulateObject.num_materials = 0;
 	objects_mkobject(&manipulateObject);
 }
 
@@ -625,12 +635,22 @@ struct OBJECT *objects_find_by_sa_object(void *sa_object)
 	return NULL;
 }
 
-void objects_clone(struct CEntity *entity)
+void objects_clone(struct OBJECT *object, struct CEntity *entity)
 {
+	int i;
+
 	if (cloning_object.model == 0) {
 		cloning_object.model = entity->model;
 		game_ObjectGetPos(entity, &cloning_object.pos);
 		game_ObjectGetRot(entity, &cloning_object_rot);
+		cloning_object.num_materials = 0;
+		if (object) {
+			cloning_object.num_materials = object->num_materials;
+			for (i = 0; i < OBJECT_MAX_MATERIALS; i++) {
+				cloning_object.material_index[i] = object->material_index[i];
+				cloning_object.material_texture[i] = object->material_texture[i];
+			}
+		}
 		objects_mkobject(&cloning_object);
 	}
 }

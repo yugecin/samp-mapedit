@@ -124,6 +124,7 @@ void create_object()
 	btn_create->enabled = 0;
 	btn_prev->enabled = btn_next->enabled = 0;
 	picking_object.pos = positionToPreview;
+	picking_object.num_materials = 0;
 	objects_mkobject(&picking_object);
 }
 
@@ -329,6 +330,7 @@ void cb_btn_create(struct UI_BUTTON *btn)
 		memcpy(object, &picking_object, sizeof(struct OBJECT));
 		object->pos = positionToCommit;
 		memset(&object->rot, 0, sizeof(struct RwV3D));
+		object->num_materials = 0;
 		objects_mkobject(object);
 	}
 	restore_after_hide();

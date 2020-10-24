@@ -56,6 +56,17 @@ struct CEntity *objlistui_index_to_entity(int idx)
 }
 
 static
+struct OBJECT *objlistui_index_to_object(int idx)
+{
+	if (idx >= 0 && fromLayers) {
+		if (idx < active_layer->numobjects) {
+			return &active_layer->objects[idx];
+		}
+	}
+	return NULL;
+}
+
+static
 void objlistui_refresh_list_from_layer()
 {
 	char *unknown = "unknown";
@@ -257,7 +268,7 @@ void cb_btn_clone(struct UI_BUTTON *btn)
 	entity = objlistui_index_to_entity(lst->selectedindex);
 	if (entity != NULL) {
 		lst->selectedindex = -1;
-		objects_clone(entity);
+		objects_clone(objlistui_index_to_object(lst->selectedindex), entity);
 	}
 }
 

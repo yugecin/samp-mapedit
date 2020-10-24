@@ -17,15 +17,22 @@ union MAPDATA {
 		int version;
 		int numremoves;
 		int numobjects;
+		int objectdata_size;
 		int numzones;
 		float streamin;
 		float streamout;
 		float drawdistance;
 	} header;
 	struct {
+		short objectdata_size;
 		int model;
 		struct RwV3D pos;
 		struct RwV3D rot;
+		float drawdistance;
+		char no_camera_col;
+		short attached_object_id;
+		short attached_vehicle_id;
+		char num_materials;
 	} object;
 	struct {
 		int model;
@@ -93,7 +100,7 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	struct REMOVEDBUILDING *remove;
 	FILE *f, *meta;
 	union MAPDATA data;
-	int i;
+	int i, j;
 	char haslod;
 	char descriptionlen;
 	int dogangzones;
@@ -109,7 +116,7 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 		meta = NULL;
 	}
 
-	data.header.version = 0x0250414D;
+	data.header.version = 0x0350414D;
 	data.header.numremoves = 0;
 	for (i = 0; i < layer->numremoves; i++) {
 		if (layer->removes[i].lodmodel) {
@@ -119,6 +126,17 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 		}
 	}
 	data.header.numobjects = layer->numobjects;
+	data.header.objectdata_size = sizeof(data.object) * layer->numobjects;
+	for (i = 0; i < layer->numobjects; i++) {
+		object = layer->objects + i;
+		for (j = 0; j < object->num_materials; j++) {
+			if (object->material_type[j] == 1) {
+				data.header.objectdata_size += 1 + 1 + 2 + 1 + 1 + 4;
+				data.header.objectdata_size += object->material_texture[j].txdname_len;
+				data.header.objectdata_size += object->material_texture[j].texture_len;
+			}
+		}
+	}
 	data.header.numzones = dogangzones ? numgangzones : 0;
 	data.header.streamin = layer->stream_in_radius;
 	data.header.streamout = layer->stream_out_radius;
@@ -150,6 +168,21 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 		fwrite(&descriptionlen, sizeof(char), 1, meta);
 	}
 
+	if (dogangzones) {
+		for (i = 0; i < numgangzones; i++) {
+			data.gangzone.west = gangzone_data[i].minx;
+			data.gangzone.south = gangzone_data[i].miny;
+			data.gangzone.east = gangzone_data[i].maxx;
+			data.gangzone.north = gangzone_data[i].maxy;
+			data.gangzone.color = gangzone_data[i].color;
+			fwrite(&data.gangzone, sizeof(data.gangzone), 1, f);
+		}
+	}
+
+	data.object.drawdistance = data.header.drawdistance;
+	data.object.no_camera_col = 0;
+	data.object.attached_object_id = -1;
+	data.object.attached_vehicle_id = -1;
 	for (i = 0; i < layer->numobjects; i++) {
 		object = layer->objects + i;
 		data.object.model = object->model;
@@ -160,17 +193,27 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 			data.object.pos = object->pos;
 			data.object.rot = object->rot;
 		}
+		data.object.num_materials = object->num_materials;
+		data.object.objectdata_size = sizeof(data.object);
+		for (j = 0; j < object->num_materials; j++) {
+			if (object->material_type[j] == 1) {
+				data.object.objectdata_size += 1 + 1 + 2 + 1 + 1 + 4;
+				data.object.objectdata_size += object->material_texture[j].txdname_len;
+				data.object.objectdata_size += object->material_texture[j].texture_len;
+			}
+		}
 		fwrite(&data.object, sizeof(data.object), 1, f);
-	}
-
-	if (dogangzones) {
-		for (i = 0; i < numgangzones; i++) {
-			data.gangzone.west = gangzone_data[i].minx;
-			data.gangzone.south = gangzone_data[i].miny;
-			data.gangzone.east = gangzone_data[i].maxx;
-			data.gangzone.north = gangzone_data[i].maxy;
-			data.gangzone.color = gangzone_data[i].color;
-			fwrite(&data.gangzone, sizeof(data.gangzone), 1, f);
+		for (j = 0; j < object->num_materials; j++) {
+			fwrite(&object->material_type[j], 1, 1, f);
+			fwrite(&object->material_index[j], 1, 1, f);
+			fwrite(&object->material_texture[j].model, 2, 1, f);
+			fwrite(&object->material_texture[j].txdname_len, 1, 1, f);
+			fwrite(&object->material_texture[j].txdname,
+				object->material_texture[j].txdname_len, 1, f);
+			fwrite(&object->material_texture[j].texture_len, 1, 1, f);
+			fwrite(&object->material_texture[j].texture,
+				object->material_texture[j].texture_len, 1, f);
+			fwrite(&object->material_texture[j].color, 4, 1, f);
 		}
 	}
 
@@ -186,7 +229,7 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 	struct REMOVEDBUILDING *remove;
 	FILE *f, *meta;
 	union MAPDATA data;
-	int i;
+	int i, j;
 	char descriptionlen;
 	char haslod;
 	int dogangzones;
@@ -203,7 +246,7 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 		goto corrupted;
 	}
 
-	if (data.header.version != 0x0250414D) {
+	if (data.header.version != 0x0350414D) {
 		sprintf(debugstring, "wrong map file version %p", data.header.version);
 		ui_push_debug_string();
 		goto ret;
@@ -250,25 +293,11 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 		remove++;
 	}
 
-	for (i = 0; i < layer->numobjects; i++) {
-		if (!(fread(&data.object, sizeof(data.object), 1, f))) {
-			sprintf(debugstring, "missing %d objects", layer->numobjects - i - 1);
-			ui_push_debug_string();
-			goto corrupted;
-		}
-		object->model = data.object.model;
-		object->pos = data.object.pos;
-		object->rot = data.object.rot;
-		if (layer->show) {
-			objects_mkobject(object);
-		} else {
-			objects_mkobject_dontcreate(object);
-		}
-		object++;
-	}
-
 	if (dogangzones) {
 		memset(gangzone_enable, 0, sizeof(int) * MAX_GANG_ZONES);
+	} else if (actual_num_gangzones_in_file) {
+		sprintf(debugstring, "non-first layer has gangzones! will be wiped on save");
+		ui_push_debug_string();
 	}
 	for (i = 0; i < actual_num_gangzones_in_file; i++) {
 		if (!(fread(&data.gangzone, sizeof(data.gangzone), 1, f))) {
@@ -284,6 +313,84 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 			gangzone_data[i].color = gangzone_data[i].altcolor = data.gangzone.color;
 			gangzone_enable[i] = 1;
 		}
+	}
+
+	for (i = 0; i < layer->numobjects; i++) {
+		if (!(fread(&data.object, sizeof(data.object), 1, f))) {
+			sprintf(debugstring, "missing %d objects", layer->numobjects - i - 1);
+			ui_push_debug_string();
+			goto corrupted;
+		}
+		object->model = data.object.model;
+		object->pos = data.object.pos;
+		object->rot = data.object.rot;
+		object->num_materials = data.object.num_materials;
+		for (j = 0; j < object->num_materials; j++) {
+			if (!fread(&object->material_type[j], 1, 1, f)) {
+				sprintf(debugstring, "failed to read object %d material %d (type)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			if (object->material_type[j] != 1) {
+				sprintf(debugstring, "unsupported object %d material %d type %d", i, j, object->material_type[j]);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			if (!fread(&object->material_index[j], 1, 1, f)) {
+				sprintf(debugstring, "failed to read object %d material %d (idx)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			if (!fread(&object->material_texture[j].model, 2, 1, f)) {
+				sprintf(debugstring, "failed to read object %d material %d (model)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			if (!fread(&object->material_texture[j].txdname_len, 1, 1, f)) {
+				sprintf(debugstring, "failed to read object %d material %d (txdname len)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			if (!fread(object->material_texture[j].txdname,
+				object->material_texture[j].txdname_len, 1, f))
+			{
+				sprintf(debugstring, "failed to read object %d material %d (txdname)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			object->material_texture[j].txdname[object->material_texture[j].txdname_len] = 0;
+			if (!fread(&object->material_texture[j].texture_len, 1, 1, f)) {
+				sprintf(debugstring, "failed to read object %d material %d (texture_len)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			if (!fread(object->material_texture[j].texture,
+				object->material_texture[j].texture_len, 1, f))
+			{
+				sprintf(debugstring, "failed to read object %d material %d (texture)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+			object->material_texture[j].texture[object->material_texture[j].texture_len] = 0;
+			if (!fread(&object->material_texture[j].color, 4, 1, f)) {
+				sprintf(debugstring, "failed to read object %d material %d (color)", i, j);
+				ui_push_debug_string();
+				goto corrupted;
+			}
+		}
+		if (layer->show) {
+			objects_mkobject(object);
+		} else {
+			objects_mkobject_dontcreate(object);
+		}
+		object++;
+	}
+
+	if (fread(&data, 1, 1, f)) {
+		sprintf(debugstring, "extra data at the end of the file");
+		ui_push_debug_string();
+		layer->numobjects = 0; /*for safety*/
+		goto corrupted;
 	}
 
 ret:

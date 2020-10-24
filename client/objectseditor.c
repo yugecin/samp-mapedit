@@ -204,7 +204,7 @@ void cb_btn_remove_from_bulkedit(struct UI_BUTTON *btn)
 static
 void cb_btn_clone(struct UI_BUTTON *btn)
 {
-	objects_clone(editingObject->sa_object);
+	objects_clone(editingObject, editingObject->sa_object);
 }
 
 static

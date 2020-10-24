@@ -284,6 +284,7 @@ int bulkeditui_on_background_element_just_clicked(struct OBJECTLAYER *real_activ
 				}
 				plantObj->rot.x = plantObj->rot.y = plantObj->rot.z = 0.0f;
 				plantObj->model = lastMadeObjectModel;
+				plantObj->num_materials = 0;
 				objects_mkobject(plantObj);
 				return 0;
 			}

@@ -10,6 +10,8 @@
 #define OBJECT_STATUS_WAITING 2
 #define OBJECT_STATUS_HIDDEN 3
 
+#define OBJECT_MAX_MATERIALS 16
+
 struct OBJECT {
 	void *sa_object;
 	int sa_handle;
@@ -18,6 +20,17 @@ struct OBJECT {
 	struct RwV3D pos; /*only used during creation*/
 	struct RwV3D rot; /*only used during creation/project load*/
 	char status;
+	char num_materials;
+	char material_type[OBJECT_MAX_MATERIALS];
+	char material_index[OBJECT_MAX_MATERIALS];
+	struct {
+		short model;
+		char txdname_len;
+		char txdname[200];
+		char texture_len;
+		char texture[200];
+		int color;
+	} material_texture[OBJECT_MAX_MATERIALS];
 };
 
 struct REMOVEDBUILDING {
@@ -66,7 +79,8 @@ void objects_clearlayers();
 struct OBJECT *objects_find_by_sa_handle(int sa_handle);
 /*changes the active layer to the layer the object is in*/
 struct OBJECT *objects_find_by_sa_object(void *sa_object);
-void objects_clone(struct CEntity *entity);
+/*object can be NULL if not cloning from a mapped object but from a world building*/
+void objects_clone(struct OBJECT *object, struct CEntity *entity);
 void objects_delete_obj(struct OBJECT *obj);
 struct OBJECTLAYER *objects_layer_for_object(struct OBJECT *obj);
 void objects_set_material_text(
