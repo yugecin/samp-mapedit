@@ -18,6 +18,8 @@ int samp_handle;
 
 void samp_init()
 {
+	struct RPCParameters rpcparams;
+	struct RPCDATA_SetWorldBounds rpcsetworldbounds;
 	DWORD oldvp;
 
 	samp_handle = (int) GetModuleHandle("samp.dll");
@@ -39,6 +41,14 @@ void samp_init()
 
 	chat_bar_visible = (int*) (*((int*) pCmdWindow) + 0x14E0);
 	VirtualProtect(chat_bar_enable_op, 1, PAGE_EXECUTE_READWRITE, &oldvp);
+
+	rpcparams.dataBitLength = sizeof(struct RPCDATA_SetWorldBounds) * 8;
+	rpcparams.data = &rpcsetworldbounds;
+	rpcsetworldbounds.max_x = 100000;
+	rpcsetworldbounds.min_x = -100000;
+	rpcsetworldbounds.max_y = 100000;
+	rpcsetworldbounds.min_y = -100000;
+	samp_SetWorldBounds(&rpcparams);
 }
 
 void samp_dispose()
@@ -107,6 +117,15 @@ __declspec(naked) void samp_SetPlayerObjectMaterial(struct RPCParameters *rpc_pa
 	_asm {
 		mov eax, [samp_handle]
 		add eax, 0x1B650
+		jmp eax
+	}
+}
+
+__declspec(naked) void samp_SetWorldBounds(struct RPCParameters *rpc_parameters)
+{
+	_asm {
+		mov eax, [samp_handle]
+		add eax, 0x1A3C0
 		jmp eax
 	}
 }
