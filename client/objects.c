@@ -648,6 +648,7 @@ void objects_clone(struct OBJECT *object, struct CEntity *entity)
 			cloning_object.num_materials = object->num_materials;
 			for (i = 0; i < OBJECT_MAX_MATERIALS; i++) {
 				cloning_object.material_index[i] = object->material_index[i];
+				cloning_object.material_type[i] = object->material_type[i];
 				cloning_object.material_texture[i] = object->material_texture[i];
 			}
 		}
