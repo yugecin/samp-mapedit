@@ -233,9 +233,9 @@ int bulkedit_is_in_list(struct OBJECT *object)
 
 void bulkedit_move_layer(struct OBJECTLAYER *tolayer)
 {
-	struct OBJECT *originobject, *destobject;
+	struct OBJECT *originobject, *destobject, *layerobject;
 	struct OBJECTLAYER *originlayer;
-	int i;
+	int i, j;
 
 	if (MAX_OBJECTS - tolayer->numobjects < numBulkEditObjects) {
 		msg_title = "Bulk_edit";
@@ -251,8 +251,15 @@ void bulkedit_move_layer(struct OBJECTLAYER *tolayer)
 			destobject = tolayer->objects + tolayer->numobjects++;
 			memcpy(destobject, originobject, sizeof(struct OBJECT));
 			originlayer->numobjects--;
-			if (originobject != originlayer->objects + originlayer->numobjects) {
-				memcpy(originobject, originlayer->objects + originlayer->numobjects, sizeof(struct OBJECT));
+			layerobject = originobject;
+			while (layerobject < originlayer->objects + originlayer->numobjects) {
+				for (j = i + 1; j < numBulkEditObjects; j++) {
+					if (bulkEditObjects[j] == layerobject + 1) {
+						bulkEditObjects[j] = layerobject;
+					}
+				}
+				*layerobject = *(layerobject + 1);
+				layerobject++;
 			}
 		}
 	}
