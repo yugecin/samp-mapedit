@@ -76,6 +76,28 @@ void objecttextures_associate_model_txd(int model, char *txd)
 }
 
 static
+void update_modified_text()
+{
+	int i, j;
+	char *c;
+
+	if (object->num_materials) {
+		c = txt_lbl_modified;
+		for (i = 0; i < OBJECT_MAX_MATERIALS; i++) {
+			for (j = 0; j < object->num_materials; j++) {
+				if (object->material_index[j] == i) {
+					c += sprintf(c, "%d, ", i);
+				}
+			}
+		}
+		c[-1] = 0;
+		c[-2] = 0;
+	} else {
+		strcpy(txt_lbl_modified, "none");
+	}
+}
+
+static
 void update_material()
 {
 	int materialIndex;
@@ -110,6 +132,8 @@ storematerial:
 	object->material_texture[i].texture_len = strlen(in_texture->value);
 	strcpy(object->material_texture[i].texture, in_texture->value);
 	object->material_texture[i].color = matcol;
+
+	update_modified_text();
 }
 
 static
@@ -138,6 +162,8 @@ void cb_btn_reset_material(struct UI_BUTTON *in)
 			object->num_materials--;
 		}
 	}
+
+	update_modified_text();
 }
 
 static
@@ -184,6 +210,8 @@ void update_material_text()
 	objects_set_material_text(object,
 		materialIndex,
 		materialSize, in_font->value, fontsize, bold, fgcol, bgcol, align, in_text->value);
+
+	update_modified_text();
 }
 
 static
@@ -315,6 +343,7 @@ void objecttextures_show(struct OBJECT *obj)
 {
 	object = obj;
 	ui_show_window(wnd);
+	update_modified_text();
 }
 
 void objecttextures_init()
