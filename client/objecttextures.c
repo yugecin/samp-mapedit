@@ -217,7 +217,24 @@ void update_material_text()
 static
 void cb_rdb_materialindex(struct UI_RADIOBUTTON *rdb)
 {
+	int i;
+	char str[11];
+
 	update_material_text(); /*TODO: may be texture*/
+
+	for (i = 0; i < object->num_materials; i++) {
+		if (object->material_type[i] == 1 &&
+			object->material_index[i] == (int) rdb->_parent._parent.userdata)
+		{
+			sprintf(str, "%d", object->material_texture[i].model);
+			ui_in_set_text(in_modelid, str);
+			ui_in_set_text(in_txd, object->material_texture[i].txdname);
+			ui_in_set_text(in_texture, object->material_texture[i].texture);
+			sprintf(str, "%08X", object->material_texture[i].color);
+			ui_in_set_text(in_matcol, str);
+			break;
+		}
+	}
 }
 
 static
