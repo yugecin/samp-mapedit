@@ -43,6 +43,7 @@ static struct UI_INPUT *in_x, *in_y;
 static struct UI_INPUT *in_boxx, *in_boxy;
 static struct UI_INPUT *in_letterx, *in_lettery;
 static struct UI_INPUT *in_model, *in_col1, *in_col2, *in_rx, *in_ry, *in_rz, *in_zoom;
+static struct UI_INPUT *in_massmove_x, *in_massmove_y, *in_widen;
 static int textdrawsactive;
 static char txtlen[10];
 static char lbl_num_text[35];
@@ -473,6 +474,40 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 	cb_lst_item_selected(lst);
 }
 
+static
+void cb_btn_massmove(struct UI_BUTTON *btn)
+{
+	float x, y;
+	int i;
+
+	x = (float) atof(in_massmove_x->value);
+	y = (float) atof(in_massmove_y->value);
+
+	for (i = 0; i < numtextdraws; i++) {
+		textdraws[i].fX += x;
+		textdraws[i].fY += y;
+		textdraws[i].fBoxSizeX += x;
+	}
+	cb_lst_item_selected(lst);
+}
+
+static
+void cb_btn_widen(struct UI_BUTTON *btn)
+{
+	float x;
+	int i;
+
+	x = (float) atof(in_widen->value);
+
+	for (i = 0; i < numtextdraws; i++) {
+		textdraws[i].fBoxSizeX += x;
+		if (textdraws[i].byteCenter) {
+			textdraws[i].fBoxSizeY += x;
+		}
+	}
+	cb_lst_item_selected(lst);
+}
+
 static int dragging;
 static float origCursorX, origCursorY;
 static float *dragging_prop_x;
@@ -765,6 +800,14 @@ void textdraws_init()
 	in_zoom->_parent.span = 2;
 	in_zoom->_parent.userdata = (void*) ((int) &textdraws[0].fZoom - (int) &textdraws[0]);
 	ui_wnd_add_child(wnd, in_zoom);
+
+	ui_wnd_add_child(wnd, ui_btn_make("massmove", cb_btn_massmove));
+	ui_wnd_add_child(wnd, in_massmove_x = ui_in_make(NULL));
+	ui_wnd_add_child(wnd, in_massmove_y = ui_in_make(NULL));
+
+	ui_wnd_add_child(wnd, ui_btn_make("widen", cb_btn_widen));
+	ui_wnd_add_child(wnd, in_widen = ui_in_make(NULL));
+	ui_wnd_add_child(wnd, NULL);
 
 	btn = ui_btn_make("test_selection", cb_btn_testselection);
 	btn->_parent.span = 3;
