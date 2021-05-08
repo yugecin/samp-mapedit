@@ -25,7 +25,7 @@
 #define TRACE(X)
 #endif
 
-#define INPUT_TEXTLEN 250
+#define INPUT_TEXTLEN 255
 
 typedef void (msgboxcb)(int);
 

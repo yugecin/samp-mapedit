@@ -1,6 +1,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-extern char checkpointDescriptions[MAX_RACECHECKPOINTS][251];
+extern char checkpointDescriptions[MAX_RACECHECKPOINTS][256];
 extern int numcheckpoints;
 
 void racecp_resetall();

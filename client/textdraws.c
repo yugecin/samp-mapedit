@@ -44,6 +44,7 @@ static struct UI_INPUT *in_boxx, *in_boxy;
 static struct UI_INPUT *in_letterx, *in_lettery;
 static struct UI_INPUT *in_model, *in_col1, *in_col2, *in_rx, *in_ry, *in_rz, *in_zoom;
 static int textdrawsactive;
+static char txtlen[10];
 static char lbl_num_text[35];
 #define MAX_LIST_ENTRY_LEN 20
 static char listnames[MAX_TEXTDRAWS * MAX_LIST_ENTRY_LEN];
@@ -72,6 +73,7 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 
 	ui_in_set_text(in_name, textdraw_name[td - textdraws]);
 	ui_in_set_text(in_txt, textdraw_text[td - textdraws]);
+	sprintf(txtlen, "%d", strlen(textdraw_text[td - textdraws]));
 
 	sprintf(tmptxt, "%d", td->iStyle);
 	ui_in_set_text(in_font, tmptxt);
@@ -179,6 +181,7 @@ void cb_in_txt(struct UI_INPUT *in)
 	char v;
 
 	if (IS_VALID_INDEX_SELECTED) {
+		sprintf(txtlen, "%d", strlen(in->value));
 		i = 0;
 		tildes = 0;
 		for (;;) {
@@ -646,8 +649,9 @@ void textdraws_init()
 	in_name->_parent.span = 3;
 	ui_wnd_add_child(wnd, in_name);
 
+	ui_wnd_add_child(wnd, ui_lbl_make(txtlen));
 	in_txt = ui_in_make(cb_in_txt);
-	in_txt->_parent.span = 3;
+	in_txt->_parent.span = 2;
 	ui_wnd_add_child(wnd, in_txt);
 
 	ui_wnd_add_child(wnd, ui_lbl_make("font"));
