@@ -969,7 +969,11 @@ int objui_on_background_element_just_clicked()
 			ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_OBJECT) ||
 			ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_DUMMY))
 		{
-			strcpy(txt_contextmenu_model, modelNames[clicked_entity->model]);
+			if (modelNames[clicked_entity->model]) {
+				strcpy(txt_contextmenu_model, modelNames[clicked_entity->model]);
+			} else {
+				sprintf(txt_contextmenu_model, "!%05d:_unknown", clicked_entity->model);
+			}
 		} else {
 			goto nothing;
 		}

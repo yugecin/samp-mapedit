@@ -246,7 +246,11 @@ void objedit_show(struct OBJECT *obj)
 	ui_show_window(wnd);
 	objedit_update_bulkedit_buttons();
 	bulkedit_begin(obj);
-	sprintf(lbl_txt_model, modelNames[obj->model]);
+	if (modelNames[clicked_entity->model]) {
+		strcpy(lbl_txt_model, modelNames[clicked_entity->model]);
+	} else {
+		sprintf(lbl_txt_model, "!%05d:_unknown", clicked_entity->model);
+	}
 }
 
 void objedit_move()
