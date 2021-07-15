@@ -23,7 +23,7 @@ static struct UI_BUTTON *btn_create;
 static struct UI_LABEL *lbl_modelname;
 static struct UI_INPUT *in_filter;
 static struct UI_LIST *lst_browser;
-static char lbltxt_modelid[7], lbltxt_modelname[40];
+static char lbltxt_modelid[7], lbltxt_modelname[40], lbltxt_modelsize[20];
 static int lst_index_to_model_mapping[MAX_MODELS];
 static int lst_model_to_index_mapping[MAX_MODELS];
 static ui_method *proc_orig_lst_post_layout;
@@ -121,6 +121,8 @@ void create_object()
 		lbltxt_modelname[0] = '?';
 		lbltxt_modelname[1] = 0;
 	}
+	lbltxt_modelsize[0] = '_';
+	lbltxt_modelsize[1] = 0;
 	btn_create->enabled = 0;
 	btn_prev->enabled = btn_next->enabled = 0;
 	picking_object.pos = positionToPreview;
@@ -198,6 +200,13 @@ int objbrowser_object_created(struct OBJECT *object)
 			pos = positionToPreview;
 			pos.z += (colmodel->max.z + colmodel->min.z) / 2.0f;
 			game_ObjectSetPos(entity, &pos);
+			sprintf(
+				lbltxt_modelsize,
+				"%.0fx%.0fx%.0f",
+				colmodel->max.x - colmodel->min.x,
+				colmodel->max.y - colmodel->min.y,
+				colmodel->max.z - colmodel->min.z
+			);
 		}
 		rotationStartTime = *timeInGame;
 		hasvalidobject = 1;
@@ -501,6 +510,7 @@ void objbrowser_init()
 
 	ui_wnd_add_child(wnd, ui_lbl_make(lbltxt_modelid));
 	ui_wnd_add_child(wnd, lbl_modelname = ui_lbl_make(lbltxt_modelname));
+	ui_wnd_add_child(wnd, ui_lbl_make(lbltxt_modelsize));
 	btn_next = ui_btn_make("Next_model", cb_btn_prev_next_model);
 	btn_next->_parent.userdata = (void*) 1;
 	ui_wnd_add_child(wnd, btn_next);
