@@ -19,6 +19,12 @@ and other people's usecases is a chore and costs time and will probably kill my
 motivation for this project. You're welcome to run this and improve it.
 This project is licensed under GPLv3.
 
+My gta_sa.exe is EU 1.0
+
+See https://github.com/basdon/basdon-tools for some tools:
+- mapinfo.c can be generate pawn code from .map files (with the --dump option)
+- textinfo.c shows how to extract textdraw info from .text files
+
 Install
 -------
 * certain functions might not work when Silent Patch is used *
