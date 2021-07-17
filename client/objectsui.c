@@ -33,6 +33,7 @@ static struct UI_BUTTON *btn_mainmenu_layers, *btn_mainmenu_selectobject;
 static struct UI_BUTTON *btn_contextmenu_mkobject;
 static struct UI_BUTTON *btn_contextmenu_editobject;
 static struct UI_BUTTON *btn_contextmenu_moveobject;
+static struct UI_BUTTON *btn_contextmenu_viewobject;
 static struct UI_LABEL *lbl_contextmenu_model;
 static struct UI_BUTTON *btn_add_layer;
 static struct UI_LABEL *lbl_layers_info;
@@ -143,6 +144,17 @@ void cb_btn_contextmenu_moveobject(struct UI_BUTTON *btn)
 {
 	objedit_show(objects_find_by_sa_object(clicked_entity));
 	objedit_move();
+}
+
+static
+void cb_btn_contextmenu_viewobject(struct UI_BUTTON *btn)
+{
+	struct RwV3D pos;
+
+	game_ObjectGetPos(clicked_entity, &pos);
+	ui_hide_window();
+	objbrowser_highlight_model(clicked_entity->model);
+	objbrowser_show(&pos);
 }
 
 static
@@ -616,6 +628,10 @@ void objui_init()
 	ui_wnd_add_child(context_menu, btn);
 	btn->enabled = 0;
 	btn_contextmenu_moveobject = btn;
+	btn = ui_btn_make("View_in_browser", cb_btn_contextmenu_viewobject);
+	ui_wnd_add_child(context_menu, btn);
+	btn->enabled = 0;
+	btn_contextmenu_viewobject = btn;
 
 	/*main menu entries*/
 	lbl = ui_lbl_make("=_Objects_=");
@@ -959,6 +975,10 @@ int objui_on_background_element_just_clicked()
 	btn_contextmenu_moveobject->enabled =
 		clicked_entity != NULL &&
 		(clicked_object = objects_find_by_sa_object(clicked_entity)) != NULL;
+	btn_contextmenu_viewobject->enabled = clicked_entity != NULL &&
+		(ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_BUILDING) ||
+		ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_OBJECT) ||
+		ENTITY_IS_TYPE(clicked_entity, ENTITY_TYPE_DUMMY));
 
 	if (clicked_entity != NULL)
 	{
