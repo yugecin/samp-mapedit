@@ -409,19 +409,19 @@ void update_layer_ui()
 		if (!in_layer_radin[i]) {
 			in_layer_radin[i] = ui_in_make(cb_in_radin);
 			in_layer_radin[i]->_parent.userdata = (void*) i;
-			in_layer_radin[i]->_parent.pref_width = 80.0f;
+			in_layer_radin[i]->_parent.pref_width = 100.0f;
 			ui_wnd_add_child(window_layers, in_layer_radin[i]);
 		}
 		if (!in_layer_radout[i]) {
 			in_layer_radout[i] = ui_in_make(cb_in_radout);
 			in_layer_radout[i]->_parent.userdata = (void*) i;
-			in_layer_radout[i]->_parent.pref_width = 80.0f;
+			in_layer_radout[i]->_parent.pref_width = 100.0f;
 			ui_wnd_add_child(window_layers, in_layer_radout[i]);
 		}
 		if (!in_layer_drawdistance[i]) {
 			in_layer_drawdistance[i] = ui_in_make(cb_in_drawdistance);
 			in_layer_drawdistance[i]->_parent.userdata = (void*) i;
-			in_layer_drawdistance[i]->_parent.pref_width = 80.0f;
+			in_layer_drawdistance[i]->_parent.pref_width = 100.0f;
 			ui_wnd_add_child(window_layers, in_layer_drawdistance[i]);
 		}
 		if (!chk_layer_showspheres[i]) {
