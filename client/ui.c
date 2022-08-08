@@ -655,7 +655,6 @@ void ui_do_exclusive_mode_basics(struct UI_WINDOW *wnd, int allow_camera_move)
 	ui_draw_cursor();
 }
 
-static
 void ui_place_camera_behind_player()
 {
 	float rotation;
@@ -671,6 +670,7 @@ void ui_place_camera_behind_player()
 	camera->lookVector.x = x;
 	camera->lookVector.y = y;
 	camera->lookVector.z = -0.25f;
+	need_camera_update = 1;
 }
 
 int ui_handle_keydown(int vk)
@@ -790,7 +790,6 @@ void ui_render()
 			!currentKeyState->standards[VK_Y])
 		{
 			ui_place_camera_behind_player();
-			need_camera_update = 1;
 		} else  if (currentKeyState->standards[VK_Y] &&
 			!activeKeyState->standards[VK_Y])
 		{

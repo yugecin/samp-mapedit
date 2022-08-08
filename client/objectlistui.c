@@ -8,6 +8,7 @@
 #include "objectsui.h"
 #include "objectlistui.h"
 #include "objectseditor.h"
+#include "player.h"
 #include "msgbox.h"
 #include "removebuildingeditor.h"
 #include "removedbuildings.h"
@@ -289,6 +290,37 @@ void cb_btn_edit(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_jmp2objcenter(struct UI_BUTTON *btn)
+{
+	struct OBJECTLAYER *layer;
+	struct OBJECT *obj;
+	int i, j, n;
+
+	n = 0;
+	player_position.x = player_position.y = player_position.z = 0.0f;
+	for (i = 0, layer = layers; i < numlayers; i++, layer++) {
+		for (j = 0, obj = layer->objects; j < layer->numobjects; j++, obj++) {
+			player_position.x += obj->pos.x;
+			player_position.y += obj->pos.y;
+			player_position.z += obj->pos.z;
+			n++;
+		}
+	}
+	player_position.x /= n;
+	player_position.y /= n;
+	player_position.z /= n;
+	ui_place_camera_behind_player();
+}
+
+static
+void cb_btn_jmp2sacenter(struct UI_BUTTON *btn)
+{
+	player_position.x = player_position.y = 0.0f;
+	player_position.z = 10.0f;
+	ui_place_camera_behind_player();
+}
+
+static
 void cb_list_item_selected(struct UI_LIST *lst)
 {
 	struct CEntity *entity;
@@ -318,9 +350,13 @@ void objlistui_init()
 	struct UI_BUTTON *btn;
 
 	btn = ui_btn_make("Objects", cb_btn_mainmenu_objects);
-	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 	btn = ui_btn_make("Nearby", cb_btn_mainmenu_nearby);
+	ui_wnd_add_child(main_menu, btn);
+	btn = ui_btn_make("jmp2sacenter", cb_btn_jmp2sacenter);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(main_menu, btn);
+	btn = ui_btn_make("jmp2objcenter", cb_btn_jmp2objcenter);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(main_menu, btn);
 

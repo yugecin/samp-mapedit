@@ -87,3 +87,4 @@ int ui_handle_keydown(int vk);
 int ui_handle_char(char c);
 void ui_open_persistent_state();
 void ui_draw_default_help_text();
+void ui_place_camera_behind_player();
