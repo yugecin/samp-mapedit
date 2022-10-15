@@ -621,6 +621,9 @@ struct OBJECT *objects_find_by_sa_object(void *sa_object)
 	int layerid, i;
 	struct OBJECT *objects;
 
+	if (!sa_object) {
+		return NULL;
+	}
 	for (layerid = 0; layerid < numlayers; layerid++) {
 		objects = layers[layerid].objects;
 		for (i = layers[layerid].numobjects - 1; i >= 0; i--) {

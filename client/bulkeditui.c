@@ -30,7 +30,6 @@ static struct UI_LIST *lst_bulk_filter;
 static struct UI_BUTTON *btn_bulk_addall;
 static struct UI_BUTTON *btn_layer[MAX_LAYERS];
 
-static char capture_clicks;
 static char is_dragselecting;
 static float dragselect_start_x, dragselect_start_y;
 
