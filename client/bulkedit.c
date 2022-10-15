@@ -11,12 +11,12 @@
 #include <math.h>
 #include <string.h>
 
-static struct RwV3D initialPositions[1000];
-static struct RwV3D initialRotations[1000];
+static struct RwV3D initialPositions[MAX_OBJECTS * 10];
+static struct RwV3D initialRotations[MAX_OBJECTS * 10];
 static struct RwV3D initialPos;
 static struct RwV3D initialRot;
 static struct OBJECT *handlingObject;
-static struct OBJECT *bulkEditObjects[1000];
+static struct OBJECT *bulkEditObjects[MAX_OBJECTS * 10];
 static int numBulkEditObjects;
 static char hasUpdated;
 
@@ -27,7 +27,7 @@ char bulkedit_direction_add_90, bulkedit_direction_remove_90, bulkedit_direction
 void bulkedit_delete_objects()
 {
 	int i, numToDelete, highestPos, highestPosIndex;
-	struct OBJECT *objects_to_delete[MAX_OBJECTS];
+	struct OBJECT *objects_to_delete[MAX_OBJECTS * 10];
 
 	/*since deleting objects shift the objects around in the layer,
 	collect them from highest address to lowest and delete them as such,

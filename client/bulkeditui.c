@@ -51,7 +51,7 @@ struct ON_SCREEN_OBJECT {
 	int passes_filter;
 };
 
-static struct ON_SCREEN_OBJECT on_screen_objects[MAX_OBJECTS];
+static struct ON_SCREEN_OBJECT on_screen_objects[MAX_OBJECTS * 10];
 static int num_on_screen_objects;
 
 static
