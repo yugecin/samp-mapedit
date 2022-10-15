@@ -242,7 +242,7 @@ void cb_btn_center(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_delete(struct UI_BUTTON *btn)
+void cb_objlistui_btn_delete(struct UI_BUTTON *btn)
 {
 	struct CEntity *entity;
 	struct OBJECT *obj;
@@ -262,7 +262,7 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_clone(struct UI_BUTTON *btn)
+void cb_btn_objlistui_clone(struct UI_BUTTON *btn)
 {
 	struct CEntity *entity;
 
@@ -274,7 +274,7 @@ void cb_btn_clone(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_edit(struct UI_BUTTON *btn)
+void cb_btn_objlistui_edit(struct UI_BUTTON *btn)
 {
 	struct CEntity *entity;
 	struct OBJECT *obj;
@@ -377,11 +377,11 @@ void objlistui_init()
 	ui_wnd_add_child(wnd, btn_move);
 	btn_tp_to_cam = ui_btn_make("TP_Object_to_camera", cb_btn_tp_to_cam);
 	ui_wnd_add_child(wnd, btn_tp_to_cam);
-	btn_delete = ui_btn_make("Delete", cb_btn_delete);
+	btn_delete = ui_btn_make("Delete", cb_objlistui_btn_delete);
 	ui_wnd_add_child(wnd, btn_delete);
-	btn_clone = ui_btn_make("Clone", cb_btn_clone);
+	btn_clone = ui_btn_make("Clone", cb_btn_objlistui_clone);
 	ui_wnd_add_child(wnd, btn_clone);
-	btn_edit = ui_btn_make("Edit", cb_btn_edit);
+	btn_edit = ui_btn_make("Edit", cb_btn_objlistui_edit);
 	ui_wnd_add_child(wnd, btn_edit);
 }
 

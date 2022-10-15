@@ -108,7 +108,7 @@ void cb_btn_textures(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_move(struct UI_BUTTON *btn)
+void cb_btn_objectseditor_move(struct UI_BUTTON *btn)
 {
 	objedit_move();
 }
@@ -321,7 +321,7 @@ void objedit_init()
 	btn = ui_btn_make("Textures", cb_btn_textures);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
-	btn = ui_btn_make("Move", cb_btn_move);
+	btn = ui_btn_make("Move", cb_btn_objectseditor_move);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
 	btn = ui_btn_make("Undo_move", cb_btn_undo_move);

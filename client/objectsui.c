@@ -528,7 +528,7 @@ void cb_btn_add_layer(struct UI_BUTTON *btn)
 }
 
 static
-void cb_btn_view_in_object_browser(struct UI_BUTTON *btn)
+void cb_btn_objectsui_view_in_object_browser(struct UI_BUTTON *btn)
 {
 	struct RwV3D pos;
 
@@ -686,7 +686,7 @@ void objui_init()
 	ui_wnd_add_child(window_objinfo, lbl_objmodel);
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Size:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_modelsize));
-	btn = ui_btn_make("View_in_object_browser", cb_btn_view_in_object_browser);
+	btn = ui_btn_make("View_in_object_browser", cb_btn_objectsui_view_in_object_browser);
 	btn->_parent.span = 2;
 	btn->enabled = 0;
 	ui_wnd_add_child(window_objinfo, btn_view_in_browser = btn);
