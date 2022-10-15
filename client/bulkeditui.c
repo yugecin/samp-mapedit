@@ -345,7 +345,7 @@ int bulkeditui_proc_wnd_draw(void *wnd)
 		dragselect_start_y = cursory;
 		num_on_screen_objects = 0;
 		for (i = 0; i < numlayers; i++) {
-			if (!chk_select_from_active_layer->checked || layers + i == active_layer) {
+			if ((!chk_select_from_active_layer->checked || layers + i == active_layer) && layers[i].show) {
 				for (j = 0; j < layers[i].numobjects; j++) {
 					game_WorldToScreen(&screenpos, &layers[i].objects[j].pos);
 					if (screenpos.z > 0.0f) {
