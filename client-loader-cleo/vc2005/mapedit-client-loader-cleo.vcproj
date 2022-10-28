@@ -124,7 +124,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="CLEO.lib"
-				OutputFile="$(OutDir)\$(ProjectName).cleo"
+				OutputFile="$(SolutionDir)\out-$(ConfigurationName)\$(ProjectName).cleo"
 				AdditionalLibraryDirectories="..\CLEO_SDK"
 				IgnoreDefaultLibraryNames="uuid.lib"
 			/>
