@@ -223,6 +223,33 @@ void objectstorage_save_layer(struct OBJECTLAYER *layer)
 	}
 }
 
+static
+void objectstorage_do_hardcoded_gangzone_creation()
+{
+#if 0
+	int i;
+	// code to generate more gangzones:
+	float minx = gangzone_data[153].minx;
+	float maxx = gangzone_data[153].maxx;
+	float miny = gangzone_data[153].miny;
+	float maxy = gangzone_data[153].maxy;
+	int color = gangzone_data[153].color;
+	float dx = (6962.0f - 7098.0f) / 18.0f;
+	float dy = (3818.0f - 4055.0f) / 18.0f;
+	for (i = 0; i < 18; ) {
+		i++;
+		gangzone_data[numgangzones].minx = minx + dx * i;
+		gangzone_data[numgangzones].maxx = maxx + dx * i;
+		gangzone_data[numgangzones].miny = miny + dy * i;
+		gangzone_data[numgangzones].maxy = maxy + dy * i;
+		gangzone_data[numgangzones].color = color;
+		gangzone_data[numgangzones].altcolor = color;
+		gangzone_enable[numgangzones] = 1;
+		numgangzones++;
+	}
+#endif
+}
+
 void objectstorage_load_layer(struct OBJECTLAYER *layer)
 {
 	struct OBJECT *object;
@@ -313,6 +340,9 @@ void objectstorage_load_layer(struct OBJECTLAYER *layer)
 			gangzone_data[i].color = gangzone_data[i].altcolor = data.gangzone.color;
 			gangzone_enable[i] = 1;
 		}
+	}
+	if (dogangzones) {
+		objectstorage_do_hardcoded_gangzone_creation();
 	}
 
 	for (i = 0; i < layer->numobjects; i++) {
