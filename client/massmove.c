@@ -4,6 +4,7 @@
 #include "bulkeditui.h"
 #include "common.h"
 #include "game.h"
+#include "gangzone.h"
 #include "entity.h"
 #include "ide.h"
 #include "racecp.h"
@@ -117,6 +118,17 @@ void cb_btn_do(struct UI_BUTTON *btn)
 		vehicles[i].pos.y += move.y;
 		vehicles[i].pos.z += move.z;
 		vehicles[i].heading -= moveangle;
+	}
+
+	for (i = 0; i < numgangzones; i++) {
+		if (moveangle != 0.0f && i == 0) {
+			sprintf(debugstring, "gangzones do not rotate yet!!");
+			ui_push_debug_string();
+		}
+		gangzone_data[i].minx += move.x;
+		gangzone_data[i].miny += move.y;
+		gangzone_data[i].maxx += move.x;
+		gangzone_data[i].maxy += move.y;
 	}
 }
 
