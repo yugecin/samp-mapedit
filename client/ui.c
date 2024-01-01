@@ -266,6 +266,20 @@ void ui_draw_default_help_text()
 		buf);
 }
 
+void ui_draw_entityinfonodepool_stats()
+{
+	char buf[64];
+	int eiCur, eiMax, obCur, obMax;
+
+	eiCur = game_PoolGetNumUsedSpaces(*entryInfoNodePool);
+	eiMax = (*entryInfoNodePool)->size;
+	obCur = game_PoolGetNumUsedSpaces(*objectPool);
+	obMax = (*objectPool)->size;
+	game_TextSetAlign(LEFT);
+	sprintf(buf, "~g~~h~entryinfo %d/%d object %d/%d", eiCur, eiMax, obCur, obMax);
+	game_TextPrintStringFromBottom(2.0f, fresy - 4.0f, buf);
+}
+
 void ui_draw_cursor()
 {
 	/* (inner|outer)(width|height)(radius|diam)*/
@@ -866,6 +880,7 @@ void ui_render()
 
 		if (!hide_all_ui) {
 			ui_draw_default_help_text();
+			ui_draw_entityinfonodepool_stats();
 		}
 	} else {
 justdeactivated:

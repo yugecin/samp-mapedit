@@ -377,6 +377,8 @@ There are two 50 char log buffers, only pointing to the first one.
 extern unsigned char *logBuffer;
 extern unsigned char pedPosBeingUpdated;
 extern int (*randMax65535)();
+extern struct CPool **entryInfoNodePool;
+extern struct CPool **objectPool;
 
 void game_CameraRestore();
 void game_CameraRestoreWithJumpCut();
@@ -584,3 +586,16 @@ int game_WorldIntersectEntity(
 	struct CColPoint *colpoint,
 	void **collidedEntity);
 void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in);
+
+struct CPool
+{
+	char _[8];
+	int size;
+	/**incomplete*/
+};
+EXPECT_SIZE(struct CPool, 0xC);
+
+/**
+sdk CPool::GetNoOfUsedSpaces
+*/
+int game_PoolGetNumUsedSpaces(struct CPool *pool);

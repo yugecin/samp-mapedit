@@ -32,6 +32,8 @@ void *_opcode0815ret = (void*) 0x473BEE;
 unsigned char *logBuffer = (char*) 0xBAB278;
 unsigned char pedPosBeingUpdated = 0;
 int (*randMax65535)();
+struct CPool **entryInfoNodePool = (void*) 0xB7448C;
+struct CPool **objectPool = (void*) 0xB7449C;
 
 char tmptext[1000];
 char *ptmptext = tmptext;
@@ -803,4 +805,11 @@ void game_WorldToScreen(struct RwV3D *out, struct RwV3D *in)
 	game_TransformPoint(out, &camera->cameraViewMatrix, in);
 	out->x *= fresx / out->z;
 	out->y *= fresy / out->z;
+}
+
+__declspec(naked) int game_PoolGetNumUsedSpaces(struct CPool *pool)
+{
+	_asm mov ecx, [esp+4]
+	_asm mov eax, 0x54F6B0
+	_asm jmp eax
 }
