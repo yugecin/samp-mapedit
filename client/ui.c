@@ -278,6 +278,13 @@ void ui_draw_entityinfonodepool_stats()
 	game_TextSetAlign(LEFT);
 	sprintf(buf, "~g~~h~entryinfo %d/%d object %d/%d", eiCur, eiMax, obCur, obMax);
 	game_TextPrintStringFromBottom(2.0f, fresy - 4.0f, buf);
+	if (eiCur > 5000) {
+		// this is the default limit in samp 0.3.7
+		game_TextSetAlign(CENTER);
+		game_TextSetLetterSize(font_size_x * 2.0f, font_size_y * 2.0f);
+		game_TextPrintString(fresx / 2.0f, fresy / 2.0f, "~r~ENTRY INFO NODE POOL EXCEEDED");
+		game_TextSetLetterSize(font_size_x, font_size_y);
+	}
 }
 
 void ui_draw_cursor()

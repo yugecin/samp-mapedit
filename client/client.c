@@ -113,7 +113,7 @@ void detour()
 		*passthru_pa = (detour_param + DETOUR_EIP) - DT(0xF);
 		/*reloading won't work in this case,
 		but production use should be ok*/
-		sprintf(debugstring, "mods detected, reloading might not work");
+		sprintf(debugstring, "mods detected (plhud?), reloading might not work");
 		ui_push_debug_string();
 	}
 	/*return address for fake call to reload_client*/

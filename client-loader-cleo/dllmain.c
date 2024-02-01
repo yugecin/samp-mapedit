@@ -60,8 +60,19 @@ OpcodeResult WINAPI opcode_0C62(CScriptThread *thread)
 	return OR_CONTINUE;
 }
 
+static
+void WINAPI expandEntryInfoNodePool(HMODULE hModule)
+{
+	int *size = (void*) 0x550FBA;
+	// default is 500, samp bumps this to 5000, we want more
+	while (*size != 5000) Sleep(20);
+	*size = 10000;
+	ExitThread(/*exit code*/ 0);
+}
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason_for_call, LPVOID lpResrvd)
 {
+	HANDLE hThread;
 	FILE *f;
 	char *c;
 
@@ -75,6 +86,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason_for_call, LPVOID lpResrvd)
 			while (*c != 0 && *c != '\n') c++;
 			*c = 0;
 			fclose(f);
+		}
+		hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) expandEntryInfoNodePool, hModule, 0, NULL);
+		if (hThread) {
+			CloseHandle(hThread);
 		}
 		data.proc_loader_reload_client = reload_client;
 		data.proc_loader_unload_client = unload_client;
