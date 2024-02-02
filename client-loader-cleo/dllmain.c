@@ -63,9 +63,18 @@ OpcodeResult WINAPI opcode_0C62(CScriptThread *thread)
 static
 void WINAPI expandEntryInfoNodePool(HMODULE hModule)
 {
+	void **pool = (void**) 0xB7448C;
 	int *size = (void*) 0x550FBA;
 	// default is 500, samp bumps this to 5000, we want more
-	while (*size != 5000) Sleep(20);
+	while (*size != 5000) {
+		Sleep(20);
+		if (*pool) {
+			// we're too late, pool already allocated, bail out
+			// (this most likely just means that singleplayer is being launched,
+			//  in which case our condition had no chance of passing)
+			ExitThread(/*exit code*/ 0);
+		}
+	}
 	*size = 10000;
 	ExitThread(/*exit code*/ 0);
 }
