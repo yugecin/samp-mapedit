@@ -25,7 +25,7 @@
 #include <windows.h>
 
 #define MAX_FILES 1000
-#define NAME_LEN 50
+#define NAME_LEN 100
 #define FILE_LEN NAME_LEN + 15
 #define MAX_RECENT_PROJECT_BUTTONS 4
 
@@ -81,7 +81,7 @@ void proj_updatelist()
 		do {
 			memcpy(tmp_files[numfiles], data.cFileName, NAME_LEN);
 			listdata[numfiles] = tmp_files[numfiles];
-			tmp_files[numfiles][49] = 0;
+			tmp_files[numfiles][NAME_LEN-1] = 0;
 			/*remove extension*/
 			tmp_files[numfiles][strlen(tmp_files[numfiles])-4] = 0;
 			numfiles++;
@@ -201,6 +201,8 @@ void prj_open_by_name(char *name)
 		memcpy(open_project_name, name, INPUT_TEXTLEN + 1);
 		prj_open_by_file(file);
 	} else {
+		sprintf(debugstring, "failed to open file %s", filename);
+		ui_push_debug_string();
 		msg_message = "Failed_to_open_project";
 		msg_title = "Open_project";
 		msg_btn1text = "Ok";
