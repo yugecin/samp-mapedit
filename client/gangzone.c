@@ -45,6 +45,15 @@ static struct IM2DVERTEX verts[] = {
 #define IS_VALID_INDEX_SELECTED (0 <= lst->selectedindex && lst->selectedindex < numgangzones)
 
 static
+void abgr_rgba(int *col)
+{
+	unsigned int v = *((unsigned int*) col);
+
+	v = ((v & 0xFF) << 24) | ((v & 0xFF00) << 8) | ((v & 0xFF0000) >> 8) | (v >> 24);
+	*col = *((int*) &v);
+}
+
+static
 void cb_chk_click(struct UI_CHECKBOX *chk)
 {
 	((struct UI_CHECKBOX*) chk->_parent._parent.userdata)->checked = 0;
@@ -79,7 +88,9 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 	btn_delete->enabled = 1;
 
 	if (!dont_update_color_textbox) {
-		sprintf(buf, "%08x", gangzone_data[lst->selectedindex].color);
+		col = gangzone_data[lst->selectedindex].color;
+		abgr_rgba(&col);
+		sprintf(buf, "%08x", col);
 		ui_in_set_text(in_color, buf);
 	}
 	col = gangzone_data[lst->selectedindex].color;
@@ -92,7 +103,7 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 static
 void update_list()
 {
-	int i, selected_index;
+	int i, selected_index, col;
 	char *names[MAX_GANG_ZONES];
 
 	if (IS_VALID_INDEX_SELECTED) {
@@ -102,7 +113,9 @@ void update_list()
 	selected_index = lst->selectedindex;
 	for (i = 0; i < numgangzones; i++) {
 		names[i] = listnames + i * GANG_ZONE_TEXT_LEN;
-		sprintf(names[i], "%04d:_%p", i, gangzone_data[i].color);
+		col = gangzone_data[i].color;
+		abgr_rgba(&col);
+		sprintf(names[i], "%04d:_%p", i, col);
 	}
 	ui_lst_set_data(lst, names, numgangzones);
 	ui_lst_set_selected_index(lst, selected_index);
@@ -187,6 +200,7 @@ void in_cb_color(struct UI_INPUT *in)
 	int col;
 
 	if (IS_VALID_INDEX_SELECTED && common_col(in->value, &col)) {
+		abgr_rgba(&col);
 		gangzone_data[lst->selectedindex].color = col;
 		dont_update_color_textbox = 1;
 		update_list();
@@ -481,7 +495,7 @@ void gangzone_init()
 	btn_delete->enabled = 0;
 	btn_delete->_parent.span = 4;
 	ui_wnd_add_child(wnd, btn_delete);
-	ui_wnd_add_child(wnd, ui_lbl_make("colABGR"));
+	ui_wnd_add_child(wnd, ui_lbl_make("colRGBA"));
 	in_color = ui_in_make(in_cb_color);
 	in_color->_parent.span = 3;
 	ui_wnd_add_child(wnd, in_color);
