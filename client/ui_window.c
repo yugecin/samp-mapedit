@@ -348,3 +348,17 @@ void ui_wnd_remove_child(struct UI_WINDOW *wnd, void *child)
 {
 	ui_cnt_remove_child((struct UI_CONTAINER*) wnd, child);
 }
+
+void ui_wnd_center(struct UI_WINDOW *wnd)
+{
+	struct UI_ELEMENT *e;
+
+	/*force layout now to get the size, to position in center*/
+	wnd->_parent.need_layout = 1;
+	e = (struct UI_ELEMENT*) wnd;
+	e->proc_update(e);
+	e->x = (fresx - e->width) / 2.0f;
+	e->y = (fresy - e->height) / 2.0f;
+	/*still ask layout so the children's positions can be adjusted*/
+	wnd->_parent.need_layout = 1;
+}

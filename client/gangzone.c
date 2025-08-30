@@ -21,6 +21,7 @@ static struct UI_LIST *lst;
 static struct UI_BUTTON *btn_edit, *btn_delete;
 static struct UI_LABEL *lbl_num;
 static struct UI_INPUT *in_color;
+static struct UI_WINDOW *wnd_palette;
 static float zone_z;
 static char lbl_num_text[35];
 #define GANG_ZONE_TEXT_LEN 16
@@ -206,7 +207,96 @@ void in_cb_color(struct UI_INPUT *in)
 		update_list();
 		dont_update_color_textbox = 0;
 	}
-};
+}
+
+static
+void cb_btn_use_palette_color(struct UI_BUTTON *btn)
+{
+	if (IS_VALID_INDEX_SELECTED) {
+		gangzone_data[lst->selectedindex].color = (int) btn->_parent.userdata;
+		update_list();
+		ui_show_window(wnd);
+		ui_wnd_dispose(wnd_palette);
+	}
+}
+
+static
+void cb_lbl_palette_draw(struct UI_LABEL *lbl)
+{
+	ui_element_draw_background((void*) lbl, (int) lbl->_parent.userdata);
+}
+
+static
+void add_palette_color(int rgba)
+{
+	struct UI_BUTTON *btn;
+	struct UI_LABEL *lbl;
+	char colbuf[10];
+	int abgr;
+
+	sprintf(colbuf, "%p:", rgba);
+	btn = ui_btn_make(colbuf, cb_btn_use_palette_color);
+	abgr = rgba;
+	abgr_rgba(&abgr);
+	btn->_parent.userdata = (void*) abgr;
+	ui_wnd_add_child(wnd_palette, btn);
+	lbl = ui_lbl_make("___");
+	lbl->_parent.proc_draw = (ui_method*) cb_lbl_palette_draw;
+	lbl->_parent.userdata = (void*) (0xFF000000 | (rgba >> 8));
+	ui_wnd_add_child(wnd_palette, lbl);
+}
+
+static
+void cb_btn_palette(struct UI_BUTTON *_btn)
+{
+	struct UI_LABEL *lbl;
+	int listedcolors[MAX_GANG_ZONES];
+	int numlistedcolors;
+	int i, j, col;
+
+	wnd_palette = ui_wnd_make(300.0f, 300.0f, "Gangzones");
+	wnd_palette->columns = 8;
+
+	lbl = ui_lbl_make("Colors currently used");
+	lbl->_parent.span = 8;
+	ui_wnd_add_child(wnd_palette, lbl);
+	numlistedcolors = 0;
+	for (i = 0; i < numgangzones; i++) {
+		col = gangzone_data[i].color;
+		for (j = 0; j < numlistedcolors; j++) {
+			if (listedcolors[j] == col) {
+				goto skip;
+			}
+		}
+		listedcolors[numlistedcolors++] = col;
+		abgr_rgba(&col);
+		add_palette_color(col);
+skip:
+		;
+	}
+	if (numlistedcolors % 8) {
+		// fill columns until we're at 0 again
+		lbl = ui_lbl_make("_");
+		lbl->_parent.span = 8 - (numlistedcolors % 8);
+		ui_wnd_add_child(wnd_palette, lbl);
+	}
+	lbl = ui_lbl_make("Default colors");
+	lbl->_parent.span = 8;
+	ui_wnd_add_child(wnd_palette, lbl);
+	add_palette_color(0x989898FF);
+	add_palette_color(0x909898FF);
+	add_palette_color(0x686868FF);
+	add_palette_color(0x595753FF);
+	add_palette_color(0x000000FF);
+	add_palette_color(0xFFFFFFFF);
+	add_palette_color(0x988870FF);
+	add_palette_color(0xE0C060FF);
+	add_palette_color(0x386830FF);
+	add_palette_color(0x708838FF);
+
+	ui_wnd_center(wnd_palette);
+	ui_show_window(wnd_palette);
+}
 
 int gangzone_on_background_element_just_clicked()
 {
@@ -497,8 +587,12 @@ void gangzone_init()
 	ui_wnd_add_child(wnd, btn_delete);
 	ui_wnd_add_child(wnd, ui_lbl_make("colRGBA"));
 	in_color = ui_in_make(in_cb_color);
-	in_color->_parent.span = 3;
+	in_color->_parent.span = 2;
+	in_color->_parent.pref_width = 100.0f;
 	ui_wnd_add_child(wnd, in_color);
+	ui_wnd_add_child(wnd, ui_btn_make("palette", cb_btn_palette));
+
+	wnd_palette = NULL;
 }
 
 void gangzone_dispose()

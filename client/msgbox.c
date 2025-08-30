@@ -58,8 +58,6 @@ void msg_dispose()
 
 void msg_show(msgboxcb *cb)
 {
-	struct UI_ELEMENT *e;
-
 	result_cb = cb;
 	msg_lbl->text = msg_message;
 	msg_lbl->_parent.proc_recalc_size(msg_lbl);
@@ -75,13 +73,6 @@ void msg_show(msgboxcb *cb)
 	msg_btn1->_parent.proc_recalc_size(msg_btn1);
 	msg_btn2->_parent.proc_recalc_size(msg_btn2);
 	msg_btn3->_parent.proc_recalc_size(msg_btn3);
-	/*force layout now to get the size, to position in center*/
-	msg_wnd->_parent.need_layout = 1;
-	e = (struct UI_ELEMENT*) msg_wnd;
-	e->proc_update(e);
-	e->x = (fresx - e->width) / 2.0f;
-	e->y = (fresy - e->height) / 2.0f;
-	/*still ask layout so the children's positions can be adjusted*/
-	msg_wnd->_parent.need_layout = 1;
+	ui_wnd_center(msg_wnd);
 	ui_show_window(msg_wnd);
 }

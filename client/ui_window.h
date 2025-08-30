@@ -23,3 +23,5 @@ int ui_wnd_mouseup(struct UI_WINDOW *wnd);
 int ui_wnd_mousewheel(struct UI_WINDOW *wnd, int value);
 void ui_wnd_add_child(struct UI_WINDOW *wnd, void *child);
 void ui_wnd_remove_child(struct UI_WINDOW *wnd, void *child);
+
+void ui_wnd_center(struct UI_WINDOW *wnd);
