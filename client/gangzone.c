@@ -147,6 +147,13 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		}
 		index_to_select = numgangzones * relative_index_to_select_0_or_1;
 	}
+	if (!numgangzones) {
+		gangzone_data[0].color = 0xFF000000;
+		gangzone_data[0].minx = camera->position.x - 50.0f;
+		gangzone_data[0].maxx = camera->position.x + 50.0f;
+		gangzone_data[0].miny = camera->position.y - 50.0f;
+		gangzone_data[0].maxy = camera->position.y + 50.0f;
+	}
 	gangzone_enable[numgangzones] = 1;
 	numgangzones++;
 	update_list();
