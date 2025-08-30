@@ -276,7 +276,7 @@ void ui_draw_entityinfonodepool_stats()
 	obCur = game_PoolGetNumUsedSpaces(*objectPool);
 	obMax = (*objectPool)->size;
 	game_TextSetAlign(LEFT);
-	sprintf(buf, "entryinfo %d/%d object %d/%d", eiCur, eiMax, obCur, obMax);
+	sprintf(buf, "entryinfo %d/5000(%d) object %d/1000(%d)", eiCur, eiMax, obCur, obMax);
 	game_TextPrintStringFromBottom(2.0f, fresy - 4.0f, buf);
 	if (eiCur > 5000) {
 		// 5000 is the default limit in samp 0.3.7
