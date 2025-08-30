@@ -110,20 +110,42 @@ void update_list()
 }
 
 static
+void cb_msg_limitreached(int choice)
+{
+	ui_show_window(wnd);
+}
+
+static
 void cb_btn_add(struct UI_BUTTON *btn)
 {
-	int i, index_to_select;
+	int i, index_to_select, relative_index_to_select_0_or_1;
+
+	if (numgangzones >= MAX_GANG_ZONES) {
+		msg_message = "Limit_reached!";
+		msg_title = "Gangzones";
+		msg_btn1text = "Ok";
+		msg_show(cb_msg_limitreached);
+		return;
+	}
+
+	relative_index_to_select_0_or_1 = ((int) btn->_parent.userdata) & 1;
 
 	if (IS_VALID_INDEX_SELECTED) {
 		for (i = numgangzones; i > lst->selectedindex; i--) {
 			gangzone_data[i] = gangzone_data[i - 1];
 		}
-		index_to_select = lst->selectedindex + 1;
+		index_to_select = lst->selectedindex + relative_index_to_select_0_or_1;
 	} else {
 		if (numgangzones > 0) {
-			gangzone_data[numgangzones] = gangzone_data[numgangzones - 1];
+			if (relative_index_to_select_0_or_1) {
+				gangzone_data[numgangzones] = gangzone_data[numgangzones - 1];
+			} else {
+				for (i = numgangzones; i > 0; i--) {
+					gangzone_data[i] = gangzone_data[i - 1];
+				}
+			}
 		}
-		index_to_select = numgangzones;
+		index_to_select = numgangzones * relative_index_to_select_0_or_1;
 	}
 	gangzone_enable[numgangzones] = 1;
 	numgangzones++;
@@ -434,24 +456,29 @@ void gangzone_init()
 	ui_wnd_add_child(main_menu, btn);
 
 	wnd = ui_wnd_make(9000.0f, 300.0f, "Gangzones");
-	wnd->columns = 2;
+	wnd->columns = 4;
 
 	lbl_num = ui_lbl_make(lbl_num_text);
-	lbl_num->_parent.span = 2;
+	lbl_num->_parent.span = 4;
 	ui_wnd_add_child(wnd, lbl_num);
 	lst = ui_lst_make(35, cb_lst_item_selected);
-	lst->_parent.span = 2;
-	lst->_parent.pref_width = 100.0f;
+	lst->_parent.span = 4;
 	ui_wnd_add_child(wnd, lst);
-	btn = ui_btn_make("Copy_selected/Add", cb_btn_add);
+	btn = ui_btn_make("Clone before", cb_btn_add);
+	btn->_parent.userdata = (void*) 0;
+	btn->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn);
+	btn = ui_btn_make("Clone after", cb_btn_add);
+	btn->_parent.userdata = (void*) 1;
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
-	btn_delete->_parent.span = 2;
 	btn_delete->enabled = 0;
+	btn_delete->_parent.span = 4;
 	ui_wnd_add_child(wnd, btn_delete);
 	ui_wnd_add_child(wnd, ui_lbl_make("colABGR"));
 	in_color = ui_in_make(in_cb_color);
+	in_color->_parent.span = 3;
 	ui_wnd_add_child(wnd, in_color);
 }
 
