@@ -191,6 +191,8 @@ void ui_init()
 
 void ui_show_window(struct UI_WINDOW *wnd)
 {
+	struct UI_ELEMENT *e;
+
 	active_window = wnd;
 	ui_active_element = NULL;
 	wnd->_parent._parent.proc_recalc_size(wnd);
@@ -202,6 +204,16 @@ void ui_show_window(struct UI_WINDOW *wnd)
 	racecpui_on_active_window_changed(wnd);
 	gangzone_on_active_window_changed(wnd);
 	textdraws_on_active_window_changed(wnd);
+
+	/*okay still need to do layout so we can put the cursor in the center of the window*/
+	wnd->_parent.need_layout = 1;
+	e = (struct UI_ELEMENT*) wnd;
+	e->proc_update(e);
+	/*still ask layout so the children's positions can be adjusted*/
+	wnd->_parent.need_layout = 1;
+
+	cursorx = e->x + e->width / 2;
+	cursory = e->y + e->height / 2;
 }
 
 void ui_hide_window()
