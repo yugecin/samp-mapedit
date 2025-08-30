@@ -215,9 +215,10 @@ void cb_btn_use_palette_color(struct UI_BUTTON *btn)
 	if (IS_VALID_INDEX_SELECTED) {
 		gangzone_data[lst->selectedindex].color = (int) btn->_parent.userdata;
 		update_list();
-		ui_show_window(wnd);
-		ui_wnd_dispose(wnd_palette);
 	}
+	ui_show_window(wnd);
+	ui_wnd_dispose(wnd_palette);
+	wnd_palette = NULL;
 }
 
 static
@@ -247,6 +248,16 @@ void add_palette_color(int rgba)
 }
 
 static
+int cb_wnd_palette_close(struct UI_WINDOW *_)
+{
+	ui_hide_window();
+	ui_wnd_dispose(wnd_palette);
+	wnd_palette = NULL;
+	ui_show_window(wnd);
+	return 1;
+}
+
+static
 void cb_btn_palette(struct UI_BUTTON *_btn)
 {
 	struct UI_LABEL *lbl;
@@ -256,6 +267,7 @@ void cb_btn_palette(struct UI_BUTTON *_btn)
 
 	wnd_palette = ui_wnd_make(300.0f, 300.0f, "Gangzones");
 	wnd_palette->columns = 8;
+	wnd_palette->proc_close = (ui_method*) cb_wnd_palette_close;
 
 	lbl = ui_lbl_make("Colors currently used");
 	lbl->_parent.span = 8;
