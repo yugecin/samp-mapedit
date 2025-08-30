@@ -177,9 +177,7 @@ void cb_btn_delete(struct UI_BUTTON *btn)
 	}
 	i = lst->selectedindex;
 	update_list();
-	if (i < numgangzones) {
-		ui_lst_set_selected_index(lst, i);
-	}
+	ui_lst_set_selected_index(lst, i < numgangzones ? i : numgangzones - 1);
 	cb_lst_item_selected(lst);
 }
 
