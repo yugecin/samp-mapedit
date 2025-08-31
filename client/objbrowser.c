@@ -365,7 +365,7 @@ void cb_btn_switchtime(struct UI_BUTTON *btn)
 	timeweather_set_time(desired_time);
 }
 
-void objbrowser_show(struct RwV3D *positionToCreate)
+void objbrowser_show(struct RwV3D *positionToCreate, int center_cursor_on_screen)
 {
 	objbrowser_never_create = 0;
 	objbrowser_cb = NULL;
@@ -386,6 +386,13 @@ void objbrowser_show(struct RwV3D *positionToCreate)
 	ui_exclusive_mode = objbrowser_do_ui;
 	cloud_render_original_opcode = *cloud_render_opcode;
 	*cloud_render_opcode = 0xC3; /*ret*/
+	if (center_cursor_on_screen) {
+		/*opening the object browser in some cases is more likely for the reason of panning around the object,
+		and in that case it's nicer that the cursor is placed in the middle of the screen instead of the middle
+		of the object browser control panel so one doesn't have to move the cursor first*/
+		cursorx = fresx / 2.0f;
+		cursory = fresy / 2.0f;
+	}
 }
 
 void objbrowser_highlight_model(int model)

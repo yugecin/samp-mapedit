@@ -215,7 +215,7 @@ void cb_btn_view_in_object_browser(struct UI_BUTTON *btn)
 	game_ObjectGetPos(editingObject->sa_object, &pos);
 	ui_hide_window();
 	objbrowser_highlight_model(editingObject->model);
-	objbrowser_show(&pos);
+	objbrowser_show(&pos, 1);
 }
 
 static

@@ -307,7 +307,7 @@ void cb_btn_pick_object(struct UI_BUTTON *btn)
 	game_ObjectGetPos(object->sa_object, &pos);
 	ui_hide_window();
 	objbrowser_highlight_model(atoi(in_modelid->value));
-	objbrowser_show(&pos);
+	objbrowser_show(&pos, 0);
 	objbrowser_never_create = 1;
 	objbrowser_cb = cb_objbrowser_model_chosen;
 }

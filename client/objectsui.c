@@ -129,7 +129,7 @@ void cb_btn_contextmenu_mkobject(struct UI_BUTTON *btn)
 		msg_btn1text = "Ok";
 		msg_show(NULL);
 	} else {
-		objbrowser_show(&nextObjectPosition);
+		objbrowser_show(&nextObjectPosition, 0);
 	}
 }
 
@@ -154,7 +154,7 @@ void cb_btn_contextmenu_viewobject(struct UI_BUTTON *btn)
 	game_ObjectGetPos(clicked_entity, &pos);
 	ui_hide_window();
 	objbrowser_highlight_model(clicked_entity->model);
-	objbrowser_show(&pos);
+	objbrowser_show(&pos, 1);
 }
 
 static
@@ -536,7 +536,7 @@ void cb_btn_objectsui_view_in_object_browser(struct UI_BUTTON *btn)
 		game_ObjectGetPos(selected_entity, &pos);
 		objbrowser_highlight_model(selected_entity->model);
 		ui_hide_window(); /*clears selected_entity*/
-		objbrowser_show(&pos);
+		objbrowser_show(&pos, 1);
 	}
 }
 
