@@ -131,6 +131,14 @@ void cb_btn_mainmenu_bulkedit(struct UI_BUTTON *btn)
 	if (obj) {
 		bulkedit_begin(obj);
 	}
+
+	/*do layout so we can put the cursor in the center of the window*/
+	bulkeditui_wnd->_parent.need_layout = 1;
+	bulkeditui_wnd->_parent._parent.proc_update((void*) bulkeditui_wnd);
+	/*still ask layout so the children's positions can be adjusted*/
+	bulkeditui_wnd->_parent.need_layout = 1;
+	cursorx = bulkeditui_wnd->_parent._parent.x + bulkeditui_wnd->_parent._parent.width / 2;
+	cursory = bulkeditui_wnd->_parent._parent.y + bulkeditui_wnd->_parent._parent.height / 2;
 }
 
 static
