@@ -179,18 +179,9 @@ int snap_cursor_to_next_handle(struct GANG_ZONE *zone)
 }
 
 static
-int wnd_accept_keyup(struct UI_WINDOW *wnd, int vk)
+void add(int relative_index_to_select_0_or_1)
 {
-	if (vk == VK_TAB && IS_VALID_INDEX_SELECTED) {
-		return snap_cursor_to_next_handle(gangzone_data + lst->selectedindex);
-	}
-	return 0;
-}
-
-static
-void cb_btn_add(struct UI_BUTTON *btn)
-{
-	int i, index_to_select, relative_index_to_select_0_or_1, force_under_camera;
+	int i, index_to_select, force_under_camera;
 
 	if (numgangzones >= MAX_GANG_ZONES) {
 		msg_message = "Limit_reached!";
@@ -199,8 +190,6 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		msg_show(cb_msg_limitreached);
 		return;
 	}
-
-	relative_index_to_select_0_or_1 = ((int) btn->_parent.userdata) & 1;
 
 	if (IS_VALID_INDEX_SELECTED) {
 		for (i = numgangzones; i > lst->selectedindex; i--) {
@@ -237,6 +226,12 @@ void cb_btn_add(struct UI_BUTTON *btn)
 	update_list();
 	ui_lst_set_selected_index(lst, index_to_select);
 	cb_lst_item_selected(lst);
+}
+
+static
+void cb_btn_add(struct UI_BUTTON *btn)
+{
+	add(((int) btn->_parent.userdata) & 1);
 }
 
 static
@@ -322,7 +317,7 @@ int cb_wnd_palette_close(struct UI_WINDOW *_)
 }
 
 static
-void cb_btn_palette(struct UI_BUTTON *_btn)
+void open_wnd_palette()
 {
 	struct UI_LABEL *lbl;
 	int listedcolors[MAX_GANG_ZONES];
@@ -372,6 +367,22 @@ skip:
 
 	ui_wnd_center(wnd_palette);
 	ui_show_window(wnd_palette);
+}
+
+static
+int wnd_accept_keyup(struct UI_WINDOW *wnd, int vk)
+{
+	if (IS_VALID_INDEX_SELECTED) {
+		if (vk == VK_TAB) {
+			return snap_cursor_to_next_handle(gangzone_data + lst->selectedindex);
+		} else if (vk == VK_V) {
+			open_wnd_palette();
+		}
+	}
+	if (vk == VK_C) {
+		add(1);
+	}
+	return 0;
 }
 
 int gangzone_on_background_element_just_clicked()
@@ -658,7 +669,7 @@ void gangzone_init()
 	btn->_parent.userdata = (void*) 0;
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
-	btn = ui_btn_make("Clone after", cb_btn_add);
+	btn = ui_btn_make("Clone after (C)", cb_btn_add);
 	btn->_parent.userdata = (void*) 1;
 	btn->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn);
@@ -671,7 +682,7 @@ void gangzone_init()
 	in_color->_parent.span = 2;
 	in_color->_parent.pref_width = 100.0f;
 	ui_wnd_add_child(wnd, in_color);
-	ui_wnd_add_child(wnd, ui_btn_make("palette", cb_btn_palette));
+	ui_wnd_add_child(wnd, ui_btn_make("palette (V)", (ui_method*) open_wnd_palette));
 
 	wnd_palette = NULL;
 }
