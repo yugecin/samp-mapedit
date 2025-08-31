@@ -9,6 +9,7 @@
 #include "player.h"
 #include "samp.h"
 #include "vk.h"
+#include <windows.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -211,6 +212,7 @@ void add(int relative_index_to_select_0_or_1)
 		index_to_select = numgangzones * relative_index_to_select_0_or_1;
 	}
 
+	last_handle_snapped_to = (last_handle_snapped_to + 3) % 4; /*since snap_cursor_to_next_handle will go to the next handle, and we want to keep the same after cloning*/
 	force_under_camera = !snap_cursor_to_next_handle(gangzone_data + numgangzones);
 	if (force_under_camera || !numgangzones) {
 		if (!numgangzones) {
@@ -382,6 +384,9 @@ int wnd_accept_keyup(struct UI_WINDOW *wnd, int vk)
 {
 	if (IS_VALID_INDEX_SELECTED) {
 		if (vk == VK_TAB) {
+			if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+				last_handle_snapped_to = (last_handle_snapped_to + 2) % 4; /*skip two from current so we will effectively go in reverse direction*/
+			}
 			return snap_cursor_to_next_handle(gangzone_data + lst->selectedindex);
 		} else if (vk == VK_V) {
 			open_wnd_palette();
