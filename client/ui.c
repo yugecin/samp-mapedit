@@ -727,14 +727,26 @@ int ui_handle_keydown(int vk)
 		}
 		*/
 	}
-	return ui_active_element != NULL &&
-		UIPROC(ui_active_element, proc_accept_keydown, (void*) vk);
+	return 0
+		|| ui_active_element && UIPROC(ui_active_element, proc_accept_keydown, (void*) vk)
+		|| active_window && UIPROC(active_window, proc_accept_keydown, (void*) vk)
+	;
+}
+
+int ui_handle_keyup(int vk)
+{
+	return 0
+		|| ui_active_element && UIPROC(ui_active_element, proc_accept_keyup, (void*) vk)
+		|| active_window && UIPROC(active_window, proc_accept_keyup, (void*) vk)
+	;
 }
 
 int ui_handle_char(char c)
 {
-	return ui_active_element != NULL &&
-		UIPROC(ui_active_element, proc_accept_char, (void*) c);
+	return 0
+		|| ui_active_element && UIPROC(ui_active_element, proc_accept_char, (void*) c)
+		|| active_window && UIPROC(active_window, proc_accept_char, (void*) c)
+	;
 }
 
 void ui_render()

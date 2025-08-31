@@ -8,6 +8,7 @@
 #include "ui.h"
 #include "player.h"
 #include "samp.h"
+#include "vk.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,6 +36,8 @@ static int dont_update_color_textbox;
 
 struct RwV3D handles[4];
 int dragging_handle;
+
+int last_handle_snapped_to = 0;
 
 static struct IM2DVERTEX verts[] = {
 	{0, 0, 0, 0x40555556, 0, 1.0f, 0.0f},
@@ -130,27 +133,56 @@ void cb_msg_limitreached(int choice)
 }
 
 static
-int snap_cursor_to_a_control_point(struct GANG_ZONE *zone)
+int snap_cursor_to_handle(struct GANG_ZONE *zone, int handle_index)
 {
-	struct RwV3D vin[4], vout;
+	struct RwV3D vin, vout;
+
+	switch (handle_index) {
+	case 0:
+		vin.x = zone->minx;
+		vin.y = zone->maxy;
+		break;
+	case 1:
+		vin.x = zone->maxx;
+		vin.y = zone->maxy;
+		break;
+	case 2:
+		vin.x = zone->maxx;
+		vin.y = zone->miny;
+		break;
+	case 3:
+		vin.x = zone->minx;
+		vin.y = zone->miny;
+	}
+	vin.z = zone_z;
+	game_WorldToScreen(&vout, &vin);
+	if (vout.z > 0.0f && vout.x > 0.0f && vout.x < fresx && vout.y > 0.0f && vout.y < fresy) {
+		cursorx = vout.x;
+		cursory = vout.y;
+		return 1;
+	}
+	return 0;
+}
+
+static
+int snap_cursor_to_next_handle(struct GANG_ZONE *zone)
+{
 	int i;
 
-	vin[0].z = vin[1].z = vin[2].z = vin[3].z = zone_z;
-	vin[0].x = zone->minx;
-	vin[0].y = zone->maxy;
-	vin[1].x = zone->maxx;
-	vin[1].y = zone->maxy;
-	vin[2].x = zone->minx;
-	vin[2].y = zone->miny;
-	vin[3].x = zone->maxx;
-	vin[3].y = zone->miny;
 	for (i = 0; i < 4; i++) {
-		game_WorldToScreen(&vout, vin + i);
-		if (vout.z > 0.0f && vout.x > 0.0f && vout.x < fresx && vout.y > 0.0f && vout.y < fresy) {
-			cursorx = vout.x;
-			cursory = vout.y;
+		last_handle_snapped_to = (last_handle_snapped_to + 1) % 4;
+		if (snap_cursor_to_handle(zone, last_handle_snapped_to)) {
 			return 1;
 		}
+	}
+	return 0;
+}
+
+static
+int wnd_accept_keyup(struct UI_WINDOW *wnd, int vk)
+{
+	if (vk == VK_TAB && IS_VALID_INDEX_SELECTED) {
+		return snap_cursor_to_next_handle(gangzone_data + lst->selectedindex);
 	}
 	return 0;
 }
@@ -188,7 +220,7 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		index_to_select = numgangzones * relative_index_to_select_0_or_1;
 	}
 
-	force_under_camera = !snap_cursor_to_a_control_point(gangzone_data + numgangzones);
+	force_under_camera = !snap_cursor_to_next_handle(gangzone_data + numgangzones);
 	if (force_under_camera || !numgangzones) {
 		if (!numgangzones) {
 			gangzone_data[numgangzones].color = 0xFF000000;
@@ -197,7 +229,7 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		gangzone_data[numgangzones].maxx = camera->position.x + 50.0f;
 		gangzone_data[numgangzones].miny = camera->position.y - 50.0f;
 		gangzone_data[numgangzones].maxy = camera->position.y + 50.0f;
-		snap_cursor_to_a_control_point(gangzone_data + numgangzones);
+		for (i = 0; i < 4 && !snap_cursor_to_handle(gangzone_data + numgangzones, i); i++);
 	}
 
 	gangzone_enable[numgangzones] = 1;
@@ -590,6 +622,7 @@ void gangzone_on_active_window_changed(struct UI_WINDOW *_wnd)
 void gangzone_init()
 {
 	struct UI_BUTTON *btn;
+	struct UI_LABEL *lbl;
 	int poolsaddr;
 	int gangzonesaddr;
 	int **ptr;
@@ -610,10 +643,14 @@ void gangzone_init()
 
 	wnd = ui_wnd_make(9000.0f, 300.0f, "Gangzones");
 	wnd->columns = 4;
+	wnd->_parent._parent.proc_accept_keyup = (ui_method1*) wnd_accept_keyup;
 
 	lbl_num = ui_lbl_make(lbl_num_text);
 	lbl_num->_parent.span = 4;
 	ui_wnd_add_child(wnd, lbl_num);
+	lbl = ui_lbl_make("press ~r~TAB~w~ to snap cursor");
+	lbl->_parent.span = 4;
+	ui_wnd_add_child(wnd, lbl);
 	lst = ui_lst_make(35, cb_lst_item_selected);
 	lst->_parent.span = 4;
 	ui_wnd_add_child(wnd, lst);

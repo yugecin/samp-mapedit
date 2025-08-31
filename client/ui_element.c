@@ -25,6 +25,7 @@ void ui_elem_init(void *elem, enum eUIElementType type)
 	e->proc_recalc_size = (ui_method*) ui_elem_dummy_proc;
 	e->proc_post_layout = (ui_method*) ui_elem_dummy_proc;
 	e->proc_accept_keydown = (ui_method1*) ui_elem_dummy_proc;
+	e->proc_accept_keyup = (ui_method1*) ui_elem_dummy_proc;
 	e->proc_accept_char = (ui_method1*) ui_elem_dummy_proc;
 	e->alignment = 0;
 	e->span = 1;

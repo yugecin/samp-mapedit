@@ -146,6 +146,9 @@ LRESULT APIENTRY NewWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (uMsg == WM_KEYDOWN && ui_handle_keydown((int) wParam)) {
 		return 0;
 	}
+	if (uMsg == WM_KEYUP && ui_handle_keyup((int) wParam)) {
+		return 0;
+	}
 	/*somewhere WM_KEYDOWN is already translated to WM_CHAR?*/
 	if (uMsg == WM_CHAR && ui_handle_char((char) wParam)) {
 		return 0;
