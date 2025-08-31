@@ -213,10 +213,10 @@ void add(int relative_index_to_select_0_or_1)
 	}
 
 	last_handle_snapped_to = (last_handle_snapped_to + 3) % 4; /*since snap_cursor_to_next_handle will go to the next handle, and we want to keep the same after cloning*/
-	force_under_camera = !snap_cursor_to_next_handle(gangzone_data + numgangzones);
+	force_under_camera = !snap_cursor_to_next_handle(gangzone_data + index_to_select);
 	if (force_under_camera || !numgangzones) {
 		if (!numgangzones) {
-			gangzone_data[numgangzones].color = 0xFF000000;
+			gangzone_data[0].color = 0xFF000000;
 		}
 		lv = &camera->lookVector;
 		zone_z = (float) fabs(camera->position.z - zone_z);
@@ -224,11 +224,11 @@ void add(int relative_index_to_select_0_or_1)
 		facingAngle = atan2(lv->y, lv->x);
 		udrotation = atan2(lv->z, sqrt(lv->x * lv->x + lv->y * lv->y));
 		camera_dist_to_z_plane = (zone_z - camera->position.z) / tan(udrotation);
-		gangzone_data[numgangzones].minx = camera->position.x - 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
-		gangzone_data[numgangzones].maxx = camera->position.x + 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
-		gangzone_data[numgangzones].miny = camera->position.y - 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
-		gangzone_data[numgangzones].maxy = camera->position.y + 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
-		for (i = 0; i < 4 && !snap_cursor_to_handle(gangzone_data + numgangzones, i); i++);
+		gangzone_data[index_to_select].minx = camera->position.x - 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
+		gangzone_data[index_to_select].maxx = camera->position.x + 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
+		gangzone_data[index_to_select].miny = camera->position.y - 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
+		gangzone_data[index_to_select].maxy = camera->position.y + 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
+		for (i = 0; i < 4 && !snap_cursor_to_handle(gangzone_data + index_to_select, i); i++);
 	}
 
 	gangzone_enable[numgangzones] = 1;
