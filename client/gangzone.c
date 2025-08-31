@@ -132,6 +132,7 @@ void cb_msg_limitreached(int choice)
 static
 void cb_btn_add(struct UI_BUTTON *btn)
 {
+	struct RwV3D vin[4], vout;
 	int i, index_to_select, relative_index_to_select_0_or_1;
 
 	if (numgangzones >= MAX_GANG_ZONES) {
@@ -167,6 +168,23 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		gangzone_data[0].maxx = camera->position.x + 50.0f;
 		gangzone_data[0].miny = camera->position.y - 50.0f;
 		gangzone_data[0].maxy = camera->position.y + 50.0f;
+	}
+	vin[0].z = vin[1].z = vin[2].z = vin[3].z = zone_z;
+	vin[0].x = gangzone_data[numgangzones].minx;
+	vin[0].y = gangzone_data[numgangzones].maxy;
+	vin[1].x = gangzone_data[numgangzones].maxx;
+	vin[1].y = gangzone_data[numgangzones].maxy;
+	vin[2].x = gangzone_data[numgangzones].minx;
+	vin[2].y = gangzone_data[numgangzones].miny;
+	vin[3].x = gangzone_data[numgangzones].maxx;
+	vin[3].y = gangzone_data[numgangzones].miny;
+	for (i = 0; i < 4; i++) {
+		game_WorldToScreen(&vout, vin + i);
+		if (vout.z > 0.0f) {
+			cursorx = vout.x;
+			cursory = vout.y;
+			break;
+		}
 	}
 	gangzone_enable[numgangzones] = 1;
 	numgangzones++;
