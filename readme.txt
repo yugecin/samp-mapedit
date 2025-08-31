@@ -36,8 +36,10 @@ Install
   path to where mapedit-client.dll gets compiled, for the reload functionality
   to work)
 - (if not doing the above, copy mapedit-client.dll to CLEO folder)
-- get a sa-mp server, add mapedit-server.dll to plugins and use the cfg from
-  the server dir
+- get a sa-mp server (I use 0.3.7-R2, you can download them at
+  https://samp.romzes.com (use at own risk)), add mapedit-server.dll to the
+  plugins folder and use the cfg from the server dir. you don't need to modify
+  the gamemode setting as the plugin will generate a dummy one.
 
 Run
 ---
