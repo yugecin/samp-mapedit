@@ -159,9 +159,10 @@ void cb_cp_cpcol(struct UI_COLORPICKER *colpick)
 }
 
 static
-void cb_btn_back(struct UI_BUTTON *btn)
+int show_main_window()
 {
 	racecpui_show_window();
+	return 1;
 }
 
 static
@@ -230,6 +231,7 @@ void racecpeditor_init()
 	/*checkpoint settings window*/
 	window_cpsettings = ui_wnd_make(9000.0f, 500.0f, "Checkpoint");
 	window_cpsettings->columns = 4;
+	window_cpsettings->proc_close = (ui_method*) show_main_window;
 	proc_cpsettings_draw = window_cpsettings->_parent._parent.proc_draw;
 	window_cpsettings->_parent._parent.proc_draw = draw_window_cpsettings;
 	ui_wnd_add_child(window_cpsettings, ui_lbl_make("Description:"));
@@ -319,7 +321,7 @@ void racecpeditor_init()
 	cp_colpick->_parent.span = 3;
 	cp_colpick->last_selected_colorABGR = 0xFF0000FF;
 	ui_wnd_add_child(window_cpsettings, cp_colpick);
-	btn = ui_btn_make("Back_to_list", cb_btn_back);
+	btn = ui_btn_make("Back_to_list", (ui_method*) show_main_window);
 	btn->_parent.span = 4;
 	ui_wnd_add_child(window_cpsettings, btn);
 }
