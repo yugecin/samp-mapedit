@@ -23,7 +23,7 @@ static struct UI_BUTTON *btn_edit, *btn_delete;
 static struct UI_LABEL *lbl_num;
 static struct UI_INPUT *in_color;
 static struct UI_WINDOW *wnd_palette;
-static float zone_z;
+static float zone_z = 0.0f;
 static char lbl_num_text[35];
 #define GANG_ZONE_TEXT_LEN 16
 static char listnames[MAX_GANG_ZONES * GANG_ZONE_TEXT_LEN];
@@ -182,6 +182,8 @@ static
 void add(int relative_index_to_select_0_or_1)
 {
 	int i, index_to_select, force_under_camera;
+	double facingAngle, udrotation, camera_dist_to_z_plane;
+	struct RwV3D *lv;
 
 	if (numgangzones >= MAX_GANG_ZONES) {
 		msg_message = "Limit_reached!";
@@ -214,10 +216,16 @@ void add(int relative_index_to_select_0_or_1)
 		if (!numgangzones) {
 			gangzone_data[numgangzones].color = 0xFF000000;
 		}
-		gangzone_data[numgangzones].minx = camera->position.x - 50.0f;
-		gangzone_data[numgangzones].maxx = camera->position.x + 50.0f;
-		gangzone_data[numgangzones].miny = camera->position.y - 50.0f;
-		gangzone_data[numgangzones].maxy = camera->position.y + 50.0f;
+		lv = &camera->lookVector;
+		zone_z = (float) fabs(camera->position.z - zone_z);
+		zone_z = lv->z > 0.0f ? camera->position.z + zone_z : camera->position.z - zone_z;
+		facingAngle = atan2(lv->y, lv->x);
+		udrotation = atan2(lv->z, sqrt(lv->x * lv->x + lv->y * lv->y));
+		camera_dist_to_z_plane = (zone_z - camera->position.z) / tan(udrotation);
+		gangzone_data[numgangzones].minx = camera->position.x - 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
+		gangzone_data[numgangzones].maxx = camera->position.x + 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
+		gangzone_data[numgangzones].miny = camera->position.y - 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
+		gangzone_data[numgangzones].maxy = camera->position.y + 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
 		for (i = 0; i < 4 && !snap_cursor_to_handle(gangzone_data + numgangzones, i); i++);
 	}
 
