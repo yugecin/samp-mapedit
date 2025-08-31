@@ -130,10 +130,35 @@ void cb_msg_limitreached(int choice)
 }
 
 static
-void cb_btn_add(struct UI_BUTTON *btn)
+int snap_cursor_to_a_control_point(struct GANG_ZONE *zone)
 {
 	struct RwV3D vin[4], vout;
-	int i, index_to_select, relative_index_to_select_0_or_1;
+	int i;
+
+	vin[0].z = vin[1].z = vin[2].z = vin[3].z = zone_z;
+	vin[0].x = zone->minx;
+	vin[0].y = zone->maxy;
+	vin[1].x = zone->maxx;
+	vin[1].y = zone->maxy;
+	vin[2].x = zone->minx;
+	vin[2].y = zone->miny;
+	vin[3].x = zone->maxx;
+	vin[3].y = zone->miny;
+	for (i = 0; i < 4; i++) {
+		game_WorldToScreen(&vout, vin + i);
+		if (vout.z > 0.0f && vout.x > 0.0f && vout.x < fresx && vout.y > 0.0f && vout.y < fresy) {
+			cursorx = vout.x;
+			cursory = vout.y;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static
+void cb_btn_add(struct UI_BUTTON *btn)
+{
+	int i, index_to_select, relative_index_to_select_0_or_1, force_under_camera;
 
 	if (numgangzones >= MAX_GANG_ZONES) {
 		msg_message = "Limit_reached!";
@@ -162,30 +187,19 @@ void cb_btn_add(struct UI_BUTTON *btn)
 		}
 		index_to_select = numgangzones * relative_index_to_select_0_or_1;
 	}
-	if (!numgangzones) {
-		gangzone_data[0].color = 0xFF000000;
-		gangzone_data[0].minx = camera->position.x - 50.0f;
-		gangzone_data[0].maxx = camera->position.x + 50.0f;
-		gangzone_data[0].miny = camera->position.y - 50.0f;
-		gangzone_data[0].maxy = camera->position.y + 50.0f;
-	}
-	vin[0].z = vin[1].z = vin[2].z = vin[3].z = zone_z;
-	vin[0].x = gangzone_data[numgangzones].minx;
-	vin[0].y = gangzone_data[numgangzones].maxy;
-	vin[1].x = gangzone_data[numgangzones].maxx;
-	vin[1].y = gangzone_data[numgangzones].maxy;
-	vin[2].x = gangzone_data[numgangzones].minx;
-	vin[2].y = gangzone_data[numgangzones].miny;
-	vin[3].x = gangzone_data[numgangzones].maxx;
-	vin[3].y = gangzone_data[numgangzones].miny;
-	for (i = 0; i < 4; i++) {
-		game_WorldToScreen(&vout, vin + i);
-		if (vout.z > 0.0f) {
-			cursorx = vout.x;
-			cursory = vout.y;
-			break;
+
+	force_under_camera = !snap_cursor_to_a_control_point(gangzone_data + numgangzones);
+	if (force_under_camera || !numgangzones) {
+		if (!numgangzones) {
+			gangzone_data[numgangzones].color = 0xFF000000;
 		}
+		gangzone_data[numgangzones].minx = camera->position.x - 50.0f;
+		gangzone_data[numgangzones].maxx = camera->position.x + 50.0f;
+		gangzone_data[numgangzones].miny = camera->position.y - 50.0f;
+		gangzone_data[numgangzones].maxy = camera->position.y + 50.0f;
+		snap_cursor_to_a_control_point(gangzone_data + numgangzones);
 	}
+
 	gangzone_enable[numgangzones] = 1;
 	numgangzones++;
 	update_list();
