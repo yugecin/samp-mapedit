@@ -538,6 +538,7 @@ void gangzone_frame_update()
 							cursory < handles[j].y + HANDLE_SIZE)
 						{
 							dragging_handle = j;
+							last_handle_snapped_to = dragging_handle;
 							goto isdragging;
 						}
 					}
