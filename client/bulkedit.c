@@ -517,6 +517,28 @@ void bulkedit_update_rot_spread()
 	}
 }
 
+void bulkedit_update_rot_pseudorandomz()
+{
+	struct RwV3D rot, handle_rot;
+	float summed_rot;
+	int i;
+
+	if (numBulkEditObjects < 2) {
+		return;
+	}
+
+	game_ObjectGetRot(handlingObject->sa_object, &handle_rot);
+	summed_rot = handle_rot.z;
+	for (i = 0; i < numBulkEditObjects; i++) {
+		if (bulkEditObjects[i] != handlingObject) {
+			game_ObjectGetRot(bulkEditObjects[i]->sa_object, &rot);
+			rot.z = summed_rot;
+			game_ObjectSetRotRad(bulkEditObjects[i]->sa_object, &rot);
+			summed_rot += handle_rot.z;
+		}
+	}
+}
+
 void bulkedit_update_rot_object_direction()
 {
 	struct OBJECT *furthest_obj;

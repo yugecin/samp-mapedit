@@ -22,6 +22,7 @@ void bulkedit_update_pos_copyz();
 void bulkedit_update_pos_rotaroundz();
 void bulkedit_update_rot_sync();
 void bulkedit_update_rot_spread();
+void bulkedit_update_rot_pseudorandomz();
 void bulkedit_update_rot_object_direction();
 
 extern void (*bulkedit_pos_update_method)();
