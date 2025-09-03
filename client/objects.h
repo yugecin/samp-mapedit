@@ -109,3 +109,5 @@ extern struct OBJECT manipulateObject;
 extern struct CEntity *manipulateEntity;
 extern int lastMadeObjectModel;
 void objects_show_creation_progress();
+
+int dontEditObjectAfterCloning;

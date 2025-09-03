@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <windows.h>
+#include "vk.h"
 
 static struct UI_WINDOW *window_layers;
 static struct UI_LABEL *lbl_layer;
@@ -65,7 +66,7 @@ static struct UI_LABEL *lbl_objmodel;
 static struct UI_LABEL *lbl_objlodmodel;
 static struct UI_BUTTON *btn_view_in_browser;
 static struct UI_BUTTON *btn_remove_building;
-static struct UI_BUTTON *btn_objclone;
+static struct UI_BUTTON *btn_objclone, *btn_objclonecontinue;
 static struct UI_BUTTON *btn_edit_obj;
 static struct UI_BUTTON *btn_delete_obj;
 
@@ -569,6 +570,13 @@ void cb_btn_objclone(struct UI_BUTTON *btn)
 }
 
 static
+void cb_btn_objclonecontinue(struct UI_BUTTON *btn)
+{
+	dontEditObjectAfterCloning = 1;
+	cb_btn_objclone(btn_objclone);
+}
+
+static
 void cb_btn_edit_obj(struct UI_BUTTON *btn)
 {
 	objedit_show(selected_object);
@@ -600,6 +608,16 @@ void cb_btn_delete_obj(struct UI_BUTTON *btn)
 		object_to_delete_after_confirm = selected_object;
 		objui_show_delete_confirm_msg(cb_confirm_delete);
 	}
+}
+
+static
+int window_objinfo_accept_keyup(struct UI_WINDOW *wnd, int vk)
+{
+	if (vk == VK_C && btn_objclonecontinue->enabled) {
+		cb_btn_objclonecontinue(btn_objclonecontinue);
+		return 1;
+	}
+	return 0;
 }
 
 void objui_init()
@@ -678,6 +696,7 @@ void objui_init()
 	/*objinfo window*/
 	window_objinfo = ui_wnd_make(1500.0f, 400.0f, "Entity_Info");
 	window_objinfo->columns = 2;
+	window_objinfo->_parent._parent.proc_accept_keyup = (ui_method1*) window_objinfo_accept_keyup;
 
 	ui_wnd_add_child(window_objinfo, ui_lbl_make("Entity:"));
 	ui_wnd_add_child(window_objinfo, ui_lbl_make(txt_objentity));
@@ -707,6 +726,9 @@ void objui_init()
 	btn = ui_btn_make("Clone", cb_btn_objclone);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(window_objinfo, btn_objclone = btn);
+	btn = ui_btn_make("Clone & Continue (C)", cb_btn_objclonecontinue);
+	btn->_parent.span = 2;
+	ui_wnd_add_child(window_objinfo, btn_objclonecontinue = btn);
 	btn = ui_btn_make("Edit_Object", cb_btn_edit_obj);
 	btn->_parent.span = 2;
 	ui_wnd_add_child(window_objinfo, btn_edit_obj = btn);
@@ -876,6 +898,7 @@ void objui_select_entity(void *entity)
 
 	if (entity == NULL) {
 		btn_objclone->enabled = 0;
+		btn_objclonecontinue->enabled = 0;
 		selected_object = NULL;
 		btn_view_in_browser->enabled = 0;
 		btn_remove_building->enabled = 0;
@@ -893,6 +916,7 @@ void objui_select_entity(void *entity)
 	}
 
 	btn_objclone->enabled = 1;
+	btn_objclonecontinue->enabled = 1;
 	lod = *((int**) ((char*) entity + 0x30));
 	modelid = *((unsigned short*) entity + 0x11);
 	sprintf(txt_objentity, "%p", entity);

@@ -41,6 +41,7 @@ struct OBJECT manipulateObject;
 struct CEntity *manipulateEntity = NULL;
 
 int lastMadeObjectModel = 1297;
+int dontEditObjectAfterCloning = 0;
 
 void objects_set_material_text(
 	struct OBJECT *object,
@@ -212,17 +213,20 @@ int objects_object_created(struct OBJECT *object)
 	nc.params.asflt[4] = cloning_object_rot.z;
 	sockets_send(&nc, sizeof(nc));
 
-	nc._parent.id = MAPEDIT_MSG_NATIVECALL;
-	nc.nc = NC_EditObject;
-	nc.params.asint[1] = 0;
-	nc.params.asint[2] = cloning_object.samp_objectid;
-	sockets_send(&nc, sizeof(nc));
-
 	objui_select_entity(NULL);
-
 	cloning_object.model = 0;
 
-	objedit_show(newobject);
+	if (dontEditObjectAfterCloning) {
+		dontEditObjectAfterCloning = 0;
+	} else {
+		nc._parent.id = MAPEDIT_MSG_NATIVECALL;
+		nc.nc = NC_EditObject;
+		nc.params.asint[1] = 0;
+		nc.params.asint[2] = cloning_object.samp_objectid;
+		sockets_send(&nc, sizeof(nc));
+
+		objedit_show(newobject);
+	}
 	return 1;
 }
 
