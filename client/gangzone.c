@@ -182,7 +182,7 @@ int snap_cursor_to_next_handle(struct GANG_ZONE *zone)
 static
 void add(int relative_index_to_select_0_or_1)
 {
-	int i, index_to_select, force_under_camera;
+	int i, index_of_new_zone, force_under_camera;
 	double facingAngle, udrotation, camera_dist_to_z_plane;
 	struct RwV3D *lv;
 
@@ -198,7 +198,7 @@ void add(int relative_index_to_select_0_or_1)
 		for (i = numgangzones; i > lst->selectedindex; i--) {
 			gangzone_data[i] = gangzone_data[i - 1];
 		}
-		index_to_select = lst->selectedindex + relative_index_to_select_0_or_1;
+		index_of_new_zone = lst->selectedindex + relative_index_to_select_0_or_1;
 	} else {
 		if (numgangzones > 0) {
 			if (relative_index_to_select_0_or_1) {
@@ -209,11 +209,11 @@ void add(int relative_index_to_select_0_or_1)
 				}
 			}
 		}
-		index_to_select = numgangzones * relative_index_to_select_0_or_1;
+		index_of_new_zone = numgangzones * relative_index_to_select_0_or_1;
 	}
 
 	last_handle_snapped_to = (last_handle_snapped_to + 3) % 4; /*since snap_cursor_to_next_handle will go to the next handle, and we want to keep the same after cloning*/
-	force_under_camera = !snap_cursor_to_next_handle(gangzone_data + index_to_select);
+	force_under_camera = !snap_cursor_to_next_handle(gangzone_data + index_of_new_zone);
 	if (force_under_camera || !numgangzones) {
 		if (!numgangzones) {
 			gangzone_data[0].color = 0xFF000000;
@@ -224,17 +224,17 @@ void add(int relative_index_to_select_0_or_1)
 		facingAngle = atan2(lv->y, lv->x);
 		udrotation = atan2(lv->z, sqrt(lv->x * lv->x + lv->y * lv->y));
 		camera_dist_to_z_plane = (zone_z - camera->position.z) / tan(udrotation);
-		gangzone_data[index_to_select].minx = camera->position.x - 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
-		gangzone_data[index_to_select].maxx = camera->position.x + 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
-		gangzone_data[index_to_select].miny = camera->position.y - 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
-		gangzone_data[index_to_select].maxy = camera->position.y + 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
-		for (i = 0; i < 4 && !snap_cursor_to_handle(gangzone_data + index_to_select, i); i++);
+		gangzone_data[index_of_new_zone].minx = camera->position.x - 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
+		gangzone_data[index_of_new_zone].maxx = camera->position.x + 10.0f + (float) (camera_dist_to_z_plane * cos(facingAngle));
+		gangzone_data[index_of_new_zone].miny = camera->position.y - 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
+		gangzone_data[index_of_new_zone].maxy = camera->position.y + 10.0f + (float) (camera_dist_to_z_plane * sin(facingAngle));
+		for (i = 0; i < 4 && !snap_cursor_to_handle(gangzone_data + index_of_new_zone, i); i++);
 	}
 
 	gangzone_enable[numgangzones] = 1;
 	numgangzones++;
 	update_list();
-	ui_lst_set_selected_index(lst, index_to_select);
+	ui_lst_set_selected_index(lst, index_of_new_zone);
 	cb_lst_item_selected(lst);
 }
 
