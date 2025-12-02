@@ -467,6 +467,7 @@ void gangzone_frame_update()
 	struct RwV3D pos;
 	struct RwV3D a, b, c, d, in;
 	float *minx, *maxx, *miny, *maxy;
+	double lvhang;
 	int col, i, j;
 	int alpha;
 
@@ -625,6 +626,10 @@ handle_changed:
 		dragging_handle = -1;
 	}
 	player_position.z += 100.0f;
+	// offset the player a little so the player blip on the minimap is not hiding the gangzone being edited
+	lvhang = atan2(camera->lookVector.y, camera->lookVector.x);
+	player_position.x -= (float) (75.0f * cos(lvhang));
+	player_position.y -= (float) (75.0f * sin(lvhang));
 
 	sprintf(lbl_num_text, "num_zones:_%d", numgangzones);
 }
