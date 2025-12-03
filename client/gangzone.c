@@ -557,13 +557,13 @@ isdragging:
 			ui_get_entity_pointed_at(&clicked_entity, &clicked_colpoint);
 			if (clicked_entity) {
 				pos = clicked_colpoint.pos;
+				zone_z = pos.z;
 			} else {
 				game_ScreenToWorld(&pos, cursorx, cursory, 50.0f);
 			}
 			player_position = pos;
 
 			if (dragging_handle != -1) {
-				zone_z = pos.z;
 				minx = &gangzone_data[lst->selectedindex].minx;
 				maxx = &gangzone_data[lst->selectedindex].maxx;
 				miny = &gangzone_data[lst->selectedindex].miny;
