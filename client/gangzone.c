@@ -20,10 +20,10 @@ int numgangzones;
 
 static struct UI_WINDOW *wnd;
 static struct UI_LIST *lst;
-static struct UI_BUTTON *btn_edit, *btn_delete;
+static struct UI_BUTTON *btn_edit, *btn_delete, *btn_bulkadd;
 static struct UI_LABEL *lbl_num;
 static struct UI_INPUT *in_color;
-static struct UI_WINDOW *wnd_palette;
+static struct UI_WINDOW *wnd_palette, *wnd_bulkadd;
 static float zone_z = 0.0f;
 static char lbl_num_text[35];
 #define GANG_ZONE_TEXT_LEN 16
@@ -31,6 +31,8 @@ static char listnames[MAX_GANG_ZONES * GANG_ZONE_TEXT_LEN];
 static int gangzonesactive;
 static int was_lmb_down;
 static int dont_update_color_textbox;
+static int bulk_amount = 10;
+static float bulk_direction = 45.0f, bulk_off = 10.0f;
 
 /*this is actually size/2*/
 #define HANDLE_SIZE (7.5f)
@@ -56,6 +58,28 @@ void abgr_rgba(int *col)
 
 	v = ((v & 0xFF) << 24) | ((v & 0xFF00) << 8) | ((v & 0xFF0000) >> 8) | (v >> 24);
 	*col = *((int*) &v);
+}
+
+static
+int altcolor(int col)
+{
+	return (col & 0xFF00FF00) | (0xFF - (col & 0xFF)) |
+		((0xFF - ((col & 0xFF) >> 8)) << 8) |
+		((0xFF - ((col & 0xFF0000) >> 16)) << 16);
+}
+
+static
+void bulkedit_apply_to_zone(struct GANG_ZONE *master, struct GANG_ZONE *to, int number, int altcolor)
+{
+	double dir;
+
+	dir = bulk_direction * M_PI / 180.0;
+	to->color = master->color;
+	to->altcolor = altcolor;
+	to->maxx = master->maxx + (float) (bulk_off * number * cos(dir));
+	to->minx = master->minx + (float) (bulk_off * number * cos(dir));
+	to->maxy = master->maxy + (float) (bulk_off * number * sin(dir));
+	to->miny = master->miny + (float) (bulk_off * number * sin(dir));
 }
 
 static
@@ -88,9 +112,11 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 
 	if (lst->selectedindex == -1) {
 		btn_delete->enabled = 0;
+		btn_bulkadd->enabled = 0;
 		return;
 	}
 	btn_delete->enabled = 1;
+	btn_bulkadd->enabled = 1;
 
 	if (!dont_update_color_textbox) {
 		col = gangzone_data[lst->selectedindex].color;
@@ -98,11 +124,7 @@ void cb_lst_item_selected(struct UI_LIST *lst)
 		sprintf(buf, "%08x", col);
 		ui_in_set_text(in_color, buf);
 	}
-	col = gangzone_data[lst->selectedindex].color;
-	col = (col & 0xFF00FF00) | (0xFF - (col & 0xFF)) |
-		((0xFF - ((col & 0xFF) >> 8)) << 8) |
-		((0xFF - ((col & 0xFF0000) >> 16)) << 16);
-	gangzone_data[lst->selectedindex].altcolor = col;
+	gangzone_data[lst->selectedindex].altcolor = altcolor(gangzone_data[lst->selectedindex].color);
 }
 
 static
@@ -380,7 +402,7 @@ skip:
 }
 
 static
-int wnd_accept_keyup(struct UI_WINDOW *wnd, int vk)
+int wnd_accept_keyup(struct UI_WINDOW *_wnd, int vk)
 {
 	if (IS_VALID_INDEX_SELECTED) {
 		if (vk == VK_TAB) {
@@ -388,14 +410,152 @@ int wnd_accept_keyup(struct UI_WINDOW *wnd, int vk)
 				last_handle_snapped_to = (last_handle_snapped_to + 2) % 4; /*skip two from current so we will effectively go in reverse direction*/
 			}
 			return snap_cursor_to_next_handle(gangzone_data + lst->selectedindex);
-		} else if (vk == VK_V) {
+		} 
+	}
+	// the "bulk add" window has this same listener, so only do the following if we're actually in the main window
+	if (_wnd == wnd) {
+		if (vk == VK_C) {
+			add(1);
+			return 1;
+		} else if (IS_VALID_INDEX_SELECTED && vk == VK_V) {
 			open_wnd_palette();
+			return 1;
 		}
 	}
-	if (vk == VK_C) {
-		add(1);
-	}
 	return 0;
+}
+
+static
+void bulk_update()
+{
+	struct GANG_ZONE *master;
+	int i, idx;
+
+	master = gangzone_data + lst->selectedindex;
+	for (idx = MAX_GANG_ZONES - bulk_amount, i = 1; idx < MAX_GANG_ZONES; idx++, i++) {
+		gangzone_enable[idx] = 1;
+		bulkedit_apply_to_zone(master, gangzone_data + idx, i, altcolor(master->color));
+	}
+}
+
+static
+void cb_in_bulk_direction(struct UI_INPUT *in)
+{
+	bulk_direction = (float) atof(in->value);
+	bulk_update();
+}
+
+static
+void cb_in_bulk_off(struct UI_INPUT *in)
+{
+	bulk_off = (float) atof(in->value);
+	bulk_update();
+}
+
+static
+void cb_in_bulk_amount(struct UI_INPUT *in)
+{
+	int i;
+
+	for (i = 1; i <= bulk_amount; i++) {
+		gangzone_enable[MAX_GANG_ZONES - i] = 0;
+	}
+	bulk_amount = atoi(in->value);
+	if (bulk_amount > MAX_GANG_ZONES - numgangzones - 2) { // -2 is just a "safe margin", no specific meaning
+		bulk_amount = MAX_GANG_ZONES - numgangzones - 2;
+		if (bulk_amount < 0) {
+			bulk_amount = 0;
+		}
+	}
+	bulk_update();
+}
+
+static
+int cb_wnd_bulkadd_close()
+{
+	int i;
+
+	for (i = 0; i < bulk_amount; i++) {
+		gangzone_enable[MAX_GANG_ZONES - 1 - i] = 0;
+	}
+	if (IS_VALID_INDEX_SELECTED) {
+		gangzone_data[lst->selectedindex].altcolor = altcolor(gangzone_data[lst->selectedindex].color);
+	}
+	ui_hide_window();
+	ui_wnd_dispose(wnd_bulkadd);
+	wnd_bulkadd = NULL;
+	ui_show_window(wnd);
+	return 1;
+}
+
+static
+void cb_btn_bulk_commit(struct UI_BUTTON *btn)
+{
+	struct GANG_ZONE *master;
+	int from, to, at, n;
+
+	for (from = MAX_GANG_ZONES - 1, n = 0; n < bulk_amount; from--, n++) {
+		gangzone_enable[from] = 0;
+	}
+	if (IS_VALID_INDEX_SELECTED && bulk_amount) {
+		{
+			from = lst->selectedindex + 1;
+			to = numgangzones;
+			for (n = 0; n < bulk_amount; n++) {
+				gangzone_enable[to] = 1;
+				gangzone_data[to++] = gangzone_data[from++];
+			}
+			numgangzones += bulk_amount;
+		}
+		master = gangzone_data + lst->selectedindex;
+		at = lst->selectedindex + 1;
+		for (n = 1; n <= bulk_amount; n++) {
+			bulkedit_apply_to_zone(master, gangzone_data + at++, n, master->color);
+		}
+	}
+
+	n = bulk_amount;
+	bulk_amount = 0; /* so that the undo code in cb_wnd_bulkadd_close doesn't undo anything, given that
+			    we just committed new gangzones which may now overlap with the beginning of the
+			    "temp uncommitted bulkadd preview" zones */
+	cb_wnd_bulkadd_close();
+	bulk_amount = n; /* and restore it or the input field in the window next time we open it will be 0 */
+}
+
+static
+void open_wnd_bulkadd()
+{
+	struct UI_INPUT *in_direction, *in_off, *in_amount;
+	struct UI_BUTTON *btn_commit;
+	char buf[100];
+
+	if (IS_VALID_INDEX_SELECTED) {
+		gangzone_data[lst->selectedindex].altcolor = gangzone_data[lst->selectedindex].color;
+	}
+
+	wnd_bulkadd = ui_wnd_make(fresx, fresy / 2.0f, "Bulk add");
+	wnd_bulkadd->columns = 2;
+	wnd_bulkadd->proc_close = (ui_method*) cb_wnd_bulkadd_close;
+	wnd->_parent._parent.proc_accept_keyup = (ui_method1*) wnd_accept_keyup; /*to still have the TAB action*/
+
+	ui_wnd_add_child(wnd_bulkadd, ui_lbl_make("direction_(deg):"));
+	ui_wnd_add_child(wnd_bulkadd, (in_direction = ui_in_make(cb_in_bulk_direction)));
+	ui_wnd_add_child(wnd_bulkadd, ui_lbl_make("offset:"));
+	ui_wnd_add_child(wnd_bulkadd, (in_off = ui_in_make(cb_in_bulk_off)));
+	ui_wnd_add_child(wnd_bulkadd, ui_lbl_make("amount:"));
+	ui_wnd_add_child(wnd_bulkadd, (in_amount = ui_in_make(cb_in_bulk_amount)));
+	ui_wnd_add_child(wnd_bulkadd, (btn_commit = ui_btn_make("commit", cb_btn_bulk_commit)));
+
+	sprintf(buf, "%.2f", bulk_direction);
+	ui_in_set_text(in_color, buf);
+	sprintf(buf, "%.2f", bulk_off);
+	ui_in_set_text(in_off, buf);
+	sprintf(buf, "%d", bulk_amount);
+	ui_in_set_text(in_amount, buf);
+	btn_commit->_parent.span = 2;
+
+	ui_show_window(wnd_bulkadd);
+	bulk_update();
 }
 
 int gangzone_on_background_element_just_clicked()
@@ -476,7 +636,13 @@ void gangzone_frame_update()
 	}
 
 	game_RwIm2DPrepareRender();
-	for (i = 0; i < numgangzones; i++) {
+	for (i = 0;; i++) {
+		if (i == numgangzones) {
+			i = MAX_GANG_ZONES - bulk_amount;
+		}
+		if (i >= numgangzones && (ui_get_active_window() != wnd_bulkadd || i >= MAX_GANG_ZONES)) {
+			break;
+		}
 		in.x = gangzone_data[i].minx;
 		in.y = gangzone_data[i].maxy;
 		in.z = zone_z;
@@ -619,6 +785,9 @@ handle_changed:
 					*miny = pos.y;
 					break;
 				}
+				if (wnd_bulkadd && ui_get_active_window() == wnd_bulkadd) {
+					bulk_update();
+				}
 			}
 		}
 	} else {
@@ -636,6 +805,9 @@ handle_changed:
 
 void gangzone_on_active_window_changed(struct UI_WINDOW *_wnd)
 {
+	if (wnd_bulkadd && _wnd == wnd_bulkadd) {
+		return; // pretend we're still in the gangzone main window
+	}
 	if (_wnd == wnd) {
 		gangzonesactive = 1;
 		was_lmb_down = 0;
@@ -681,7 +853,7 @@ void gangzone_init()
 	lbl = ui_lbl_make("press ~r~TAB~w~ to snap cursor");
 	lbl->_parent.span = 4;
 	ui_wnd_add_child(wnd, lbl);
-	lst = ui_lst_make(35, cb_lst_item_selected);
+	lst = ui_lst_make(25, cb_lst_item_selected);
 	lst->_parent.span = 4;
 	ui_wnd_add_child(wnd, lst);
 	btn = ui_btn_make("Clone before", cb_btn_add);
@@ -694,8 +866,12 @@ void gangzone_init()
 	ui_wnd_add_child(wnd, btn);
 	btn_delete = ui_btn_make("Delete", cb_btn_delete);
 	btn_delete->enabled = 0;
-	btn_delete->_parent.span = 4;
+	btn_delete->_parent.span = 2;
 	ui_wnd_add_child(wnd, btn_delete);
+	btn_bulkadd = ui_btn_make("Bulkadd", (ui_method*) open_wnd_bulkadd);
+	btn_bulkadd->enabled = 0;
+	btn_bulkadd->_parent.span = 2;
+	ui_wnd_add_child(wnd, btn_bulkadd);
 	ui_wnd_add_child(wnd, ui_lbl_make("colRGBA"));
 	in_color = ui_in_make(in_cb_color);
 	in_color->_parent.span = 2;
