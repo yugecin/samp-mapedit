@@ -503,6 +503,9 @@ void cb_btn_bulk_commit(struct UI_BUTTON *btn)
 			gangzone_data + lst->selectedindex + 1,
 			sizeof(struct GANG_ZONE) * (numgangzones - lst->selectedindex - 1)
 		);
+		for (n = numgangzones; n < numgangzones + bulk_amount; n++) {
+			gangzone_enable[n] = 1;
+		}
 		numgangzones += bulk_amount;
 		master = gangzone_data + lst->selectedindex;
 		into = master + 1;
