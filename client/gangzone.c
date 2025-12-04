@@ -536,7 +536,7 @@ void open_wnd_bulkadd()
 	wnd_bulkadd = ui_wnd_make(fresx, fresy / 2.0f, "Bulk add");
 	wnd_bulkadd->columns = 2;
 	wnd_bulkadd->proc_close = (ui_method*) cb_wnd_bulkadd_close;
-	wnd->_parent._parent.proc_accept_keyup = (ui_method1*) wnd_accept_keyup; /*to still have the TAB action*/
+	wnd_bulkadd->_parent._parent.proc_accept_keyup = (ui_method1*) wnd_accept_keyup; /*to still have the TAB action*/
 
 	ui_wnd_add_child(wnd_bulkadd, ui_lbl_make("direction_(deg):"));
 	ui_wnd_add_child(wnd_bulkadd, (in_direction = ui_in_make(cb_in_bulk_direction)));
