@@ -491,26 +491,23 @@ int cb_wnd_bulkadd_close()
 static
 void cb_btn_bulk_commit(struct UI_BUTTON *btn)
 {
-	struct GANG_ZONE *master;
-	int from, to, at, n;
+	struct GANG_ZONE *master, *into;
+	int from, n;
 
 	for (from = MAX_GANG_ZONES - 1, n = 0; n < bulk_amount; from--, n++) {
 		gangzone_enable[from] = 0;
 	}
 	if (IS_VALID_INDEX_SELECTED && bulk_amount) {
-		{
-			from = lst->selectedindex + 1;
-			to = numgangzones;
-			for (n = 0; n < bulk_amount; n++) {
-				gangzone_enable[to] = 1;
-				gangzone_data[to++] = gangzone_data[from++];
-			}
-			numgangzones += bulk_amount;
-		}
+		memcpy(
+			gangzone_data + lst->selectedindex + 1 + bulk_amount,
+			gangzone_data + lst->selectedindex + 1,
+			sizeof(struct GANG_ZONE) * (numgangzones - lst->selectedindex - 1)
+		);
+		numgangzones += bulk_amount;
 		master = gangzone_data + lst->selectedindex;
-		at = lst->selectedindex + 1;
+		into = master + 1;
 		for (n = 1; n <= bulk_amount; n++) {
-			bulkedit_apply_to_zone(master, gangzone_data + at++, n, master->color);
+			bulkedit_apply_to_zone(master, into++, n, master->color);
 		}
 	}
 
