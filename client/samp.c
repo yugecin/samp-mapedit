@@ -112,6 +112,19 @@ __declspec(naked) int _samp_hide_chat_bar()
 }
 */
 
+__declspec(naked)
+void __cdecl samp_SendWarningChatMessageF(void *null, char *format, ...)
+{
+	_asm {
+		mov eax, samp_handle
+		mov eax, [eax+0x26E9F8] // console
+		mov [esp+4], eax
+		mov eax, samp_handle
+		add eax, 0x680B0
+		jmp eax
+	}
+}
+
 __declspec(naked) void samp_SetPlayerObjectMaterial(struct RPCParameters *rpc_parameters)
 {
 	_asm {

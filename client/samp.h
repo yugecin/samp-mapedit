@@ -33,6 +33,7 @@ void samp_break_chat_bar();
 void samp_restore_chat_bar();
 void samp_hide_ui_f7();
 void samp_restore_ui_f7();
+void __cdecl samp_SendWarningChatMessageF(void *null, char *format, ...);
 void samp_SetWorldBounds(struct RPCParameters *rpc_parameters);
 void samp_SetPlayerObjectMaterial(struct RPCParameters *rpc_parameters);
 void samp_patchObjectMaterialReadText(char *text);
